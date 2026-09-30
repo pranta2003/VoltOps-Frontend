@@ -1,0 +1,34 @@
+name: CI
+
+# Runs on every push to main, and on every pull request targeting main.
+# This is a quality gate, not a deployment - it just proves the code actually
+# builds cleanly before it's allowed into main. Vercel (set up separately,
+# see the chat) handles the actual live deployment.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # "npm run build" runs "tsc && vite build" (see package.json) - so this
+      # single step both type-checks AND builds. If either fails, this step
+      # fails, and GitHub shows a red X on the PR.
+      - name: Type-check and build
+        run: npm run build
+
+  # Add a "lint" or "test" job here once we actually set up ESLint/a test
+  # suite - no point adding a step that has nothing to run yet.
