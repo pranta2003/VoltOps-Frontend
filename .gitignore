@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment secrets - never commit these
+.env
+
+# Build output
+dist/
+build/
+
+# Editor/OS junk
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+npm-debug.log*
