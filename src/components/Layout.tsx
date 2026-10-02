@@ -6,6 +6,16 @@ interface LayoutProps {
   title: string;
 }
 
+//export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
+ // const { user, isLoading } = useAuth();
+
+  //if (isLoading) {
+   // return (
+    //  <div className="flex h-screen items-center justify-center text-gray-500">
+     //   Loading...
+     // </div>
+  //  );
+ // } }
 // One shared shell (sidebar + topbar) for every dashboard. When we build
 // Milestone 2/3/4 pages, they wrap their content in <Layout title="...">
 // instead of each page reinventing its own header/sidebar — this keeps the
