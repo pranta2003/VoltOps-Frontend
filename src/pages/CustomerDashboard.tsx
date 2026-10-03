@@ -6,6 +6,16 @@ import { useAuth } from "../context/AuthContext";
 export function CustomerDashboard() {
   const { user } = useAuth();
 
+//api.interceptors.request.use((config) => {
+ // const token = localStorage.getItem("voltops_token");
+//  if (token) {
+ //   config.headers.Authorization = `Bearer ${token}`;
+ // }
+//  return config;
+//  });
+
+
+  
   return (
     <Layout title="My Account">
       <div className="bg-white border rounded-lg p-6">
