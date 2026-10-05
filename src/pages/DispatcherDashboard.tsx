@@ -7,6 +7,13 @@ import { useAuth } from "../context/AuthContext";
 export function DispatcherDashboard() {
   const { user } = useAuth();
 
+
+//   e.preventDefault();
+ //   setError("");
+ //   setIsSubmitting(true);
+
+  
+  
   return (
     <Layout title="Dispatcher Dashboard">
       <div className="bg-white border rounded-lg p-6">
