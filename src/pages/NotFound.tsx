@@ -9,5 +9,12 @@ export function NotFound() {
         Go back home
       </Link>
     </div>
+
+
+ //    <div className="bg-white border rounded-lg p-6">
+   //     <p className="text-gray-700">
+    //      Welcome, <span className="font-medium">{user?.name}</span>.
+     //   </p>
+    
   );
 }
