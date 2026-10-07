@@ -1,5 +1,5 @@
 import { useState, FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 // This form only creates CUSTOMER accounts. See the long comment in
@@ -9,6 +9,17 @@ import { useAuth } from "../context/AuthContext";
 export function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const packageParam = searchParams.get("package");
+  const packageNames: Record<string, string> = {
+    standard: "Standard care",
+    priority: "Priority 24/7",
+    enterprise: "Enterprise",
+  };
+  const selectedPackageName = packageParam
+    ? packageNames[packageParam.toLowerCase()] || packageParam
+    : null;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -59,6 +70,12 @@ export function Register() {
 
         <form onSubmit={handleSubmit} className="bg-white border rounded-lg p-6 space-y-4">
           <h2 className="text-lg font-medium text-gray-900">Sign up</h2>
+
+          {selectedPackageName && (
+            <div className="text-sm text-brand bg-brand/10 border border-brand/20 rounded-md px-3 py-2">
+              Selected package: <span className="font-semibold">{selectedPackageName}</span>
+            </div>
+          )}
 
           {error && (
             <div className="text-sm text-status-danger bg-red-50 border border-red-100 rounded-md px-3 py-2">
