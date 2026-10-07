@@ -10,14 +10,17 @@ import { CustomerDashboard } from "./pages/CustomerDashboard";
 import { NotFound } from "./pages/NotFound";
 import { Unauthorized } from "./pages/Unauthorized";
 
+import { LandingPage } from "./pages/LandingPage";
+
 // This one component is the ONLY place that decides "which dashboard does
 // this role see at '/'". If we ever add a 5th role, we add one line here —
 // not one change in every page that redirects after login.
+// For logged-out visitors, it renders the public LandingPage directly.
 function HomeRedirect() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) return null;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <LandingPage />;
 
   switch (user.role) {
     case "ADMIN":
@@ -42,14 +45,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <HomeRedirect />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/" element={<HomeRedirect />} />
 
           {/* Direct paths are also guarded by role, in case we link to them
               directly later (e.g. from a notification). */}
