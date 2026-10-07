@@ -44,6 +44,10 @@ function CheckIcon() {
 export function LandingPage() {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    document.title = "VoltOps | Field service workforce and service management";
+  }, []);
+
   // 1. Sticky nav shadow on scroll
   const [isScrolled, setIsScrolled] = useState(false);
   useEffect(() => {
@@ -143,10 +147,10 @@ export function LandingPage() {
           <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-12 items-center">
             <div>
               <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-bold leading-[1.15] tracking-tight text-gray-900">
-                The right electrician, on the right job, before the deadline.
+                The right technician, on the right job, before the deadline.
               </h1>
               <p className="text-gray-600 my-4 sm:my-6 max-w-lg text-base leading-relaxed">
-                VoltOps helps electrical service companies manage technicians, customer requests
+                VoltOps helps field service companies — from electrical to HVAC — manage technicians, customer requests
                 and field jobs in one place, and recommends the best technician for every job with
                 clear reasons.
               </p>
@@ -176,6 +180,19 @@ export function LandingPage() {
                 <span className="inline-flex items-center">
                   <span className="w-2 h-2 rounded-full bg-status-available mr-2 shrink-0"></span>
                   Live job updates
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-4 sm:gap-5 mt-3 text-xs sm:text-[13px] text-gray-600">
+                <span className="inline-flex items-center">
+                  <span className="mr-1.5">⚡</span>
+                  Electrical
+                </span>
+                <span className="inline-flex items-center">
+                  <span className="mr-1.5">❄️</span>
+                  HVAC
+                </span>
+                <span className="inline-flex items-center">
+                  + more coming
                 </span>
               </div>
             </div>
@@ -340,7 +357,8 @@ export function LandingPage() {
               </div>
               <h3 className="font-semibold text-gray-900 text-base">Customers and assets</h3>
               <p className="text-gray-600 text-sm mt-1.5 leading-relaxed">
-                Keep every generator, transformer and UPS system with its service history.
+                Keep every piece of equipment — generators, transformers, HVAC units and more — with
+                its service history.
               </p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl p-5 sm:p-6 transition-all duration-200 ease-in-out hover:-translate-y-1 hover:shadow-md hover:border-brand-light">
@@ -658,12 +676,12 @@ export function LandingPage() {
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold leading-tight tracking-tight text-gray-900">
-              Built for electrical service companies
+              Built for field service companies
             </h2>
             <p className="text-gray-600 max-w-xl mt-2.5 text-sm sm:text-base leading-relaxed">
               Most small and medium service providers in Bangladesh still coordinate technicians
               through phone calls and spreadsheets. VoltOps replaces that guesswork with a reliable
-              system for generators, transformers, UPS systems, panels and industrial motors.
+              system for generators, transformers, UPS systems, HVAC units and industrial equipment.
             </p>
           </div>
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
@@ -700,7 +718,7 @@ export function LandingPage() {
           <div className="bg-brand text-white rounded-xl p-8 sm:p-11 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold leading-tight tracking-tight text-white">
-                Ready to simplify your electrical operations?
+                Ready to simplify your field operations?
               </h2>
               <p className="text-[#cfe0e6] mt-1.5 text-sm sm:text-base">
                 Choose a package and get your dashboard in minutes.
@@ -789,7 +807,7 @@ export function LandingPage() {
       {/* Footer */}
       <footer className="bg-brand text-[#cfe0e6] py-7 text-xs sm:text-sm">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
-          <span>© 2026 VoltOps · Electrical workforce management</span>
+          <span>© 2026 VoltOps · Field service workforce management</span>
           <span>CSE 400 project, BUBT</span>
         </div>
       </footer>
