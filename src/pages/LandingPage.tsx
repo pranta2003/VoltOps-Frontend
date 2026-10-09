@@ -1,201 +1,204 @@
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTheme, ThemePreference } from "../context/ThemeContext";
 
-// ── Types ─────────────────────────────────────────────────────────────
-interface ServiceScenario {
+// ── Coverage Plan IDs ────────────────────────────────────────────────────
+export type PlanId = "8hr" | "247-standard" | "247-priority" | "custom";
+
+// ── 5-Category Simulation Scenarios ─────────────────────────────────────
+interface Scenario {
   id: string;
-  category: string;
   categoryLabel: string;
   icon: string;
-  badgeColor: string;
+  accentClass: string;
+  darkAccentClass: string;
   title: string;
   client: string;
-  urgency: "Urgent" | "High Priority" | "Active";
-  slaTargetText: string;
+  urgency: string;
+  slaText: string;
   slaSeconds: number;
-  technician: {
+  tech: {
     name: string;
     role: string;
-    location: string;
     distanceText: string;
     matchScore: number;
-    explanation: string;
+    note: string;
     checks: string[];
   };
-  pipelineStatus: string;
-  activeStageIndex: number;
+  stage: number; // 0-4
 }
 
-// ── 5 Core Multi-Category Simulation Scenarios ─────────────────────────
-const SERVICE_SCENARIOS: ServiceScenario[] = [
+const SCENARIOS: Scenario[] = [
   {
     id: "hvac",
-    category: "Cooling & Mechanical",
     categoryLabel: "Commercial HVAC",
     icon: "❄️",
-    badgeColor: "text-cyan-300 border-cyan-500/30 bg-cyan-500/10",
+    accentClass: "border-cyan-400/60 text-cyan-700",
+    darkAccentClass: "dark:border-cyan-500/40 dark:text-cyan-300",
     title: "WO-2041 · Central Chiller Shutdown & Compressor Tripping",
     client: "Apex Retail Galleria · Ground Floor Outlets",
     urgency: "Urgent",
-    slaTargetText: "20-Min Priority SLA",
-    slaSeconds: 1145, // ~19 mins left
-    technician: {
+    slaText: "20-Min Priority SLA",
+    slaSeconds: 1145,
+    tech: {
       name: "Tariqul Alam",
       role: "HVAC & Industrial Chiller Specialist",
-      location: "Gulshan 1 · 0 active jobs",
-      distanceText: "1.4 km away · ETA 7 mins",
+      distanceText: "1.4 km · ETA 7 mins",
       matchScore: 96,
-      explanation: "Certified refrigerant handling, diagnostic kit ready, on-duty within 2 km.",
-      checks: ["HVAC Certified", "Free Now", "7 mins away", "Diagnostic kit ready"],
+      note: "Certified refrigerant handling, diagnostic kit ready, on-duty within 2 km.",
+      checks: ["HVAC Certified", "Free Now", "7 mins away", "Kit ready"],
     },
-    pipelineStatus: "En Route to Site",
-    activeStageIndex: 3,
+    stage: 3,
   },
   {
     id: "electrical",
-    category: "Electrical & Equipment",
     categoryLabel: "Electrical & Power",
     icon: "⚡",
-    badgeColor: "text-amber-300 border-amber-500/30 bg-amber-500/10",
+    accentClass: "border-amber-400/60 text-amber-700",
+    darkAccentClass: "dark:border-amber-500/40 dark:text-amber-300",
     title: "WO-1054 · 500 KVA Industrial Generator Voltage Drop",
     client: "ABC Manufacturing Ltd · Production Line 2",
     urgency: "Urgent",
-    slaTargetText: "40-Min Standard SLA",
-    slaSeconds: 2310, // ~38 mins left
-    technician: {
+    slaText: "40-Min Standard SLA",
+    slaSeconds: 2310,
+    tech: {
       name: "Rahim Ahmed",
       role: "High-Voltage Power & Generator Engineer",
-      location: "Mirpur 10 · 0 active jobs",
-      distanceText: "3.2 km away · ETA 14 mins",
+      distanceText: "3.2 km · ETA 14 mins",
       matchScore: 94,
-      explanation: "Safety electrical license verified, zero schedule conflicts, 14 minutes from factory.",
-      checks: ["High-Voltage Licensed", "Free Now", "14 mins away", "Low daily workload"],
+      note: "Safety electrical license verified, zero schedule conflicts, 14 min from factory.",
+      checks: ["HV Licensed", "Free Now", "14 mins", "Low workload"],
     },
-    pipelineStatus: "En Route to Site",
-    activeStageIndex: 3,
+    stage: 3,
   },
   {
     id: "security",
-    category: "Security & Infrastructure",
     categoryLabel: "CCTV & Security",
     icon: "📹",
-    badgeColor: "text-purple-300 border-purple-500/30 bg-purple-500/10",
+    accentClass: "border-purple-400/60 text-purple-700",
+    darkAccentClass: "dark:border-purple-500/40 dark:text-purple-300",
     title: "WO-3088 · Perimeter CCTV Offline & DVR Network Failure",
     client: "Northstar Logistics Hub · Warehouse Zone B",
     urgency: "High Priority",
-    slaTargetText: "40-Min Standard SLA",
-    slaSeconds: 1680, // ~28 mins left
-    technician: {
+    slaText: "40-Min Standard SLA",
+    slaSeconds: 1680,
+    tech: {
       name: "Tanvir Hasan",
       role: "Surveillance & Access Control Technician",
-      location: "Tejgaon Commercial · 0 active jobs",
-      distanceText: "2.1 km away · ETA 11 mins",
+      distanceText: "2.1 km · ETA 11 mins",
       matchScore: 91,
-      explanation: "IP camera & NVR certified, tools in vehicle, closest verified technician.",
-      checks: ["NVR/IP Certified", "Free Now", "11 mins away", "Testing rig ready"],
+      note: "IP camera & NVR certified, testing rig in vehicle, closest verified technician.",
+      checks: ["NVR/IP Cert", "Available", "11 mins", "Rig ready"],
     },
-    pipelineStatus: "Assigned by Dispatcher",
-    activeStageIndex: 2,
+    stage: 2,
   },
   {
     id: "it",
-    category: "IT & Systems",
     categoryLabel: "IT & Networking",
     icon: "💻",
-    badgeColor: "text-emerald-300 border-emerald-500/30 bg-emerald-500/10",
+    accentClass: "border-emerald-400/60 text-emerald-700",
+    darkAccentClass: "dark:border-emerald-500/40 dark:text-emerald-300",
     title: "WO-4012 · Core Switch Reboot Loop & POS Connectivity Down",
     client: "Metro Mart Superstore · 8 Cash Counters",
     urgency: "Urgent",
-    slaTargetText: "20-Min Priority SLA",
-    slaSeconds: 980, // ~16 mins left
-    technician: {
+    slaText: "20-Min Priority SLA",
+    slaSeconds: 980,
+    tech: {
       name: "Saif Chowdhury",
       role: "Network Infrastructure & Systems Engineer",
-      location: "Dhanmondi 27 · 0 active jobs",
-      distanceText: "1.8 km away · ETA 9 mins",
+      distanceText: "1.8 km · ETA 9 mins",
       matchScore: 95,
-      explanation: "Network hardware certified, replacement switch in dispatch buffer, immediate dispatch.",
-      checks: ["Network Certified", "On Standby", "9 mins away", "Spare hardware ready"],
+      note: "Network hardware certified, replacement switch in dispatch buffer.",
+      checks: ["Net Certified", "On Standby", "9 mins", "Spare HW"],
     },
-    pipelineStatus: "En Route to Site",
-    activeStageIndex: 3,
+    stage: 3,
   },
   {
     id: "facility",
-    category: "Building Maintenance",
     categoryLabel: "Facility Upkeep",
     icon: "🛠️",
-    badgeColor: "text-rose-300 border-rose-500/30 bg-rose-500/10",
+    accentClass: "border-rose-400/60 text-rose-700",
+    darkAccentClass: "dark:border-rose-500/40 dark:text-rose-300",
     title: "WO-5023 · Automatic Glass Entry Door Jam & Rail Misalignment",
     client: "Crown Corporate Plaza · Main Lobby",
     urgency: "Active",
-    slaTargetText: "40-Min Standard SLA",
-    slaSeconds: 2240, // ~37 mins left
-    technician: {
+    slaText: "40-Min Standard SLA",
+    slaSeconds: 2240,
+    tech: {
       name: "Kamrul Islam",
       role: "Commercial Facility & Mechanical Fitter",
-      location: "Mohakhali DOHS · 0 active jobs",
-      distanceText: "2.8 km away · ETA 13 mins",
+      distanceText: "2.8 km · ETA 13 mins",
       matchScore: 89,
-      explanation: "Commercial door system specialist, standard parts in mobile unit, verified available.",
-      checks: ["Facility Licensed", "Free Now", "13 mins away", "Hardware stocked"],
+      note: "Commercial door specialist, standard parts in mobile unit, verified available.",
+      checks: ["Facility Lic.", "Free Now", "13 mins", "Parts stocked"],
     },
-    pipelineStatus: "Assigned by Dispatcher",
-    activeStageIndex: 2,
+    stage: 2,
   },
 ];
 
-// ── 5-Step Process Data ────────────────────────────────────────────────
 const WORKFLOW_STEPS = [
-  {
-    step: 1,
-    title: "Subscribe to a plan",
-    summary: "Choose a Weekly or Monthly plan with a guaranteed 20 or 40-minute arrival SLA for your facilities.",
-    icon: "📋",
-  },
-  {
-    step: 2,
-    title: "Report the problem",
-    summary: "Select your trade category and submit your breakdown in seconds from any browser or device.",
-    icon: "🚨",
-  },
-  {
-    step: 3,
-    title: "Dispatcher reviews & matches",
-    summary: "Our operations desk evaluates verified certifications, transit distance, and current workload.",
-    icon: "🧭",
-  },
-  {
-    step: 4,
-    title: "Technician arrives on site",
-    summary: "Your qualified professional reaches your premises within the committed arrival SLA window.",
-    icon: "⚡",
-  },
-  {
-    step: 5,
-    title: "Review & update records",
-    summary: "Approve completed work, receive digital sign-off, and access itemized equipment history logs.",
-    icon: "✅",
-  },
+  { step: 1, icon: "📋", title: "Subscribe", body: "Choose a coverage plan with a defined operational window and arrival SLA for your facilities." },
+  { step: 2, icon: "🚨", title: "Report the issue", body: "Select the trade category and submit your breakdown request from any browser or device." },
+  { step: 3, icon: "🧭", title: "Dispatcher reviews", body: "Our operations desk evaluates verified certifications, travel distance, and current workload." },
+  { step: 4, icon: "⚡", title: "Technician arrives", body: "Your qualified professional reaches your premises within the committed physical arrival window." },
+  { step: 5, icon: "✅", title: "Sign-off & records", body: "Approve completed work, receive a digital sign-off, and access itemised equipment history." },
 ];
 
-// ── Helper Icons ───────────────────────────────────────────────────────
-function LogoMark({ className = "" }: { className?: string }) {
+// ── Theme Selector Icon Component ────────────────────────────────────────
+function ThemeToggle() {
+  const { preference, setPreference } = useTheme();
+
+  const options: { value: ThemePreference; label: string; icon: string }[] = [
+    { value: "light", label: "Light", icon: "☀️" },
+    { value: "dark", label: "Dark", icon: "🌙" },
+    { value: "system", label: "System", icon: "💻" },
+  ];
+
   return (
     <div
-      className={`w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-900 to-slate-900 border border-cyan-500/40 flex items-center justify-center shrink-0 shadow-lg shadow-cyan-950/50 group-hover:border-cyan-400 group-hover:scale-105 transition-all duration-300 ${className}`}
+      role="group"
+      aria-label="Theme"
+      className="flex items-center gap-0.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] p-0.5"
+    >
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          title={o.label}
+          aria-pressed={preference === o.value}
+          onClick={() => setPreference(o.value)}
+          className={`rounded-md px-2 py-1 text-xs font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
+            preference === o.value
+              ? "bg-[var(--accent)] text-white shadow-sm"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          }`}
+        >
+          <span className="mr-0.5">{o.icon}</span>
+          <span className="hidden sm:inline">{o.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── Logo Mark ────────────────────────────────────────────────────────────
+function LogoMark({ size = 36 }: { size?: number }) {
+  return (
+    <div
+      className="relative flex items-center justify-center rounded-xl bg-gradient-to-br from-[#1F6B7B] to-[#0e4a57] shadow-md group-hover:shadow-[0_0_16px_rgba(56,189,248,0.4)] transition-all duration-300"
+      style={{ width: size, height: size }}
       aria-hidden="true"
     >
       <svg
-        width="18"
-        height="18"
+        width={size * 0.5}
+        height={size * 0.5}
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#38bdf8"
-        strokeWidth="2.2"
+        stroke="#7de8f8"
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="transition-transform duration-300 group-hover:rotate-6"
+        className="group-hover:rotate-6 transition-transform duration-300"
       >
         <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
       </svg>
@@ -203,9 +206,21 @@ function LogoMark({ className = "" }: { className?: string }) {
   );
 }
 
-function CheckIcon({ className = "w-4 h-4 text-emerald-400 shrink-0 mt-0.5" }: { className?: string }) {
+// ── Check Icon ───────────────────────────────────────────────────────────
+interface CheckIconProps {
+  className?: string;
+  style?: CSSProperties;
+}
+
+function CheckIcon({ className = "", style }: CheckIconProps) {
   return (
-    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <svg
+      className={`w-4 h-4 shrink-0 ${className}`}
+      style={style}
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      aria-hidden="true"
+    >
       <path
         fillRule="evenodd"
         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -215,167 +230,151 @@ function CheckIcon({ className = "w-4 h-4 text-emerald-400 shrink-0 mt-0.5" }: {
   );
 }
 
+// ── Main Component ───────────────────────────────────────────────────────
 export function LandingPage() {
   const navigate = useNavigate();
+  const { resolved } = useTheme();
+  const isDark = resolved === "dark";
 
   // Page title
   useEffect(() => {
-    document.title = "VoltOps | Field service workforce and service management";
+    document.title = "VoltOps | Field Service Coordination Platform";
   }, []);
 
-  // Sticky nav scroll tracking
-  const [isScrolled, setIsScrolled] = useState(false);
+  // Sticky nav shadow
+  const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handler = () => setScrolled(window.scrollY > 24);
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  // Mobile menu open state
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Mobile menu
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Active Category Scenario in Hero Console
-  const [activeScenarioId, setActiveScenarioId] = useState<string>("hvac");
-  const activeScenario =
-    SERVICE_SCENARIOS.find((s) => s.id === activeScenarioId) || SERVICE_SCENARIOS[0];
+  // Active console scenario
+  const [activeId, setActiveId] = useState("hvac");
+  const scenario = SCENARIOS.find((s) => s.id === activeId)!;
 
-  // Simulated Verification Feedback State in Hero Console
-  const [isVerifying, setIsVerifying] = useState(false);
-
-  const handleSimulateVerification = () => {
-    setIsVerifying(true);
-    setTimeout(() => {
-      setIsVerifying(false);
-    }, 700);
-  };
-
-  // Live countdown timer for the active scenario
-  const [scenarioTimes, setScenarioTimes] = useState<Record<string, number>>(() => {
-    const initial: Record<string, number> = {};
-    SERVICE_SCENARIOS.forEach((s) => {
-      initial[s.id] = s.slaSeconds;
-    });
-    return initial;
-  });
-
+  // Countdown timers per scenario
+  const [times, setTimes] = useState<Record<string, number>>(() =>
+    Object.fromEntries(SCENARIOS.map((s) => [s.id, s.slaSeconds]))
+  );
   useEffect(() => {
-    const timer = setInterval(() => {
-      setScenarioTimes((prev) => {
-        const next = { ...prev };
-        Object.keys(next).forEach((key) => {
-          if (next[key] > 0) {
-            next[key] -= 1;
-          }
-        });
-        return next;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
+    const t = setInterval(
+      () =>
+        setTimes((prev) =>
+          Object.fromEntries(
+            Object.entries(prev).map(([k, v]) => [k, Math.max(0, v - 1)])
+          )
+        ),
+      1000
+    );
+    return () => clearInterval(t);
   }, []);
+  const fmt = (s: number) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
-  const formatSeconds = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-  };
+  // Workflow step hover (hover-only, not persistent click)
+  const [hoveredStep, setHoveredStep] = useState<number | null>(null);
 
-  // Active step state in How It Works interactive timeline
-  const [activeWorkflowStep, setActiveWorkflowStep] = useState<number>(1);
+  // Plan comparison expand
+  const [showMatrix, setShowMatrix] = useState(false);
 
-  // Expanded plan comparison state
-  const [showPlanMatrix, setShowPlanMatrix] = useState<boolean>(false);
+  // Contact form
+  const [contactDone, setContactDone] = useState(false);
+  const [cName, setCName] = useState("");
+  const [cEmail, setCEmail] = useState("");
+  const [cCompany, setCCompany] = useState("");
+  const [cMsg, setCMsg] = useState("");
 
-  // Contact form submission state
-  const [contactSubmitted, setContactSubmitted] = useState(false);
-  const [contactName, setContactName] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactCompany, setContactCompany] = useState("");
-  const [contactMessage, setContactMessage] = useState("");
-
-  const handleContactSubmit = (e: FormEvent) => {
+  const handleContact = (e: FormEvent) => {
     e.preventDefault();
-    setContactSubmitted(true);
-    setContactName("");
-    setContactEmail("");
-    setContactCompany("");
-    setContactMessage("");
+    setContactDone(true);
+    setCName(""); setCEmail(""); setCCompany(""); setCMsg("");
   };
 
-  const handleSelectPackage = (pkg: "weekly" | "monthly-standard" | "monthly-priority") => {
-    navigate(`/register?package=${pkg}`);
+  const handlePlan = (plan: PlanId) => {
+    if (plan === "custom") {
+      const el = document.getElementById("contact");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate(`/register?package=${plan}`);
+    }
   };
+
+  // ── Shared utility class pieces ──────────────────────────────────────
+  const card = "rounded-2xl border transition-all duration-200 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]";
+  const surface = "bg-[var(--bg-surface)] border-[var(--border)]";
+  const surface2 = "bg-[var(--bg-surface-2)] border-[var(--border)]";
+  const textPrimary = "text-[var(--text-primary)]";
+  const textSecondary = "text-[var(--text-secondary)]";
+  const textMuted = "text-[var(--text-muted)]";
+  const accent = "text-[var(--accent)]";
+  const borderColor = "border-[var(--border)]";
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased selection:bg-cyan-500 selection:text-slate-950 overflow-x-hidden">
-      {/* ── Navigation Bar ────────────────────────────────────────────── */}
+    <div className="min-h-screen font-sans" style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}>
+
+      {/* ── Navigation ────────────────────────────────────────────────── */}
       <nav
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-slate-950/85 backdrop-blur-xl border-b border-white/10 shadow-2xl shadow-black/40"
-            : "bg-transparent border-b border-white/5"
+        className={`sticky top-0 z-50 border-b ${borderColor} transition-all duration-300 ${
+          scrolled ? "backdrop-blur-xl shadow-[var(--shadow-sm)]" : ""
         }`}
+        style={{ background: scrolled ? "var(--bg-overlay)" : "var(--bg-base)" }}
       >
-        <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
-          <a href="#" className="flex items-center gap-3 font-bold text-xl tracking-tight text-white group">
-            <LogoMark />
-            <div className="flex flex-col">
-              <span className="leading-tight text-base font-bold tracking-tight">VoltOps</span>
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-cyan-400">
-                Field Service Coordination
+        <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
+          {/* Logo + Brand */}
+          <a href="#" className="flex items-center gap-3 group shrink-0">
+            <LogoMark size={36} />
+            <div className="flex flex-col leading-none">
+              <span className={`font-bold text-[17px] tracking-tight ${textPrimary}`}>VoltOps</span>
+              <span className={`text-[10px] font-semibold uppercase tracking-widest ${accent}`}>
+                Field Service Platform
               </span>
             </div>
           </a>
 
-          {/* Desktop Navigation Links */}
-          <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-300">
-            <a href="#services" className="hover:text-cyan-400 transition-colors">
-              Services
-            </a>
-            <a href="#how" className="hover:text-cyan-400 transition-colors">
-              How It Works
-            </a>
-            <a href="#dispatch" className="hover:text-cyan-400 transition-colors">
-              Matching Engine
-            </a>
-            <a href="#packages" className="hover:text-cyan-400 transition-colors">
-              Subscription Plans
-            </a>
-            <a href="#about" className="hover:text-cyan-400 transition-colors">
-              About
-            </a>
-            <a href="#contact" className="hover:text-cyan-400 transition-colors">
-              Contact
-            </a>
+          {/* Desktop nav links */}
+          <div className={`hidden lg:flex items-center gap-7 text-sm font-medium ${textSecondary}`}>
+            {["#services", "#how", "#dispatch", "#packages", "#about", "#contact"].map((href, i) => {
+              const labels = ["Services", "How It Works", "Matching", "Plans", "About", "Contact"];
+              return (
+                <a key={href} href={href} className="hover:text-[var(--accent)] transition-colors">
+                  {labels[i]}
+                </a>
+              );
+            })}
           </div>
 
-          {/* Desktop Action Buttons */}
+          {/* Desktop right actions */}
           <div className="hidden lg:flex items-center gap-3">
+            <ThemeToggle />
             <Link
               to="/login"
-              className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-300 hover:text-white hover:bg-white/5 border border-slate-700/60 transition-all"
+              className={`px-4 py-2 rounded-xl text-sm font-semibold border ${borderColor} ${textSecondary} hover:text-[var(--accent)] transition-colors`}
             >
               Sign in
             </Link>
             <a
               href="#packages"
-              className="px-5 py-2 rounded-xl text-sm font-semibold text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 hover:opacity-95 shadow-lg shadow-cyan-500/20 transition-all"
+              className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all"
+              style={{ background: "var(--accent)" }}
             >
-              Choose a Plan
+              Choose Plan
             </a>
           </div>
 
-          {/* Mobile Menu Toggle Button */}
+          {/* Mobile toggle */}
           <button
             type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 border border-slate-800"
-            aria-label="Toggle navigation menu"
-            aria-expanded={mobileMenuOpen}
+            onClick={() => setMenuOpen(!menuOpen)}
+            className={`lg:hidden p-2 rounded-xl border ${borderColor} ${textMuted} hover:text-[var(--text-primary)]`}
+            aria-label="Toggle navigation"
+            aria-expanded={menuOpen}
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              {mobileMenuOpen ? (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {menuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -384,64 +383,41 @@ export function LandingPage() {
           </button>
         </div>
 
-        {/* Mobile Dropdown Menu */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden bg-slate-950/95 backdrop-blur-2xl border-b border-slate-800 px-6 py-6 space-y-4 animate-in fade-in duration-200">
-            <div className="flex flex-col space-y-3 text-base font-medium text-slate-300">
-              <a
-                href="#services"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-2 hover:text-cyan-400 border-b border-slate-800/60"
-              >
-                Services
-              </a>
-              <a
-                href="#how"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-2 hover:text-cyan-400 border-b border-slate-800/60"
-              >
-                How It Works
-              </a>
-              <a
-                href="#dispatch"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-2 hover:text-cyan-400 border-b border-slate-800/60"
-              >
-                Matching Engine
-              </a>
-              <a
-                href="#packages"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-2 hover:text-cyan-400 border-b border-slate-800/60"
-              >
-                Subscription Plans
-              </a>
-              <a
-                href="#about"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-2 hover:text-cyan-400 border-b border-slate-800/60"
-              >
-                About
-              </a>
-              <a
-                href="#contact"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-2 hover:text-cyan-400"
-              >
-                Contact
-              </a>
+        {/* Mobile dropdown */}
+        {menuOpen && (
+          <div className={`lg:hidden border-t ${borderColor} px-5 py-5 space-y-3`} style={{ background: "var(--bg-surface)" }}>
+            <div className="pb-3 mb-3 border-b border-[var(--border)]">
+              <ThemeToggle />
             </div>
-            <div className="pt-2 flex flex-col gap-3">
+            {[
+              ["#services", "Services"],
+              ["#how", "How It Works"],
+              ["#dispatch", "Matching Engine"],
+              ["#packages", "Plans"],
+              ["#about", "About"],
+              ["#contact", "Contact"],
+            ].map(([href, label]) => (
+              <a
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className={`block py-2 border-b border-[var(--border)] text-sm font-medium ${textSecondary} hover:text-[var(--accent)]`}
+              >
+                {label}
+              </a>
+            ))}
+            <div className="flex flex-col gap-2 pt-2">
               <Link
                 to="/login"
-                className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-slate-200 bg-slate-900 border border-slate-700"
+                className={`w-full text-center py-2.5 rounded-xl text-sm font-semibold border ${borderColor} ${textPrimary}`}
               >
                 Sign in
               </Link>
               <a
                 href="#packages"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300"
+                onClick={() => setMenuOpen(false)}
+                className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-white"
+                style={{ background: "var(--accent)" }}
               >
                 Choose a Plan
               </a>
@@ -450,188 +426,178 @@ export function LandingPage() {
         )}
       </nav>
 
-      {/* ── Hero Section (Cinematic, Modern, Visual Depth) ────────────── */}
-      <header className="relative overflow-hidden pt-12 pb-24 lg:pt-20 lg:pb-36">
-        {/* Layered Atmospheric Background & Radial Lighting */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-20"
-          style={{
-            backgroundImage: "radial-gradient(rgba(56, 189, 248, 0.2) 1px, transparent 1px)",
-            backgroundSize: "32px 32px",
-            maskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 80%)",
-            WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 80%)",
-          }}
-        />
-        {/* Ambient Drifting Glows */}
-        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[34rem] h-[34rem] bg-cyan-500/10 rounded-full blur-[100px] pointer-events-none animate-ambient-drift" />
-        <div className="absolute top-1/3 right-10 w-[30rem] h-[30rem] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none animate-pulse-subtle" />
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* ── HERO SECTION ─────────────────────────────────────────────────  */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      <header className="relative overflow-hidden py-16 lg:py-24">
+        {/* Dark: ambient glow blobs. Light: subtle warm radial */}
+        {isDark ? (
+          <>
+            <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[36rem] h-[36rem] rounded-full blur-[120px] pointer-events-none animate-ambient-drift"
+              style={{ background: "rgba(56,189,248,0.08)" }} />
+            <div className="absolute top-1/3 right-10 w-[28rem] h-[28rem] rounded-full blur-[100px] pointer-events-none animate-pulse-subtle"
+              style={{ background: "rgba(20,184,166,0.07)" }} />
+            <div className="absolute inset-0 pointer-events-none opacity-15" style={{
+              backgroundImage: "radial-gradient(rgba(56,189,248,0.25) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
+              maskImage: "radial-gradient(ellipse 60% 50% at 50% 30%, #000 20%, transparent 80%)",
+              WebkitMaskImage: "radial-gradient(ellipse 60% 50% at 50% 30%, #000 20%, transparent 80%)",
+            }} />
+          </>
+        ) : (
+          <div className="absolute inset-0 pointer-events-none" style={{
+            background: "radial-gradient(ellipse 80% 60% at 40% 40%, rgba(31,107,123,0.06) 0%, transparent 70%)",
+          }} />
+        )}
 
-        <div className="relative max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-            {/* Hero Left Content */}
-            <div className="lg:col-span-6 space-y-7 text-left">
-              {/* Headline */}
-              <h1 className="text-4xl sm:text-5xl lg:text-[52px] font-extrabold tracking-tight text-white leading-[1.12]">
+        <div className="relative max-w-7xl mx-auto px-5">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+
+            {/* Left — Hero Copy */}
+            <div className="lg:col-span-6 space-y-7">
+              <h1 className={`leading-[1.1] tracking-tight font-extrabold text-4xl sm:text-5xl lg:text-[52px] ${textPrimary}`}>
                 One service plan.{" "}
-                <span className="text-cyan-400">
-                  The right professional.
-                </span>{" "}
+                <span style={{ color: "var(--accent)" }}>The right professional.</span>{" "}
                 When your business needs one.
               </h1>
-
-              {/* Supporting Paragraph (Concise ~25 words) */}
-              <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-xl">
+              <p className={`text-base sm:text-lg leading-relaxed max-w-xl ${textSecondary}`}>
                 VoltOps coordinates qualified professionals across electrical, HVAC, security, IT,
-                and facility maintenance services under a subscription plan with guaranteed arrival SLAs.
+                and facility maintenance — backed by defined coverage windows and physical arrival commitments.
               </p>
-
-              {/* Exactly Two Clean Calls to Action */}
-              <div className="flex flex-wrap items-center gap-4 pt-1">
+              <div className="flex flex-wrap gap-3 pt-1">
                 <a
                   href="#packages"
-                  className="px-6 py-3.5 rounded-xl font-semibold text-sm sm:text-base text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 hover:brightness-110 shadow-lg shadow-cyan-500/25 transition-all"
+                  className="px-6 py-3.5 rounded-xl font-semibold text-sm text-white shadow-md transition-all hover:opacity-90 active:scale-[0.98]"
+                  style={{ background: "var(--accent)" }}
                 >
-                  Explore Service Plans
+                  Explore Coverage Plans
                 </a>
                 <a
                   href="#how"
-                  className="px-6 py-3.5 rounded-xl font-semibold text-sm sm:text-base text-slate-200 bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 transition-colors"
+                  className={`px-6 py-3.5 rounded-xl font-semibold text-sm border ${borderColor} ${textSecondary} hover:text-[var(--accent)] transition-colors`}
                 >
                   See How It Works
                 </a>
               </div>
             </div>
 
-            {/* Hero Right: Upgraded Interactive Simulated Dispatch Console */}
+            {/* Right — Simulated Dispatch Console */}
             <div className="lg:col-span-6">
-              <div className="relative rounded-2xl bg-slate-950/90 border border-white/10 shadow-2xl shadow-cyan-950/40 p-5 sm:p-7 backdrop-blur-2xl">
-                {/* Console Top Header */}
-                <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                  <div className="flex items-center gap-2.5">
+              <div
+                className={`rounded-2xl border p-5 sm:p-6 ${borderColor}`}
+                style={{ background: "var(--bg-surface)", boxShadow: "var(--shadow-lg)" }}
+              >
+                {/* Console header */}
+                <div className={`flex items-center justify-between pb-4 mb-1 border-b ${borderColor}`}>
+                  <div className="flex items-center gap-2">
                     <span className="relative flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400" />
                     </span>
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                    <span className={`text-xs font-bold uppercase tracking-wider ${textMuted}`}>
                       Simulated Dispatch Console
                     </span>
                   </div>
-                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-medium">
+                  <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-medium border ${borderColor} ${textMuted}`}>
                     Interactive Demo
                   </span>
                 </div>
 
-                {/* 5 Selectable Trade Category Tabs */}
-                <div className="flex gap-1.5 overflow-x-auto py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden border-b border-slate-800/60">
-                  {SERVICE_SCENARIOS.map((scenario) => {
-                    const isActive = scenario.id === activeScenario.id;
+                {/* Category tabs */}
+                <div className={`flex gap-1.5 overflow-x-auto py-3 border-b ${borderColor} no-scrollbar`}>
+                  {SCENARIOS.map((s) => {
+                    const isActive = s.id === activeId;
                     return (
                       <button
-                        key={scenario.id}
+                        key={s.id}
                         type="button"
-                        onClick={() => setActiveScenarioId(scenario.id)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-all flex items-center gap-1.5 ${
+                        onClick={() => setActiveId(s.id)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-all flex items-center gap-1.5 border focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
                           isActive
-                            ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/10"
-                            : "bg-slate-900/60 text-slate-400 border border-slate-800/80 hover:text-slate-200"
+                            ? "border-[var(--accent)] text-[var(--accent)] bg-[var(--bg-surface-2)]"
+                            : `border-[var(--border)] ${textMuted} hover:text-[var(--text-primary)]`
                         }`}
                       >
-                        <span>{scenario.icon}</span>
-                        <span>{scenario.categoryLabel}</span>
+                        <span>{s.icon}</span>
+                        <span>{s.categoryLabel}</span>
                       </button>
                     );
                   })}
                 </div>
 
-                {/* Active Simulated Job Details Card */}
-                <div className="mt-4 space-y-4">
-                  {/* Job Header */}
-                  <div className="flex items-start justify-between gap-3 bg-slate-900/80 p-3.5 rounded-xl border border-slate-800/80">
-                    <div>
-                      <span className="text-xs font-semibold text-cyan-400 block">{activeScenario.category}</span>
-                      <h3 className="text-sm sm:text-base font-bold text-white mt-0.5">{activeScenario.title}</h3>
-                      <p className="text-xs text-slate-400 mt-0.5">{activeScenario.client}</p>
+                {/* Scenario body */}
+                <div className="mt-4 space-y-3">
+                  {/* Job header */}
+                  <div className={`flex items-start justify-between gap-3 p-3 rounded-xl border ${borderColor}`}
+                    style={{ background: "var(--bg-surface-2)" }}>
+                    <div className="min-w-0">
+                      <span className={`text-xs font-semibold block ${accent}`}>{scenario.categoryLabel}</span>
+                      <h3 className={`text-sm font-bold mt-0.5 leading-snug ${textPrimary}`}>{scenario.title}</h3>
+                      <p className={`text-xs mt-0.5 ${textMuted}`}>{scenario.client}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="inline-block text-[11px] font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
-                        {activeScenario.urgency}
+                      <span className="inline-block text-[11px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400">
+                        {scenario.urgency}
                       </span>
-                      <div className="text-xs font-mono font-bold text-cyan-300 mt-1.5">
-                        ETA {formatSeconds(scenarioTimes[activeScenario.id] || 600)}
+                      <div className={`text-xs font-mono font-bold mt-1.5 ${accent}`}>
+                        ETA {fmt(times[scenario.id] ?? 0)}
                       </div>
-                      <span className="text-[10px] text-slate-400 block">{activeScenario.slaTargetText}</span>
+                      <span className={`text-[10px] ${textMuted}`}>{scenario.slaText}</span>
                     </div>
                   </div>
 
-                  {/* Matched Technician Dispatch Preview */}
-                  <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 p-4 rounded-xl border border-cyan-500/30 space-y-3">
-                    <div className="flex items-center justify-between">
+                  {/* Technician match */}
+                  <div className={`p-3.5 rounded-xl border-2 space-y-2.5`}
+                    style={{ borderColor: "var(--accent)", background: "var(--bg-surface-2)" }}>
+                    <div className="flex items-center justify-between gap-2">
                       <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-white text-sm sm:text-base">
-                            {activeScenario.technician.name}
-                          </h4>
-                          <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                            {activeScenario.technician.matchScore}% Match
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`font-bold text-sm ${textPrimary}`}>{scenario.tech.name}</span>
+                          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
+                            {scenario.tech.matchScore}% Match
                           </span>
                         </div>
-                        <p className="text-xs text-slate-300 mt-0.5">
-                          {activeScenario.technician.role} · {activeScenario.technician.distanceText}
+                        <p className={`text-xs mt-0.5 ${textSecondary}`}>
+                          {scenario.tech.role} · {scenario.tech.distanceText}
                         </p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleSimulateVerification}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 transition-all shrink-0 active:scale-95 shadow-sm"
-                      >
-                        {isVerifying ? "Verifying..." : "Verify Match"}
-                      </button>
                     </div>
-
-                    <p className="text-xs text-slate-400 leading-relaxed border-t border-slate-800/80 pt-2.5">
-                      <span className="text-slate-300 font-semibold">Dispatcher Review:</span>{" "}
-                      {activeScenario.technician.explanation}
+                    <p className={`text-xs leading-relaxed border-t pt-2 ${textMuted}`}
+                      style={{ borderColor: "var(--border)" }}>
+                      <span className={`font-semibold ${textSecondary}`}>Dispatcher note:</span>{" "}
+                      {scenario.tech.note}
                     </p>
-
-                    {/* Criteria Checkmarks */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px] text-emerald-400 font-medium">
-                      {activeScenario.technician.checks.map((chk, i) => (
-                        <span key={i} className="truncate flex items-center gap-1">
-                          <span>✓</span> <span>{chk}</span>
-                        </span>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                      {scenario.tech.checks.map((c, i) => (
+                        <span key={i} className="flex items-center gap-1">✓ {c}</span>
                       ))}
                     </div>
                   </div>
 
-                  {/* Dispatch Lifecycle Pipeline */}
-                  <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800/80">
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 mb-2">
-                      <span className="font-semibold text-slate-300">Simulated Job Pipeline:</span>
-                      <span className="text-cyan-300 font-medium">{activeScenario.pipelineStatus}</span>
+                  {/* Pipeline */}
+                  <div className={`p-3 rounded-xl border ${borderColor}`} style={{ background: "var(--bg-surface-2)" }}>
+                    <div className={`flex justify-between text-[11px] mb-2 ${textMuted}`}>
+                      <span className={`font-semibold ${textSecondary}`}>Simulated job pipeline:</span>
+                      <span className={accent}>En Route to Site</span>
                     </div>
-                    <div className="grid grid-cols-5 gap-1.5 text-center text-[10px]">
-                      <div className="py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        1. Reported
-                      </div>
-                      <div className="py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        2. Reviewed
-                      </div>
-                      <div className="py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        3. Assigned
-                      </div>
-                      <div className="py-1 rounded bg-cyan-500/30 text-cyan-200 border border-cyan-400/50 font-bold">
-                        4. En Route
-                      </div>
-                      <div className="py-1 rounded bg-slate-800/60 text-slate-500 border border-slate-800">
-                        5. On Site
-                      </div>
+                    <div className="grid grid-cols-5 gap-1 text-center text-[10px]">
+                      {["Reported","Reviewed","Assigned","En Route","On Site"].map((label, i) => (
+                        <div key={i} className={`py-1 rounded transition-colors ${
+                          i < 3
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
+                            : i === 3
+                              ? "bg-blue-100 text-blue-700 font-bold dark:bg-blue-500/25 dark:text-blue-300"
+                              : `${textMuted}`
+                        }`} style={i >= 4 ? { background: "var(--bg-surface)", border: "1px solid var(--border)" } : {}}>
+                          {i + 1}. {label}
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Human-in-the-Loop Clarification Disclaimer */}
-                  <div className="text-[11px] text-slate-400 text-center italic">
-                    Demonstration view. Human dispatchers confirm all assignments before work dispatch.
-                  </div>
+                  <p className={`text-[11px] text-center italic ${textMuted}`}>
+                    Demonstration only. Human dispatchers confirm all assignments before work dispatch.
+                  </p>
                 </div>
               </div>
             </div>
@@ -639,289 +605,174 @@ export function LandingPage() {
         </div>
       </header>
 
-      {/* ── Key SLA & Credibility Metric Bar ──────────────────────────── */}
-      <section className="border-y border-white/10 bg-slate-950/70 py-10 relative">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center sm:text-left">
-          <div className="border-l-2 border-cyan-400 pl-4">
-            <div className="text-3xl sm:text-4xl font-extrabold text-white">20 & 40 min</div>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Guaranteed technician on-site arrival targets
-            </p>
-          </div>
-          <div className="border-l-2 border-teal-400 pl-4">
-            <div className="text-3xl sm:text-4xl font-extrabold text-white">5 Core Trades</div>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              HVAC, Electrical, Security, IT & Facilities
-            </p>
-          </div>
-          <div className="border-l-2 border-emerald-400 pl-4">
-            <div className="text-3xl sm:text-4xl font-extrabold text-white">100% Human</div>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Dispatcher-verified assignments for safety
-            </p>
-          </div>
-          <div className="border-l-2 border-purple-400 pl-4">
-            <div className="text-3xl sm:text-4xl font-extrabold text-white">Audit Logs</div>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Transparent digital history & itemized billing
-            </p>
-          </div>
+      {/* ── Metrics Bar ─────────────────────────────────────────────────── */}
+      <section className={`border-y ${borderColor} py-10`} style={{ background: "var(--bg-surface-2)" }}>
+        <div className="max-w-7xl mx-auto px-5 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center sm:text-left">
+          {[
+            { val: "20 & 40 min", desc: "Physical technician arrival commitments", border: "var(--accent)" },
+            { val: "5 Trades", desc: "HVAC, Electrical, Security, IT & Facilities", border: "#14b8a6" },
+            { val: "100% Human", desc: "Dispatcher-confirmed assignments always", border: "#1E824C" },
+            { val: "4 Plans", desc: "From 8-hr daily to custom coverage schedules", border: "#9333ea" },
+          ].map(({ val, desc, border }) => (
+            <div key={val} className="pl-4" style={{ borderLeft: `2px solid ${border}` }}>
+              <div className={`text-2xl sm:text-3xl font-extrabold ${textPrimary}`}>{val}</div>
+              <p className={`text-xs sm:text-sm mt-1 ${textMuted}`}>{desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* ── Section 1: Comprehensive Field Operations (5 Core Trades) ─── */}
-      <section id="services" className="py-24 max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-            Unified Trade Coverage
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+      {/* ── Services Section ─────────────────────────────────────────────── */}
+      <section id="services" className="py-24 max-w-7xl mx-auto px-5">
+        <div className="text-center max-w-2xl mx-auto space-y-3 mb-14">
+          <span className={`text-xs font-bold uppercase tracking-wider ${accent}`}>Unified Trade Coverage</span>
+          <h2 className={`text-3xl sm:text-4xl font-extrabold ${textPrimary}`}>
             One subscription for every facility trade
           </h2>
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-            Stop juggling independent contractors. VoltOps coordinates vetted, licensed field professionals
-            across five core operational trades under a single unified SLA.
+          <p className={`text-sm sm:text-base leading-relaxed ${textSecondary}`}>
+            VoltOps coordinates vetted, licensed professionals across five core operational trades under a single unified coordination platform.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-16">
-          {/* Tile 1: Electrical */}
-          <div className="p-7 rounded-2xl bg-slate-900/70 border border-white/10 hover:border-amber-400/50 hover:-translate-y-1 transition-all duration-300 shadow-xl group">
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-              ⚡
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[
+            { icon: "⚡", accent: "#d97706", accentDark: "#fbbf24", label: "High & Low Voltage", title: "Electrical & Power Systems",
+              desc: "Industrial generators, step-down transformers, commercial switchboards, UPS backups, and severe line faults.",
+              bullets: ["Generator synchronization & AVR testing", "Phase imbalance & emergency restoration", "Transformer insulation inspection"] },
+            { icon: "❄️", accent: "#0891b2", accentDark: "#38bdf8", label: "Climate & Ventilation", title: "Cooling & Mechanical HVAC",
+              desc: "Commercial VRF/VRV units, rooftop chillers, ducted split systems, compressor failures, and refrigerant diagnostics.",
+              bullets: ["Chiller & compressor breakdown", "VRF refrigerant recharge & vacuuming", "Scheduled air quality & filter cycles"] },
+            { icon: "📹", accent: "#7c3aed", accentDark: "#a78bfa", label: "Perimeter & Access", title: "Security & Surveillance",
+              desc: "IP CCTV cameras, DVR/NVR storage, biometric turnstiles, and electronic door strike malfunctions.",
+              bullets: ["Camera feed restoration & lens alignment", "DVR/NVR raid reconfiguration", "Access control reader repairs"] },
+            { icon: "💻", accent: "#059669", accentDark: "#34d399", label: "Hardware & Systems", title: "IT, Hardware & Networks",
+              desc: "Office networking drops, rack cabling, core router crashes, POS downtime, and workstation hardware triage.",
+              bullets: ["Managed switch & firewall diagnosis", "Server rack cable management", "POS terminal hardware replacement"] },
+            { icon: "🛠️", accent: "#dc2626", accentDark: "#f87171", label: "Building Infrastructure", title: "Facility & Building Upkeep",
+              desc: "Commercial repairs, door sensors, lighting fixture overhaul, and structural facility upkeep across business premises.",
+              bullets: ["Partition wall & moisture barrier repair", "Commercial door alignment & sensors", "Lighting fixture resets & overhaul"] },
+            { icon: "🎯", accent: "var(--accent)", accentDark: "var(--accent)", label: "Human-in-the-Loop", title: "Dedicated Dispatch Control",
+              desc: "Every work order is reviewed by an experienced human dispatcher who evaluates credentials, tools, and proximity.",
+              bullets: ["Transparent multi-factor candidate scoring", "Live SLA countdown enforcement", "Itemized digital invoices & equipment logs"],
+              featured: true },
+          ].map(({ icon, accent: ac, accentDark: acd, label, title, desc, bullets, featured }) => (
+            <div
+              key={title}
+              className={`p-6 rounded-2xl border transition-all duration-200 group hover:-translate-y-1 hover:shadow-[var(--shadow-md)] ${
+                featured ? "" : `hover:border-[var(--accent)] ${card}`
+              }`}
+              style={{
+                background: featured
+                  ? isDark
+                    ? "linear-gradient(135deg, #0f1f2f 0%, #0e2432 100%)"
+                    : "linear-gradient(135deg, #f0fafa 0%, #e6f4f7 100%)"
+                  : "var(--bg-surface)",
+                borderColor: featured ? "var(--accent)" : "var(--border)",
+                boxShadow: "var(--shadow-sm)",
+              }}
+            >
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center text-xl mb-4 transition-transform group-hover:scale-110"
+                style={{ background: isDark ? `${acd}20` : `${ac}18`, border: `1px solid ${isDark ? acd : ac}30` }}
+              >
+                {icon}
+              </div>
+              <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: isDark ? acd : ac }}>{label}</span>
+              <h3 className={`text-base font-bold mt-1 mb-2 ${textPrimary}`}>{title}</h3>
+              <p className={`text-xs leading-relaxed mb-3 ${textSecondary}`}>{desc}</p>
+              <ul className="space-y-1.5">
+                {bullets.map((b) => (
+                  <li key={b} className={`flex items-center gap-2 text-xs ${textSecondary}`}>
+                    <CheckIcon className="w-3.5 h-3.5" style={{ color: isDark ? acd : ac }} />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">High & Low Voltage</span>
-            <h3 className="text-xl font-bold text-white mt-1">Electrical & Power Systems</h3>
-            <p className="text-slate-400 text-sm mt-2.5 leading-relaxed">
-              Industrial generators, step-down transformers, commercial switchboards, capacitor banks,
-              UPS backups, and severe line faults.
-            </p>
-            <ul className="mt-4 space-y-2 text-xs text-slate-300">
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-amber-400" />
-                <span>Generator synchronization & AVR testing</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-amber-400" />
-                <span>Transformer oil & insulation inspection</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-amber-400" />
-                <span>Phase imbalance & emergency restoration</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Tile 2: HVAC */}
-          <div className="p-7 rounded-2xl bg-slate-900/70 border border-white/10 hover:border-cyan-400/50 hover:-translate-y-1 transition-all duration-300 shadow-xl group">
-            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-              ❄️
-            </div>
-            <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">Climate & Ventilation</span>
-            <h3 className="text-xl font-bold text-white mt-1">Cooling & Mechanical HVAC</h3>
-            <p className="text-slate-400 text-sm mt-2.5 leading-relaxed">
-              Commercial VRF/VRV units, rooftop chillers, ducted split systems, compressor failures,
-              refrigerant leak diagnostics, and preventive duct servicing.
-            </p>
-            <ul className="mt-4 space-y-2 text-xs text-slate-300">
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Chiller & compressor breakdown diagnostics</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-cyan-400" />
-                <span>VRF system refrigerant recharge & vacuuming</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Scheduled indoor air quality & filter cycles</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Tile 3: Security & Surveillance */}
-          <div className="p-7 rounded-2xl bg-slate-900/70 border border-white/10 hover:border-purple-400/50 hover:-translate-y-1 transition-all duration-300 shadow-xl group">
-            <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-              📹
-            </div>
-            <span className="text-xs font-semibold text-purple-400 uppercase tracking-wider">Perimeter & Access</span>
-            <h3 className="text-xl font-bold text-white mt-1">Security & Surveillance</h3>
-            <p className="text-slate-400 text-sm mt-2.5 leading-relaxed">
-              IP CCTV cameras, optical fiber video feeds, DVR/NVR storage corruption, biometric
-              turnstiles, and electronic door strike malfunctions.
-            </p>
-            <ul className="mt-4 space-y-2 text-xs text-slate-300">
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-purple-400" />
-                <span>Camera feed restoration & lens alignment</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-purple-400" />
-                <span>DVR/NVR hard drive raid reconfiguration</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-purple-400" />
-                <span>Access control reader & strike bar repairs</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Tile 4: IT & Network */}
-          <div className="p-7 rounded-2xl bg-slate-900/70 border border-white/10 hover:border-emerald-400/50 hover:-translate-y-1 transition-all duration-300 shadow-xl group">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-              💻
-            </div>
-            <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Hardware & Systems</span>
-            <h3 className="text-xl font-bold text-white mt-1">IT, Hardware & Networks</h3>
-            <p className="text-slate-400 text-sm mt-2.5 leading-relaxed">
-              Office networking drops, rack cabling, core router crashes, POS cash register
-              downtime, workstation hardware triage, and network printer issues.
-            </p>
-            <ul className="mt-4 space-y-2 text-xs text-slate-300">
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Managed switch & firewall drop diagnosis</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Server rack patch cord reorganization</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-emerald-400" />
-                <span>POS counter terminal hardware replacement</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Tile 5: Facility Maintenance */}
-          <div className="p-7 rounded-2xl bg-slate-900/70 border border-white/10 hover:border-rose-400/50 hover:-translate-y-1 transition-all duration-300 shadow-xl group">
-            <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 text-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-              🛠️
-            </div>
-            <span className="text-xs font-semibold text-rose-400 uppercase tracking-wider">Building Infrastructure</span>
-            <h3 className="text-xl font-bold text-white mt-1">Facility & Building Upkeep</h3>
-            <p className="text-slate-400 text-sm mt-2.5 leading-relaxed">
-              Commercial wall and ceiling repairs, industrial epoxy painting touch-ups, automatic door
-              sensors, lighting fixture overhaul, and structural facility upkeep.
-            </p>
-            <ul className="mt-4 space-y-2 text-xs text-slate-300">
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-rose-400" />
-                <span>Partition wall & moisture barrier patch repair</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-rose-400" />
-                <span>Commercial storefront door alignment</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-rose-400" />
-                <span>Commercial facility lighting & fixture resets</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Tile 6: Dispatch & Operations Platform */}
-          <div className="p-7 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950/60 border border-cyan-500/40 hover:border-cyan-300 hover:-translate-y-1 transition-all duration-300 shadow-xl group">
-            <div className="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-400/40 text-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-              🎯
-            </div>
-            <span className="text-xs font-semibold text-cyan-300 uppercase tracking-wider">Human-in-the-Loop</span>
-            <h3 className="text-xl font-bold text-white mt-1">Dedicated Dispatch Control</h3>
-            <p className="text-slate-300 text-sm mt-2.5 leading-relaxed">
-              Every work order is reviewed by an experienced human dispatcher who evaluates trade credentials,
-              diagnostic tools, travel proximity, and schedule availability.
-            </p>
-            <ul className="mt-4 space-y-2 text-xs text-cyan-200">
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-cyan-300" />
-                <span>Real-time GPS proximity technician routing</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-cyan-300" />
-                <span>Live SLA countdown timers with warning alerts</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon className="w-3.5 h-3.5 text-cyan-300" />
-                <span>Itemized digital invoices & equipment logs</span>
-              </li>
-            </ul>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* ── Section 2: How It Works (Connected Journey Redesign) ──────── */}
-      <section id="how" className="py-24 bg-slate-950 border-t border-white/10 relative overflow-hidden">
-        {/* Subtle background glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[20rem] bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none" />
+      {/* ── How It Works ─────────────────────────────────────────────────── */}
+      <section id="how" className={`py-24 border-t ${borderColor} relative overflow-hidden`}
+        style={{ background: "var(--bg-surface-2)" }}>
+        {isDark && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[20rem] rounded-full blur-[120px] pointer-events-none"
+            style={{ background: "rgba(56,189,248,0.04)" }} />
+        )}
 
-        <div className="max-w-7xl mx-auto px-6 relative">
-          <div className="text-center max-w-2xl mx-auto space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-              Connected Operational Journey
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+        <div className="max-w-7xl mx-auto px-5 relative">
+          <div className="text-center max-w-xl mx-auto space-y-3 mb-14">
+            <span className={`text-xs font-bold uppercase tracking-wider ${accent}`}>End-to-End Journey</span>
+            <h2 className={`text-3xl sm:text-4xl font-extrabold ${textPrimary}`}>
               How VoltOps resolves facility issues
             </h2>
-            <p className="text-slate-400 text-sm sm:text-base">
-              A clear, accountable coordination path from subscription to on-site work sign-off.
+            <p className={`text-sm sm:text-base ${textSecondary}`}>
+              A clear, accountable path from subscription to on-site sign-off.
             </p>
           </div>
 
-          {/* Desktop Connected Process Path */}
-          <div className="mt-16 hidden lg:block">
-            <div className="relative">
-              {/* Connected Glow Line across all steps */}
-              <div className="absolute top-7 left-12 right-12 h-0.5 bg-gradient-to-r from-cyan-500/80 via-teal-400 to-emerald-400/80 z-0 opacity-60" />
+          {/* Desktop connected path */}
+          <div className="hidden lg:block relative">
+            {/* Connecting line */}
+            <div className="absolute top-7 left-12 right-12 h-[2px] pointer-events-none"
+              style={{ background: "linear-gradient(to right, var(--accent), #14b8a6, #1E824C)", opacity: 0.4 }} />
 
-              <div className="grid grid-cols-5 gap-4 relative z-10">
-                {WORKFLOW_STEPS.map((stepItem) => {
-                  const isCurrent = activeWorkflowStep === stepItem.step;
-                  return (
+            <div className="grid grid-cols-5 gap-4 relative z-10">
+              {WORKFLOW_STEPS.map(({ step, icon, title, body }) => {
+                const isHov = hoveredStep === step;
+                return (
+                  <div
+                    key={step}
+                    tabIndex={0}
+                    onMouseEnter={() => setHoveredStep(step)}
+                    onMouseLeave={() => setHoveredStep(null)}
+                    onFocus={() => setHoveredStep(step)}
+                    onBlur={() => setHoveredStep(null)}
+                    className={`p-5 rounded-2xl border cursor-default transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
+                      isHov ? "-translate-y-2" : ""
+                    }`}
+                    style={{
+                      background: isHov ? "var(--bg-surface)" : "var(--bg-base)",
+                      borderColor: isHov ? "var(--accent)" : "var(--border)",
+                      boxShadow: isHov ? "var(--shadow-md)" : "none",
+                    }}
+                  >
                     <div
-                      key={stepItem.step}
-                      onMouseEnter={() => setActiveWorkflowStep(stepItem.step)}
-                      className={`p-6 rounded-2xl transition-all duration-300 cursor-pointer text-left ${
-                        isCurrent
-                          ? "bg-slate-900 border-2 border-cyan-400 shadow-xl shadow-cyan-950/50 -translate-y-2"
-                          : "bg-slate-900/60 border border-white/10 hover:border-slate-700 hover:bg-slate-900/90"
-                      }`}
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center text-lg mb-5 transition-all duration-200"
+                      style={{
+                        background: isHov
+                          ? "var(--accent)"
+                          : isDark ? "#1e2d3f" : "#e8f0f3",
+                        color: isHov ? "white" : "var(--text-muted)",
+                        boxShadow: isHov ? "0 4px 12px rgba(31,107,123,0.3)" : "none",
+                      }}
                     >
-                      {/* Step Number Circle */}
-                      <div
-                        className={`w-14 h-14 rounded-2xl font-bold flex items-center justify-center text-lg mb-6 transition-all duration-300 shadow-md ${
-                          isCurrent
-                            ? "bg-gradient-to-br from-cyan-400 to-emerald-400 text-slate-950 shadow-cyan-500/30 scale-105"
-                            : "bg-slate-800 text-slate-300 border border-slate-700"
-                        }`}
-                      >
-                        {stepItem.icon}
-                      </div>
-
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 mb-1">
-                        Step 0{stepItem.step}
-                      </div>
-                      <h3 className="font-bold text-white text-base leading-snug">{stepItem.title}</h3>
-                      <p className="text-xs text-slate-400 mt-2.5 leading-relaxed">{stepItem.summary}</p>
+                      {icon}
                     </div>
-                  );
-                })}
-              </div>
+                    <div className={`text-[11px] font-bold uppercase tracking-wider mb-1 ${accent}`}>
+                      Step 0{step}
+                    </div>
+                    <h3 className={`font-bold text-sm leading-snug mb-2 ${textPrimary}`}>{title}</h3>
+                    <p className={`text-xs leading-relaxed ${textMuted}`}>{body}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Mobile & Tablet Vertical Timeline */}
-          <div className="mt-12 lg:hidden space-y-4">
-            <div className="relative pl-6 border-l-2 border-cyan-500/40 space-y-6">
-              {WORKFLOW_STEPS.map((stepItem) => (
-                <div
-                  key={stepItem.step}
-                  className="relative p-5 rounded-2xl bg-slate-900/80 border border-white/10"
-                >
-                  <div className="absolute -left-[35px] top-4 w-7 h-7 rounded-full bg-slate-950 border-2 border-cyan-400 flex items-center justify-center text-xs font-bold text-cyan-300">
-                    {stepItem.step}
+          {/* Mobile vertical timeline */}
+          <div className="lg:hidden pl-6 relative">
+            <div className="absolute left-0 top-0 bottom-0 w-[2px]" style={{ background: "var(--accent)", opacity: 0.3 }} />
+            <div className="space-y-4">
+              {WORKFLOW_STEPS.map(({ step, icon, title, body }) => (
+                <div key={step} className={`relative p-5 rounded-2xl border ${surface}`}>
+                  <div className="absolute -left-[35px] top-4 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{ background: "var(--bg-surface)", border: `2px solid var(--accent)`, color: "var(--accent)" }}>
+                    {step}
                   </div>
-                  <h3 className="font-bold text-white text-base">{stepItem.title}</h3>
-                  <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{stepItem.summary}</p>
+                  <h3 className={`font-bold text-sm ${textPrimary}`}>{icon} {title}</h3>
+                  <p className={`text-xs mt-1.5 leading-relaxed ${textMuted}`}>{body}</p>
                 </div>
               ))}
             </div>
@@ -929,425 +780,342 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Section 3: Transparent Matching Engine & Human Review ─────── */}
-      <section id="dispatch" className="py-24 max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-6 space-y-6">
-            <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-              Accountable Business Logic
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+      {/* ── Matching Engine ───────────────────────────────────────────────── */}
+      <section id="dispatch" className="py-24 max-w-7xl mx-auto px-5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          <div className="lg:col-span-6 space-y-5">
+            <span className={`text-xs font-bold uppercase tracking-wider ${accent}`}>Transparent Logic</span>
+            <h2 className={`text-3xl sm:text-4xl font-extrabold leading-tight ${textPrimary}`}>
               Assignments you can audit and trust
             </h2>
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+            <p className={`text-sm sm:text-base leading-relaxed ${textSecondary}`}>
               Eligibility and candidate scoring come from transparent operational rules — never an opaque algorithm.
-              An experienced human dispatcher always inspects the job and authorizes the official assignment.
+              A human dispatcher always reviews the job and confirms the assignment.
             </p>
 
-            <div className="space-y-3.5 pt-2">
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-900/80 border border-white/10">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
-                  1
+            <div className="space-y-3 pt-1">
+              {[
+                { n: 1, color: "#1E824C", title: "Strict Hard Filtering First",
+                  body: "Expired licences, active leave, and schedule double-bookings are removed before any scoring." },
+                { n: 2, color: "var(--accent)", title: "Transparent Multi-Factor Scoring",
+                  body: "Trade qualifications, travel proximity, and workload are computed with plain weighted arithmetic." },
+                { n: 3, color: "#7c3aed", title: "Human Dispatcher Authorization",
+                  body: "No automated assignments. An experienced dispatcher reviews the list and confirms the dispatch." },
+              ].map(({ n, color, title, body }) => (
+                <div key={n} className={`flex items-start gap-4 p-4 rounded-xl border ${surface}`}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shrink-0 text-white"
+                    style={{ background: color }}>
+                    {n}
+                  </div>
+                  <div>
+                    <h4 className={`font-bold text-sm ${textPrimary}`}>{title}</h4>
+                    <p className={`text-xs mt-1 leading-relaxed ${textMuted}`}>{body}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-white text-sm">Strict Hard Filtering First</h4>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Expired licenses, active leave, and schedule double-bookings are automatically
-                    disqualified prior to candidate scoring.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-900/80 border border-white/10">
-                <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-sm shrink-0">
-                  2
-                </div>
-                <div>
-                  <h4 className="font-bold text-white text-sm">Transparent Multi-Factor Scoring</h4>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Trade qualifications, travel proximity, and workload are computed with plain
-                    weighted arithmetic so match reasons are clear.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-900/80 border border-white/10">
-                <div className="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-sm shrink-0">
-                  3
-                </div>
-                <div>
-                  <h4 className="font-bold text-white text-sm">Human Dispatcher Authorization</h4>
-                  <p className="text-xs text-slate-400 mt-1">
-                    No automated rogue assignments. An experienced dispatcher reviews the candidate
-                    list and manually confirms the technician dispatch.
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
           <div className="lg:col-span-6">
-            <div className="p-7 rounded-2xl bg-slate-950 border border-white/10 shadow-2xl space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div className={`p-6 rounded-2xl border shadow-[var(--shadow-md)] space-y-4 ${surface}`}>
+              <div className={`flex items-center justify-between pb-4 border-b ${borderColor}`}>
                 <div>
-                  <h3 className="font-bold text-white text-base">Candidate Evaluation Engine</h3>
-                  <span className="text-xs text-slate-400">Match breakdown for Work Order #3088</span>
+                  <h3 className={`font-bold text-base ${textPrimary}`}>Candidate Evaluation</h3>
+                  <span className={`text-xs ${textMuted}`}>Match breakdown — WO #3088 (CCTV & Security)</span>
                 </div>
-                <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-cyan-500/20 text-cyan-300">
-                  CCTV & Access Control
+                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold`}
+                  style={{ background: "var(--bg-surface-2)", color: "var(--accent)", border: "1px solid var(--border)" }}>
+                  CCTV & Access
                 </span>
               </div>
 
-              {/* Candidate 1 (Top Match) */}
-              <div className="p-4 rounded-xl bg-slate-900 border-2 border-cyan-500/50 space-y-2">
+              {/* Top match */}
+              <div className={`p-4 rounded-xl border-2 space-y-2`} style={{ borderColor: "var(--accent)", background: "var(--bg-surface-2)" }}>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-sm">Tanvir Hasan</span>
-                  <span className="text-xs font-extrabold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                  <span className={`font-bold text-sm ${textPrimary}`}>Tanvir Hasan</span>
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
                     91% Match
                   </span>
                 </div>
-                <p className="text-xs text-slate-300">
-                  Certified CCTV & NVR Specialist · Tejgaon Zone · 0 active jobs
-                </p>
-                <div className="flex gap-2 text-[11px] text-emerald-400 pt-1 font-medium">
-                  <span>✓ Safety Cert</span> <span>✓ Free Now</span> <span>✓ 2.1 km Away</span>
+                <p className={`text-xs ${textSecondary}`}>Certified CCTV & NVR Specialist · Tejgaon · 0 active jobs</p>
+                <div className={`flex gap-3 text-[11px] font-medium text-emerald-600 dark:text-emerald-400`}>
+                  <span>✓ Safety Cert</span><span>✓ Free Now</span><span>✓ 2.1 km</span>
                 </div>
               </div>
 
-              {/* Candidate 2 */}
-              <div className="p-4 rounded-xl bg-slate-900/70 border border-slate-800/80">
+              {/* 2nd match */}
+              <div className={`p-4 rounded-xl border ${surface2}`}>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-300 text-sm">Mehedi Zaman</span>
-                  <span className="text-xs font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                  <span className={`font-bold text-sm ${textSecondary}`}>Mehedi Zaman</span>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
                     78% Match
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">Security Tech · 1 active job in Banani</p>
+                <p className={`text-xs mt-1 ${textMuted}`}>Security Tech · 1 active job in Banani</p>
               </div>
 
-              {/* Ineligible Candidate */}
-              <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800/50 opacity-60">
+              {/* Ineligible */}
+              <div className={`p-4 rounded-xl border opacity-60 ${surface2}`}>
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-400 text-sm">Nayeem Islam</span>
-                  <span className="text-xs font-semibold text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">
+                  <span className={`font-bold text-sm ${textMuted}`}>Nayeem Islam</span>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400">
                     Ineligible
                   </span>
                 </div>
-                <p className="text-xs text-red-400 mt-1">✕ Certification expired 12 days ago (Filtered)</p>
+                <p className="text-xs text-red-500 mt-1">✕ Certification expired 12 days ago (filtered)</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Section 4: Role Workspaces ───────────────────────────────── */}
-      <section className="py-20 bg-slate-950 border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-              Role-Specific Workspaces
-            </span>
-            <h2 className="text-3xl font-extrabold text-white">Tailored tools for every stakeholder</h2>
-            <p className="text-slate-400 text-sm">
-              Each user role gets a dedicated console engineered for their operational priorities.
-            </p>
+      {/* ── Role Workspaces ───────────────────────────────────────────────── */}
+      <section className={`py-20 border-t ${borderColor}`} style={{ background: "var(--bg-surface-2)" }}>
+        <div className="max-w-7xl mx-auto px-5">
+          <div className="text-center max-w-xl mx-auto mb-12 space-y-3">
+            <span className={`text-xs font-bold uppercase tracking-wider ${accent}`}>Role Workspaces</span>
+            <h2 className={`text-3xl font-extrabold ${textPrimary}`}>Tailored tools for every stakeholder</h2>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="p-6 rounded-2xl bg-slate-900/80 border border-white/10 hover:border-slate-700 hover:-translate-y-1 transition-all">
-              <span className="text-2xl mb-3 block">🏢</span>
-              <h3 className="font-bold text-white text-base">Business Customer</h3>
-              <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                Submit problems across five categories, monitor technician arrival countdowns, review
-                equipment history, and approve digital invoices.
-              </p>
-            </div>
-            <div className="p-6 rounded-2xl bg-slate-900/80 border border-white/10 hover:border-slate-700 hover:-translate-y-1 transition-all">
-              <span className="text-2xl mb-3 block">📡</span>
-              <h3 className="font-bold text-white text-base">Dispatcher Console</h3>
-              <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                Review incoming requests, compare technician candidates with transparent scores, enforce
-                SLA countdowns, and assign jobs.
-              </p>
-            </div>
-            <div className="p-6 rounded-2xl bg-slate-900/80 border border-white/10 hover:border-slate-700 hover:-translate-y-1 transition-all">
-              <span className="text-2xl mb-3 block">🧰</span>
-              <h3 className="font-bold text-white text-base">Field Technician</h3>
-              <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                Access today's job roster, update travel and on-site progress live, manage trade
-                certifications, and report work completion.
-              </p>
-            </div>
-            <div className="p-6 rounded-2xl bg-slate-900/80 border border-white/10 hover:border-slate-700 hover:-translate-y-1 transition-all">
-              <span className="text-2xl mb-3 block">⚙️</span>
-              <h3 className="font-bold text-white text-base">Administrator</h3>
-              <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                Oversee workforce staff accounts, review security audit trails, monitor SLA breach
-                reports, and configure service operational boundaries.
-              </p>
-            </div>
+            {[
+              { icon: "🏢", title: "Business Customer", body: "Submit problems, monitor arrival countdowns, review equipment history, and approve digital invoices." },
+              { icon: "📡", title: "Dispatcher Console", body: "Review incoming requests, compare candidates with transparent scores, enforce SLAs, and confirm assignments." },
+              { icon: "🧰", title: "Field Technician", body: "Access today's job roster, update travel and on-site progress, manage certifications, and report completion." },
+              { icon: "⚙️", title: "Administrator", body: "Oversee workforce accounts, review audit trails, monitor SLA breach reports, and configure service boundaries." },
+            ].map(({ icon, title, body }) => (
+              <div key={title} className={`p-6 rounded-2xl border hover:-translate-y-1 transition-all duration-200 ${surface}`}>
+                <span className="text-2xl block mb-3">{icon}</span>
+                <h3 className={`font-bold text-base mb-2 ${textPrimary}`}>{title}</h3>
+                <p className={`text-xs leading-relaxed ${textMuted}`}>{body}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── Section 5: Simplified Subscription Plans & Clear Hierarchy ─ */}
-      <section id="packages" className="py-24 max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-            Subscription Pricing & SLA
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
-            Choose your facility service plan
-          </h2>
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-            Every plan includes qualified coordination across all 5 service categories. Response time is
-            our commitment to when our technician physically arrives at your premises.
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* ── SUBSCRIPTION PLANS ──────────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      <section id="packages" className="py-24 max-w-7xl mx-auto px-5">
+        <div className="text-center max-w-3xl mx-auto space-y-3 mb-6">
+          <span className={`text-xs font-bold uppercase tracking-wider ${accent}`}>Coverage Plans</span>
+          <h2 className={`text-3xl sm:text-4xl font-extrabold ${textPrimary}`}>Choose your facility coverage</h2>
+          <p className={`text-sm sm:text-base leading-relaxed ${textSecondary}`}>
+            All plans include qualified coordination across all five service trades.
           </p>
         </div>
 
-        {/* SLA Plain Language Clarification Box */}
-        <div className="max-w-3xl mx-auto mt-8 p-4 rounded-xl bg-cyan-950/30 border border-cyan-500/30 text-xs sm:text-sm text-cyan-200 flex items-start gap-3">
+        {/* SLA clarification */}
+        <div className={`max-w-3xl mx-auto mb-12 p-4 rounded-xl border text-xs sm:text-sm flex items-start gap-3`}
+          style={{ background: isDark ? "rgba(56,189,248,0.05)" : "rgba(31,107,123,0.05)", borderColor: "var(--accent)", color: "var(--text-secondary)" }}>
           <span className="text-lg shrink-0">⏱️</span>
           <div>
-            <strong className="font-bold text-white">What does "Response Time" mean?</strong> Response
-            time is the target window within which the assigned technician physically reaches your
-            facility. It is not merely an email acknowledgment. Total repair duration depends on job
-            scope and parts required.
+            <strong className={textPrimary}>What does "arrival SLA" mean?</strong>{" "}
+            The assigned technician physically arrives at your facility within the stated window — not merely an email acknowledgement or ticket update. Total repair duration depends on job scope and parts required.
           </div>
         </div>
 
-        {/* 3 Streamlined Package Cards with High Visual Hierarchy */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-14 items-stretch">
-          {/* Card 1: Weekly */}
-          <div className="p-8 rounded-2xl bg-slate-900/80 border border-white/10 flex flex-col justify-between hover:border-slate-700 transition-all shadow-xl">
-            <div className="space-y-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold text-white">Weekly Plan</h3>
-                  <span className="text-xs text-slate-400">Short-term facility protection</span>
+        {/* 4 Plan Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
+
+          {/* Plan A: 8-Hour Daily */}
+          <div className={`p-7 rounded-2xl border flex flex-col justify-between hover:shadow-[var(--shadow-md)] hover:-translate-y-1 transition-all ${surface}`}>
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between">
+                  <h3 className={`text-xl font-bold ${textPrimary}`}>8-Hour Daily</h3>
+                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${borderColor} ${textMuted}`}>
+                    Plan A
+                  </span>
                 </div>
-                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                  Flexible Term
-                </span>
+                <p className={`text-xs mt-1 ${textMuted}`}>Defined daily operational window</p>
               </div>
-
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Flexible short-term coverage for pop-ups, seasonal peaks, or temporary project setups.
+              <div className="py-4 border-y" style={{ borderColor: "var(--border)" }}>
+                <div className={`text-lg font-extrabold ${textPrimary}`}>Pricing to be announced</div>
+                <div className={`text-xs mt-0.5 ${textMuted}`}>8 hours per day coverage</div>
+              </div>
+              <div className="p-3 rounded-lg" style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border)" }}>
+                <span className={`text-xs font-medium block ${textMuted}`}>Coverage window:</span>
+                <span className={`text-base font-bold ${textPrimary}`}>8 hours per day</span>
+              </div>
+              <p className={`text-xs leading-relaxed ${textSecondary}`}>
+                For businesses that need qualified professionals during a defined daily operating window. Contact us for schedule details.
               </p>
-
-              <div className="py-4 border-y border-white/10">
-                <div className="text-2xl font-extrabold text-white">Pricing to be announced</div>
-                <div className="text-xs text-slate-400 mt-1">Billed weekly per facility</div>
-              </div>
-
-              {/* SLA Target Callout */}
-              <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800">
-                <span className="text-xs text-slate-400 block font-medium">Arrival SLA Commitment:</span>
-                <span className="text-lg font-bold text-emerald-400 mt-0.5 block">
-                  Within 40 minutes on site
-                </span>
-              </div>
-
-              {/* 3 Concise Key Benefits */}
-              <ul className="space-y-3 text-xs text-slate-300 pt-1">
-                <li className="flex items-center gap-2.5">
-                  <CheckIcon />
-                  <span>Coverage across all 5 service trades</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckIcon />
-                  <span>Human dispatcher verification on every request</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckIcon />
-                  <span>Transparent itemized billing per repair</span>
-                </li>
-              </ul>
             </div>
-
             <button
               type="button"
-              onClick={() => handleSelectPackage("weekly")}
-              className="mt-8 w-full py-3.5 rounded-xl font-semibold text-sm text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors"
+              onClick={() => handlePlan("8hr")}
+              className={`mt-6 w-full py-3 rounded-xl font-semibold text-sm border transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] ${borderColor} ${textSecondary}`}
             >
-              Select Weekly Plan
+              Select Plan A
             </button>
           </div>
 
-          {/* Card 2: Monthly Standard */}
-          <div className="p-8 rounded-2xl bg-slate-900/80 border border-white/10 flex flex-col justify-between hover:border-slate-700 transition-all shadow-xl">
-            <div className="space-y-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold text-white">Monthly Standard</h3>
-                  <span className="text-xs text-slate-400">Regular commercial operations</span>
+          {/* Plan B: 24/7 Standard */}
+          <div className={`p-7 rounded-2xl border flex flex-col justify-between hover:shadow-[var(--shadow-md)] hover:-translate-y-1 transition-all ${surface}`}>
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between">
+                  <h3 className={`text-xl font-bold ${textPrimary}`}>24/7 Standard</h3>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                    Plan B
+                  </span>
                 </div>
-                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                  Best Value
-                </span>
+                <p className={`text-xs mt-1 ${textMuted}`}>Round-the-clock reliable coverage</p>
               </div>
-
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Better value than four weekly plans. Continuous support for retail outlets and corporate offices.
-              </p>
-
-              <div className="py-4 border-y border-white/10">
-                <div className="text-2xl font-extrabold text-white">Pricing to be announced</div>
-                <div className="text-xs text-emerald-400 mt-1 font-semibold">
-                  ★ Discounted rate — cheaper than 4 weekly plans
+              <div className="py-4 border-y" style={{ borderColor: "var(--border)" }}>
+                <div className={`text-lg font-extrabold ${textPrimary}`}>Pricing to be announced</div>
+                <div className={`text-xs mt-0.5 font-medium`} style={{ color: "#1E824C" }}>
+                  ★ Available 24 hours · 7 days a week
                 </div>
               </div>
-
-              {/* SLA Target Callout */}
-              <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800">
-                <span className="text-xs text-slate-400 block font-medium">Arrival SLA Commitment:</span>
-                <span className="text-lg font-bold text-emerald-400 mt-0.5 block">
-                  Within 40 minutes on site
-                </span>
+              <div className="p-3 rounded-lg" style={{ background: "var(--bg-surface-2)", border: "1px solid var(--border)" }}>
+                <span className={`text-xs font-medium block ${textMuted}`}>Arrival SLA commitment:</span>
+                <span className="text-base font-bold" style={{ color: "#1E824C" }}>Within 40 minutes on site</span>
               </div>
-
-              {/* 3 Concise Key Benefits */}
-              <ul className="space-y-3 text-xs text-slate-300 pt-1">
-                <li className="flex items-center gap-2.5">
-                  <CheckIcon />
-                  <span>Coverage across all 5 service trades</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckIcon />
-                  <span>Priority dispatcher matching queue</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckIcon />
-                  <span>Equipment asset log & service timeline</span>
-                </li>
+              <ul className="space-y-2 text-xs">
+                {["All 5 service trades covered", "Human dispatcher verification every job", "Digital job history & itemised invoices"].map((b) => (
+                  <li key={b} className={`flex items-center gap-2 ${textSecondary}`}>
+                    <CheckIcon className="w-3.5 h-3.5" style={{ color: "#1E824C" }} />{b}
+                  </li>
+                ))}
               </ul>
             </div>
-
             <button
               type="button"
-              onClick={() => handleSelectPackage("monthly-standard")}
-              className="mt-8 w-full py-3.5 rounded-xl font-semibold text-sm text-slate-200 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors"
+              onClick={() => handlePlan("247-standard")}
+              className={`mt-6 w-full py-3 rounded-xl font-semibold text-sm border transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] ${borderColor} ${textSecondary}`}
             >
-              Select Monthly Standard
+              Select Plan B
             </button>
           </div>
 
-          {/* Card 3: Monthly Priority (Featured Tier) */}
-          <div className="p-8 rounded-2xl bg-gradient-to-b from-slate-900 via-slate-900 to-cyan-950/80 border-2 border-cyan-400 shadow-2xl shadow-cyan-950/60 flex flex-col justify-between relative">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-cyan-400 to-teal-400 text-slate-950 font-bold text-xs uppercase tracking-wider shadow">
-              ⚡ Rapid 20-Min Response
+          {/* Plan C: 24/7 Priority — FEATURED */}
+          <div
+            className="p-7 rounded-2xl flex flex-col justify-between relative transition-all hover:-translate-y-1"
+            style={{ background: isDark ? "linear-gradient(160deg,#0f1e30 0%,#0a1a28 100%)" : "linear-gradient(160deg,#e8f4f7 0%,#d8eef3 100%)", border: "2px solid var(--accent)", boxShadow: "var(--shadow-lg)" }}
+          >
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-white text-xs font-bold uppercase tracking-wider shadow"
+              style={{ background: "var(--accent)" }}>
+              ⚡ Fastest Response
             </div>
-
-            <div className="space-y-5 mt-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold text-white">Monthly Priority</h3>
-                  <span className="text-xs text-cyan-300">High-uptime mission critical</span>
+            <div className="space-y-4 mt-2">
+              <div>
+                <div className="flex items-center justify-between">
+                  <h3 className={`text-xl font-bold ${textPrimary}`}>24/7 Priority</h3>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-bold" style={{ background: isDark ? "rgba(56,189,248,0.15)" : "rgba(31,107,123,0.12)", color: "var(--accent)", border: "1px solid var(--accent)" }}>
+                    Plan C
+                  </span>
                 </div>
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                  Critical Facilities
-                </span>
+                <p className={`text-xs mt-1 ${textMuted}`}>For time-critical facilities</p>
               </div>
-
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Engineered for factories, high-traffic commercial spaces, and mission-critical equipment.
-              </p>
-
-              <div className="py-4 border-y border-cyan-500/20">
-                <div className="text-2xl font-extrabold text-cyan-300">Pricing to be announced</div>
-                <div className="text-xs text-slate-300 mt-1">Billed monthly · 2x faster arrival SLA</div>
+              <div className="py-4 border-y" style={{ borderColor: "var(--accent)", opacity: 0.3 }}>
               </div>
-
-              {/* SLA Target Callout */}
-              <div className="p-4 rounded-xl bg-cyan-950/50 border border-cyan-500/40">
-                <span className="text-xs text-cyan-300 block font-medium">Arrival SLA Commitment:</span>
-                <span className="text-xl font-extrabold text-white mt-0.5 block tracking-tight">
-                  Within 20 minutes on site
-                </span>
+              <div className="py-0">
+                <div className={`text-lg font-extrabold ${textPrimary}`}>Pricing to be announced</div>
+                <div className={`text-xs mt-0.5 ${textMuted}`}>24/7 · 2× faster arrival SLA</div>
               </div>
-
-              {/* 3 Concise Key Benefits */}
-              <ul className="space-y-3 text-xs text-slate-200 pt-1">
-                <li className="flex items-center gap-2.5">
-                  <CheckIcon className="w-4 h-4 text-cyan-400 shrink-0" />
-                  <span className="font-semibold text-white">20-minute rapid arrival target (2x faster)</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckIcon className="w-4 h-4 text-cyan-400 shrink-0" />
-                  <span>Top-tier emergency dispatcher priority</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckIcon className="w-4 h-4 text-cyan-400 shrink-0" />
-                  <span>Full asset service history & preventative alerts</span>
-                </li>
+              <div className="p-3.5 rounded-xl" style={{ background: isDark ? "rgba(56,189,248,0.08)" : "rgba(31,107,123,0.08)", border: "1px solid var(--accent)" }}>
+                <span className="text-xs font-medium block" style={{ color: "var(--accent)" }}>Arrival SLA commitment:</span>
+                <span className={`text-xl font-extrabold ${textPrimary}`}>Within 20 minutes on site</span>
+              </div>
+              <ul className="space-y-2 text-xs">
+                {["20-min rapid arrival (2× faster)", "Top-tier emergency dispatcher priority", "Full asset service history & preventative alerts"].map((b, i) => (
+                  <li key={b} className={`flex items-center gap-2 ${i === 0 ? `font-semibold ${textPrimary}` : textSecondary}`}>
+                    <CheckIcon className="w-3.5 h-3.5" style={{ color: "var(--accent)" }} />{b}
+                  </li>
+                ))}
               </ul>
             </div>
-
             <button
               type="button"
-              onClick={() => handleSelectPackage("monthly-priority")}
-              className="mt-8 w-full py-4 rounded-xl font-bold text-sm text-slate-950 bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 hover:brightness-110 shadow-lg shadow-cyan-500/25 transition-all"
+              onClick={() => handlePlan("247-priority")}
+              className="mt-6 w-full py-3.5 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90 active:scale-[0.98] shadow-md"
+              style={{ background: "var(--accent)" }}
             >
-              Select Monthly Priority
+              Select Plan C
+            </button>
+          </div>
+
+          {/* Plan D: Custom Coverage */}
+          <div className={`p-7 rounded-2xl border flex flex-col justify-between hover:shadow-[var(--shadow-md)] hover:-translate-y-1 transition-all`}
+            style={{ background: isDark ? "linear-gradient(135deg,#0f1a27 0%,#12203a 100%)" : "linear-gradient(135deg,#fafafa 0%,#f4f0eb 100%)", borderColor: "var(--border)" }}>
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between">
+                  <h3 className={`text-xl font-bold ${textPrimary}`}>Custom Coverage</h3>
+                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${borderColor} ${textMuted}`}>
+                    Plan D
+                  </span>
+                </div>
+                <p className={`text-xs mt-1 ${textMuted}`}>Tailored to your requirements</p>
+              </div>
+              <div className="py-4 border-y" style={{ borderColor: "var(--border)" }}>
+                <div className={`text-lg font-extrabold ${textPrimary}`}>Pricing upon review</div>
+                <div className={`text-xs mt-0.5 ${textMuted}`}>Discussed after requirements review</div>
+              </div>
+              <div className="p-3 rounded-lg" style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+                <span className={`text-xs font-medium block ${textMuted}`}>Example schedules:</span>
+                <span className={`text-sm font-bold ${textPrimary}`}>6, 8, or 16 hours/day</span>
+              </div>
+              <p className={`text-xs leading-relaxed ${textSecondary}`}>
+                Request a tailored daily coverage schedule that matches your operating hours. Arrival SLAs and pricing are determined after we review your requirements.
+              </p>
+              <p className={`text-[11px] italic ${textMuted}`}>
+                Not all custom schedules or SLAs are automatically available. Our team will confirm feasibility.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => handlePlan("custom")}
+              className={`mt-6 w-full py-3 rounded-xl font-semibold text-sm border-2 transition-colors hover:text-[var(--accent)] ${borderColor} ${textSecondary}`}
+              style={{ borderColor: "var(--accent)" }}
+            >
+              Discuss a Custom Plan →
             </button>
           </div>
         </div>
 
-        {/* Expandable Comparison Matrix Toggle */}
-        <div className="mt-14 text-center">
+        {/* Expandable comparison */}
+        <div className="mt-12 text-center">
           <button
             type="button"
-            onClick={() => setShowPlanMatrix(!showPlanMatrix)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-300 hover:text-white bg-slate-900 border border-white/10 hover:border-slate-700 transition-all"
+            onClick={() => setShowMatrix(!showMatrix)}
+            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border transition-all ${borderColor} ${textSecondary} hover:text-[var(--accent)]`}
           >
-            <span>{showPlanMatrix ? "Hide Plan Feature Comparison ▲" : "Compare All Plan Details & Features ▼"}</span>
+            {showMatrix ? "Hide Plan Comparison ▲" : "Compare All Plans ▼"}
           </button>
         </div>
 
-        {/* Detailed Plan Comparison Table (Expandable) */}
-        {showPlanMatrix && (
-          <div className="mt-8 rounded-2xl bg-slate-900/90 border border-white/10 overflow-hidden shadow-2xl animate-in fade-in duration-300">
+        {showMatrix && (
+          <div className={`mt-6 rounded-2xl border overflow-hidden shadow-[var(--shadow-md)] ${surface}`}>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
-                  <tr className="border-b border-slate-800 bg-slate-950/80 text-slate-300">
-                    <th className="py-4 px-6 font-semibold">Operational Feature</th>
-                    <th className="py-4 px-6 font-semibold">Weekly Plan</th>
-                    <th className="py-4 px-6 font-semibold">Monthly Standard</th>
-                    <th className="py-4 px-6 font-semibold text-cyan-300">Monthly Priority</th>
+                  <tr className="border-b" style={{ borderColor: "var(--border)", background: "var(--bg-surface-2)" }}>
+                    <th className={`py-4 px-5 font-semibold ${textSecondary}`}>Feature</th>
+                    <th className={`py-4 px-5 font-semibold ${textSecondary}`}>Plan A · 8-Hour</th>
+                    <th className={`py-4 px-5 font-semibold ${textSecondary}`}>Plan B · 24/7 Std</th>
+                    <th className={`py-4 px-5 font-bold`} style={{ color: "var(--accent)" }}>Plan C · 24/7 Priority</th>
+                    <th className={`py-4 px-5 font-semibold ${textSecondary}`}>Plan D · Custom</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 text-slate-400">
-                  <tr>
-                    <td className="py-3.5 px-6 font-medium text-white">Technician Arrival SLA</td>
-                    <td className="py-3.5 px-6">Within 40 minutes</td>
-                    <td className="py-3.5 px-6">Within 40 minutes</td>
-                    <td className="py-3.5 px-6 font-bold text-cyan-300">Within 20 minutes (2x faster)</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3.5 px-6 font-medium text-white">Billing Cadence</td>
-                    <td className="py-3.5 px-6">Weekly subscription</td>
-                    <td className="py-3.5 px-6 font-medium text-emerald-400">Monthly (Cheaper than 4 weekly)</td>
-                    <td className="py-3.5 px-6">Monthly subscription</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3.5 px-6 font-medium text-white">Supported Categories</td>
-                    <td className="py-3.5 px-6">All 5 trades</td>
-                    <td className="py-3.5 px-6">All 5 trades</td>
-                    <td className="py-3.5 px-6">All 5 trades</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3.5 px-6 font-medium text-white">Dispatcher Oversight</td>
-                    <td className="py-3.5 px-6">Human dispatcher</td>
-                    <td className="py-3.5 px-6">Human dispatcher</td>
-                    <td className="py-3.5 px-6 font-semibold text-cyan-300">Priority emergency routing</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3.5 px-6 font-medium text-white">Asset & Service History</td>
-                    <td className="py-3.5 px-6">Standard log</td>
-                    <td className="py-3.5 px-6">Detailed equipment history</td>
-                    <td className="py-3.5 px-6">Full multi-asset audit history</td>
-                  </tr>
+                <tbody style={{ borderColor: "var(--border)" }} className="divide-y divide-[var(--border)]">
+                  {[
+                    ["Coverage Window", "8 hours / day", "24/7", "24/7", "Tailored schedule"],
+                    ["Arrival SLA", "Not specified", "40 minutes", "20 minutes (2×)", "To be confirmed"],
+                    ["Service Trades", "All 5", "All 5", "All 5", "All 5"],
+                    ["Dispatcher Type", "Human dispatcher", "Human dispatcher", "Emergency priority", "Human dispatcher"],
+                    ["Pricing", "To be announced", "To be announced", "To be announced", "Upon review"],
+                  ].map(([feat, a, b, c, d]) => (
+                    <tr key={feat as string}>
+                      <td className={`py-3 px-5 font-medium ${textPrimary}`}>{feat}</td>
+                      <td className={`py-3 px-5 ${textMuted}`}>{a}</td>
+                      <td className={`py-3 px-5 ${textMuted}`}>{b}</td>
+                      <td className={`py-3 px-5 font-semibold`} style={{ color: "var(--accent)" }}>{c}</td>
+                      <td className={`py-3 px-5 ${textMuted}`}>{d}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -1355,182 +1123,140 @@ export function LandingPage() {
         )}
       </section>
 
-      {/* ── Section 6: About VoltOps ─────────────────────────────────── */}
-      <section id="about" className="py-24 bg-slate-950 border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 space-y-6">
-            <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-              Modern Facility Management
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+      {/* ── About ────────────────────────────────────────────────────────── */}
+      <section id="about" className={`py-24 border-t ${borderColor}`} style={{ background: "var(--bg-surface-2)" }}>
+        <div className="max-w-7xl mx-auto px-5 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-7 space-y-5">
+            <span className={`text-xs font-bold uppercase tracking-wider ${accent}`}>About VoltOps</span>
+            <h2 className={`text-3xl sm:text-4xl font-extrabold leading-tight ${textPrimary}`}>
               Built for commercial field service coordination
             </h2>
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              Most businesses still handle facility breakdowns through scattered phone books, chat groups,
-              and unverified contractors. When a commercial chiller stalls, a security camera drops, or a
-              generator voltage fluctuates, operational delays result in real revenue losses.
+            <p className={`text-sm sm:text-base leading-relaxed ${textSecondary}`}>
+              Most businesses still handle facility breakdowns through scattered phone books, chat groups, and unverified contractors.
+              When a commercial chiller stalls, a security camera drops, or a generator falters, delays cost operational revenue.
             </p>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              VoltOps replaces guesswork with an accountable coordination infrastructure. We connect business
-              managers with vetted technicians across electrical, mechanical, security, IT, and facility upkeep —
-              backed by physical arrival SLA commitments and human dispatcher oversight.
+            <p className={`text-sm leading-relaxed ${textMuted}`}>
+              VoltOps replaces guesswork with an accountable coordination infrastructure — connecting business managers with vetted
+              technicians across electrical, mechanical, security, IT, and facility upkeep, backed by physical arrival commitments and
+              human dispatcher accountability.
             </p>
           </div>
-
           <div className="lg:col-span-5 space-y-4">
-            <div className="p-5 rounded-xl bg-slate-900/80 border border-white/10 space-y-1.5">
-              <div className="flex items-center gap-2 font-bold text-white text-sm">
-                <span className="text-emerald-400">✓</span> No uncertified technicians
+            {[
+              { title: "No uncertified technicians", body: "Safety credentials and trade licences are verified before assignment eligibility." },
+              { title: "No double bookings", body: "Active job workloads and transit distances prevent technician overcommitment." },
+              { title: "Real operational accountability", body: "Customers monitor verified technician transit and itemised billing records." },
+            ].map(({ title, body }) => (
+              <div key={title} className={`p-5 rounded-xl border space-y-1 ${surface}`}>
+                <div className={`flex items-center gap-2 font-bold text-sm ${textPrimary}`}>
+                  <span style={{ color: "#1E824C" }}>✓</span> {title}
+                </div>
+                <p className={`text-xs ${textMuted}`}>{body}</p>
               </div>
-              <p className="text-xs text-slate-400">
-                Safety credentials and trade licenses are verified before assignment eligibility.
-              </p>
-            </div>
-            <div className="p-5 rounded-xl bg-slate-900/80 border border-white/10 space-y-1.5">
-              <div className="flex items-center gap-2 font-bold text-white text-sm">
-                <span className="text-emerald-400">✓</span> No double bookings
-              </div>
-              <p className="text-xs text-slate-400">
-                Active job workloads and transit distances prevent technician overcommitment.
-              </p>
-            </div>
-            <div className="p-5 rounded-xl bg-slate-900/80 border border-white/10 space-y-1.5">
-              <div className="flex items-center gap-2 font-bold text-white text-sm">
-                <span className="text-emerald-400">✓</span> Real operational accountability
-              </div>
-              <p className="text-xs text-slate-400">
-                Customers monitor verified technician transit, estimated arrival time, and itemized billing.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── Section 7: Contact & Support ─────────────────────────────── */}
-      <section id="contact" className="py-24 max-w-7xl mx-auto px-6">
-        {/* Banner */}
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-slate-900 via-cyan-950 to-slate-950 border border-cyan-500/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+      {/* ── Contact ──────────────────────────────────────────────────────── */}
+      <section id="contact" className="py-24 max-w-7xl mx-auto px-5">
+        {/* CTA banner */}
+        <div className="p-8 sm:p-12 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-[var(--shadow-md)] mb-16"
+          style={{ background: isDark ? "linear-gradient(135deg,#0f1e30 0%,#0a2233 100%)" : "linear-gradient(135deg,#e8f4f7 0%,#d4edf4 100%)", border: "1px solid var(--accent)" }}>
           <div className="space-y-2 text-center md:text-left">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+            <h2 className={`text-2xl sm:text-3xl font-extrabold ${textPrimary}`}>
               Ready to safeguard your facility operations?
             </h2>
-            <p className="text-sm text-cyan-200">
-              Select a service plan and start submitting requests with guaranteed arrival response times.
+            <p className={`text-sm ${textSecondary}`}>
+              Select a coverage plan or discuss a custom schedule with our team.
             </p>
           </div>
           <a
             href="#packages"
-            className="px-6 py-3.5 rounded-xl text-sm font-bold text-slate-950 bg-gradient-to-r from-cyan-400 to-emerald-400 hover:brightness-110 shrink-0 shadow-lg"
+            className="px-6 py-3.5 rounded-xl text-sm font-bold text-white shrink-0 shadow-md hover:opacity-90 transition-all"
+            style={{ background: "var(--accent)" }}
           >
-            Get Started Now
+            View Plans
           </a>
         </div>
 
-        {/* Contact Form & Information */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          {/* Contact info */}
           <div className="lg:col-span-5 space-y-5">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Direct Inquiries</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mt-1">Talk with our team</h2>
-              <p className="text-slate-400 text-sm mt-2">
-                Have enterprise facility questions or multiple sites across Dhaka? Send our coordination
-                desk a message.
+              <span className={`text-xs font-bold uppercase tracking-wider ${accent}`}>Direct Inquiries</span>
+              <h2 className={`text-2xl sm:text-3xl font-bold mt-1 ${textPrimary}`}>Talk with our team</h2>
+              <p className={`text-sm mt-2 ${textMuted}`}>
+                Enterprise facility questions or multiple sites? Send our coordination team a message.
               </p>
             </div>
-
-            <div className="space-y-3 pt-3 text-sm text-slate-300">
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-white/10">
-                <span className="text-cyan-400">✉️</span>
-                <div>
-                  <span className="text-xs text-slate-400 block font-semibold">Email</span>
-                  <span>support@voltops.example</span>
+            <div className="space-y-3">
+              {[
+                { icon: "✉️", label: "Email", value: "support@voltops.example" },
+                { icon: "📞", label: "Phone", value: "+880 1XXX-XXXXXX" },
+                { icon: "📍", label: "Coordination Center", value: "Dhaka, Bangladesh" },
+              ].map(({ icon, label, value }) => (
+                <div key={label} className={`flex items-center gap-3 p-3.5 rounded-xl border ${surface}`}>
+                  <span className="text-lg">{icon}</span>
+                  <div>
+                    <span className={`text-xs font-semibold block ${textMuted}`}>{label}</span>
+                    <span className={`text-sm ${textSecondary}`}>{value}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-white/10">
-                <span className="text-cyan-400">📞</span>
-                <div>
-                  <span className="text-xs text-slate-400 block font-semibold">Phone</span>
-                  <span>+880 1XXX-XXXXXX</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-white/10">
-                <span className="text-cyan-400">📍</span>
-                <div>
-                  <span className="text-xs text-slate-400 block font-semibold">Coordination Center</span>
-                  <span>Dhaka, Bangladesh</span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
+          {/* Contact form */}
           <div className="lg:col-span-7">
-            <div className="p-7 rounded-2xl bg-slate-900/90 border border-white/10 shadow-xl">
-              <h3 className="text-lg font-bold text-white mb-2">Send an inquiry</h3>
-              <p className="text-xs text-slate-400 mb-5">
-                Note: This form is for sales and facility inquiries. For emergency repairs, subscribe and log in to dispatch.
+            <div className={`p-7 rounded-2xl border shadow-[var(--shadow-sm)] ${surface}`}>
+              <h3 className={`text-lg font-bold mb-1 ${textPrimary}`}>Send an inquiry</h3>
+              <p className={`text-xs mb-5 ${textMuted}`}>
+                This form is for sales and facility inquiries only. For emergency repairs, please subscribe and log in to dispatch.
               </p>
-
-              {contactSubmitted ? (
-                <div className="p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-sm">
-                  ✓ Thank you! Your inquiry has been received. Our coordination team will reply within
-                  one working day.
+              {contactDone ? (
+                <div className="p-4 rounded-xl text-sm border" style={{ background: "rgba(30,130,76,0.08)", borderColor: "#1E824C", color: "#1E824C" }}>
+                  ✓ Thank you! Your inquiry has been noted. Our team will reply within one working day.
                 </div>
               ) : (
-                <form onSubmit={handleContactSubmit} className="space-y-4">
+                <form onSubmit={handleContact} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">Your Name</label>
-                      <input
-                        type="text"
-                        required
-                        value={contactName}
-                        onChange={(e) => setContactName(e.target.value)}
+                      <label className={`block text-xs font-semibold mb-1 ${textSecondary}`}>Your Name</label>
+                      <input type="text" required value={cName} onChange={(e) => setCName(e.target.value)}
                         placeholder="Karim Rahman"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                        className={`w-full px-3.5 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2`}
+                        style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">Business Email</label>
-                      <input
-                        type="email"
-                        required
-                        value={contactEmail}
-                        onChange={(e) => setContactEmail(e.target.value)}
+                      <label className={`block text-xs font-semibold mb-1 ${textSecondary}`}>Business Email</label>
+                      <input type="email" required value={cEmail} onChange={(e) => setCEmail(e.target.value)}
                         placeholder="you@company.com"
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                        className={`w-full px-3.5 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2`}
+                        style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                       />
                     </div>
                   </div>
-
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Company / Facility Name
-                    </label>
-                    <input
-                      type="text"
-                      value={contactCompany}
-                      onChange={(e) => setContactCompany(e.target.value)}
+                    <label className={`block text-xs font-semibold mb-1 ${textSecondary}`}>Company / Facility Name</label>
+                    <input type="text" value={cCompany} onChange={(e) => setCCompany(e.target.value)}
                       placeholder="Apex Galleria Ltd."
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                      className={`w-full px-3.5 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2`}
+                      style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                     />
                   </div>
-
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Message</label>
-                    <textarea
-                      rows={4}
-                      required
-                      value={contactMessage}
-                      onChange={(e) => setContactMessage(e.target.value)}
-                      placeholder="Tell us about your facility locations and service requirements..."
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                    <label className={`block text-xs font-semibold mb-1 ${textSecondary}`}>Message</label>
+                    <textarea rows={4} required value={cMsg} onChange={(e) => setCMsg(e.target.value)}
+                      placeholder="Tell us about your facility locations and coverage requirements..."
+                      className={`w-full px-3.5 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 resize-none`}
+                      style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                     />
                   </div>
-
-                  <button
-                    type="submit"
-                    className="px-6 py-3 rounded-xl text-sm font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 transition-colors"
-                  >
+                  <button type="submit"
+                    className="px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+                    style={{ background: "var(--accent)" }}>
                     Send Message
                   </button>
                 </form>
@@ -1540,16 +1266,16 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Footer ───────────────────────────────────────────────────── */}
-      <footer className="border-t border-white/10 bg-slate-950 py-10 text-xs text-slate-400">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-          <div className="flex items-center gap-2">
-            <LogoMark className="w-6 h-6 rounded-md" />
-            <span className="font-semibold text-slate-300">
-              © 2026 VoltOps · Subscription-based field service coordination for businesses
+      {/* ── Footer ───────────────────────────────────────────────────────── */}
+      <footer className={`border-t py-8 ${borderColor}`} style={{ background: "var(--bg-surface)" }}>
+        <div className="max-w-7xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="flex items-center gap-2.5">
+            <LogoMark size={28} />
+            <span className={`text-xs font-semibold ${textSecondary}`}>
+              © 2026 VoltOps · Subscription-based field service coordination
             </span>
           </div>
-          <div>CSE 400 project, BUBT</div>
+          <div className={`text-xs ${textMuted}`}>CSE 400 project, BUBT</div>
         </div>
       </footer>
     </div>

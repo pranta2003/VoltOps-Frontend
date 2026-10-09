@@ -31,42 +31,50 @@ export function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--bg-base)" }}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-brand">VoltOps</h1>
-          <p className="text-gray-500 text-sm mt-1">Field Service Workforce & Coordination Platform</p>
+          <Link to="/" className="inline-block">
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">VoltOps</h1>
+          </Link>
+          <p className="text-[var(--text-muted)] text-sm mt-1">Field Service Workforce & Coordination Platform</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white border rounded-lg p-6 space-y-4">
-          <h2 className="text-lg font-medium text-gray-900">Log in</h2>
+        <form
+          onSubmit={handleSubmit}
+          className="border rounded-2xl p-6 space-y-4 shadow-[var(--shadow-sm)]"
+          style={{ background: "var(--bg-surface)", borderColor: "var(--border)" }}
+        >
+          <h2 className="text-lg font-bold text-[var(--text-primary)]">Log in</h2>
 
           {error && (
-            <div className="text-sm text-status-danger bg-red-50 border border-red-100 rounded-md px-3 py-2">
+            <div className="text-sm text-status-danger bg-red-500/10 border border-red-500/20 rounded-xl px-3.5 py-2.5">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Email</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
               placeholder="you@company.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Password</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
               placeholder="••••••••"
             />
           </div>
@@ -74,20 +82,21 @@ export function Login() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-brand hover:bg-brand-dark text-white rounded-md py-2 text-sm font-medium transition-colors disabled:opacity-50"
+            className="w-full text-white rounded-xl py-2.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.99] disabled:opacity-50 shadow-sm"
+            style={{ background: "var(--accent)" }}
           >
             {isSubmitting ? "Logging in..." : "Log in"}
           </button>
 
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-[var(--text-muted)]">
             New customer?{" "}
-            <Link to="/register" className="text-brand hover:underline">
+            <Link to="/register" className="font-semibold hover:underline" style={{ color: "var(--accent)" }}>
               Create an account
             </Link>
           </p>
         </form>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
+        <p className="text-center text-xs text-[var(--text-muted)] mt-6">
           Staff test logins are listed in the project README (seeded accounts).
         </p>
       </div>

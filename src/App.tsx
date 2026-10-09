@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
@@ -38,53 +39,55 @@ function HomeRedirect() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/unauthorized" element={<Unauthorized />} />
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
 
-          <Route path="/" element={<HomeRedirect />} />
+            <Route path="/" element={<HomeRedirect />} />
 
-          {/* Direct paths are also guarded by role, in case we link to them
-              directly later (e.g. from a notification). */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dispatcher"
-            element={
-              <ProtectedRoute allowedRoles={["DISPATCHER"]}>
-                <DispatcherDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/technician"
-            element={
-              <ProtectedRoute allowedRoles={["TECHNICIAN"]}>
-                <TechnicianDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/customer"
-            element={
-              <ProtectedRoute allowedRoles={["CUSTOMER"]}>
-                <CustomerDashboard />
-              </ProtectedRoute>
-            }
-          />
+            {/* Direct paths are also guarded by role, in case we link to them
+                directly later (e.g. from a notification). */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dispatcher"
+              element={
+                <ProtectedRoute allowedRoles={["DISPATCHER"]}>
+                  <DispatcherDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/technician"
+              element={
+                <ProtectedRoute allowedRoles={["TECHNICIAN"]}>
+                  <TechnicianDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/customer"
+              element={
+                <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+                  <CustomerDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

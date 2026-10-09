@@ -2,34 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  @keyframes ambient-drift {
-    0%, 100% {
-      transform: translate(0px, 0px) scale(1);
-    }
-    50% {
-      transform: translate(25px, -15px) scale(1.05);
-    }
-  }
+/* ── Anti-flash: set dark/light ASAP before React hydrates ─────────── */
+/* This script is injected inline in index.html to avoid flash */
 
-  @keyframes pulse-subtle {
-    0%, 100% {
-      opacity: 0.6;
-    }
-    50% {
-      opacity: 0.9;
-    }
-  }
+/* ── CSS Custom Properties: Theme Tokens ────────────────────────────── */
+:root {
+  /* Surface colors */
+  --bg-base: #f9f6f0;        /* warm ivory page background */
+  --bg-surface: #ffffff;     /* cards, panels */
+  --bg-surface-2: #f2ede6;   /* secondary surface, hover tints */
+  --bg-overlay: #ffffffcc;   /* translucent navbar/panel */
 
-  .animate-ambient-drift {
-    animation: ambient-drift 18s ease-in-out infinite;
-  }
+  /* Border */
+  --border: #e2d9ce;
+  --border-strong: #c8bfb4;
 
-  .animate-pulse-subtle {
-    animation: pulse-subtle 4s ease-in-out infinite;
-  }
+  /* Text */
+  --text-primary: #1a1714;   /* near-black for headlines */
+  --text-secondary: #4a4037; /* body copy */
+  --text-muted: #897e74;     /* captions, labels */
+  --text-inverse: #ffffff;
+
+  /* Accent */
+  --accent: #1F6B7B;         /* teal for interactive */
+  --accent-hover: #155a68;
+  --accent-text: #0e4a57;    /* on light backgrounds */
+
+  /* Shadow */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.10);
+
+  /* Status */
+  --status-available: #1E824C;
+  --status-danger: #B3261E;
 }
 
+.dark {
+  --bg-base: #080e18;        /* deep midnight navy */
+  --bg-surface: #0f1927;     /* card surfaces */
+  --bg-surface-2: #162030;   /* raised panels */
+  --bg-overlay: #080e18dd;   /* navbar at scroll */
+
+  --border: #1e2d3f;
+  --border-strong: #2a3f55;
+
+  --text-primary: #f0f4f8;
+  --text-secondary: #94a3b8;
+  --text-muted: #5a7191;
+  --text-inverse: #0a0e17;
+
+  --accent: #38bdf8;
+  --accent-hover: #7dd3fc;
+  --accent-text: #38bdf8;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.5);
+}
+
+/* ── Base Styles ─────────────────────────────────────────────────────── */
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  @apply font-sans antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── Scrollbar hiding utility ────────────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Reduced motion ──────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
@@ -38,8 +82,3 @@
     scroll-behavior: auto !important;
   }
 }
-
-body {
-  @apply bg-gray-50 text-gray-900 font-sans;
-}
-
