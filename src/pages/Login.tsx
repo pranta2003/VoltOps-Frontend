@@ -35,7 +35,7 @@ export function Login() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold text-brand">VoltOps</h1>
-          <p className="text-gray-500 text-sm mt-1">Electrical Workforce & Service Platform</p>
+          <p className="text-gray-500 text-sm mt-1">Field Service Workforce & Coordination Platform</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white border rounded-lg p-6 space-y-4">
