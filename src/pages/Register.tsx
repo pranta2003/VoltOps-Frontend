@@ -12,13 +12,39 @@ export function Register() {
   const [searchParams] = useSearchParams();
 
   const packageParam = searchParams.get("package");
-  const packageNames: Record<string, string> = {
-    standard: "Standard care",
-    priority: "Priority 24/7",
-    enterprise: "Enterprise",
+  const packageConfig: Record<string, { name: string; sla: string }> = {
+    weekly: {
+      name: "Weekly Plan",
+      sla: "Within 40 minutes technician arrival commitment",
+    },
+    "monthly-standard": {
+      name: "Monthly Standard",
+      sla: "Within 40 minutes technician arrival commitment",
+    },
+    "monthly-priority": {
+      name: "Monthly Priority",
+      sla: "Within 20 minutes rapid technician arrival commitment",
+    },
+    // Backwards-compatibility fallbacks
+    standard: {
+      name: "Monthly Standard",
+      sla: "Within 40 minutes technician arrival commitment",
+    },
+    priority: {
+      name: "Monthly Priority",
+      sla: "Within 20 minutes rapid technician arrival commitment",
+    },
+    enterprise: {
+      name: "Monthly Priority",
+      sla: "Within 20 minutes rapid technician arrival commitment",
+    },
   };
-  const selectedPackageName = packageParam
-    ? packageNames[packageParam.toLowerCase()] || packageParam
+
+  const selectedPackage = packageParam
+    ? packageConfig[packageParam.toLowerCase()] || {
+        name: packageParam,
+        sla: "Within plan response commitment",
+      }
     : null;
 
   const [name, setName] = useState("");
@@ -71,9 +97,15 @@ export function Register() {
         <form onSubmit={handleSubmit} className="bg-white border rounded-lg p-6 space-y-4">
           <h2 className="text-lg font-medium text-gray-900">Sign up</h2>
 
-          {selectedPackageName && (
-            <div className="text-sm text-brand bg-brand/10 border border-brand/20 rounded-md px-3 py-2">
-              Selected package: <span className="font-semibold">{selectedPackageName}</span>
+          {selectedPackage && (
+            <div className="text-sm bg-brand/10 border border-brand/20 rounded-md p-3">
+              <div className="font-semibold text-brand">
+                Selected plan: <span className="text-gray-900 font-bold">{selectedPackage.name}</span>
+              </div>
+              <div className="text-xs text-slate-600 mt-1 flex items-center gap-1.5">
+                <span className="text-status-available font-bold">✓</span>
+                <span>Response SLA: <strong className="text-status-available">{selectedPackage.sla}</strong></span>
+              </div>
             </div>
           )}
 
