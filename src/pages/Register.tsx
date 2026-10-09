@@ -12,31 +12,53 @@ export function Register() {
   const [searchParams] = useSearchParams();
 
   const packageParam = searchParams.get("package");
-  const packageConfig: Record<string, { name: string; sla: string }> = {
+  const packageConfig: Record<string, { name: string; sla: string; slaLabel?: string }> = {
+    // Current coverage plans
+    "8hr": {
+      name: "8-Hour Daily Coverage (Plan A)",
+      sla: "8 hours per day defined operational window (no arrival SLA)",
+      slaLabel: "Coverage Window",
+    },
+    "247-standard": {
+      name: "24/7 Standard Coverage (Plan B)",
+      sla: "Within 40 minutes — technician physically arrives at your facility",
+      slaLabel: "Arrival SLA",
+    },
+    "247-priority": {
+      name: "24/7 Priority Coverage (Plan C)",
+      sla: "Within 20 minutes — rapid technician physical arrival (2× faster)",
+      slaLabel: "Arrival SLA",
+    },
+    // Legacy backwards-compatibility fallbacks
     weekly: {
-      name: "Weekly Plan",
-      sla: "Within 40 minutes technician arrival commitment",
+      name: "Weekly Plan (Legacy)",
+      sla: "Within 40 minutes technician arrival",
+      slaLabel: "Arrival SLA",
     },
     "monthly-standard": {
-      name: "Monthly Standard",
-      sla: "Within 40 minutes technician arrival commitment",
+      name: "Monthly Standard (Legacy)",
+      sla: "Within 40 minutes technician arrival",
+      slaLabel: "Arrival SLA",
     },
     "monthly-priority": {
-      name: "Monthly Priority",
-      sla: "Within 20 minutes rapid technician arrival commitment",
+      name: "Monthly Priority (Legacy)",
+      sla: "Within 20 minutes rapid technician arrival",
+      slaLabel: "Arrival SLA",
     },
-    // Backwards-compatibility fallbacks
     standard: {
-      name: "Monthly Standard",
-      sla: "Within 40 minutes technician arrival commitment",
+      name: "Monthly Standard (Legacy)",
+      sla: "Within 40 minutes technician arrival",
+      slaLabel: "Arrival SLA",
     },
     priority: {
-      name: "Monthly Priority",
-      sla: "Within 20 minutes rapid technician arrival commitment",
+      name: "Monthly Priority (Legacy)",
+      sla: "Within 20 minutes rapid technician arrival",
+      slaLabel: "Arrival SLA",
     },
     enterprise: {
-      name: "Monthly Priority",
-      sla: "Within 20 minutes rapid technician arrival commitment",
+      name: "Monthly Priority (Legacy)",
+      sla: "Within 20 minutes rapid technician arrival",
+      slaLabel: "Arrival SLA",
     },
   };
 
@@ -44,6 +66,7 @@ export function Register() {
     ? packageConfig[packageParam.toLowerCase()] || {
         name: packageParam,
         sla: "Within plan response commitment",
+        slaLabel: "Plan Commitment",
       }
     : null;
 
@@ -68,86 +91,80 @@ export function Register() {
     }
   }
 
-//<div>
-        //    <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-      //      <input
-    //          type="password"
-    //          required
-    //          value={password}
-    //          onChange={(e) => setPassword(e.target.value)}
-   //           className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
-     //         placeholder="••••••••"
-    //        />
-    //      </div>
-
-
-
-
-
-
-  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--bg-base)" }}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-brand">VoltOps</h1>
-          <p className="text-gray-500 text-sm mt-1">Create a customer account</p>
+          <Link to="/" className="inline-block">
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">VoltOps</h1>
+          </Link>
+          <p className="text-[var(--text-muted)] text-sm mt-1">Create a customer account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white border rounded-lg p-6 space-y-4">
-          <h2 className="text-lg font-medium text-gray-900">Sign up</h2>
+        <form
+          onSubmit={handleSubmit}
+          className="border rounded-2xl p-6 space-y-4 shadow-[var(--shadow-sm)]"
+          style={{ background: "var(--bg-surface)", borderColor: "var(--border)" }}
+        >
+          <h2 className="text-lg font-bold text-[var(--text-primary)]">Sign up</h2>
 
           {selectedPackage && (
-            <div className="text-sm bg-brand/10 border border-brand/20 rounded-md p-3">
-              <div className="font-semibold text-brand">
-                Selected plan: <span className="text-gray-900 font-bold">{selectedPackage.name}</span>
+            <div
+              className="text-sm rounded-xl p-3.5 border"
+              style={{ background: "rgba(31,107,123,0.08)", borderColor: "var(--accent)" }}
+            >
+              <div className="font-semibold" style={{ color: "var(--accent)" }}>
+                Selected plan: <span className="text-[var(--text-primary)] font-bold">{selectedPackage.name}</span>
               </div>
-              <div className="text-xs text-slate-600 mt-1 flex items-center gap-1.5">
-                <span className="text-status-available font-bold">✓</span>
-                <span>Response SLA: <strong className="text-status-available">{selectedPackage.sla}</strong></span>
+              <div className="text-xs text-[var(--text-secondary)] mt-1.5 flex items-center gap-1.5">
+                <span className="font-bold" style={{ color: "#1E824C" }}>✓</span>
+                <span>{selectedPackage.slaLabel || "Commitment"}: <strong style={{ color: "#1E824C" }}>{selectedPackage.sla}</strong></span>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="text-sm text-status-danger bg-red-50 border border-red-100 rounded-md px-3 py-2">
+            <div className="text-sm text-status-danger bg-red-500/10 border border-red-500/20 rounded-xl px-3.5 py-2.5">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full name</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Full name</label>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
               placeholder="Karim Rahman"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Email</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
               placeholder="you@company.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Password</label>
             <input
               type="password"
               required
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+              style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
               placeholder="At least 6 characters"
             />
           </div>
@@ -155,14 +172,15 @@ export function Register() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-brand hover:bg-brand-dark text-white rounded-md py-2 text-sm font-medium transition-colors disabled:opacity-50"
+            className="w-full text-white rounded-xl py-2.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.99] disabled:opacity-50 shadow-sm"
+            style={{ background: "var(--accent)" }}
           >
             {isSubmitting ? "Creating account..." : "Create account"}
           </button>
 
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-[var(--text-muted)]">
             Already have an account?{" "}
-            <Link to="/login" className="text-brand hover:underline">
+            <Link to="/login" className="font-semibold hover:underline" style={{ color: "var(--accent)" }}>
               Log in
             </Link>
           </p>

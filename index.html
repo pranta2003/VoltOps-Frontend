@@ -3,11 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VoltOps | Field service workforce and service management</title>
+    <title>VoltOps | Field Service Coordination Platform</title>
+
+    <!-- Anti-flash: resolve theme before first paint -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("voltops-theme");
+          if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"
       rel="stylesheet"
     />
   </head>
