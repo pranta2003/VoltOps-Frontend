@@ -9,20 +9,20 @@
 :root {
   /* Surface colors — Light Mode (Warm Ivory & Organic Alabaster) */
   --bg-base: #f7f6f0;        /* warm ivory page background */
-  --bg-surface: rgba(255, 255, 255, 0.88); /* frosted card surface */
-  --bg-surface-2: #f0ebe0;   /* secondary surface, hover tints */
-  --bg-surface-3: #e6dfd2;   /* raised / interactive background */
-  --bg-overlay: rgba(247, 246, 240, 0.85); /* translucent navbar with blur */
+  --bg-surface: rgba(255, 255, 255, 0.95); /* frosted card surface */
+  --bg-surface-2: #ede8dc;   /* secondary surface, hover tints */
+  --bg-surface-3: #e2dbcd;   /* raised / interactive background */
+  --bg-overlay: rgba(247, 246, 240, 0.92); /* translucent navbar with blur */
 
   /* Border */
-  --border: #e3dcd0;
-  --border-strong: rgba(22, 101, 52, 0.4);
-  --border-subtle: #eae4d8;
+  --border: #dcd4c5;
+  --border-strong: rgba(21, 128, 61, 0.5);
+  --border-subtle: #e7e0d3;
 
-  /* Text */
-  --text-primary: #0f1720;   /* rich ink obsidian */
-  --text-secondary: #334155; /* crisp slate */
-  --text-muted: #64748b;     /* captions, metadata */
+  /* Text — Enhanced high contrast so light mode cards are perfectly readable */
+  --text-primary: #0a0f1d;   /* deep obsidian black */
+  --text-secondary: #1e293b; /* crisp dark slate */
+  --text-muted: #475569;     /* clear, readable slate grey (not pale/washed out) */
   --text-inverse: #ffffff;
 
   /* Accent — Deep forest emerald with lime highlight */
@@ -65,8 +65,8 @@
   --border-subtle: rgba(255, 255, 255, 0.05);
 
   --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #627288;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
   --text-inverse: #06090e;
 
   /* Accent — Emerald / Mint Green */
