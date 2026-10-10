@@ -8,65 +8,120 @@
 /* ── CSS Custom Properties: Theme Tokens ────────────────────────────── */
 :root {
   /* Surface colors */
-  --bg-base: #f9f6f0;        /* warm ivory page background */
+  --bg-base: #f8f6f0;        /* warm ivory page background */
   --bg-surface: #ffffff;     /* cards, panels */
-  --bg-surface-2: #f2ede6;   /* secondary surface, hover tints */
-  --bg-overlay: #ffffffcc;   /* translucent navbar/panel */
+  --bg-surface-2: #f2ede4;   /* secondary surface, hover tints */
+  --bg-surface-3: #eae3d8;   /* raised / interactive background */
+  --bg-overlay: #ffffffd6;   /* translucent navbar/panel with blur */
 
   /* Border */
-  --border: #e2d9ce;
-  --border-strong: #c8bfb4;
+  --border: #e2dbcf;
+  --border-strong: #c8bfae;
+  --border-subtle: #eeea7e0;
 
   /* Text */
-  --text-primary: #1a1714;   /* near-black for headlines */
-  --text-secondary: #4a4037; /* body copy */
-  --text-muted: #897e74;     /* captions, labels */
+  --text-primary: #121921;   /* rich obsidian for headlines */
+  --text-secondary: #3d4a54; /* crisp body copy */
+  --text-muted: #72808c;     /* captions, metadata */
   --text-inverse: #ffffff;
 
   /* Accent */
-  --accent: #1F6B7B;         /* teal for interactive */
-  --accent-hover: #155a68;
-  --accent-text: #0e4a57;    /* on light backgrounds */
+  --accent: #176577;         /* signature deep teal */
+  --accent-hover: #104e5d;
+  --accent-text: #0d424e;
+  --accent-subtle: rgba(23, 101, 119, 0.08);
+  --accent-glow: rgba(23, 101, 119, 0.18);
+
+  /* Warm accent */
+  --amber-accent: #c26c19;
+  --amber-subtle: rgba(194, 108, 25, 0.10);
+
+  /* Atmospheric hero glows (light mode) */
+  --hero-glow-1: rgba(30, 144, 170, 0.14);
+  --hero-glow-2: rgba(45, 180, 190, 0.10);
+  --hero-glow-3: rgba(217, 130, 43, 0.08);
 
   /* Shadow */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.08);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,.10);
+  --shadow-sm: 0 1px 3px rgba(18, 25, 33, 0.04), 0 1px 2px rgba(18, 25, 33, 0.02);
+  --shadow-md: 0 4px 16px rgba(18, 25, 33, 0.06), 0 1px 4px rgba(18, 25, 33, 0.04);
+  --shadow-lg: 0 12px 36px rgba(18, 25, 33, 0.09), 0 2px 8px rgba(18, 25, 33, 0.04);
+  --shadow-float: 0 20px 48px rgba(18, 25, 33, 0.12);
 
   /* Status */
-  --status-available: #1E824C;
-  --status-danger: #B3261E;
+  --status-available: #167a44;
+  --status-danger: #b3261e;
 }
 
 .dark {
-  --bg-base: #080e18;        /* deep midnight navy */
-  --bg-surface: #0f1927;     /* card surfaces */
-  --bg-surface-2: #162030;   /* raised panels */
-  --bg-overlay: #080e18dd;   /* navbar at scroll */
+  --bg-base: #060b13;        /* atmospheric deep midnight navy */
+  --bg-surface: #0b1320;     /* layered card surfaces */
+  --bg-surface-2: #101c2e;   /* raised panels */
+  --bg-surface-3: #16263d;   /* active / focus elements */
+  --bg-overlay: #070d18e0;   /* translucent navbar with blur */
 
-  --border: #1e2d3f;
-  --border-strong: #2a3f55;
+  --border: #182638;
+  --border-strong: #23364f;
+  --border-subtle: #121c29;
 
-  --text-primary: #f0f4f8;
+  --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
-  --text-muted: #5a7191;
-  --text-inverse: #0a0e17;
+  --text-muted: #576d87;
+  --text-inverse: #060b13;
 
-  --accent: #38bdf8;
+  --accent: #38bdf8;         /* luminescent cyan */
   --accent-hover: #7dd3fc;
   --accent-text: #38bdf8;
+  --accent-subtle: rgba(56, 189, 248, 0.10);
+  --accent-glow: rgba(56, 189, 248, 0.28);
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.3);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.4);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,.5);
+  --amber-accent: #f59e0b;
+  --amber-subtle: rgba(245, 158, 11, 0.12);
+
+  /* Atmospheric hero glows (dark mode) */
+  --hero-glow-1: rgba(56, 189, 248, 0.16);
+  --hero-glow-2: rgba(20, 184, 166, 0.12);
+  --hero-glow-3: rgba(245, 158, 11, 0.08);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.60);
+  --shadow-float: 0 24px 56px rgba(0, 0, 0, 0.70);
 }
 
-/* ── Base Styles ─────────────────────────────────────────────────────── */
 body {
   background-color: var(--bg-base);
   color: var(--text-primary);
   @apply font-sans antialiased;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: 'Plus Jakarta Sans', Inter, -apple-system, sans-serif;
+  letter-spacing: -0.025em;
+}
+
+/* ── Refined glass card ──────────────────────────────────────────────── */
+.glass-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+/* ── Ambient Radial Glows ────────────────────────────────────────────── */
+.hero-glow-blob-1 {
+  background: radial-gradient(circle at center, var(--hero-glow-1) 0%, transparent 70%);
+}
+.hero-glow-blob-2 {
+  background: radial-gradient(circle at center, var(--hero-glow-2) 0%, transparent 68%);
+}
+.hero-glow-blob-3 {
+  background: radial-gradient(circle at center, var(--hero-glow-3) 0%, transparent 65%);
 }
 
 /* ── Scrollbar hiding utility ────────────────────────────────────────── */
