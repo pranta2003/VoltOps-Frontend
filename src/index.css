@@ -53,7 +53,7 @@
 }
 
 .dark {
-  /* Surface colors — Dark Mode (Deep Midnight Obsidian + Chartreuse Accent) */
+  /* Surface colors — Dark Mode (Deep Midnight Obsidian + Emerald / Mint Accent) */
   --bg-base: #06090e;        /* atmospheric organic midnight base */
   --bg-surface: rgba(14, 20, 29, 0.72);  /* translucent smoked glass */
   --bg-surface-2: rgba(20, 29, 43, 0.85); /* raised frosted panels */
@@ -61,7 +61,7 @@
   --bg-overlay: rgba(6, 9, 14, 0.82);    /* translucent navbar with blur */
 
   --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(212, 244, 62, 0.35);
+  --border-strong: rgba(16, 185, 129, 0.40);
   --border-subtle: rgba(255, 255, 255, 0.05);
 
   --text-primary: #f8fafc;
@@ -69,21 +69,21 @@
   --text-muted: #627288;
   --text-inverse: #06090e;
 
-  /* Accent — Luminous Chartreuse / Electric Lime from Synergeus reference */
-  --accent: #d4f43e;
-  --accent-hover: #e2f865;
-  --accent-text: #d4f43e;
-  --accent-subtle: rgba(212, 244, 62, 0.12);
-  --accent-glow: rgba(212, 244, 62, 0.32);
+  /* Accent — Emerald / Mint Green */
+  --accent: #10b981;
+  --accent-hover: #34d399;
+  --accent-text: #34d399;
+  --accent-subtle: rgba(16, 185, 129, 0.14);
+  --accent-glow: rgba(16, 185, 129, 0.35);
 
-  --lime-accent: #d4f43e;
+  --lime-accent: #34d399;
   --amber-accent: #f59e0b;
-  --amber-subtle: rgba(245, 158, 11, 0.12);
+  --amber-subtle: rgba(245, 158, 11, 0.14);
 
-  /* Atmospheric hero glows (dark mode: chartreuse canopy + emerald + amber) */
-  --hero-glow-1: rgba(212, 244, 62, 0.18);
-  --hero-glow-2: rgba(16, 185, 129, 0.14);
-  --hero-glow-3: rgba(245, 158, 11, 0.09);
+  /* Atmospheric hero glows (dark mode: Emerald + Mint + Amber bokeh glow) */
+  --hero-glow-1: rgba(16, 185, 129, 0.22);
+  --hero-glow-2: rgba(52, 211, 153, 0.16);
+  --hero-glow-3: rgba(245, 158, 11, 0.14); /* warm golden/amber glow in background */
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
@@ -111,7 +111,7 @@ h1, h2, h3, h4, .font-heading {
 }
 
 .dark .font-serif-italic {
-  color: #d4f43e;
+  color: #34d399;
 }
 
 /* ── Frosted Smoked Glass Card ──────────────────────────────────────── */
@@ -142,19 +142,22 @@ h1, h2, h3, h4, .font-heading {
 
 /* ── Individual Jewel-Tone Card Glows ────────────────────────────────── */
 .glow-card-lime {
-  background: radial-gradient(circle at 50% 0%, rgba(212, 244, 62, 0.15) 0%, transparent 70%), var(--bg-surface);
+  background: radial-gradient(circle at 50% 0%, rgba(52, 211, 153, 0.20) 0%, transparent 70%), var(--bg-surface);
 }
 .glow-card-emerald {
-  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.15) 0%, transparent 70%), var(--bg-surface);
+  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.22) 0%, transparent 70%), var(--bg-surface);
 }
 .glow-card-amber {
-  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.15) 0%, transparent 70%), var(--bg-surface);
+  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.18) 0%, transparent 70%), var(--bg-surface);
 }
 .glow-card-cyan {
-  background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 70%), var(--bg-surface);
+  background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.18) 0%, transparent 70%), var(--bg-surface);
 }
 .glow-card-indigo {
-  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 70%), var(--bg-surface);
+  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.18) 0%, transparent 70%), var(--bg-surface);
+}
+.glow-card-purple {
+  background: radial-gradient(circle at 50% 0%, rgba(168, 85, 247, 0.18) 0%, transparent 70%), var(--bg-surface);
 }
 
 /* ── Scrollbar hiding utility ────────────────────────────────────────── */
