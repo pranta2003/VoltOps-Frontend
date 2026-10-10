@@ -51,10 +51,10 @@ const CORE_SERVICES: ServiceTrade[] = [
     accentColor: "#38bdf8",
     glowClass: "glow-card-cyan",
     badge: "AC / HVAC",
-    simpleIssue: "AC stopped cooling, gas leak, or chiller tripped",
+    simpleIssue: "Chillers, split ACs, or gas leaks",
     slaBadge: "20–40 Min",
-    simpleDesc: "Emergency repair for building ACs, chillers, and cooling systems.",
-    simplePoints: ["Central AC & Chillers", "Gas Leaks & Cooling", "Fast Part Replacement"],
+    simpleDesc: "Emergency repairs for commercial ACs, chillers, and cooling systems.",
+    simplePoints: ["Central ACs & Chillers", "Gas Leaks & Cooling", "Fast Part Replacement"],
   },
   {
     id: "electrical",
@@ -63,10 +63,10 @@ const CORE_SERVICES: ServiceTrade[] = [
     accentColor: "#f59e0b",
     glowClass: "glow-card-amber",
     badge: "Electrical",
-    simpleIssue: "Generator failure, power tripping, or main line fault",
+    simpleIssue: "Breaker trips, outages, or generator failure",
     slaBadge: "20–40 Min",
-    simpleDesc: "Licensed electricians on site to restore power and generators.",
-    simplePoints: ["Backup Generators", "Main Breaker Trips", "Voltage & Short Circuits"],
+    simpleDesc: "Licensed electricians on site to restore power, panels, and generators.",
+    simplePoints: ["Backup Generators", "Main Breaker Trips", "Short Circuits & Wiring"],
   },
   {
     id: "security",
@@ -75,10 +75,10 @@ const CORE_SERVICES: ServiceTrade[] = [
     accentColor: "#a855f7",
     glowClass: "glow-card-purple",
     badge: "Security",
-    simpleIssue: "Security cameras offline or biometric door locks stuck",
+    simpleIssue: "Cameras offline or door locks stuck",
     slaBadge: "20–40 Min",
-    simpleDesc: "Quick fix for CCTV cameras, DVR recording, and door access.",
-    simplePoints: ["Offline CCTV Cameras", "Biometric Door Locks", "Gates & Security Alarms"],
+    simpleDesc: "Quick repairs for CCTV systems, DVR recorders, and access doors.",
+    simplePoints: ["Offline CCTV Cameras", "Biometric Door Access", "Gates & Security Alarms"],
   },
   {
     id: "it",
@@ -86,11 +86,11 @@ const CORE_SERVICES: ServiceTrade[] = [
     icon: ServerIcon,
     accentColor: "#10b981",
     glowClass: "glow-card-emerald",
-    badge: "Networks",
-    simpleIssue: "Office Wi-Fi down, server rack issue, or POS failure",
+    badge: "Network & IT",
+    simpleIssue: "Office Wi-Fi down or router failure",
     slaBadge: "20–40 Min",
-    simpleDesc: "Network engineers to fix office switches, routers, and Wi-Fi.",
-    simplePoints: ["Office Wi-Fi & Routers", "Server Racks & Switches", "Billing / POS Lines"],
+    simpleDesc: "Network engineers to fix office Wi-Fi, switches, and internet lines.",
+    simplePoints: ["Office Wi-Fi & Routers", "Server Racks & Switches", "Billing & POS Lines"],
   },
   {
     id: "facility",
@@ -98,11 +98,11 @@ const CORE_SERVICES: ServiceTrade[] = [
     icon: WrenchIcon,
     accentColor: "#f43f5e",
     glowClass: "glow-card-indigo",
-    badge: "Facility",
-    simpleIssue: "Water pipe burst, glass door jammed, or dock broken",
+    badge: "Plumbing & Fixes",
+    simpleIssue: "Water pipe bursts or jammed doors",
     slaBadge: "20–40 Min",
     simpleDesc: "Emergency plumbing, automatic glass doors, and building upkeep.",
-    simplePoints: ["Water Pipe Bursts", "Glass & Auto Doors", "Mechanical Repairs"],
+    simplePoints: ["Water Pipe Bursts", "Glass & Auto Doors", "General Building Upkeep"],
   },
 ];
 
@@ -274,8 +274,8 @@ export function LandingPage() {
         }}
         aria-hidden="true"
       >
-        {/* Tint overlay ensuring cards glide cleanly with high contrast */}
-        <div className="absolute inset-0 bg-[#06090e]/88 dark:bg-[#06090e]/90 bg-[#f7f6f0]/92 backdrop-blur-[10px]" />
+        {/* Tint overlay ensuring cards glide cleanly while architectural towers remain visible */}
+        <div className="absolute inset-0 bg-[#f7f6f0]/65 dark:bg-[#06090e]/88 backdrop-blur-[2px] dark:backdrop-blur-[8px]" />
       </div>
 
       {/* ── Floating Pill Navigation ──────────────────────────────────── */}
@@ -307,8 +307,8 @@ export function LandingPage() {
             <div className="hidden lg:flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full border border-[var(--border)] bg-[var(--bg-surface-2)]">
               {[
                 ["#services", "Services"],
-                ["#how", "How It Works"],
                 ["#dispatch", "Operations"],
+                ["#how", "How It Works"],
                 ["#packages", "Plans"],
                 ["#about", "About"],
                 ["#contact", "Contact"],
@@ -367,8 +367,8 @@ export function LandingPage() {
               </div>
               {[
                 ["#services", "Services"],
-                ["#how", "How It Works"],
                 ["#dispatch", "Operations"],
+                ["#how", "How It Works"],
                 ["#packages", "Plans"],
                 ["#about", "About"],
                 ["#contact", "Contact"],
@@ -409,7 +409,7 @@ export function LandingPage() {
         {/* Commercial Building Background — Rich, vivid, project relevant */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden -z-1">
           <div
-            className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 opacity-75 dark:opacity-65"
+            className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 opacity-90 dark:opacity-65"
             style={{
               backgroundImage: "url('/images/hero-building.jpg')",
               backgroundPosition: "center 25%",
@@ -421,7 +421,7 @@ export function LandingPage() {
             style={{
               background: isDark
                 ? "radial-gradient(ellipse 85% 70% at 50% 35%, rgba(6,9,14,0.40) 0%, rgba(6,9,14,0.85) 60%, var(--bg-base) 100%)"
-                : "radial-gradient(ellipse 85% 70% at 50% 35%, rgba(247,246,240,0.35) 0%, rgba(247,246,240,0.85) 60%, var(--bg-base) 100%)",
+                : "radial-gradient(ellipse 90% 75% at 50% 32%, rgba(247,246,240,0.18) 0%, rgba(247,246,240,0.52) 58%, var(--bg-base) 100%)",
             }}
           />
           {/* Bottom fade into page */}
@@ -434,17 +434,6 @@ export function LandingPage() {
         <div className="hero-glow-blob-3 absolute top-1/3 right-1/4 w-[32rem] h-[24rem] rounded-full blur-[110px] pointer-events-none animate-pulse-subtle" />
 
         <div className="relative max-w-6xl mx-auto px-5">
-          {/* Eyebrow badge with live pulse */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface)] backdrop-blur-xl mb-6 shadow-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10b981] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#10b981]" />
-            </span>
-            <span className="text-slate-800 dark:text-slate-200 font-medium">
-              Commercial Building Repairs · 24/7 Operations
-            </span>
-          </div>
-
           {/* Centered Editorial Headline with Italic Serif */}
           <h1 className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[68px] tracking-tight leading-[1.08] text-[var(--text-primary)] max-w-4xl mx-auto drop-shadow-sm">
             Our platform simplifies your{" "}
@@ -453,9 +442,9 @@ export function LandingPage() {
             </span>
           </h1>
 
-          {/* Luminous, clean, refined subtitle (No boring AI paragraph) */}
+          {/* Luminous, clean, refined subtitle */}
           <p className="text-base sm:text-xl text-slate-800 dark:text-slate-200 max-w-2xl mx-auto font-normal leading-relaxed mt-5 tracking-tight">
-            One unified subscription for your building repairs — with verified licensed technicians at your door in{" "}
+            One unified subscription for building repairs — verified licensed technicians at your door in{" "}
             <span className="font-semibold text-emerald-600 dark:text-[#34d399] underline decoration-emerald-500/40 underline-offset-4">
               20 to 40 minutes
             </span>.
@@ -504,13 +493,13 @@ export function LandingPage() {
                 </div>
               </div>
 
-              <div className="border-t border-[var(--border)] pt-4 mt-4 space-y-1.5">
+              <div className="border-t border-[var(--border)] pt-4 mt-4 space-y-1">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
                   <span className="text-amber-500">★★★★★</span>
                   <span>4.9 / 5.0 Rating</span>
                 </div>
                 <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
-                  Trusted by 120+ commercial complexes, hospitals, and offices.
+                  Trusted across 120+ facilities
                 </p>
               </div>
             </div>
@@ -638,7 +627,7 @@ export function LandingPage() {
                   Arrival Guarantee
                 </span>
                 <h4 className="text-base font-bold font-heading text-slate-900 dark:text-white">
-                  Physical presence, not just automated emails.
+                  Physical presence on site.
                 </h4>
                 <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
                   Our licensed technicians physically reach your facility within 20 or 40 minutes when an emergency strikes.
@@ -668,22 +657,6 @@ export function LandingPage() {
         </div>
       </header>
 
-      {/* ── Section 2: Social Proof / Logos ─────────────────────────────── */}
-      <section className="py-12 border-y border-[var(--border)] bg-[var(--bg-surface-2)]">
-        <div className="max-w-6xl mx-auto px-5 text-center">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 block mb-6">
-            Trusted by facility managers across commercial sectors
-          </span>
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14 opacity-85 grayscale hover:grayscale-0 transition-all text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
-            <span className="flex items-center gap-2"><BuildingIcon size={16} /> Commercial Real Estate</span>
-            <span className="flex items-center gap-2"><ServerIcon size={16} /> Data Centers</span>
-            <span className="flex items-center gap-2"><ShieldCheckIcon size={16} /> Warehouses & Logistics</span>
-            <span className="flex items-center gap-2"><ZapIcon size={16} /> Factories & Plants</span>
-            <span className="flex items-center gap-2"><WrenchIcon size={16} /> Corporate Offices</span>
-          </div>
-        </div>
-      </section>
-
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── Section 3: The 5 Core Service Sectors (Simple, Easy Names) ─── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
@@ -703,143 +676,82 @@ export function LandingPage() {
           </p>
         </div>
 
-        {/* 5 Core Service Cards (Simple text, less talks, clean & punchy) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+        {/* 5 Core Service Cards (Centered, Balanced Typography, Minimal Copy) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 items-stretch">
           {CORE_SERVICES.map((trade, idx) => {
             const TradeIcon = trade.icon;
             const isWide = idx >= 3;
             return (
               <div
                 key={trade.id}
-                className={`p-7 rounded-[32px] border border-[var(--border)] glass-panel ${trade.glowClass} flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] ${
-                  isWide ? "lg:col-span-1.5" : ""
+                className={`p-7 sm:p-8 rounded-[32px] border border-[var(--border)] glass-panel ${trade.glowClass} flex flex-col items-center justify-between text-center hover:-translate-y-1.5 transition-all duration-300 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] group ${
+                  isWide ? "lg:col-span-3" : "lg:col-span-2"
                 }`}
               >
-                <div className="space-y-4">
-                  {/* Inner floating micro-card with simple example */}
-                  <div className="p-3.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2 shadow-inner">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                          style={{ backgroundColor: `${trade.accentColor}25`, color: trade.accentColor }}
-                        >
-                          <TradeIcon size={15} />
-                        </div>
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">{trade.badge}</span>
-                      </div>
-                      <span
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor: `${trade.accentColor}20`,
-                          color: trade.accentColor,
-                        }}
-                      >
-                        {trade.slaBadge}
-                      </span>
-                    </div>
-                    <p className="text-xs text-[var(--text-secondary)] italic">
-                      "{trade.simpleIssue}"
-                    </p>
+                <div className="flex flex-col items-center text-center w-full space-y-4">
+                  {/* Centered Trade Icon with accent color glow */}
+                  <div
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto transition-transform duration-300 group-hover:scale-110 shadow-sm"
+                    style={{
+                      backgroundColor: `${trade.accentColor}18`,
+                      color: trade.accentColor,
+                      border: `1px solid ${trade.accentColor}35`,
+                    }}
+                  >
+                    <TradeIcon size={26} />
                   </div>
 
-                  {/* Title & Short 1-Sentence Description */}
-                  <div>
-                    <h3 className="text-xl font-bold font-heading text-[var(--text-primary)]">
+                  {/* Centered SLA Badge */}
+                  <span
+                    className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border mx-auto"
+                    style={{
+                      borderColor: `${trade.accentColor}40`,
+                      color: trade.accentColor,
+                      backgroundColor: `${trade.accentColor}12`,
+                    }}
+                  >
+                    <span>Arrival SLA · {trade.slaBadge}</span>
+                  </span>
+
+                  {/* Centered Title & Minimal Description */}
+                  <div className="space-y-1.5 pt-1">
+                    <h3 className="text-2xl font-extrabold font-heading text-[var(--text-primary)] tracking-tight text-center">
                       {trade.title}
                     </h3>
-                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed mt-2">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 text-center leading-relaxed max-w-xs mx-auto">
                       {trade.simpleDesc}
                     </p>
                   </div>
 
-                  {/* 3 Simple Tags */}
-                  <div className="space-y-1.5 pt-2 border-t border-[var(--border)]">
+                  {/* Centered Example Scenario */}
+                  <div className="w-full py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-slate-600 dark:text-slate-300 italic text-center font-medium">
+                    "{trade.simpleIssue}"
+                  </div>
+
+                  {/* Centered 3 Bullet Points */}
+                  <div className="w-full space-y-2 pt-3 border-t border-[var(--border)]">
                     {trade.simplePoints.map((pt) => (
-                      <div key={pt} className="flex items-center gap-2 text-xs text-[var(--text-primary)] font-medium">
-                        <CheckIcon className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <div key={pt} className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
+                        <CheckCircleIcon size={14} className="text-emerald-500 shrink-0" />
                         <span>{pt}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Card Action Link */}
-                <div className="pt-5 border-t border-[var(--border)] mt-5 flex items-center justify-between text-xs font-semibold">
-                  <span className="text-slate-600 dark:text-slate-400">Included in all plans</span>
+                {/* Centered Action Link / Button */}
+                <div className="pt-5 border-t border-[var(--border)] mt-5 w-full">
                   <a
                     href="#packages"
-                    className="inline-flex items-center gap-1 font-bold text-[#10b981] dark:text-[#34d399] hover:underline"
+                    className="w-full py-2.5 rounded-full text-xs font-bold text-center border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#06090e] hover:bg-[#10b981] transition-all flex items-center justify-center gap-1.5 shadow-sm"
                   >
-                    <span>View Plans</span>
-                    <ArrowRightIcon size={13} />
+                    <span>View Plans & SLAs</span>
+                    <ArrowRightIcon size={12} />
                   </a>
                 </div>
               </div>
             );
           })}
-        </div>
-      </section>
-
-      {/* ── Section 4: Testimonials (Jewel-Tone Smoked Glass Cards) ─────── */}
-      <section className="py-24 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
-        <div className="max-w-6xl mx-auto px-5">
-          <div className="text-center max-w-xl mx-auto space-y-3 mb-16">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
-              Customer Feedback
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
-              What facilities say{" "}
-              <span className="font-serif-italic font-normal">
-                about VoltOps
-              </span>
-            </h2>
-            <p className="text-sm text-slate-700 dark:text-slate-300">
-              Real results from business managers who rely on our guaranteed arrival SLAs.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[
-              {
-                quote: "When our AC chiller stopped at 2 PM, VoltOps had an engineer on site in 18 minutes. It saved our ground floor stores.",
-                author: "Tarek Mansoor",
-                role: "Operations Director · Apex Retail",
-                glow: "glow-card-cyan",
-              },
-              {
-                quote: "No more calling 10 contractors. One ticket, and a licensed electrician is on site in 20 minutes.",
-                author: "Sadia Rahman",
-                role: "Plant Head · ABC Manufacturing",
-                glow: "glow-card-emerald",
-              },
-              {
-                quote: "Having digital service logs and verified technician licenses has made our safety audits completely stress-free.",
-                author: "Kabir Hossain",
-                role: "Security Director · Northstar Logistics",
-                glow: "glow-card-amber",
-              },
-              {
-                quote: "Our billing switches failed on a busy Friday. VoltOps's technician arrived in 9 mins with the exact replacement switch.",
-                author: "Farhan Ali",
-                role: "IT Lead · Metro Mart",
-                glow: "glow-card-indigo",
-              },
-            ].map(({ quote, author, role, glow }, idx) => (
-              <div
-                key={idx}
-                className={`p-6 rounded-[28px] border border-[var(--border)] glass-panel ${glow} flex flex-col justify-between hover:-translate-y-1 transition-all shadow-[var(--shadow-sm)]`}
-              >
-                <p className="text-xs leading-relaxed text-slate-800 dark:text-slate-200 italic font-medium">
-                  "{quote}"
-                </p>
-                <div className="pt-4 border-t border-[var(--border)] mt-4">
-                  <div className="font-bold text-xs text-slate-900 dark:text-white">{author}</div>
-                  <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">{role}</div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -1283,20 +1195,17 @@ export function LandingPage() {
               </span>
             </h2>
             <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-              Most businesses still handle facility breakdowns through scattered phone books, chat groups, and unverified contractors.
-              When a commercial chiller stalls, a security camera drops, or a generator falters, delays cost operational revenue.
+              VoltOps replaces scattered contractor phone calls with reliable coordination infrastructure — connecting facility managers with vetted technicians across electrical, mechanical, security, IT, and facility upkeep.
             </p>
             <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              VoltOps replaces guesswork with an accountable coordination infrastructure — connecting business managers with vetted
-              technicians across electrical, mechanical, security, IT, and facility upkeep, backed by physical arrival commitments and
-              human dispatcher accountability.
+              Every job is backed by guaranteed arrival SLAs, transparent digital tracking, and certified technicians.
             </p>
           </div>
           <div className="lg:col-span-5 space-y-3.5">
             {[
-              { title: "No uncertified technicians", body: "Safety credentials and trade licences are verified before assignment eligibility." },
-              { title: "No double bookings", body: "Active job workloads and transit distances prevent technician overcommitment." },
-              { title: "Real operational accountability", body: "Customers monitor verified technician transit and itemised billing records." },
+              { title: "No uncertified technicians", body: "Trade licenses and safety credentials are confirmed before assignment." },
+              { title: "No double bookings", body: "Live location and route matching prevent delayed arrivals." },
+              { title: "Real accountability", body: "Transparent arrival tracking and digital itemized repair logs." },
             ].map(({ title, body }) => (
               <div key={title} className="p-5 rounded-2xl border border-[var(--border)] glass-panel space-y-1 shadow-[var(--shadow-sm)]">
                 <div className="flex items-center gap-2 font-bold text-sm text-[var(--text-primary)]">
@@ -1304,6 +1213,68 @@ export function LandingPage() {
                   <span>{title}</span>
                 </div>
                 <p className="text-xs pl-6 text-[var(--text-secondary)]">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Customer Feedback / Testimonials (Relocated right before Contact) ── */}
+      <section className="py-24 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+        <div className="max-w-6xl mx-auto px-5">
+          <div className="text-center max-w-xl mx-auto space-y-3 mb-16">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
+              Customer Feedback
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
+              What facilities say{" "}
+              <span className="font-serif-italic font-normal">
+                about VoltOps
+              </span>
+            </h2>
+            <p className="text-sm text-slate-700 dark:text-slate-300">
+              Real results from managers who rely on our guaranteed arrival SLAs.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              {
+                quote: "When our AC chiller stopped at 2 PM, VoltOps had an engineer on site in 18 minutes. It saved our ground floor stores.",
+                author: "Tarek Mansoor",
+                role: "Operations Director · Apex Retail",
+                glow: "glow-card-cyan",
+              },
+              {
+                quote: "No more calling 10 contractors. One ticket, and a licensed electrician is on site in 20 minutes.",
+                author: "Sadia Rahman",
+                role: "Plant Head · ABC Manufacturing",
+                glow: "glow-card-emerald",
+              },
+              {
+                quote: "Having digital service logs and verified technician licenses has made our safety audits completely stress-free.",
+                author: "Kabir Hossain",
+                role: "Security Director · Northstar Logistics",
+                glow: "glow-card-amber",
+              },
+              {
+                quote: "Our billing switches failed on a busy Friday. VoltOps arrived in 9 mins with the exact replacement switch.",
+                author: "Farhan Ali",
+                role: "IT Lead · Metro Mart",
+                glow: "glow-card-indigo",
+              },
+            ].map(({ quote, author, role, glow }, idx) => (
+              <div
+                key={idx}
+                className={`p-6 rounded-[28px] border border-[var(--border)] glass-panel ${glow} flex flex-col justify-between hover:-translate-y-1 transition-all shadow-[var(--shadow-sm)]`}
+              >
+                <p className="text-xs leading-relaxed text-slate-800 dark:text-slate-200 italic font-medium">
+                  "{quote}"
+                </p>
+                <div className="pt-4 border-t border-[var(--border)] mt-4">
+                  <div className="font-bold text-xs text-slate-900 dark:text-white">{author}</div>
+                  <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">{role}</div>
+                </div>
               </div>
             ))}
           </div>

@@ -20,9 +20,9 @@
   --border-subtle: #e7e0d3;
 
   /* Text — Enhanced high contrast so light mode cards are perfectly readable */
-  --text-primary: #0a0f1d;   /* deep obsidian black */
+  --text-primary: #090d16;   /* deep obsidian black */
   --text-secondary: #1e293b; /* crisp dark slate */
-  --text-muted: #475569;     /* clear, readable slate grey (not pale/washed out) */
+  --text-muted: #334155;     /* clear, readable slate grey */
   --text-inverse: #ffffff;
 
   /* Accent — Deep forest emerald with lime highlight */
