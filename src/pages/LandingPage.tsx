@@ -49,7 +49,7 @@ interface Scenario {
     note: string;
     checks: string[];
   };
-  stage: number; // 0-4
+  stage: number;
 }
 
 const SCENARIOS: Scenario[] = [
@@ -57,7 +57,7 @@ const SCENARIOS: Scenario[] = [
     id: "hvac",
     categoryLabel: "Commercial HVAC",
     icon: SnowflakeIcon,
-    accentColor: "#0891b2",
+    accentColor: "#38bdf8",
     title: "WO-2041 · Central Chiller Shutdown & Compressor Tripping",
     client: "Apex Retail Galleria · Ground Floor Outlets",
     urgency: "Urgent",
@@ -77,7 +77,7 @@ const SCENARIOS: Scenario[] = [
     id: "electrical",
     categoryLabel: "Electrical & Power",
     icon: ZapIcon,
-    accentColor: "#d97706",
+    accentColor: "#f59e0b",
     title: "WO-1054 · 500 KVA Industrial Generator Voltage Drop",
     client: "ABC Manufacturing Ltd · Production Line 2",
     urgency: "Urgent",
@@ -97,7 +97,7 @@ const SCENARIOS: Scenario[] = [
     id: "security",
     categoryLabel: "CCTV & Security",
     icon: ShieldCheckIcon,
-    accentColor: "#7c3aed",
+    accentColor: "#a855f7",
     title: "WO-3088 · Perimeter CCTV Offline & DVR Network Failure",
     client: "Northstar Logistics Hub · Warehouse Zone B",
     urgency: "High Priority",
@@ -117,7 +117,7 @@ const SCENARIOS: Scenario[] = [
     id: "it",
     categoryLabel: "IT & Networking",
     icon: ServerIcon,
-    accentColor: "#059669",
+    accentColor: "#10b981",
     title: "WO-4012 · Core Switch Reboot Loop & POS Connectivity Down",
     client: "Metro Mart Superstore · 8 Cash Counters",
     urgency: "Urgent",
@@ -137,7 +137,7 @@ const SCENARIOS: Scenario[] = [
     id: "facility",
     categoryLabel: "Facility Upkeep",
     icon: WrenchIcon,
-    accentColor: "#e11d48",
+    accentColor: "#f43f5e",
     title: "WO-5023 · Automatic Glass Entry Door Jam & Rail Misalignment",
     client: "Crown Corporate Plaza · Main Lobby",
     urgency: "Active",
@@ -177,7 +177,7 @@ function ThemeToggle() {
     <div
       role="group"
       aria-label="Theme"
-      className="flex items-center gap-0.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] p-0.5"
+      className="flex items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--bg-surface-2)] p-1 backdrop-blur-xl"
     >
       {options.map((o) => {
         const Icon = o.icon;
@@ -189,13 +189,13 @@ function ThemeToggle() {
             title={o.label}
             aria-pressed={isActive}
             onClick={() => setPreference(o.value)}
-            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
+            className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
               isActive
-                ? "bg-[var(--accent)] text-white shadow-sm"
+                ? "bg-[#d4f43e] text-[#06090e] dark:bg-[#d4f43e] dark:text-[#06090e] shadow-sm font-bold"
                 : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             }`}
           >
-            <Icon size={13} className="shrink-0" />
+            <Icon size={12} className="shrink-0" />
             <span className="hidden sm:inline">{o.label}</span>
           </button>
         );
@@ -205,14 +205,14 @@ function ThemeToggle() {
 }
 
 // ── Logo Mark ────────────────────────────────────────────────────────────
-function LogoMark({ size = 36 }: { size?: number }) {
+function LogoMark({ size = 34 }: { size?: number }) {
   return (
     <div
-      className="relative flex items-center justify-center rounded-xl bg-gradient-to-br from-[#176577] to-[#0d424e] shadow-md group-hover:shadow-[0_0_16px_rgba(56,189,248,0.4)] transition-all duration-300"
+      className="relative flex items-center justify-center rounded-xl bg-gradient-to-br from-[#d4f43e] to-[#a3e635] shadow-[0_0_16px_rgba(212,244,62,0.3)] transition-all duration-300"
       style={{ width: size, height: size }}
       aria-hidden="true"
     >
-      <ZapIcon size={Math.round(size * 0.52)} className="text-[#38bdf8] group-hover:rotate-6 transition-transform duration-300" />
+      <ZapIcon size={Math.round(size * 0.52)} className="text-[#06090e]" />
     </div>
   );
 }
@@ -315,261 +315,253 @@ export function LandingPage() {
     }
   };
 
-  // ── Shared utility class pieces ──────────────────────────────────────
-  const card = "rounded-2xl border transition-all duration-200 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)]";
-  const surface = "bg-[var(--bg-surface)] border-[var(--border)]";
-  const surface2 = "bg-[var(--bg-surface-2)] border-[var(--border)]";
+  // Shared classes
+  const surface = "glass-panel";
   const textPrimary = "text-[var(--text-primary)]";
   const textSecondary = "text-[var(--text-secondary)]";
   const textMuted = "text-[var(--text-muted)]";
-  const accent = "text-[var(--accent)]";
   const borderColor = "border-[var(--border)]";
 
   return (
-    <div className="min-h-screen font-sans selection:bg-[var(--accent)] selection:text-white" style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}>
+    <div
+      className="min-h-screen font-sans selection:bg-[#d4f43e] selection:text-[#06090e]"
+      style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}
+    >
 
-      {/* ── Navigation ────────────────────────────────────────────────── */}
-      <nav
-        className={`sticky top-0 z-50 border-b ${borderColor} transition-all duration-300 ${
-          scrolled ? "backdrop-blur-xl shadow-[var(--shadow-sm)]" : ""
-        }`}
-        style={{ background: scrolled ? "var(--bg-overlay)" : "var(--bg-base)" }}
-      >
-        <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
-          {/* Logo + Brand */}
-          <a href="#" className="flex items-center gap-3 group shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded-lg">
-            <LogoMark size={36} />
-            <div className="flex flex-col leading-none">
-              <span className={`font-heading font-extrabold text-[18px] tracking-tight ${textPrimary}`}>VoltOps</span>
-              <span className={`text-[10px] font-semibold uppercase tracking-wider ${accent}`}>
-                Field Service Platform
-              </span>
-            </div>
-          </a>
-
-          {/* Desktop nav links */}
-          <div className={`hidden lg:flex items-center gap-7 text-sm font-medium ${textSecondary}`}>
-            {["#services", "#how", "#dispatch", "#packages", "#about", "#contact"].map((href, i) => {
-              const labels = ["Services", "How It Works", "Matching", "Plans", "About", "Contact"];
-              return (
-                <a key={href} href={href} className="hover:text-[var(--accent)] transition-colors">
-                  {labels[i]}
-                </a>
-              );
-            })}
-          </div>
-
-          {/* Desktop right actions */}
-          <div className="hidden lg:flex items-center gap-3">
-            <ThemeToggle />
-            <Link
-              to="/login"
-              className={`px-4 py-2 rounded-xl text-sm font-semibold border ${borderColor} ${textSecondary} hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all`}
-            >
-              Sign in
-            </Link>
-            <a
-              href="#packages"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-sm transition-all hover:opacity-95 active:scale-[0.98]"
-              style={{ background: "var(--accent)" }}
-            >
-              <span>Choose Plan</span>
-              <ArrowRightIcon size={14} />
+      {/* ── Floating Pill Navigation ──────────────────────────────────── */}
+      <div className="sticky top-4 z-50 px-4 sm:px-6 max-w-6xl mx-auto">
+        <nav
+          className={`rounded-full border ${borderColor} px-4 py-2.5 transition-all duration-300 ${
+            scrolled
+              ? "backdrop-blur-2xl shadow-[var(--shadow-md)] bg-[var(--bg-overlay)]"
+              : "backdrop-blur-xl bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            {/* Logo + Brand */}
+            <a href="#" className="flex items-center gap-2.5 group shrink-0 focus-visible:outline-none">
+              <LogoMark size={32} />
+              <div className="flex items-baseline gap-1">
+                <span className={`font-heading font-extrabold text-[17px] tracking-tight ${textPrimary}`}>VoltOps</span>
+                <span className="text-[10px] font-bold text-[#d4f43e] dark:text-[#d4f43e] text-emerald-600">●</span>
+              </div>
             </a>
-          </div>
 
-          {/* Mobile toggle */}
-          <button
-            type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className={`lg:hidden p-2 rounded-xl border ${borderColor} ${textMuted} hover:text-[var(--text-primary)]`}
-            aria-label="Toggle navigation"
-            aria-expanded={menuOpen}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              {menuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
-        </div>
-
-        {/* Mobile dropdown */}
-        {menuOpen && (
-          <div className={`lg:hidden border-t ${borderColor} px-5 py-5 space-y-3`} style={{ background: "var(--bg-surface)" }}>
-            <div className="pb-3 mb-3 border-b border-[var(--border)]">
-              <ThemeToggle />
+            {/* Desktop Center Nav Pills */}
+            <div className="hidden lg:flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full border border-[var(--border)] bg-[var(--bg-surface-2)]">
+              {[
+                ["#services", "Services"],
+                ["#how", "How It Works"],
+                ["#dispatch", "Operations"],
+                ["#packages", "Plans"],
+                ["#about", "About"],
+                ["#contact", "Contact"],
+              ].map(([href, label]) => (
+                <a
+                  key={href}
+                  href={href}
+                  className="px-3 py-1.5 rounded-full text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all"
+                >
+                  {label}
+                </a>
+              ))}
             </div>
-            {[
-              ["#services", "Services"],
-              ["#how", "How It Works"],
-              ["#dispatch", "Matching Engine"],
-              ["#packages", "Plans"],
-              ["#about", "About"],
-              ["#contact", "Contact"],
-            ].map(([href, label]) => (
-              <a
-                key={href}
-                href={href}
-                onClick={() => setMenuOpen(false)}
-                className={`block py-2 border-b border-[var(--border)] text-sm font-medium ${textSecondary} hover:text-[var(--accent)]`}
-              >
-                {label}
-              </a>
-            ))}
-            <div className="flex flex-col gap-2 pt-2">
+
+            {/* Desktop Right Actions */}
+            <div className="hidden lg:flex items-center gap-2.5">
+              <ThemeToggle />
               <Link
                 to="/login"
-                className={`w-full text-center py-2.5 rounded-xl text-sm font-semibold border ${borderColor} ${textPrimary}`}
+                className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
               >
                 Sign in
               </Link>
               <a
                 href="#packages"
-                onClick={() => setMenuOpen(false)}
-                className="w-full text-center py-2.5 rounded-xl text-sm font-semibold text-white"
-                style={{ background: "var(--accent)" }}
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-[#d4f43e] text-[#06090e] shadow-[0_0_16px_rgba(212,244,62,0.35)] hover:bg-[#e2f865] transition-all"
               >
-                Choose a Plan
+                <span>Choose Plan</span>
+                <ArrowRightIcon size={12} />
               </a>
             </div>
+
+            {/* Mobile Toggle */}
+            <button
+              type="button"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className={`lg:hidden p-2 rounded-full border ${borderColor} ${textMuted} hover:text-[var(--text-primary)]`}
+              aria-label="Toggle navigation"
+              aria-expanded={menuOpen}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {menuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
           </div>
-        )}
-      </nav>
+
+          {/* Mobile dropdown */}
+          {menuOpen && (
+            <div className={`lg:hidden pt-4 pb-2 border-t mt-3 ${borderColor} space-y-2`}>
+              <div className="pb-2 mb-2 flex justify-center">
+                <ThemeToggle />
+              </div>
+              {[
+                ["#services", "Services"],
+                ["#how", "How It Works"],
+                ["#dispatch", "Operations"],
+                ["#packages", "Plans"],
+                ["#about", "About"],
+                ["#contact", "Contact"],
+              ].map(([href, label]) => (
+                <a
+                  key={href}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  className="block px-3 py-2 rounded-xl text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                >
+                  {label}
+                </a>
+              ))}
+              <div className="pt-2 flex gap-2">
+                <Link
+                  to="/login"
+                  className="w-1/2 text-center py-2 rounded-full text-xs font-semibold border border-[var(--border)] text-[var(--text-primary)]"
+                >
+                  Sign in
+                </Link>
+                <a
+                  href="#packages"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-1/2 text-center py-2 rounded-full text-xs font-bold bg-[#d4f43e] text-[#06090e]"
+                >
+                  Choose a Plan
+                </a>
+              </div>
+            </div>
+          )}
+        </nav>
+      </div>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* ── HERO SECTION ─────────────────────────────────────────────────  */}
+      {/* ── HERO SECTION (SYNERGEUS EDITORIAL ARCHITECTURE) ─────────────── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <header className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28">
-        {/* Ambient radial glows with slow drifting animation */}
-        <div className="hero-glow-blob-1 absolute top-10 left-1/4 -translate-x-1/2 w-[38rem] h-[38rem] rounded-full blur-[130px] pointer-events-none animate-ambient-drift" />
-        <div className="hero-glow-blob-2 absolute top-1/3 right-10 w-[30rem] h-[30rem] rounded-full blur-[110px] pointer-events-none animate-ambient-drift-rev" />
-        <div className="hero-glow-blob-3 absolute -bottom-10 left-1/3 w-[26rem] h-[26rem] rounded-full blur-[100px] pointer-events-none animate-pulse-subtle" />
+      <header className="relative overflow-hidden pt-12 pb-24 lg:pt-16 lg:pb-32 text-center">
+        {/* Atmospheric ambient bokeh & glow (Chartreuse + Emerald + Amber) */}
+        <div className="hero-glow-blob-1 absolute top-0 left-1/2 -translate-x-1/2 w-[48rem] h-[34rem] rounded-full blur-[140px] pointer-events-none animate-ambient-drift" />
+        <div className="hero-glow-blob-2 absolute top-1/4 left-1/4 w-[36rem] h-[28rem] rounded-full blur-[120px] pointer-events-none animate-ambient-drift-rev" />
+        <div className="hero-glow-blob-3 absolute top-1/3 right-1/4 w-[32rem] h-[24rem] rounded-full blur-[110px] pointer-events-none animate-pulse-subtle" />
 
-        {/* Subtle grid pattern */}
+        {/* Soft grid background */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-10"
+          className="absolute inset-0 pointer-events-none opacity-[0.08]"
           style={{
             backgroundImage: "radial-gradient(var(--text-muted) 1px, transparent 1px)",
-            backgroundSize: "32px 32px",
-            maskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 80%)",
-            WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, #000 20%, transparent 80%)",
+            backgroundSize: "28px 28px",
+            maskImage: "radial-gradient(ellipse 65% 55% at 50% 25%, #000 20%, transparent 80%)",
+            WebkitMaskImage: "radial-gradient(ellipse 65% 55% at 50% 25%, #000 20%, transparent 80%)",
           }}
         />
 
-        <div className="relative max-w-7xl mx-auto px-5">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+        <div className="relative max-w-6xl mx-auto px-5">
+          {/* Eyebrow badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface)] backdrop-blur-xl mb-6 shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4f43e] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#d4f43e]" />
+            </span>
+            <span className="text-[var(--text-secondary)] font-medium">
+              Multi-Trade Emergency Response · 24/7 Operations
+            </span>
+          </div>
 
-            {/* Left — Hero Copy */}
-            <div className="lg:col-span-6 space-y-7 text-left">
-              {/* Eyebrow badge */}
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                </span>
-                <span className="text-[var(--text-secondary)] font-medium">
-                  Unified Multi-Trade Facility Coverage · 24/7 Operations
-                </span>
+          {/* Centered Editorial Headline with Italic Serif */}
+          <h1 className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[68px] tracking-tight leading-[1.08] text-[var(--text-primary)] max-w-4xl mx-auto">
+            Our platform simplifies your{" "}
+            <span className="font-serif-italic font-normal">
+              facility operations
+            </span>
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed mt-5">
+            VoltOps coordinates licensed professionals across electrical, HVAC, security, IT,
+            and facility upkeep — backed by guaranteed coverage windows, physical arrival SLAs,
+            and human dispatcher oversight.
+          </p>
+
+          {/* Pill CTA Bar */}
+          <div className="flex flex-wrap items-center justify-center gap-3.5 pt-7">
+            <a
+              href="#packages"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-[#d4f43e] text-[#06090e] shadow-[0_0_24px_rgba(212,244,62,0.35)] hover:bg-[#e2f865] hover:shadow-[0_0_32px_rgba(212,244,62,0.5)] transition-all transform hover:-translate-y-0.5"
+            >
+              <span>Explore Coverage Plans</span>
+              <ArrowRightIcon size={15} />
+            </a>
+            <a
+              href="#how"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-surface)] backdrop-blur-xl transition-all"
+            >
+              <CompassIcon size={15} className="text-[#d4f43e]" />
+              <span>See How It Works</span>
+            </a>
+          </div>
+
+          {/* ── 3-Element Elevated Centerpiece (Like Synergeus Reference) ─── */}
+          <div className="mt-14 relative grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+
+            {/* Left Flanking Proof Card */}
+            <div className="hidden lg:flex lg:col-span-3 flex-col text-left p-5 rounded-2xl glass-panel space-y-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                Nationally Recognized
+              </span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#d4f43e]" />
+                  <span>5 Commercial Trades</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#d4f43e]" />
+                  <span>20 & 40-Min Arrival SLAs</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#d4f43e]" />
+                  <span>100% Dispatcher Verified</span>
+                </div>
               </div>
-
-              {/* Expressive Headline */}
-              <h1 className="font-heading font-extrabold text-4xl sm:text-5xl lg:text-[54px] tracking-tight leading-[1.12] text-[var(--text-primary)]">
-                One unified service plan.{" "}
-                <span className="bg-gradient-to-r from-[var(--accent)] via-teal-500 to-emerald-500 bg-clip-text text-transparent">
-                  The right technician on site.
-                </span>{" "}
-                Before downtime costs you.
-              </h1>
-
-              {/* Supporting Copy */}
-              <p className="text-base sm:text-lg leading-relaxed text-[var(--text-secondary)] max-w-xl">
-                VoltOps coordinates vetted, licensed professionals across electrical, HVAC, security, IT,
-                and facility upkeep — backed by guaranteed coverage windows, physical arrival SLAs,
-                and human dispatcher oversight.
+              <p className="text-[11px] leading-relaxed text-[var(--text-muted)] border-t border-[var(--border)] pt-2.5">
+                Every breakdown is matched by proximity, licensing, and real-time workload.
               </p>
-
-              {/* CTAs */}
-              <div className="flex flex-wrap items-center gap-3.5 pt-1">
-                <a
-                  href="#packages"
-                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-white shadow-md transition-all hover:opacity-95 active:scale-[0.98]"
-                  style={{ background: "var(--accent)" }}
-                >
-                  <span>Explore Coverage Plans</span>
-                  <ArrowRightIcon size={16} />
-                </a>
-                <a
-                  href="#how"
-                  className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm border ${borderColor} ${textSecondary} hover:text-[var(--accent)] hover:border-[var(--accent)] bg-[var(--bg-surface)] transition-all`}
-                >
-                  <CompassIcon size={16} className="text-[var(--accent)]" />
-                  <span>See How It Works</span>
-                </a>
-              </div>
-
-              {/* Micro Trust Strip */}
-              <div className="pt-2 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[var(--text-muted)] font-medium">
-                <span className="flex items-center gap-1.5">
-                  <ClockIcon size={14} className="text-[var(--accent)]" />
-                  20 & 40-Min Physical Arrival SLAs
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <UserCheckIcon size={14} className="text-emerald-500" />
-                  100% Human Dispatcher Verified
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <ShieldCheckIcon size={14} className="text-purple-500" />
-                  5 Specialized Trades
-                </span>
-              </div>
             </div>
 
-            {/* Right — Layered Console Composition */}
-            <div className="lg:col-span-6 relative">
-              {/* Floating Top-Right Indicator Pill */}
+            {/* Center Focal Card: Dispatch Coordination Hub */}
+            <div className="lg:col-span-6">
               <div
-                className="hidden sm:flex absolute -top-4 -right-2 z-20 items-center gap-2.5 px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-md)] animate-float-gentle text-xs font-semibold text-[var(--text-primary)]"
-                style={{ backdropFilter: "blur(12px)" }}
-              >
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                </span>
-                <UserCheckIcon size={15} className="text-emerald-500" />
-                <span>Verified Match En Route · ~7 mins</span>
-              </div>
-
-              {/* Primary Dispatch Console */}
-              <div
-                className="rounded-2xl border p-5 sm:p-6 transition-all relative z-10 glass-panel"
+                className="rounded-3xl border border-[var(--border-strong)] p-5 sm:p-6 text-left relative glass-panel shadow-[var(--shadow-float)]"
                 style={{
-                  background: "var(--bg-surface)",
-                  borderColor: "var(--border-strong)",
-                  boxShadow: "var(--shadow-lg)",
+                  background: isDark
+                    ? "radial-gradient(circle at 50% 0%, rgba(212,244,62,0.12) 0%, rgba(14,20,29,0.85) 65%)"
+                    : "radial-gradient(circle at 50% 0%, rgba(212,244,62,0.2) 0%, rgba(255,255,255,0.92) 75%)",
                 }}
               >
                 {/* Console header */}
-                <div className={`flex items-center justify-between pb-4 mb-3 border-b ${borderColor}`}>
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex items-center gap-1.5" aria-hidden="true">
-                      <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
-                    </div>
-                    <span className={`text-[11px] font-mono font-bold uppercase tracking-wider pl-1.5 border-l border-[var(--border)] ${textMuted}`}>
+                <div className="flex items-center justify-between pb-3.5 mb-3 border-b border-[var(--border)]">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#d4f43e] animate-pulse" />
+                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--text-primary)]">
                       DISPATCH CONSOLE v2.6
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>Live Simulation</span>
-                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#d4f43e]/20 text-[#d4f43e] dark:text-[#d4f43e] text-emerald-800 border border-[#d4f43e]/30">
+                    Live Telemetry
+                  </span>
                 </div>
 
-                {/* Trade Category Tabs */}
+                {/* Trade category pills */}
                 <div className="flex gap-1.5 overflow-x-auto pb-3 mb-3 border-b border-[var(--border)] no-scrollbar">
                   {SCENARIOS.map((s) => {
                     const isActive = s.id === activeId;
@@ -579,42 +571,38 @@ export function LandingPage() {
                         key={s.id}
                         type="button"
                         onClick={() => setActiveId(s.id)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 border focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 border focus:outline-none ${
                           isActive
-                            ? "border-[var(--accent)] text-[var(--accent)] bg-[var(--bg-surface-2)] shadow-sm"
-                            : `border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]`
+                            ? "border-[#d4f43e] bg-[#d4f43e] text-[#06090e] font-bold shadow-sm"
+                            : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
                         }`}
                       >
-                        <SvgIcon size={14} className={isActive ? "text-[var(--accent)]" : "text-[var(--text-muted)]"} />
+                        <SvgIcon size={13} className={isActive ? "text-[#06090e]" : "text-[var(--text-muted)]"} />
                         <span>{s.categoryLabel}</span>
                       </button>
                     );
                   })}
                 </div>
 
-                {/* Selected Work Order Body */}
-                <div className="space-y-3.5">
-                  {/* Job Header Card */}
-                  <div
-                    className="p-3.5 rounded-xl border border-[var(--border)]"
-                    style={{ background: "var(--bg-surface-2)" }}
-                  >
+                {/* Active Work Order Body */}
+                <div className="space-y-3">
+                  <div className="p-3.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <ActiveIcon size={15} style={{ color: scenario.accentColor }} />
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <ActiveIcon size={14} style={{ color: scenario.accentColor }} />
                           <span className="text-xs font-bold uppercase tracking-wider" style={{ color: scenario.accentColor }}>
                             {scenario.categoryLabel}
                           </span>
                         </div>
                         <h3 className={`text-sm font-bold leading-snug ${textPrimary}`}>{scenario.title}</h3>
-                        <p className={`text-xs mt-1 ${textMuted}`}>{scenario.client}</p>
+                        <p className={`text-xs mt-0.5 ${textMuted}`}>{scenario.client}</p>
                       </div>
                       <div className="text-right shrink-0">
                         <span className="inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400">
                           {scenario.urgency}
                         </span>
-                        <div className="flex items-center justify-end gap-1 text-xs font-mono font-bold mt-1.5" style={{ color: "var(--accent)" }}>
+                        <div className="flex items-center justify-end gap-1 text-xs font-mono font-bold mt-1 text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700">
                           <ClockIcon size={12} />
                           <span>ETA {fmt(times[scenario.id] ?? 0)}</span>
                         </div>
@@ -623,20 +611,17 @@ export function LandingPage() {
                     </div>
                   </div>
 
-                  {/* Technician Match Card */}
-                  <div
-                    className="p-3.5 rounded-xl border-2 space-y-2.5"
-                    style={{ borderColor: "var(--accent)", background: "var(--bg-surface-2)" }}
-                  >
-                    <div className="flex items-center justify-between gap-2">
+                  {/* Technician match card */}
+                  <div className="p-3.5 rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-surface-2)] space-y-2">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--accent)] text-white shadow-sm">
+                        <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-[#d4f43e] text-[#06090e] font-bold">
                           <UserCheckIcon size={16} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
                             <span className={`font-bold text-sm ${textPrimary}`}>{scenario.tech.name}</span>
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
                               {scenario.tech.matchScore}% Match
                             </span>
                           </div>
@@ -647,8 +632,8 @@ export function LandingPage() {
                       </div>
                     </div>
 
-                    <p className="text-xs leading-relaxed border-t border-[var(--border)] pt-2 text-[var(--text-muted)]">
-                      <span className="font-semibold text-[var(--text-secondary)]">Dispatcher evaluation:</span>{" "}
+                    <p className="text-xs border-t border-[var(--border)] pt-2 text-[var(--text-muted)]">
+                      <span className="font-semibold text-[var(--text-secondary)]">Dispatcher note:</span>{" "}
                       {scenario.tech.note}
                     </p>
 
@@ -662,438 +647,438 @@ export function LandingPage() {
                     </div>
                   </div>
 
-                  {/* Simulated Job Pipeline */}
-                  <div className="p-3 rounded-xl border border-[var(--border)]" style={{ background: "var(--bg-surface-2)" }}>
-                    <div className="flex justify-between items-center text-[11px] mb-2 text-[var(--text-muted)]">
-                      <span className="font-semibold text-[var(--text-secondary)]">Simulated job status:</span>
-                      <span className="font-bold text-[var(--accent)] flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] animate-pulse" />
-                        En Route to Premises
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-5 gap-1.5 text-center text-[10px]">
-                      {["Reported", "Reviewed", "Assigned", "En Route", "On Site"].map((label, i) => (
-                        <div
-                          key={i}
-                          className={`py-1 rounded font-medium transition-colors ${
-                            i < 3
-                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 font-semibold"
-                              : i === 3
-                              ? "bg-[var(--accent)] text-white font-bold shadow-sm"
-                              : "text-[var(--text-muted)] border border-[var(--border)] bg-[var(--bg-surface)]"
-                          }`}
-                        >
-                          {i + 1}. {label}
-                        </div>
-                      ))}
-                    </div>
+                  {/* Pipeline */}
+                  <div className="grid grid-cols-5 gap-1.5 text-center text-[10px] pt-1">
+                    {["Reported", "Reviewed", "Assigned", "En Route", "On Site"].map((label, i) => (
+                      <div
+                        key={i}
+                        className={`py-1 rounded-lg font-medium ${
+                          i < 3
+                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 font-semibold"
+                            : i === 3
+                            ? "bg-[#d4f43e] text-[#06090e] font-bold"
+                            : "text-[var(--text-muted)] border border-[var(--border)] bg-[var(--bg-surface)]"
+                        }`}
+                      >
+                        {i + 1}. {label}
+                      </div>
+                    ))}
                   </div>
-
-                  <p className="text-[11px] text-center italic text-[var(--text-muted)]">
-                    Human dispatchers confirm all assignments prior to physical field technician deployment.
-                  </p>
                 </div>
               </div>
+            </div>
 
-              {/* Floating Bottom-Left Assurance Pill */}
-              <div
-                className="hidden sm:flex absolute -bottom-4 -left-3 z-20 items-center gap-2.5 px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-md)] text-xs font-semibold text-[var(--text-primary)]"
-                style={{ backdropFilter: "blur(12px)" }}
+            {/* Right Flanking Value Card */}
+            <div className="hidden lg:flex lg:col-span-3 flex-col text-left p-5 rounded-2xl glass-panel space-y-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700">
+                Guaranteed Physical Arrival
+              </span>
+              <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
+                VoltOps coordinates qualified technicians across electrical, mechanical, security, IT,
+                and facility maintenance under a single unified coordination SLA.
+              </p>
+              <a
+                href="#packages"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700 hover:underline pt-2 border-t border-[var(--border)]"
               >
-                <ShieldCheckIcon size={16} className="text-[var(--accent)]" />
-                <span>Physical Arrival SLA · Enforced</span>
-              </div>
+                <span>Learn more about SLAs</span>
+                <ArrowRightIcon size={12} />
+              </a>
             </div>
 
           </div>
         </div>
       </header>
 
-      {/* ── Metrics Bar ─────────────────────────────────────────────────── */}
-      <section className={`border-y ${borderColor} py-10`} style={{ background: "var(--bg-surface-2)" }}>
-        <div className="max-w-7xl mx-auto px-5 grid grid-cols-2 lg:grid-cols-4 gap-8 text-left">
-          {[
-            { val: "20 & 40 min", desc: "Physical technician arrival commitments", border: "var(--accent)" },
-            { val: "5 Trades", desc: "HVAC, Electrical, Security, IT & Facilities", border: "#14b8a6" },
-            { val: "100% Human", desc: "Dispatcher-confirmed assignments always", border: "#1E824C" },
-            { val: "4 Plans", desc: "From 8-hr daily to custom coverage schedules", border: "#9333ea" },
-          ].map(({ val, desc, border }) => (
-            <div key={val} className="pl-4" style={{ borderLeft: `2.5px solid ${border}` }}>
-              <div className={`text-2xl sm:text-3xl font-extrabold font-heading ${textPrimary}`}>{val}</div>
-              <p className={`text-xs sm:text-sm mt-1 leading-snug ${textMuted}`}>{desc}</p>
-            </div>
-          ))}
+      {/* ── Section 2: Social Proof / Logos (Synergeus Style) ─────────── */}
+      <section className="py-12 border-y border-[var(--border)] bg-[var(--bg-surface-2)]">
+        <div className="max-w-6xl mx-auto px-5 text-center">
+          <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] block mb-6">
+            Trusted by facility managers across critical industries
+          </span>
+          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14 opacity-75 grayscale hover:grayscale-0 transition-all text-xs sm:text-sm font-semibold text-[var(--text-secondary)]">
+            <span className="flex items-center gap-2"><BuildingIcon size={16} /> Commercial Real Estate</span>
+            <span className="flex items-center gap-2"><ServerIcon size={16} /> Data & Cloud Facilities</span>
+            <span className="flex items-center gap-2"><ShieldCheckIcon size={16} /> Industrial Logistics</span>
+            <span className="flex items-center gap-2"><ZapIcon size={16} /> Manufacturing Plants</span>
+            <span className="flex items-center gap-2"><WrenchIcon size={16} /> Corporate Headquarters</span>
+          </div>
         </div>
       </section>
 
-      {/* ── Services Section ─────────────────────────────────────────────── */}
-      <section id="services" className="py-24 max-w-7xl mx-auto px-5">
-        <div className="text-center max-w-2xl mx-auto space-y-3 mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--accent)]">
-            <WrenchIcon size={13} />
-            <span>Unified Trade Coverage</span>
-          </div>
-          <h2 className={`text-3xl sm:text-4xl font-extrabold font-heading ${textPrimary}`}>
-            One subscription for every facility trade
+      {/* ── Section 3: Three Tall Glassmorphic Feature Cards ───────────── */}
+      <section id="services" className="py-24 max-w-6xl mx-auto px-5">
+        <div className="text-center max-w-xl mx-auto space-y-3 mb-16">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700">
+            Intelligent Operations
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
+            Your personal{" "}
+            <span className="font-serif-italic font-normal">
+              dispatch operations
+            </span>
           </h2>
-          <p className={`text-sm sm:text-base leading-relaxed ${textSecondary}`}>
-            VoltOps coordinates vetted, licensed professionals across five core operational trades under a single unified coordination platform.
+          <p className="text-sm sm:text-base text-[var(--text-secondary)]">
+            Combining smart candidate proximity algorithms with experienced human dispatcher oversight.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[
-            {
-              icon: ZapIcon,
-              accent: "#d97706",
-              label: "High & Low Voltage",
-              title: "Electrical & Power Systems",
-              desc: "Industrial generators, step-down transformers, commercial switchboards, UPS backups, and severe line faults.",
-              bullets: ["Generator synchronization & AVR testing", "Phase imbalance & emergency restoration", "Transformer insulation inspection"],
-            },
-            {
-              icon: SnowflakeIcon,
-              accent: "#0891b2",
-              label: "Climate & Ventilation",
-              title: "Cooling & Mechanical HVAC",
-              desc: "Commercial VRF/VRV units, rooftop chillers, ducted split systems, compressor failures, and refrigerant diagnostics.",
-              bullets: ["Chiller & compressor breakdown triage", "VRF refrigerant recharge & vacuuming", "Scheduled air quality & filter cycles"],
-            },
-            {
-              icon: ShieldCheckIcon,
-              accent: "#7c3aed",
-              label: "Perimeter & Access",
-              title: "Security & Surveillance",
-              desc: "IP CCTV cameras, DVR/NVR storage, biometric turnstiles, and electronic door strike malfunctions.",
-              bullets: ["Camera feed restoration & lens alignment", "DVR/NVR raid reconfiguration", "Access control reader repairs"],
-            },
-            {
-              icon: ServerIcon,
-              accent: "#059669",
-              label: "Hardware & Systems",
-              title: "IT, Hardware & Networks",
-              desc: "Office networking drops, rack cabling, core router crashes, POS downtime, and workstation hardware triage.",
-              bullets: ["Managed switch & firewall diagnosis", "Server rack cable management", "POS terminal hardware replacement"],
-            },
-            {
-              icon: WrenchIcon,
-              accent: "#e11d48",
-              label: "Building Infrastructure",
-              title: "Facility & Building Upkeep",
-              desc: "Commercial repairs, door sensors, lighting fixture overhaul, and structural facility upkeep across business premises.",
-              bullets: ["Partition wall & moisture barrier repair", "Commercial door alignment & sensors", "Lighting fixture resets & overhaul"],
-            },
-            {
-              icon: RadioIcon,
-              accent: "var(--accent)",
-              label: "Human-in-the-Loop",
-              title: "Dedicated Dispatch Control",
-              desc: "Every work order is reviewed by an experienced human dispatcher who evaluates credentials, tools, and proximity.",
-              bullets: ["Transparent multi-factor candidate scoring", "Live SLA countdown enforcement", "Itemized digital invoices & equipment logs"],
-              featured: true,
-            },
-          ].map(({ icon: Icon, accent: ac, label, title, desc, bullets, featured }) => (
-            <div
-              key={title}
-              className={`p-6 rounded-2xl border transition-all duration-200 group hover:-translate-y-1 hover:shadow-[var(--shadow-md)] ${
-                featured ? "relative overflow-hidden" : card
-              }`}
-              style={{
-                background: featured
-                  ? isDark
-                    ? "linear-gradient(135deg, #0b1a29 0%, #0e2436 100%)"
-                    : "linear-gradient(135deg, #f0f8fa 0%, #e6f3f6 100%)"
-                  : "var(--bg-surface)",
-                borderColor: featured ? "var(--accent)" : "var(--border)",
-              }}
-            >
-              <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
-                style={{
-                  background: isDark ? "rgba(255,255,255,0.06)" : "var(--bg-surface-2)",
-                  color: ac,
-                  border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "var(--border)"}`,
-                }}
-              >
-                <Icon size={20} />
-              </div>
-              <span className="text-[11px] font-bold uppercase tracking-wider block" style={{ color: ac }}>{label}</span>
-              <h3 className={`text-base font-bold font-heading mt-1 mb-2 ${textPrimary}`}>{title}</h3>
-              <p className={`text-xs leading-relaxed mb-4 ${textSecondary}`}>{desc}</p>
-              <ul className="space-y-2 border-t border-[var(--border)] pt-3">
-                {bullets.map((b) => (
-                  <li key={b} className={`flex items-center gap-2 text-xs ${textSecondary}`}>
-                    <CheckIcon className="w-3.5 h-3.5" style={{ color: ac }} />
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
+        {/* 3 Tall Cards Side-by-Side (Matching Synergeus Layout) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-      {/* ── How It Works ─────────────────────────────────────────────────── */}
-      <section id="how" className={`py-24 border-t ${borderColor} relative overflow-hidden`} style={{ background: "var(--bg-surface-2)" }}>
-        <div className="max-w-7xl mx-auto px-5 relative">
-          <div className="text-center max-w-xl mx-auto space-y-3 mb-16">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--accent)]">
-              <CompassIcon size={13} />
-              <span>End-to-End Journey</span>
-            </div>
-            <h2 className={`text-3xl sm:text-4xl font-extrabold font-heading ${textPrimary}`}>
-              How VoltOps resolves facility issues
-            </h2>
-            <p className={`text-sm sm:text-base ${textSecondary}`}>
-              A clear, accountable path from subscription to on-site sign-off.
-            </p>
-          </div>
-
-          {/* Desktop connected path */}
-          <div className="hidden lg:block relative">
-            {/* Connecting line */}
-            <div
-              className="absolute top-10 left-12 right-12 h-[2px] pointer-events-none"
-              style={{ background: "linear-gradient(to right, var(--accent), #14b8a6, #1E824C)", opacity: 0.35 }}
-            />
-
-            <div className="grid grid-cols-5 gap-4 relative z-10">
-              {WORKFLOW_STEPS.map(({ step, icon: StepIcon, title, body }) => {
-                const isHov = hoveredStep === step;
-                return (
-                  <div
-                    key={step}
-                    tabIndex={0}
-                    onMouseEnter={() => setHoveredStep(step)}
-                    onMouseLeave={() => setHoveredStep(null)}
-                    onFocus={() => setHoveredStep(step)}
-                    onBlur={() => setHoveredStep(null)}
-                    className={`p-5 rounded-2xl border cursor-default transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
-                      isHov ? "-translate-y-2 shadow-[var(--shadow-md)]" : ""
-                    }`}
-                    style={{
-                      background: isHov ? "var(--bg-surface)" : "var(--bg-base)",
-                      borderColor: isHov ? "var(--accent)" : "var(--border)",
-                    }}
-                  >
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-all duration-200"
-                      style={{
-                        background: isHov ? "var(--accent)" : isDark ? "#122030" : "#e4edf1",
-                        color: isHov ? "white" : "var(--accent)",
-                        boxShadow: isHov ? "0 4px 14px rgba(23,101,119,0.3)" : "none",
-                      }}
-                    >
-                      <StepIcon size={20} />
-                    </div>
-                    <div className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "var(--accent)" }}>
-                      Step 0{step}
-                    </div>
-                    <h3 className={`font-bold font-heading text-sm leading-snug mb-2 ${textPrimary}`}>{title}</h3>
-                    <p className={`text-xs leading-relaxed ${textMuted}`}>{body}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Mobile vertical timeline */}
-          <div className="lg:hidden pl-6 relative">
-            <div className="absolute left-3 top-0 bottom-0 w-[2px]" style={{ background: "var(--accent)", opacity: 0.3 }} />
-            <div className="space-y-4">
-              {WORKFLOW_STEPS.map(({ step, icon: StepIcon, title, body }) => (
-                <div key={step} className={`relative p-5 rounded-2xl border ${surface}`}>
-                  <div
-                    className="absolute -left-[37px] top-4 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ background: "var(--bg-surface)", border: "2px solid var(--accent)", color: "var(--accent)" }}
-                  >
-                    {step}
-                  </div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <StepIcon size={16} className="text-[var(--accent)]" />
-                    <h3 className={`font-bold font-heading text-sm ${textPrimary}`}>{title}</h3>
-                  </div>
-                  <p className={`text-xs leading-relaxed ${textMuted}`}>{body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Matching Engine ───────────────────────────────────────────────── */}
-      <section id="dispatch" className="py-24 max-w-7xl mx-auto px-5">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          <div className="lg:col-span-6 space-y-5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--accent)]">
-              <SlidersIcon size={13} />
-              <span>Transparent Logic</span>
-            </div>
-            <h2 className={`text-3xl sm:text-4xl font-extrabold font-heading leading-tight ${textPrimary}`}>
-              Assignments you can audit and trust
-            </h2>
-            <p className={`text-sm sm:text-base leading-relaxed ${textSecondary}`}>
-              Eligibility and candidate scoring come from transparent operational rules — never an opaque algorithm.
-              A human dispatcher always reviews the job and confirms the assignment.
-            </p>
-
-            <div className="space-y-3 pt-2">
-              {[
-                {
-                  n: 1,
-                  icon: ShieldCheckIcon,
-                  color: "#1E824C",
-                  title: "Strict Hard Filtering First",
-                  body: "Expired licences, active leave, and schedule double-bookings are removed before any scoring.",
-                },
-                {
-                  n: 2,
-                  icon: SlidersIcon,
-                  color: "var(--accent)",
-                  title: "Transparent Multi-Factor Scoring",
-                  body: "Trade qualifications, travel proximity, and workload are computed with plain weighted arithmetic.",
-                },
-                {
-                  n: 3,
-                  icon: RadioIcon,
-                  color: "#7c3aed",
-                  title: "Human Dispatcher Authorization",
-                  body: "No automated assignments. An experienced dispatcher reviews the list and confirms the dispatch.",
-                },
-              ].map(({ n, icon: Icon, color, title, body }) => (
-                <div key={n} className={`flex items-start gap-4 p-4 rounded-xl border ${surface}`}>
-                  <div
-                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-white font-bold text-sm shadow-sm"
-                    style={{ background: color }}
-                  >
-                    <Icon size={18} />
-                  </div>
-                  <div>
-                    <h4 className={`font-bold font-heading text-sm ${textPrimary}`}>{title}</h4>
-                    <p className={`text-xs mt-1 leading-relaxed ${textMuted}`}>{body}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="lg:col-span-6">
-            <div className={`p-6 rounded-2xl border shadow-[var(--shadow-md)] space-y-4 ${surface}`}>
-              <div className={`flex items-center justify-between pb-4 border-b ${borderColor}`}>
-                <div>
-                  <h3 className={`font-bold font-heading text-base ${textPrimary}`}>Candidate Evaluation</h3>
-                  <span className={`text-xs ${textMuted}`}>Match breakdown — WO #3088 (CCTV & Security)</span>
-                </div>
-                <span
-                  className="px-2.5 py-1 rounded-full text-xs font-semibold"
-                  style={{ background: "var(--bg-surface-2)", color: "var(--accent)", border: "1px solid var(--border)" }}
-                >
-                  CCTV & Access
-                </span>
-              </div>
-
-              {/* Top match */}
-              <div className="p-4 rounded-xl border-2 space-y-2" style={{ borderColor: "var(--accent)", background: "var(--bg-surface-2)" }}>
+          {/* Card 1: Natural Language Intake */}
+          <div className="p-7 rounded-3xl border border-[var(--border)] glow-card-lime glass-panel flex flex-col justify-between hover:-translate-y-1 transition-all">
+            <div className="space-y-5">
+              {/* Simulated mini card widget */}
+              <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-3 shadow-inner">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <UserCheckIcon size={16} className="text-emerald-600 dark:text-emerald-400" />
-                    <span className={`font-bold text-sm ${textPrimary}`}>Tanvir Hasan</span>
+                    <LogoMark size={22} />
+                    <span className="text-[11px] font-bold text-[var(--text-primary)]">Instant Intake</span>
                   </div>
-                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
-                    91% Match
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#d4f43e]/20 text-[#d4f43e] dark:text-[#d4f43e] text-emerald-800">
+                    Smart Match
                   </span>
                 </div>
-                <p className={`text-xs ${textSecondary}`}>Certified CCTV & NVR Specialist · Tejgaon · 0 active jobs</p>
-                <div className="flex gap-3 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-                  <span className="flex items-center gap-1"><CheckCircleIcon size={12} /> Safety Cert</span>
-                  <span className="flex items-center gap-1"><CheckCircleIcon size={12} /> Free Now</span>
-                  <span className="flex items-center gap-1"><CheckCircleIcon size={12} /> 2.1 km away</span>
+                <p className="text-xs text-[var(--text-secondary)] leading-relaxed italic">
+                  "Chiller compressor tripping on 2nd floor retail outlets..."
+                </p>
+                <div className="flex items-center justify-between pt-2 border-t border-[var(--border)] text-[10px]">
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">✓ HVAC Trade Assigned</span>
+                  <span className="font-bold text-[var(--accent)]">AUTO-ROUTED</span>
                 </div>
               </div>
 
-              {/* 2nd match */}
-              <div className={`p-4 rounded-xl border ${surface2}`}>
-                <div className="flex items-center justify-between">
-                  <span className={`font-bold text-sm ${textSecondary}`}>Mehedi Zaman</span>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
-                    78% Match
-                  </span>
-                </div>
-                <p className={`text-xs mt-1 ${textMuted}`}>Security Tech · 1 active job in Banani (finishing in 35m)</p>
-              </div>
-
-              {/* Ineligible */}
-              <div className={`p-4 rounded-xl border opacity-60 ${surface2}`}>
-                <div className="flex items-center justify-between">
-                  <span className={`font-bold text-sm ${textMuted}`}>Nayeem Islam</span>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400">
-                    Ineligible
-                  </span>
-                </div>
-                <p className="text-xs text-red-500 mt-1">✕ Certification expired 12 days ago (filtered automatically)</p>
+              <div>
+                <h3 className="text-xl font-bold font-heading text-[var(--text-primary)]">Natural Language Intake</h3>
+                <p className="text-xs text-[var(--text-secondary)] leading-relaxed mt-2">
+                  Submit emergency breakdown requests from any browser or phone in plain language.
+                  Our system classifies trade requirements instantly.
+                </p>
               </div>
             </div>
+            <div className="pt-6 border-t border-[var(--border)] mt-6 flex items-center justify-between text-xs font-semibold text-[var(--text-muted)]">
+              <span>Zero training required</span>
+              <ArrowRightIcon size={14} className="text-[#d4f43e]" />
+            </div>
           </div>
+
+          {/* Card 2: Predictive SLA & Proximity Tracking */}
+          <div className="p-7 rounded-3xl border border-[var(--border)] glow-card-emerald glass-panel flex flex-col justify-between hover:-translate-y-1 transition-all">
+            <div className="space-y-5">
+              {/* Simulated chart / metric widget */}
+              <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-3 text-center shadow-inner">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] block">Arrival SLA Commitment</span>
+                <div className="text-3xl font-extrabold font-heading text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700">
+                  20 & 40 min
+                </div>
+                {/* Visual bar */}
+                <div className="w-full bg-[var(--border)] h-2 rounded-full overflow-hidden">
+                  <div className="bg-[#d4f43e] h-full rounded-full" style={{ width: "92%" }} />
+                </div>
+                <span className="text-[10px] text-[var(--text-muted)] block">Physical on-site arrival guarantee</span>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold font-heading text-[var(--text-primary)]">Predictive Proximity</h3>
+                <p className="text-xs text-[var(--text-secondary)] leading-relaxed mt-2">
+                  Routing considers real-time technician GPS coordinates, current job duration, and traffic buffers
+                  to ensure arrival deadlines are met.
+                </p>
+              </div>
+            </div>
+            <div className="pt-6 border-t border-[var(--border)] mt-6 flex items-center justify-between text-xs font-semibold text-[var(--text-muted)]">
+              <span>SLA enforcement built-in</span>
+              <ArrowRightIcon size={14} className="text-[#d4f43e]" />
+            </div>
+          </div>
+
+          {/* Card 3: Smart Multi-Trade Categorization */}
+          <div className="p-7 rounded-3xl border border-[var(--border)] glow-card-amber glass-panel flex flex-col justify-between hover:-translate-y-1 transition-all">
+            <div className="space-y-5">
+              {/* Interactive tag pills */}
+              <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2.5 shadow-inner">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] block">Unified Coverage</span>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-300">
+                    ❄️ Commercial HVAC
+                  </span>
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                    ⚡ High-Voltage Power
+                  </span>
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-300">
+                    📹 CCTV & Access
+                  </span>
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                    💻 Core Networks
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold font-heading text-[var(--text-primary)]">Smart Categorization</h3>
+                <p className="text-xs text-[var(--text-secondary)] leading-relaxed mt-2">
+                  Replace fragmented contractors. Five core operational disciplines coordinated under a single
+                  responsible coordination desk.
+                </p>
+              </div>
+            </div>
+            <div className="pt-6 border-t border-[var(--border)] mt-6 flex items-center justify-between text-xs font-semibold text-[var(--text-muted)]">
+              <span>All 5 trades under 1 plan</span>
+              <ArrowRightIcon size={14} className="text-[#d4f43e]" />
+            </div>
+          </div>
+
         </div>
       </section>
 
-      {/* ── Role Workspaces ───────────────────────────────────────────────── */}
-      <section className={`py-20 border-t ${borderColor}`} style={{ background: "var(--bg-surface-2)" }}>
-        <div className="max-w-7xl mx-auto px-5">
-          <div className="text-center max-w-xl mx-auto mb-14 space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--accent)]">
-              <BuildingIcon size={13} />
-              <span>Role Workspaces</span>
-            </div>
-            <h2 className={`text-3xl font-extrabold font-heading ${textPrimary}`}>Tailored tools for every stakeholder</h2>
+      {/* ── Section 4: Testimonials (Jewel-Tone Smoked Glass Cards) ─────── */}
+      <section className="py-24 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+        <div className="max-w-6xl mx-auto px-5">
+          <div className="text-center max-w-xl mx-auto space-y-3 mb-16">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700">
+              Hear Real Voices
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
+              What facilities say{" "}
+              <span className="font-serif-italic font-normal">
+                about VoltOps
+              </span>
+            </h2>
+            <p className="text-sm text-[var(--text-secondary)]">
+              How business operations managers eliminate facility downtime with guaranteed arrival SLAs.
+            </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
-              { icon: BuildingIcon, title: "Business Customer", body: "Submit problems, monitor arrival countdowns, review equipment history, and approve digital invoices." },
-              { icon: RadioIcon, title: "Dispatcher Console", body: "Review incoming requests, compare candidates with transparent scores, enforce SLAs, and confirm assignments." },
-              { icon: WrenchIcon, title: "Field Technician", body: "Access today's job roster, update travel and on-site progress, manage certifications, and report completion." },
-              { icon: SettingsIcon, title: "Administrator", body: "Oversee workforce accounts, review audit trails, monitor SLA breach reports, and configure service boundaries." },
-            ].map(({ icon: Icon, title, body }) => (
-              <div key={title} className={`p-6 rounded-2xl border hover:-translate-y-1 transition-all duration-200 ${surface}`}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[var(--accent)] mb-4">
-                  <Icon size={20} />
+              {
+                quote: "When our central chiller failed at 2 PM, VoltOps had an engineer on site in 18 minutes. It saved our ground floor operations.",
+                author: "Tarek Mansoor",
+                role: "Operations Director · Apex Retail",
+                glow: "glow-card-lime",
+              },
+              {
+                quote: "No more calling 10 contractors. One breakdown ticket, transparent candidate score, and a licensed electrician is on site.",
+                author: "Sadia Rahman",
+                role: "Plant Head · ABC Manufacturing",
+                glow: "glow-card-emerald",
+              },
+              {
+                quote: "Having itemized digital service logs and verified technician licenses has transformed our quarterly compliance audit.",
+                author: "Kabir Hossain",
+                role: "Security Director · Northstar Logistics",
+                glow: "glow-card-amber",
+              },
+              {
+                quote: "Our POS switches were rebooting on Black Friday. VoltOps's technician arrived in 9 mins with the exact replacement hardware.",
+                author: "Farhan Ali",
+                role: "IT Infrastructure · Metro Mart",
+                glow: "glow-card-indigo",
+              },
+            ].map(({ quote, author, role, glow }, idx) => (
+              <div
+                key={idx}
+                className={`p-6 rounded-3xl border border-[var(--border)] glass-panel ${glow} flex flex-col justify-between hover:-translate-y-1 transition-all`}
+              >
+                <p className="text-xs leading-relaxed text-[var(--text-secondary)] italic">
+                  "{quote}"
+                </p>
+                <div className="pt-4 border-t border-[var(--border)] mt-4">
+                  <div className="font-bold text-xs text-[var(--text-primary)]">{author}</div>
+                  <div className="text-[10px] text-[var(--text-muted)] mt-0.5">{role}</div>
                 </div>
-                <h3 className={`font-bold font-heading text-base mb-2 ${textPrimary}`}>{title}</h3>
-                <p className={`text-xs leading-relaxed ${textMuted}`}>{body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* ── SUBSCRIPTION PLANS ──────────────────────────────────────────── */}
-      {/* ══════════════════════════════════════════════════════════════════ */}
-      <section id="packages" className="py-24 max-w-7xl mx-auto px-5">
-        <div className="text-center max-w-3xl mx-auto space-y-3 mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--accent)]">
-            <ClockIcon size={13} />
-            <span>Coverage Plans</span>
+      {/* ── Section 5: Bento Operations Analytics ──────────────────────── */}
+      <section id="dispatch" className="py-24 max-w-6xl mx-auto px-5">
+        <div className="text-center max-w-xl mx-auto space-y-3 mb-16">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700">
+            Analytics & Accountability
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
+            Smarter facility care{" "}
+            <span className="font-serif-italic font-normal">
+              insights at a glance
+            </span>
+          </h2>
+          <p className="text-sm text-[var(--text-secondary)]">
+            Keep your equipment uptime and maintenance records in sync with accountable tracking.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+          {/* Left Bento: Operations Summary */}
+          <div className="lg:col-span-6 p-7 rounded-3xl border border-[var(--border)] glass-panel glow-card-lime space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Facility Health</span>
+                <div className="text-2xl font-extrabold font-heading text-[var(--text-primary)] mt-1">99.8% Uptime</div>
+              </div>
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#d4f43e]/20 text-[#d4f43e] dark:text-[#d4f43e] text-emerald-800">
+                Active Cycle
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                { label: "Preventative Maintenance", val: "100% on schedule", progress: 100, color: "#d4f43e" },
+                { label: "Arrival SLA Compliance", val: "0 Breaches across 42 jobs", progress: 100, color: "#10b981" },
+                { label: "Licensed Technician Coverage", val: "100% verified credentials", progress: 100, color: "#38bdf8" },
+              ].map(({ label, val, progress, color }) => (
+                <div key={label} className="p-3.5 rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold">
+                    <span className="text-[var(--text-primary)]">{label}</span>
+                    <span className="text-[var(--text-muted)]">{val}</span>
+                  </div>
+                  <div className="w-full bg-[var(--border)] h-1.5 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${progress}%`, background: color }} />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <h2 className={`text-3xl sm:text-4xl font-extrabold font-heading ${textPrimary}`}>Choose your facility coverage</h2>
-          <p className={`text-sm sm:text-base leading-relaxed ${textSecondary}`}>
+
+          {/* Right Bento: Transparent Candidate Evaluation */}
+          <div className="lg:col-span-6 p-7 rounded-3xl border border-[var(--border)] glass-panel space-y-4">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
+              <div>
+                <h3 className="font-bold font-heading text-base text-[var(--text-primary)]">Candidate Audit Trail</h3>
+                <span className="text-xs text-[var(--text-muted)]">Live match breakdown — WO #3088</span>
+              </div>
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--bg-surface-2)] text-[#d4f43e] dark:text-[#d4f43e] text-emerald-800 border border-[var(--border)]">
+                CCTV & Access
+              </span>
+            </div>
+
+            {/* Top Match */}
+            <div className="p-4 rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-surface-2)] space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <UserCheckIcon size={16} className="text-emerald-500" />
+                  <span className="font-bold text-sm text-[var(--text-primary)]">Tanvir Hasan</span>
+                </div>
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                  91% Match
+                </span>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)]">Certified CCTV & NVR Specialist · Tejgaon · 0 active jobs</p>
+              <div className="flex gap-3 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                <span>✓ Safety Cert</span><span>✓ Free Now</span><span>✓ 2.1 km</span>
+              </div>
+            </div>
+
+            {/* 2nd Match */}
+            <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-sm text-[var(--text-secondary)]">Mehedi Zaman</span>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                  78% Match
+                </span>
+              </div>
+              <p className="text-xs text-[var(--text-muted)] mt-1">Security Tech · 1 active job in Banani</p>
+            </div>
+
+            {/* Ineligible */}
+            <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] opacity-60">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-sm text-[var(--text-muted)]">Nayeem Islam</span>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400">
+                  Ineligible
+                </span>
+              </div>
+              <p className="text-xs text-red-500 mt-1">✕ Certification expired 12 days ago (filtered automatically)</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── Section 6: How It Works ────────────────────────────────────── */}
+      <section id="how" className="py-24 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+        <div className="max-w-6xl mx-auto px-5">
+          <div className="text-center max-w-xl mx-auto space-y-3 mb-16">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700">
+              Workflow
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
+              How VoltOps resolves{" "}
+              <span className="font-serif-italic font-normal">
+                facility breakdowns
+              </span>
+            </h2>
+            <p className="text-sm text-[var(--text-secondary)]">
+              A transparent path from subscription to completed on-site sign-off.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            {WORKFLOW_STEPS.map(({ step, icon: StepIcon, title, body }) => {
+              const isHov = hoveredStep === step;
+              return (
+                <div
+                  key={step}
+                  tabIndex={0}
+                  onMouseEnter={() => setHoveredStep(step)}
+                  onMouseLeave={() => setHoveredStep(null)}
+                  onFocus={() => setHoveredStep(step)}
+                  onBlur={() => setHoveredStep(null)}
+                  className={`p-5 rounded-3xl border border-[var(--border)] glass-panel transition-all duration-200 cursor-default ${
+                    isHov ? "-translate-y-2 border-[#d4f43e] shadow-[var(--shadow-md)]" : ""
+                  }`}
+                >
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-all"
+                    style={{
+                      background: isHov ? "#d4f43e" : "var(--bg-surface-2)",
+                      color: isHov ? "#06090e" : "var(--text-primary)",
+                    }}
+                  >
+                    <StepIcon size={20} />
+                  </div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700 mb-1">
+                    Step 0{step}
+                  </div>
+                  <h3 className="font-bold font-heading text-sm text-[var(--text-primary)] mb-2">{title}</h3>
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed">{body}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section 7: Subscription Plans ──────────────────────────────── */}
+      <section id="packages" className="py-24 max-w-6xl mx-auto px-5">
+        <div className="text-center max-w-2xl mx-auto space-y-3 mb-8">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700">
+            Coverage Plans
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
+            Choose your facility{" "}
+            <span className="font-serif-italic font-normal">
+              coverage schedule
+            </span>
+          </h2>
+          <p className="text-sm text-[var(--text-secondary)]">
             All plans include qualified coordination across all five service trades.
           </p>
         </div>
 
         {/* SLA clarification */}
         <div
-          className="max-w-3xl mx-auto mb-12 p-4 rounded-xl border text-xs sm:text-sm flex items-start gap-3"
-          style={{
-            background: isDark ? "rgba(56,189,248,0.05)" : "rgba(23,101,119,0.05)",
-            borderColor: "var(--accent)",
-            color: "var(--text-secondary)",
-          }}
+          className="max-w-2xl mx-auto mb-12 p-4 rounded-2xl border text-xs sm:text-sm flex items-start gap-3 glass-panel"
+          style={{ borderColor: "var(--border-strong)" }}
         >
-          <ClockIcon size={18} className="shrink-0 text-[var(--accent)] mt-0.5" />
-          <div>
-            <strong className={textPrimary}>What does "arrival SLA" mean?</strong>{" "}
-            The assigned technician physically arrives at your facility within the stated window — not merely an email acknowledgement or ticket update. Total repair duration depends on job scope and parts required.
+          <ClockIcon size={18} className="shrink-0 text-[#d4f43e] mt-0.5" />
+          <div className="text-[var(--text-secondary)]">
+            <strong className="text-[var(--text-primary)]">What does "arrival SLA" mean?</strong>{" "}
+            The assigned technician physically arrives at your facility within the stated window — not merely an email acknowledgement.
           </div>
         </div>
 
@@ -1101,211 +1086,185 @@ export function LandingPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
 
           {/* Plan A: 8-Hour Daily */}
-          <div className={`p-7 rounded-2xl border flex flex-col justify-between hover:shadow-[var(--shadow-md)] hover:-translate-y-1 transition-all ${surface}`}>
+          <div className="p-7 rounded-3xl border border-[var(--border)] glass-panel flex flex-col justify-between hover:-translate-y-1 transition-all">
             <div className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between">
-                  <h3 className={`text-xl font-bold font-heading ${textPrimary}`}>8-Hour Daily</h3>
-                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${borderColor} ${textMuted}`}>
-                    Plan A
-                  </span>
-                </div>
-                <p className={`text-xs mt-1 ${textMuted}`}>Defined daily operational window</p>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold font-heading text-[var(--text-primary)]">8-Hour Daily</h3>
+                <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-[var(--text-muted)]">
+                  Plan A
+                </span>
               </div>
+              <p className="text-xs text-[var(--text-muted)]">Defined daily operational window</p>
+
               <div className="py-4 border-y border-[var(--border)]">
-                <div className={`text-lg font-extrabold font-heading ${textPrimary}`}>Pricing to be announced</div>
-                <div className={`text-xs mt-0.5 ${textMuted}`}>8 hours per day coverage</div>
+                <div className="text-lg font-extrabold font-heading text-[var(--text-primary)]">Pricing to be announced</div>
+                <div className="text-xs text-[var(--text-muted)] mt-0.5">8 hours per day coverage</div>
               </div>
-              <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                <span className={`text-xs font-medium block ${textMuted}`}>Coverage window:</span>
-                <span className={`text-base font-bold ${textPrimary}`}>8 hours per day</span>
+
+              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
+                <span className="text-xs text-[var(--text-muted)] block">Coverage window:</span>
+                <span className="text-base font-bold text-[var(--text-primary)]">8 hours per day</span>
               </div>
-              <p className={`text-xs leading-relaxed ${textSecondary}`}>
-                For businesses that need qualified professionals during a defined daily operating window. Contact us for schedule details.
+
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                For businesses that operate during standard daily hours. Contact us for custom shift arrangements.
               </p>
             </div>
+
             <button
               type="button"
               onClick={() => handlePlan("8hr")}
-              className={`mt-6 w-full py-3 rounded-xl font-semibold text-sm border transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] ${borderColor} ${textSecondary}`}
+              className="mt-6 w-full py-3 rounded-full font-semibold text-xs border border-[var(--border)] hover:border-[#d4f43e] hover:text-[#d4f43e] transition-colors"
             >
               Select Plan A
             </button>
           </div>
 
           {/* Plan B: 24/7 Standard */}
-          <div className={`p-7 rounded-2xl border flex flex-col justify-between hover:shadow-[var(--shadow-md)] hover:-translate-y-1 transition-all ${surface}`}>
+          <div className="p-7 rounded-3xl border border-[var(--border)] glass-panel glow-card-emerald flex flex-col justify-between hover:-translate-y-1 transition-all">
             <div className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between">
-                  <h3 className={`text-xl font-bold font-heading ${textPrimary}`}>24/7 Standard</h3>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-                    Plan B
-                  </span>
-                </div>
-                <p className={`text-xs mt-1 ${textMuted}`}>Round-the-clock reliable coverage</p>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold font-heading text-[var(--text-primary)]">24/7 Standard</h3>
+                <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                  Plan B
+                </span>
               </div>
+              <p className="text-xs text-[var(--text-muted)]">Round-the-clock reliable coverage</p>
+
               <div className="py-4 border-y border-[var(--border)]">
-                <div className={`text-lg font-extrabold font-heading ${textPrimary}`}>Pricing to be announced</div>
-                <div className="text-xs mt-0.5 font-medium text-emerald-600 dark:text-emerald-400">
-                  ★ Available 24 hours · 7 days a week
-                </div>
+                <div className="text-lg font-extrabold font-heading text-[var(--text-primary)]">Pricing to be announced</div>
+                <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">★ 24 hours · 7 days a week</div>
               </div>
-              <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                <span className={`text-xs font-medium block ${textMuted}`}>Arrival SLA commitment:</span>
+
+              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
+                <span className="text-xs text-[var(--text-muted)] block">Arrival SLA commitment:</span>
                 <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">Within 40 minutes on site</span>
               </div>
-              <ul className="space-y-2 text-xs">
+
+              <ul className="space-y-2 text-xs text-[var(--text-secondary)]">
                 {["All 5 service trades covered", "Human dispatcher verification every job", "Digital job history & itemised invoices"].map((b) => (
-                  <li key={b} className={`flex items-center gap-2 ${textSecondary}`}>
-                    <CheckIcon className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />{b}
+                  <li key={b} className="flex items-center gap-2">
+                    <CheckIcon className="w-3.5 h-3.5 text-emerald-500" />{b}
                   </li>
                 ))}
               </ul>
             </div>
+
             <button
               type="button"
               onClick={() => handlePlan("247-standard")}
-              className={`mt-6 w-full py-3 rounded-xl font-semibold text-sm border transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] ${borderColor} ${textSecondary}`}
+              className="mt-6 w-full py-3 rounded-full font-semibold text-xs border border-[var(--border)] hover:border-[#d4f43e] hover:text-[#d4f43e] transition-colors"
             >
               Select Plan B
             </button>
           </div>
 
-          {/* Plan C: 24/7 Priority — FEATURED */}
+          {/* Plan C: 24/7 Priority — FEATURED WITH CHARTREUSE GLOW */}
           <div
-            className="p-7 rounded-2xl flex flex-col justify-between relative transition-all hover:-translate-y-1"
-            style={{
-              background: isDark
-                ? "linear-gradient(160deg, #0b1a29 0%, #081622 100%)"
-                : "linear-gradient(160deg, #eaf4f7 0%, #d8ecf2 100%)",
-              border: "2px solid var(--accent)",
-              boxShadow: "var(--shadow-lg)",
-            }}
+            className="p-7 rounded-3xl border-2 border-[#d4f43e] glass-panel glow-card-lime flex flex-col justify-between relative hover:-translate-y-1 transition-all shadow-[0_0_32px_rgba(212,244,62,0.18)]"
           >
-            <div
-              className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-white text-xs font-bold uppercase tracking-wider shadow flex items-center gap-1"
-              style={{ background: "var(--accent)" }}
-            >
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#d4f43e] text-[#06090e] text-xs font-bold uppercase tracking-wider shadow flex items-center gap-1">
               <ZapIcon size={12} />
               <span>Fastest Response</span>
             </div>
+
             <div className="space-y-4 mt-2">
-              <div>
-                <div className="flex items-center justify-between">
-                  <h3 className={`text-xl font-bold font-heading ${textPrimary}`}>24/7 Priority</h3>
-                  <span
-                    className="text-xs px-2.5 py-0.5 rounded-full font-bold"
-                    style={{
-                      background: isDark ? "rgba(56,189,248,0.15)" : "rgba(23,101,119,0.12)",
-                      color: "var(--accent)",
-                      border: "1px solid var(--accent)",
-                    }}
-                  >
-                    Plan C
-                  </span>
-                </div>
-                <p className={`text-xs mt-1 ${textMuted}`}>For time-critical facilities</p>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold font-heading text-[var(--text-primary)]">24/7 Priority</h3>
+                <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-[#d4f43e]/20 text-[#d4f43e] dark:text-[#d4f43e] text-emerald-800 border border-[#d4f43e]/40">
+                  Plan C
+                </span>
               </div>
+              <p className="text-xs text-[var(--text-muted)]">For time-critical facilities</p>
+
               <div className="py-4 border-y border-[var(--border)]">
-                <div className={`text-lg font-extrabold font-heading ${textPrimary}`}>Pricing to be announced</div>
-                <div className={`text-xs mt-0.5 ${textMuted}`}>24/7 · 2× faster arrival SLA</div>
+                <div className="text-lg font-extrabold font-heading text-[var(--text-primary)]">Pricing to be announced</div>
+                <div className="text-xs text-[var(--text-muted)] mt-0.5">24/7 · 2× faster arrival SLA</div>
               </div>
-              <div
-                className="p-3.5 rounded-xl border"
-                style={{
-                  background: isDark ? "rgba(56,189,248,0.08)" : "rgba(23,101,119,0.08)",
-                  borderColor: "var(--accent)",
-                }}
-              >
-                <span className="text-xs font-medium block" style={{ color: "var(--accent)" }}>Arrival SLA commitment:</span>
-                <span className={`text-xl font-extrabold font-heading ${textPrimary}`}>Within 20 minutes on site</span>
+
+              <div className="p-3.5 rounded-2xl border border-[#d4f43e]/40 bg-[#d4f43e]/10">
+                <span className="text-xs font-semibold text-[#d4f43e] dark:text-[#d4f43e] text-emerald-800 block">Arrival SLA commitment:</span>
+                <span className="text-xl font-extrabold font-heading text-[var(--text-primary)]">Within 20 minutes on site</span>
               </div>
+
               <ul className="space-y-2 text-xs">
                 {["20-min rapid arrival (2× faster)", "Top-tier emergency dispatcher priority", "Full asset service history & preventative alerts"].map((b, i) => (
-                  <li key={b} className={`flex items-center gap-2 ${i === 0 ? `font-semibold ${textPrimary}` : textSecondary}`}>
-                    <CheckIcon className="w-3.5 h-3.5 text-[var(--accent)]" />{b}
+                  <li key={b} className={`flex items-center gap-2 ${i === 0 ? "font-bold text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}`}>
+                    <CheckIcon className="w-3.5 h-3.5 text-[#d4f43e]" />{b}
                   </li>
                 ))}
               </ul>
             </div>
+
             <button
               type="button"
               onClick={() => handlePlan("247-priority")}
-              className="mt-6 w-full py-3.5 rounded-xl font-bold text-sm text-white transition-all hover:opacity-95 active:scale-[0.98] shadow-md flex items-center justify-center gap-1.5"
-              style={{ background: "var(--accent)" }}
+              className="mt-6 w-full py-3.5 rounded-full font-bold text-xs bg-[#d4f43e] text-[#06090e] shadow-[0_0_20px_rgba(212,244,62,0.35)] hover:bg-[#e2f865] transition-all flex items-center justify-center gap-1.5"
             >
               <span>Select Plan C</span>
-              <ArrowRightIcon size={14} />
+              <ArrowRightIcon size={13} />
             </button>
           </div>
 
           {/* Plan D: Custom Coverage */}
-          <div
-            className="p-7 rounded-2xl border flex flex-col justify-between hover:shadow-[var(--shadow-md)] hover:-translate-y-1 transition-all"
-            style={{
-              background: isDark ? "linear-gradient(135deg, #09131e 0%, #0d1a29 100%)" : "linear-gradient(135deg, #fcfbfa 0%, #f4f0eb 100%)",
-              borderColor: "var(--border)",
-            }}
-          >
+          <div className="p-7 rounded-3xl border border-[var(--border)] glass-panel flex flex-col justify-between hover:-translate-y-1 transition-all">
             <div className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between">
-                  <h3 className={`text-xl font-bold font-heading ${textPrimary}`}>Custom Coverage</h3>
-                  <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${borderColor} ${textMuted}`}>
-                    Plan D
-                  </span>
-                </div>
-                <p className={`text-xs mt-1 ${textMuted}`}>Tailored to your requirements</p>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold font-heading text-[var(--text-primary)]">Custom Coverage</h3>
+                <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-[var(--text-muted)]">
+                  Plan D
+                </span>
               </div>
+              <p className="text-xs text-[var(--text-muted)]">Tailored to your requirements</p>
+
               <div className="py-4 border-y border-[var(--border)]">
-                <div className={`text-lg font-extrabold font-heading ${textPrimary}`}>Pricing upon review</div>
-                <div className={`text-xs mt-0.5 ${textMuted}`}>Discussed after requirements review</div>
+                <div className="text-lg font-extrabold font-heading text-[var(--text-primary)]">Pricing upon review</div>
+                <div className="text-xs text-[var(--text-muted)] mt-0.5">Discussed after review</div>
               </div>
-              <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)]">
-                <span className={`text-xs font-medium block ${textMuted}`}>Example schedules:</span>
-                <span className={`text-sm font-bold ${textPrimary}`}>6, 8, or 16 hours/day</span>
+
+              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
+                <span className="text-xs text-[var(--text-muted)] block">Example schedules:</span>
+                <span className="text-sm font-bold text-[var(--text-primary)]">6, 8, or 16 hours/day</span>
               </div>
-              <p className={`text-xs leading-relaxed ${textSecondary}`}>
-                Request a tailored daily coverage schedule that matches your operating hours. Arrival SLAs and pricing are determined after we review your requirements.
-              </p>
-              <p className={`text-[11px] italic ${textMuted}`}>
-                Not all custom schedules or SLAs are automatically available. Our team will confirm feasibility.
+
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                Request a tailored schedule matching your facility shift hours. SLAs confirmed after requirements review.
               </p>
             </div>
+
             <button
               type="button"
               onClick={() => handlePlan("custom")}
-              className={`mt-6 w-full py-3 rounded-xl font-semibold text-sm border-2 transition-colors hover:text-[var(--accent)] ${textSecondary}`}
-              style={{ borderColor: "var(--accent)" }}
+              className="mt-6 w-full py-3 rounded-full font-semibold text-xs border-2 border-[#d4f43e] text-[var(--text-primary)] hover:bg-[#d4f43e] hover:text-[#06090e] transition-all"
             >
               Discuss a Custom Plan →
             </button>
           </div>
+
         </div>
 
-        {/* Expandable comparison */}
+        {/* Expandable Comparison Matrix */}
         <div className="mt-12 text-center">
           <button
             type="button"
             onClick={() => setShowMatrix(!showMatrix)}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border transition-all ${borderColor} ${textSecondary} hover:text-[var(--accent)] bg-[var(--bg-surface)]`}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] bg-[var(--bg-surface)] backdrop-blur-xl transition-all"
           >
             {showMatrix ? "Hide Plan Comparison ▲" : "Compare All Plans ▼"}
           </button>
         </div>
 
         {showMatrix && (
-          <div className={`mt-6 rounded-2xl border overflow-hidden shadow-[var(--shadow-md)] ${surface}`}>
+          <div className="mt-6 rounded-3xl border border-[var(--border)] overflow-hidden shadow-[var(--shadow-md)] glass-panel">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
-                  <tr className="border-b" style={{ borderColor: "var(--border)", background: "var(--bg-surface-2)" }}>
-                    <th className={`py-4 px-5 font-semibold ${textSecondary}`}>Feature</th>
-                    <th className={`py-4 px-5 font-semibold ${textSecondary}`}>Plan A · 8-Hour</th>
-                    <th className={`py-4 px-5 font-semibold ${textSecondary}`}>Plan B · 24/7 Std</th>
-                    <th className="py-4 px-5 font-bold" style={{ color: "var(--accent)" }}>Plan C · 24/7 Priority</th>
-                    <th className={`py-4 px-5 font-semibold ${textSecondary}`}>Plan D · Custom</th>
+                  <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)]">
+                    <th className="py-4 px-5 font-semibold text-[var(--text-secondary)]">Feature</th>
+                    <th className="py-4 px-5 font-semibold text-[var(--text-secondary)]">Plan A · 8-Hour</th>
+                    <th className="py-4 px-5 font-semibold text-[var(--text-secondary)]">Plan B · 24/7 Std</th>
+                    <th className="py-4 px-5 font-bold text-[#d4f43e] dark:text-[#d4f43e] text-emerald-800">Plan C · 24/7 Priority</th>
+                    <th className="py-4 px-5 font-semibold text-[var(--text-secondary)]">Plan D · Custom</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
@@ -1317,11 +1276,11 @@ export function LandingPage() {
                     ["Pricing", "To be announced", "To be announced", "To be announced", "Upon review"],
                   ].map(([feat, a, b, c, d]) => (
                     <tr key={feat as string}>
-                      <td className={`py-3.5 px-5 font-medium ${textPrimary}`}>{feat}</td>
-                      <td className={`py-3.5 px-5 ${textMuted}`}>{a}</td>
-                      <td className={`py-3.5 px-5 ${textMuted}`}>{b}</td>
-                      <td className="py-3.5 px-5 font-semibold" style={{ color: "var(--accent)" }}>{c}</td>
-                      <td className={`py-3.5 px-5 ${textMuted}`}>{d}</td>
+                      <td className="py-3.5 px-5 font-medium text-[var(--text-primary)]">{feat}</td>
+                      <td className="py-3.5 px-5 text-[var(--text-muted)]">{a}</td>
+                      <td className="py-3.5 px-5 text-[var(--text-muted)]">{b}</td>
+                      <td className="py-3.5 px-5 font-bold text-[#d4f43e] dark:text-[#d4f43e] text-emerald-800">{c}</td>
+                      <td className="py-3.5 px-5 text-[var(--text-muted)]">{d}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1331,197 +1290,221 @@ export function LandingPage() {
         )}
       </section>
 
-      {/* ── About ────────────────────────────────────────────────────────── */}
-      <section id="about" className={`py-24 border-t ${borderColor}`} style={{ background: "var(--bg-surface-2)" }}>
-        <div className="max-w-7xl mx-auto px-5 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 space-y-5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--accent)]">
-              <BuildingIcon size={13} />
-              <span>About VoltOps</span>
-            </div>
-            <h2 className={`text-3xl sm:text-4xl font-extrabold font-heading leading-tight ${textPrimary}`}>
-              Built for commercial field service coordination
+      {/* ── Section 8: Role Workspaces ─────────────────────────────────── */}
+      <section className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+        <div className="max-w-6xl mx-auto px-5">
+          <div className="text-center max-w-xl mx-auto mb-14 space-y-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700">
+              Role Workspaces
+            </span>
+            <h2 className="text-3xl font-extrabold font-heading text-[var(--text-primary)]">
+              Tailored tools for every stakeholder
             </h2>
-            <p className={`text-sm sm:text-base leading-relaxed ${textSecondary}`}>
-              Most businesses still handle facility breakdowns through scattered phone books, chat groups, and unverified contractors.
-              When a commercial chiller stalls, a security camera drops, or a generator falters, delays cost operational revenue.
-            </p>
-            <p className={`text-sm leading-relaxed ${textMuted}`}>
-              VoltOps replaces guesswork with an accountable coordination infrastructure — connecting business managers with vetted
-              technicians across electrical, mechanical, security, IT, and facility upkeep, backed by physical arrival commitments and
-              human dispatcher accountability.
-            </p>
           </div>
-          <div className="lg:col-span-5 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
-              { title: "No uncertified technicians", body: "Safety credentials and trade licences are verified before assignment eligibility." },
-              { title: "No double bookings", body: "Active job workloads and transit distances prevent technician overcommitment." },
-              { title: "Real operational accountability", body: "Customers monitor verified technician transit and itemised billing records." },
-            ].map(({ title, body }) => (
-              <div key={title} className={`p-5 rounded-xl border space-y-1 ${surface}`}>
-                <div className={`flex items-center gap-2 font-bold text-sm ${textPrimary}`}>
-                  <CheckCircleIcon size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>{title}</span>
+              { icon: BuildingIcon, title: "Business Customer", body: "Submit problems, monitor arrival countdowns, review equipment history, and approve digital invoices." },
+              { icon: RadioIcon, title: "Dispatcher Console", body: "Review incoming requests, compare candidates with transparent scores, enforce SLAs, and confirm assignments." },
+              { icon: WrenchIcon, title: "Field Technician", body: "Access today's job roster, update travel and on-site progress, manage certifications, and report completion." },
+              { icon: SettingsIcon, title: "Administrator", body: "Oversee workforce accounts, review audit trails, monitor SLA breach reports, and configure service boundaries." },
+            ].map(({ icon: Icon, title, body }) => (
+              <div key={title} className="p-6 rounded-3xl border border-[var(--border)] glass-panel hover:-translate-y-1 transition-all">
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#d4f43e] mb-4">
+                  <Icon size={20} />
                 </div>
-                <p className={`text-xs pl-6 ${textMuted}`}>{body}</p>
+                <h3 className="font-bold font-heading text-base text-[var(--text-primary)] mb-2">{title}</h3>
+                <p className="text-xs leading-relaxed text-[var(--text-muted)]">{body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Contact ──────────────────────────────────────────────────────── */}
-      <section id="contact" className="py-24 max-w-7xl mx-auto px-5">
-        {/* CTA banner */}
-        <div
-          className="p-8 sm:p-12 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-[var(--shadow-md)] mb-16"
-          style={{
-            background: isDark
-              ? "linear-gradient(135deg, #0b1a29 0%, #0e273a 100%)"
-              : "linear-gradient(135deg, #e8f4f7 0%, #d4edf4 100%)",
-            border: "1px solid var(--accent)",
-          }}
-        >
-          <div className="space-y-2 text-center md:text-left">
-            <h2 className={`text-2xl sm:text-3xl font-extrabold font-heading ${textPrimary}`}>
-              Ready to safeguard your facility operations?
+      {/* ── Section 9: About VoltOps ─────────────────────────────────────── */}
+      <section id="about" className="py-24 max-w-6xl mx-auto px-5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-7 space-y-5 text-left">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700">
+              About VoltOps
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)] leading-tight">
+              Built for commercial{" "}
+              <span className="font-serif-italic font-normal">
+                field service coordination
+              </span>
             </h2>
-            <p className={`text-sm ${textSecondary}`}>
-              Select a coverage plan or discuss a custom schedule with our team.
+            <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
+              Most businesses still handle facility breakdowns through scattered phone books, chat groups, and unverified contractors.
+              When a commercial chiller stalls, a security camera drops, or a generator falters, delays cost operational revenue.
+            </p>
+            <p className="text-sm leading-relaxed text-[var(--text-muted)]">
+              VoltOps replaces guesswork with an accountable coordination infrastructure — connecting business managers with vetted
+              technicians across electrical, mechanical, security, IT, and facility upkeep, backed by physical arrival commitments and
+              human dispatcher accountability.
             </p>
           </div>
-          <a
-            href="#packages"
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold text-white shrink-0 shadow-md hover:opacity-95 transition-all"
-            style={{ background: "var(--accent)" }}
-          >
-            <span>View Plans</span>
-            <ArrowRightIcon size={15} />
-          </a>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Contact info */}
-          <div className="lg:col-span-5 space-y-5">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--accent)]">
-                <MailIcon size={13} />
-                <span>Direct Inquiries</span>
+          <div className="lg:col-span-5 space-y-3.5">
+            {[
+              { title: "No uncertified technicians", body: "Safety credentials and trade licences are verified before assignment eligibility." },
+              { title: "No double bookings", body: "Active job workloads and transit distances prevent technician overcommitment." },
+              { title: "Real operational accountability", body: "Customers monitor verified technician transit and itemised billing records." },
+            ].map(({ title, body }) => (
+              <div key={title} className="p-5 rounded-2xl border border-[var(--border)] glass-panel space-y-1">
+                <div className="flex items-center gap-2 font-bold text-sm text-[var(--text-primary)]">
+                  <CheckCircleIcon size={16} className="text-[#d4f43e] shrink-0" />
+                  <span>{title}</span>
+                </div>
+                <p className="text-xs pl-6 text-[var(--text-muted)]">{body}</p>
               </div>
-              <h2 className={`text-2xl sm:text-3xl font-bold font-heading mt-2 ${textPrimary}`}>Talk with our team</h2>
-              <p className={`text-sm mt-2 ${textMuted}`}>
-                Enterprise facility questions or multiple sites? Send our coordination team a message.
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section 10: Contact & Direct Inquiries ───────────────────────── */}
+      <section id="contact" className="py-24 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+        <div className="max-w-6xl mx-auto px-5">
+          {/* Banner */}
+          <div
+            className="p-8 sm:p-12 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 glass-panel glow-card-lime mb-16 border border-[#d4f43e]/40"
+          >
+            <div className="space-y-2 text-center md:text-left">
+              <h2 className="text-2xl sm:text-3xl font-extrabold font-heading text-[var(--text-primary)]">
+                Ready to safeguard your facility operations?
+              </h2>
+              <p className="text-sm text-[var(--text-secondary)]">
+                Select a coverage plan or discuss a custom schedule with our team.
               </p>
             </div>
-            <div className="space-y-3">
-              {[
-                { icon: MailIcon, label: "Email", value: "support@voltops.example" },
-                { icon: PhoneIcon, label: "Phone", value: "+880 1XXX-XXXXXX" },
-                { icon: MapPinIcon, label: "Coordination Center", value: "Dhaka, Bangladesh" },
-              ].map(({ icon: Icon, label, value }) => (
-                <div key={label} className={`flex items-center gap-3.5 p-3.5 rounded-xl border ${surface}`}>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-[var(--bg-surface-2)] text-[var(--accent)] shrink-0">
-                    <Icon size={18} />
-                  </div>
-                  <div>
-                    <span className={`text-xs font-semibold block ${textMuted}`}>{label}</span>
-                    <span className={`text-sm ${textSecondary}`}>{value}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <a
+              href="#packages"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-xs font-bold bg-[#d4f43e] text-[#06090e] shrink-0 shadow-md hover:bg-[#e2f865] transition-all"
+            >
+              <span>View Plans</span>
+              <ArrowRightIcon size={14} />
+            </a>
           </div>
 
-          {/* Contact form */}
-          <div className="lg:col-span-7">
-            <div className={`p-7 rounded-2xl border shadow-[var(--shadow-sm)] ${surface}`}>
-              <h3 className={`text-lg font-bold font-heading mb-1 ${textPrimary}`}>Send an inquiry</h3>
-              <p className={`text-xs mb-5 ${textMuted}`}>
-                This form is for sales and facility inquiries only. For emergency repairs, please subscribe and log in to dispatch.
-              </p>
-              {contactDone ? (
-                <div className="p-4 rounded-xl text-sm border flex items-center gap-2" style={{ background: "rgba(30,130,76,0.08)", borderColor: "#1E824C", color: "#1E824C" }}>
-                  <CheckCircleIcon size={18} />
-                  <span>Thank you! Your inquiry has been noted. Our team will reply within one working day.</span>
-                </div>
-              ) : (
-                <form onSubmit={handleContact} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 text-left">
+            {/* Contact info */}
+            <div className="lg:col-span-5 space-y-5">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-[#d4f43e] dark:text-[#d4f43e] text-emerald-700">
+                  Direct Inquiries
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-bold font-heading mt-2 text-[var(--text-primary)]">
+                  Talk with our team
+                </h2>
+                <p className="text-sm mt-2 text-[var(--text-muted)]">
+                  Enterprise facility questions or multiple sites? Send our coordination desk a message.
+                </p>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { icon: MailIcon, label: "Email", value: "support@voltops.example" },
+                  { icon: PhoneIcon, label: "Phone", value: "+880 1XXX-XXXXXX" },
+                  { icon: MapPinIcon, label: "Coordination Center", value: "Dhaka, Bangladesh" },
+                ].map(({ icon: Icon, label, value }) => (
+                  <div key={label} className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-[var(--border)] glass-panel">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#d4f43e] shrink-0">
+                      <Icon size={17} />
+                    </div>
                     <div>
-                      <label className={`block text-xs font-semibold mb-1 ${textSecondary}`}>Your Name</label>
+                      <span className="text-[11px] font-semibold block text-[var(--text-muted)]">{label}</span>
+                      <span className="text-xs font-medium text-[var(--text-secondary)]">{value}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Contact form */}
+            <div className="lg:col-span-7">
+              <div className="p-7 rounded-3xl border border-[var(--border)] glass-panel shadow-sm">
+                <h3 className="text-lg font-bold font-heading mb-1 text-[var(--text-primary)]">Send an inquiry</h3>
+                <p className="text-xs mb-5 text-[var(--text-muted)]">
+                  For sales and facility scheduling inquiries. For emergency repairs, subscribe and log in to dispatch.
+                </p>
+                {contactDone ? (
+                  <div className="p-4 rounded-2xl text-sm border flex items-center gap-2 border-emerald-500 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    <CheckCircleIcon size={18} />
+                    <span>Thank you! Your inquiry has been noted. Our team will reply within one working day.</span>
+                  </div>
+                ) : (
+                  <form onSubmit={handleContact} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold mb-1 text-[var(--text-secondary)]">Your Name</label>
+                        <input
+                          type="text"
+                          required
+                          value={cName}
+                          onChange={(e) => setCName(e.target.value)}
+                          placeholder="Karim Rahman"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#d4f43e]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold mb-1 text-[var(--text-secondary)]">Business Email</label>
+                        <input
+                          type="email"
+                          required
+                          value={cEmail}
+                          onChange={(e) => setCEmail(e.target.value)}
+                          placeholder="you@company.com"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#d4f43e]"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold mb-1 text-[var(--text-secondary)]">Company / Facility Name</label>
                       <input
                         type="text"
-                        required
-                        value={cName}
-                        onChange={(e) => setCName(e.target.value)}
-                        placeholder="Karim Rahman"
-                        className="w-full px-3.5 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-                        style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                        value={cCompany}
+                        onChange={(e) => setCCompany(e.target.value)}
+                        placeholder="Apex Galleria Ltd."
+                        className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#d4f43e]"
                       />
                     </div>
                     <div>
-                      <label className={`block text-xs font-semibold mb-1 ${textSecondary}`}>Business Email</label>
-                      <input
-                        type="email"
+                      <label className="block text-xs font-semibold mb-1 text-[var(--text-secondary)]">Message</label>
+                      <textarea
+                        rows={4}
                         required
-                        value={cEmail}
-                        onChange={(e) => setCEmail(e.target.value)}
-                        placeholder="you@company.com"
-                        className="w-full px-3.5 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-                        style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                        value={cMsg}
+                        onChange={(e) => setCMsg(e.target.value)}
+                        placeholder="Tell us about your facility locations and coverage requirements..."
+                        className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#d4f43e] resize-none"
                       />
                     </div>
-                  </div>
-                  <div>
-                    <label className={`block text-xs font-semibold mb-1 ${textSecondary}`}>Company / Facility Name</label>
-                    <input
-                      type="text"
-                      value={cCompany}
-                      onChange={(e) => setCCompany(e.target.value)}
-                      placeholder="Apex Galleria Ltd."
-                      className="w-full px-3.5 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-                      style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-                    />
-                  </div>
-                  <div>
-                    <label className={`block text-xs font-semibold mb-1 ${textSecondary}`}>Message</label>
-                    <textarea
-                      rows={4}
-                      required
-                      value={cMsg}
-                      onChange={(e) => setCMsg(e.target.value)}
-                      placeholder="Tell us about your facility locations and coverage requirements..."
-                      className="w-full px-3.5 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-[var(--accent)] resize-none"
-                      style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-95 active:scale-[0.98]"
-                    style={{ background: "var(--accent)" }}
-                  >
-                    <span>Send Message</span>
-                    <ArrowRightIcon size={14} />
-                  </button>
-                </form>
-              )}
+                    <button
+                      type="submit"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs font-bold bg-[#d4f43e] text-[#06090e] hover:bg-[#e2f865] transition-all shadow-md"
+                    >
+                      <span>Send Message</span>
+                      <ArrowRightIcon size={14} />
+                    </button>
+                  </form>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className={`border-t py-8 ${borderColor}`} style={{ background: "var(--bg-surface)" }}>
-        <div className="max-w-7xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <footer className="border-t border-[var(--border)] py-8 bg-[var(--bg-surface)]">
+        <div className="max-w-6xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div className="flex items-center gap-2.5">
-            <LogoMark size={28} />
-            <span className={`text-xs font-semibold ${textSecondary}`}>
+            <LogoMark size={26} />
+            <span className="text-xs font-semibold text-[var(--text-secondary)]">
               © 2026 VoltOps · Subscription-based field service coordination
             </span>
           </div>
-          <div className={`text-xs ${textMuted}`}>CSE 400 project, BUBT</div>
+          <div className="text-xs text-[var(--text-muted)]">CSE 400 project, BUBT</div>
         </div>
       </footer>
+
     </div>
   );
 }
