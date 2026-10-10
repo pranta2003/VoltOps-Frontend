@@ -7,92 +7,95 @@
 
 /* ── CSS Custom Properties: Theme Tokens ────────────────────────────── */
 :root {
-  /* Surface colors */
-  --bg-base: #f8f6f0;        /* warm ivory page background */
-  --bg-surface: #ffffff;     /* cards, panels */
-  --bg-surface-2: #f2ede4;   /* secondary surface, hover tints */
-  --bg-surface-3: #eae3d8;   /* raised / interactive background */
-  --bg-overlay: #ffffffd6;   /* translucent navbar/panel with blur */
+  /* Surface colors — Light Mode (Warm Ivory & Organic Alabaster) */
+  --bg-base: #f7f6f0;        /* warm ivory page background */
+  --bg-surface: rgba(255, 255, 255, 0.88); /* frosted card surface */
+  --bg-surface-2: #f0ebe0;   /* secondary surface, hover tints */
+  --bg-surface-3: #e6dfd2;   /* raised / interactive background */
+  --bg-overlay: rgba(247, 246, 240, 0.85); /* translucent navbar with blur */
 
   /* Border */
-  --border: #e2dbcf;
-  --border-strong: #c8bfae;
-  --border-subtle: #eeea7e0;
+  --border: #e3dcd0;
+  --border-strong: rgba(22, 101, 52, 0.4);
+  --border-subtle: #eae4d8;
 
   /* Text */
-  --text-primary: #121921;   /* rich obsidian for headlines */
-  --text-secondary: #3d4a54; /* crisp body copy */
-  --text-muted: #72808c;     /* captions, metadata */
+  --text-primary: #0f1720;   /* rich ink obsidian */
+  --text-secondary: #334155; /* crisp slate */
+  --text-muted: #64748b;     /* captions, metadata */
   --text-inverse: #ffffff;
 
-  /* Accent */
-  --accent: #176577;         /* signature deep teal */
-  --accent-hover: #104e5d;
-  --accent-text: #0d424e;
-  --accent-subtle: rgba(23, 101, 119, 0.08);
-  --accent-glow: rgba(23, 101, 119, 0.18);
+  /* Accent — Deep forest emerald with lime highlight */
+  --accent: #15803d;
+  --accent-hover: #166534;
+  --accent-text: #14532d;
+  --accent-subtle: rgba(21, 128, 61, 0.08);
+  --accent-glow: rgba(21, 128, 61, 0.22);
 
-  /* Warm accent */
-  --amber-accent: #c26c19;
-  --amber-subtle: rgba(194, 108, 25, 0.10);
+  --lime-accent: #65a30d;
+  --amber-accent: #d97706;
+  --amber-subtle: rgba(217, 119, 6, 0.10);
 
   /* Atmospheric hero glows (light mode) */
-  --hero-glow-1: rgba(30, 144, 170, 0.14);
-  --hero-glow-2: rgba(45, 180, 190, 0.10);
-  --hero-glow-3: rgba(217, 130, 43, 0.08);
+  --hero-glow-1: rgba(101, 163, 13, 0.13);
+  --hero-glow-2: rgba(21, 128, 61, 0.10);
+  --hero-glow-3: rgba(217, 119, 6, 0.07);
 
   /* Shadow */
-  --shadow-sm: 0 1px 3px rgba(18, 25, 33, 0.04), 0 1px 2px rgba(18, 25, 33, 0.02);
-  --shadow-md: 0 4px 16px rgba(18, 25, 33, 0.06), 0 1px 4px rgba(18, 25, 33, 0.04);
-  --shadow-lg: 0 12px 36px rgba(18, 25, 33, 0.09), 0 2px 8px rgba(18, 25, 33, 0.04);
-  --shadow-float: 0 20px 48px rgba(18, 25, 33, 0.12);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 32, 0.04), 0 1px 2px rgba(15, 23, 32, 0.02);
+  --shadow-md: 0 6px 20px rgba(15, 23, 32, 0.06), 0 2px 6px rgba(15, 23, 32, 0.03);
+  --shadow-lg: 0 16px 40px rgba(15, 23, 32, 0.09), 0 4px 12px rgba(15, 23, 32, 0.04);
+  --shadow-float: 0 24px 56px rgba(15, 23, 32, 0.12);
 
   /* Status */
-  --status-available: #167a44;
+  --status-available: #15803d;
   --status-danger: #b3261e;
 }
 
 .dark {
-  --bg-base: #060b13;        /* atmospheric deep midnight navy */
-  --bg-surface: #0b1320;     /* layered card surfaces */
-  --bg-surface-2: #101c2e;   /* raised panels */
-  --bg-surface-3: #16263d;   /* active / focus elements */
-  --bg-overlay: #070d18e0;   /* translucent navbar with blur */
+  /* Surface colors — Dark Mode (Deep Midnight Obsidian + Chartreuse Accent) */
+  --bg-base: #06090e;        /* atmospheric organic midnight base */
+  --bg-surface: rgba(14, 20, 29, 0.72);  /* translucent smoked glass */
+  --bg-surface-2: rgba(20, 29, 43, 0.85); /* raised frosted panels */
+  --bg-surface-3: rgba(27, 39, 58, 0.95); /* active / focus elements */
+  --bg-overlay: rgba(6, 9, 14, 0.82);    /* translucent navbar with blur */
 
-  --border: #182638;
-  --border-strong: #23364f;
-  --border-subtle: #121c29;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(212, 244, 62, 0.35);
+  --border-subtle: rgba(255, 255, 255, 0.05);
 
-  --text-primary: #f1f5f9;
+  --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
-  --text-muted: #576d87;
-  --text-inverse: #060b13;
+  --text-muted: #627288;
+  --text-inverse: #06090e;
 
-  --accent: #38bdf8;         /* luminescent cyan */
-  --accent-hover: #7dd3fc;
-  --accent-text: #38bdf8;
-  --accent-subtle: rgba(56, 189, 248, 0.10);
-  --accent-glow: rgba(56, 189, 248, 0.28);
+  /* Accent — Luminous Chartreuse / Electric Lime from Synergeus reference */
+  --accent: #d4f43e;
+  --accent-hover: #e2f865;
+  --accent-text: #d4f43e;
+  --accent-subtle: rgba(212, 244, 62, 0.12);
+  --accent-glow: rgba(212, 244, 62, 0.32);
 
+  --lime-accent: #d4f43e;
   --amber-accent: #f59e0b;
   --amber-subtle: rgba(245, 158, 11, 0.12);
 
-  /* Atmospheric hero glows (dark mode) */
-  --hero-glow-1: rgba(56, 189, 248, 0.16);
-  --hero-glow-2: rgba(20, 184, 166, 0.12);
-  --hero-glow-3: rgba(245, 158, 11, 0.08);
+  /* Atmospheric hero glows (dark mode: chartreuse canopy + emerald + amber) */
+  --hero-glow-1: rgba(212, 244, 62, 0.18);
+  --hero-glow-2: rgba(16, 185, 129, 0.14);
+  --hero-glow-3: rgba(245, 158, 11, 0.09);
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.60);
-  --shadow-float: 0 24px 56px rgba(0, 0, 0, 0.70);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.70);
+  --shadow-float: 0 28px 64px rgba(0, 0, 0, 0.85);
 }
 
 body {
   background-color: var(--bg-base);
   color: var(--text-primary);
   @apply font-sans antialiased;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3, h4, .font-heading {
@@ -100,9 +103,22 @@ h1, h2, h3, h4, .font-heading {
   letter-spacing: -0.025em;
 }
 
-/* ── Refined glass card ──────────────────────────────────────────────── */
+.font-serif-italic {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  color: #15803d;
+}
+
+.dark .font-serif-italic {
+  color: #d4f43e;
+}
+
+/* ── Frosted Smoked Glass Card ──────────────────────────────────────── */
 .glass-panel {
   background: var(--bg-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -122,6 +138,23 @@ h1, h2, h3, h4, .font-heading {
 }
 .hero-glow-blob-3 {
   background: radial-gradient(circle at center, var(--hero-glow-3) 0%, transparent 65%);
+}
+
+/* ── Individual Jewel-Tone Card Glows ────────────────────────────────── */
+.glow-card-lime {
+  background: radial-gradient(circle at 50% 0%, rgba(212, 244, 62, 0.15) 0%, transparent 70%), var(--bg-surface);
+}
+.glow-card-emerald {
+  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.15) 0%, transparent 70%), var(--bg-surface);
+}
+.glow-card-amber {
+  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.15) 0%, transparent 70%), var(--bg-surface);
+}
+.glow-card-cyan {
+  background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 70%), var(--bg-surface);
+}
+.glow-card-indigo {
+  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 70%), var(--bg-surface);
 }
 
 /* ── Scrollbar hiding utility ────────────────────────────────────────── */
