@@ -129,25 +129,77 @@ h1, h2, h3, h4, .font-heading {
   border-color: var(--border-strong);
 }
 
-/* ── Dynamic Slow Motion Animation for Cards (Professional SaaS feel) ─── */
+/* ── Typography for Card Titles (Outfit - Sleek Geometric SaaS Letterforms) ── */
+.font-card-title {
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.025em;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* ── Dynamic Pop-Up and Slow Motion Animation for Cards ─────────── */
+@keyframes card-pop-up {
+  0% {
+    opacity: 0;
+    transform: translateY(38px) scale(0.92);
+  }
+  60% {
+    transform: translateY(-5px) scale(1.018);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+@keyframes card-slow-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+/* Entrance pop-up triggered on scroll reveal */
+.card-pop-in {
+  animation: card-pop-up 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+.pop-delay-0 { animation-delay: 0.05s; }
+.pop-delay-1 { animation-delay: 0.18s; }
+.pop-delay-2 { animation-delay: 0.31s; }
+.pop-delay-3 { animation-delay: 0.44s; }
+.pop-delay-4 { animation-delay: 0.57s; }
+.pop-delay-5 { animation-delay: 0.70s; }
+
+/* Subtle continuous slow motion wave float (gentle SaaS levitation) */
+.card-slow-float-0 { animation: card-slow-float 7.2s ease-in-out infinite; animation-delay: 0s; }
+.card-slow-float-1 { animation: card-slow-float 7.8s ease-in-out infinite; animation-delay: 1.4s; }
+.card-slow-float-2 { animation: card-slow-float 6.9s ease-in-out infinite; animation-delay: 2.8s; }
+.card-slow-float-3 { animation: card-slow-float 7.5s ease-in-out infinite; animation-delay: 4.2s; }
+.card-slow-float-4 { animation: card-slow-float 8.1s ease-in-out infinite; animation-delay: 5.6s; }
+
 .premium-card-motion {
   position: relative;
-  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.45s ease;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.4s ease;
   will-change: transform, box-shadow;
 }
 
 .premium-card-motion:hover {
-  transform: translateY(-7px) scale(1.012);
-  z-index: 10;
-  box-shadow: 0 20px 40px -10px rgba(15, 23, 32, 0.12),
-              0 0 24px -4px rgba(16, 185, 129, 0.18);
+  transform: translateY(-11px) scale(1.022) !important;
+  z-index: 25;
+  box-shadow: 0 24px 48px -10px rgba(15, 23, 32, 0.16),
+              0 0 28px -2px rgba(16, 185, 129, 0.26);
+  animation-play-state: paused;
 }
 
 .dark .premium-card-motion:hover {
-  box-shadow: 0 24px 48px -10px rgba(0, 0, 0, 0.75),
-              0 0 28px -4px rgba(16, 185, 129, 0.30);
+  box-shadow: 0 28px 56px -10px rgba(0, 0, 0, 0.85),
+              0 0 32px -2px rgba(16, 185, 129, 0.38);
+  animation-play-state: paused;
 }
 
 /* ── Ambient Radial Glows ────────────────────────────────────────────── */

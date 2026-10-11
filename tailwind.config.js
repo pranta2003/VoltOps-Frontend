@@ -22,6 +22,10 @@ export default {
       fontFamily: {
         sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
         heading: ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+        outfit: ["'Outfit'", "'Plus Jakarta Sans'", "sans-serif"],
+        display: ["'Outfit'", "'Plus Jakarta Sans'", "sans-serif"],
+        space: ["'Space Grotesk'", "sans-serif"],
+        syne: ["'Syne'", "sans-serif"],
         serif: ["'Playfair Display'", "Georgia", "serif"],
       },
       keyframes: {

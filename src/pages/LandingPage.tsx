@@ -1,6 +1,35 @@
-import { useState, useEffect, FormEvent, CSSProperties, FC } from "react";
+import { useState, useEffect, useRef, FormEvent, CSSProperties, FC } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme, ThemePreference } from "../context/ThemeContext";
+
+// ── Viewport Scroll Reveal Hook for Pop-Up & Slow Motion Animations ───────
+function useSectionReveal() {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setRevealed(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setRevealed(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -30px 0px" }
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, revealed] as const;
+}
 import {
   IconProps,
   ZapIcon,
@@ -204,6 +233,11 @@ export function LandingPage() {
   const navigate = useNavigate();
   const { resolved } = useTheme();
   const isDark = resolved === "dark";
+
+  // Viewport scroll reveal hooks for dynamic pop-up & slow motion animations
+  const [servicesRef, servicesRevealed] = useSectionReveal();
+  const [packagesRef, packagesRevealed] = useSectionReveal();
+  const [workspacesRef, workspacesRevealed] = useSectionReveal();
 
   // Page title
   useEffect(() => {
@@ -676,8 +710,8 @@ export function LandingPage() {
           </p>
         </div>
 
-        {/* 5 Core Service Cards (Centered, Refined Typography, Slow Motion) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 items-stretch">
+        {/* 5 Core Service Cards (Centered, Refined Typography, Pop-Up & Slow Motion) */}
+        <div ref={servicesRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 items-stretch">
           {CORE_SERVICES.map((trade, idx) => {
             const TradeIcon = trade.icon;
             const isWide = idx >= 3;
@@ -686,7 +720,9 @@ export function LandingPage() {
                 key={trade.id}
                 className={`p-7 sm:p-8 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion ${trade.glowClass} flex flex-col items-center justify-between text-center shadow-[var(--shadow-sm)] group ${
                   isWide ? "lg:col-span-3" : "lg:col-span-2"
-                }`}
+                } ${
+                  servicesRevealed ? `card-pop-in pop-delay-${idx}` : "opacity-0 translate-y-8"
+                } card-slow-float-${idx % 5}`}
               >
                 <div className="flex flex-col items-center text-center w-full space-y-4">
                   {/* Centered Trade Icon with accent color glow */}
@@ -713,9 +749,9 @@ export function LandingPage() {
                     <span>Arrival SLA · {trade.slaBadge}</span>
                   </span>
 
-                  {/* Centered Title & Minimal Description */}
+                  {/* Centered Title & Minimal Description (Outfit Modern SaaS Letterforms) */}
                   <div className="space-y-1.5 pt-1">
-                    <h3 className="text-xl sm:text-[22px] font-bold font-heading text-[var(--text-primary)] tracking-normal text-center">
+                    <h3 className="text-xl sm:text-[22px] font-bold font-card-title text-[var(--text-primary)] tracking-tight text-center">
                       {trade.title}
                     </h3>
                     <p className="text-[13px] text-slate-600 dark:text-slate-300 text-center leading-relaxed max-w-xs mx-auto font-normal">
@@ -943,14 +979,16 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* 4 Plan Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
+        {/* 4 Plan Cards (Pop-Up & Slow Motion) */}
+        <div ref={packagesRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
 
           {/* Plan A: 8-Hour Daily */}
-          <div className="p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)]">
+          <div className={`p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] ${
+            packagesRevealed ? "card-pop-in pop-delay-0" : "opacity-0 translate-y-8"
+          } card-slow-float-0`}>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-white">8-Hour Daily</h3>
+                <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">8-Hour Daily</h3>
                 <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-slate-600 dark:text-slate-400">
                   Plan A
                 </span>
@@ -982,10 +1020,12 @@ export function LandingPage() {
           </div>
 
           {/* Plan B: 24/7 Standard */}
-          <div className="p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)]">
+          <div className={`p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] ${
+            packagesRevealed ? "card-pop-in pop-delay-1" : "opacity-0 translate-y-8"
+          } card-slow-float-1`}>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-white">24/7 Standard</h3>
+                <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">24/7 Standard</h3>
                 <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
                   Plan B
                 </span>
@@ -1022,7 +1062,9 @@ export function LandingPage() {
 
           {/* Plan C: 24/7 Priority — FEATURED WITH EMERALD GLOW */}
           <div
-            className="p-7 rounded-[32px] border-2 border-[#10b981] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between relative shadow-[0_0_32px_rgba(16,185,129,0.22)]"
+            className={`p-7 rounded-[32px] border-2 border-[#10b981] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between relative shadow-[0_0_32px_rgba(16,185,129,0.22)] ${
+              packagesRevealed ? "card-pop-in pop-delay-2" : "opacity-0 translate-y-8"
+            } card-slow-float-2`}
           >
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#10b981] text-[#06090e] text-xs font-bold uppercase tracking-wider shadow flex items-center gap-1">
               <ZapIcon size={12} />
@@ -1031,7 +1073,7 @@ export function LandingPage() {
 
             <div className="space-y-4 mt-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-white">24/7 Priority</h3>
+                <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">24/7 Priority</h3>
                 <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-[#10b981]/20 text-[#10b981] dark:text-[#34d399] border border-[#10b981]/40">
                   Plan C
                 </span>
@@ -1068,10 +1110,12 @@ export function LandingPage() {
           </div>
 
           {/* Plan D: Custom Coverage */}
-          <div className="p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)]">
+          <div className={`p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] ${
+            packagesRevealed ? "card-pop-in pop-delay-3" : "opacity-0 translate-y-8"
+          } card-slow-float-3`}>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-white">Custom Coverage</h3>
+                <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">Custom Coverage</h3>
                 <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-slate-600 dark:text-slate-400">
                   Plan D
                 </span>
@@ -1162,18 +1206,23 @@ export function LandingPage() {
               Tailored tools for every stakeholder
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div ref={workspacesRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
               { icon: BuildingIcon, title: "Business Customer", body: "Submit problems, monitor arrival countdowns, review equipment history, and approve digital invoices.", glow: "glow-card-emerald" },
               { icon: RadioIcon, title: "Dispatcher Console", body: "Review incoming requests, compare candidates with transparent scores, enforce SLAs, and confirm assignments.", glow: "glow-card-amber" },
               { icon: WrenchIcon, title: "Field Technician", body: "Access today's job roster, update travel and on-site progress, manage certifications, and report completion.", glow: "glow-card-cyan" },
               { icon: SettingsIcon, title: "Administrator", body: "Oversee workforce accounts, review audit trails, monitor SLA breach reports, and configure service boundaries.", glow: "glow-card-indigo" },
-            ].map(({ icon: Icon, title, body, glow }) => (
-              <div key={title} className={`p-6 rounded-[28px] border border-[var(--border)] glass-panel premium-card-motion ${glow} shadow-[var(--shadow-sm)]`}>
+            ].map(({ icon: Icon, title, body, glow }, idx) => (
+              <div
+                key={title}
+                className={`p-6 rounded-[28px] border border-[var(--border)] glass-panel premium-card-motion ${glow} shadow-[var(--shadow-sm)] ${
+                  workspacesRevealed ? `card-pop-in pop-delay-${idx}` : "opacity-0 translate-y-8"
+                } card-slow-float-${idx}`}
+              >
                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#10b981] dark:text-[#34d399] mb-4">
                   <Icon size={20} />
                 </div>
-                <h3 className="font-bold font-heading text-base text-[var(--text-primary)] mb-2">{title}</h3>
+                <h3 className="font-bold font-card-title text-base sm:text-lg text-[var(--text-primary)] mb-2">{title}</h3>
                 <p className="text-xs leading-relaxed text-[var(--text-secondary)] font-normal">{body}</p>
               </div>
             ))}
