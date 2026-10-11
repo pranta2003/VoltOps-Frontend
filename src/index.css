@@ -129,6 +129,27 @@ h1, h2, h3, h4, .font-heading {
   border-color: var(--border-strong);
 }
 
+/* ── Dynamic Slow Motion Animation for Cards (Professional SaaS feel) ─── */
+.premium-card-motion {
+  position: relative;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.45s ease;
+  will-change: transform, box-shadow;
+}
+
+.premium-card-motion:hover {
+  transform: translateY(-7px) scale(1.012);
+  z-index: 10;
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 32, 0.12),
+              0 0 24px -4px rgba(16, 185, 129, 0.18);
+}
+
+.dark .premium-card-motion:hover {
+  box-shadow: 0 24px 48px -10px rgba(0, 0, 0, 0.75),
+              0 0 28px -4px rgba(16, 185, 129, 0.30);
+}
+
 /* ── Ambient Radial Glows ────────────────────────────────────────────── */
 .hero-glow-blob-1 {
   background: radial-gradient(circle at center, var(--hero-glow-1) 0%, transparent 70%);

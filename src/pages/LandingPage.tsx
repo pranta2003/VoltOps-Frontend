@@ -51,9 +51,9 @@ const CORE_SERVICES: ServiceTrade[] = [
     accentColor: "#38bdf8",
     glowClass: "glow-card-cyan",
     badge: "AC / HVAC",
-    simpleIssue: "Chillers, split ACs, or gas leaks",
+    simpleIssue: "Chiller trips, split ACs, or gas leaks",
     slaBadge: "20–40 Min",
-    simpleDesc: "Emergency repairs for commercial ACs, chillers, and cooling systems.",
+    simpleDesc: "Central chillers, cooling plants, and HVAC systems.",
     simplePoints: ["Central ACs & Chillers", "Gas Leaks & Cooling", "Fast Part Replacement"],
   },
   {
@@ -63,9 +63,9 @@ const CORE_SERVICES: ServiceTrade[] = [
     accentColor: "#f59e0b",
     glowClass: "glow-card-amber",
     badge: "Electrical",
-    simpleIssue: "Breaker trips, outages, or generator failure",
+    simpleIssue: "Breaker trips, outages, or generator fault",
     slaBadge: "20–40 Min",
-    simpleDesc: "Licensed electricians on site to restore power, panels, and generators.",
+    simpleDesc: "Power restoration, backup generators, and electrical panels.",
     simplePoints: ["Backup Generators", "Main Breaker Trips", "Short Circuits & Wiring"],
   },
   {
@@ -75,9 +75,9 @@ const CORE_SERVICES: ServiceTrade[] = [
     accentColor: "#a855f7",
     glowClass: "glow-card-purple",
     badge: "Security",
-    simpleIssue: "Cameras offline or door locks stuck",
+    simpleIssue: "Cameras offline or door access stuck",
     slaBadge: "20–40 Min",
-    simpleDesc: "Quick repairs for CCTV systems, DVR recorders, and access doors.",
+    simpleDesc: "Surveillance cameras, biometric locks, and access control.",
     simplePoints: ["Offline CCTV Cameras", "Biometric Door Access", "Gates & Security Alarms"],
   },
   {
@@ -87,9 +87,9 @@ const CORE_SERVICES: ServiceTrade[] = [
     accentColor: "#10b981",
     glowClass: "glow-card-emerald",
     badge: "Network & IT",
-    simpleIssue: "Office Wi-Fi down or router failure",
+    simpleIssue: "Wi-Fi outage, router fault, or POS line down",
     slaBadge: "20–40 Min",
-    simpleDesc: "Network engineers to fix office Wi-Fi, switches, and internet lines.",
+    simpleDesc: "Office networks, server rack switches, and line connectivity.",
     simplePoints: ["Office Wi-Fi & Routers", "Server Racks & Switches", "Billing & POS Lines"],
   },
   {
@@ -99,9 +99,9 @@ const CORE_SERVICES: ServiceTrade[] = [
     accentColor: "#f43f5e",
     glowClass: "glow-card-indigo",
     badge: "Plumbing & Fixes",
-    simpleIssue: "Water pipe bursts or jammed doors",
+    simpleIssue: "Pipe bursts, jammed doors, or water leaks",
     slaBadge: "20–40 Min",
-    simpleDesc: "Emergency plumbing, automatic glass doors, and building upkeep.",
+    simpleDesc: "Water supply lines, glass doors, and facility upkeep.",
     simplePoints: ["Water Pipe Bursts", "Glass & Auto Doors", "General Building Upkeep"],
   },
 ];
@@ -421,7 +421,7 @@ export function LandingPage() {
             style={{
               background: isDark
                 ? "radial-gradient(ellipse 85% 70% at 50% 35%, rgba(6,9,14,0.40) 0%, rgba(6,9,14,0.85) 60%, var(--bg-base) 100%)"
-                : "radial-gradient(ellipse 90% 75% at 50% 32%, rgba(247,246,240,0.18) 0%, rgba(247,246,240,0.52) 58%, var(--bg-base) 100%)",
+                : "radial-gradient(ellipse 90% 75% at 50% 32%, rgba(247,246,240,0.85) 0%, rgba(247,246,240,0.60) 40%, rgba(247,246,240,0.25) 72%, var(--bg-base) 100%)",
             }}
           />
           {/* Bottom fade into page */}
@@ -443,9 +443,9 @@ export function LandingPage() {
           </h1>
 
           {/* Luminous, clean, refined subtitle */}
-          <p className="text-base sm:text-xl text-slate-800 dark:text-slate-200 max-w-2xl mx-auto font-normal leading-relaxed mt-5 tracking-tight">
+          <p className="text-base sm:text-lg lg:text-xl font-heading font-medium text-slate-950 dark:text-slate-100 max-w-2xl mx-auto leading-relaxed mt-5 tracking-tight drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] dark:drop-shadow-none">
             One unified subscription for building repairs — verified licensed technicians at your door in{" "}
-            <span className="font-semibold text-emerald-600 dark:text-[#34d399] underline decoration-emerald-500/40 underline-offset-4">
+            <span className="font-bold text-emerald-700 dark:text-[#34d399] underline decoration-emerald-500/50 underline-offset-4">
               20 to 40 minutes
             </span>.
           </p>
@@ -676,7 +676,7 @@ export function LandingPage() {
           </p>
         </div>
 
-        {/* 5 Core Service Cards (Centered, Balanced Typography, Minimal Copy) */}
+        {/* 5 Core Service Cards (Centered, Refined Typography, Slow Motion) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 items-stretch">
           {CORE_SERVICES.map((trade, idx) => {
             const TradeIcon = trade.icon;
@@ -684,14 +684,14 @@ export function LandingPage() {
             return (
               <div
                 key={trade.id}
-                className={`p-7 sm:p-8 rounded-[32px] border border-[var(--border)] glass-panel ${trade.glowClass} flex flex-col items-center justify-between text-center hover:-translate-y-1.5 transition-all duration-300 shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] group ${
+                className={`p-7 sm:p-8 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion ${trade.glowClass} flex flex-col items-center justify-between text-center shadow-[var(--shadow-sm)] group ${
                   isWide ? "lg:col-span-3" : "lg:col-span-2"
                 }`}
               >
                 <div className="flex flex-col items-center text-center w-full space-y-4">
                   {/* Centered Trade Icon with accent color glow */}
                   <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto transition-transform duration-300 group-hover:scale-110 shadow-sm"
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto transition-transform duration-500 group-hover:scale-110 shadow-sm"
                     style={{
                       backgroundColor: `${trade.accentColor}18`,
                       color: trade.accentColor,
@@ -715,23 +715,23 @@ export function LandingPage() {
 
                   {/* Centered Title & Minimal Description */}
                   <div className="space-y-1.5 pt-1">
-                    <h3 className="text-2xl font-extrabold font-heading text-[var(--text-primary)] tracking-tight text-center">
+                    <h3 className="text-xl sm:text-[22px] font-bold font-heading text-[var(--text-primary)] tracking-normal text-center">
                       {trade.title}
                     </h3>
-                    <p className="text-xs text-slate-700 dark:text-slate-300 text-center leading-relaxed max-w-xs mx-auto">
+                    <p className="text-[13px] text-slate-600 dark:text-slate-300 text-center leading-relaxed max-w-xs mx-auto font-normal">
                       {trade.simpleDesc}
                     </p>
                   </div>
 
                   {/* Centered Example Scenario */}
-                  <div className="w-full py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-slate-600 dark:text-slate-300 italic text-center font-medium">
+                  <div className="w-full py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-slate-700 dark:text-slate-300 text-center font-medium">
                     "{trade.simpleIssue}"
                   </div>
 
                   {/* Centered 3 Bullet Points */}
                   <div className="w-full space-y-2 pt-3 border-t border-[var(--border)]">
                     {trade.simplePoints.map((pt) => (
-                      <div key={pt} className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
+                      <div key={pt} className="flex items-center justify-center gap-2 text-xs font-medium text-slate-800 dark:text-slate-200">
                         <CheckCircleIcon size={14} className="text-emerald-500 shrink-0" />
                         <span>{pt}</span>
                       </div>
@@ -743,7 +743,7 @@ export function LandingPage() {
                 <div className="pt-5 border-t border-[var(--border)] mt-5 w-full">
                   <a
                     href="#packages"
-                    className="w-full py-2.5 rounded-full text-xs font-bold text-center border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#06090e] hover:bg-[#10b981] transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                    className="w-full py-2.5 rounded-full text-xs font-semibold text-center border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#06090e] hover:bg-[#10b981] transition-all flex items-center justify-center gap-1.5 shadow-sm"
                   >
                     <span>View Plans & SLAs</span>
                     <ArrowRightIcon size={12} />
@@ -947,7 +947,7 @@ export function LandingPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
 
           {/* Plan A: 8-Hour Daily */}
-          <div className="p-7 rounded-[32px] border border-[var(--border)] glass-panel flex flex-col justify-between hover:-translate-y-1 transition-all">
+          <div className="p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)]">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-white">8-Hour Daily</h3>
@@ -982,7 +982,7 @@ export function LandingPage() {
           </div>
 
           {/* Plan B: 24/7 Standard */}
-          <div className="p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald flex flex-col justify-between hover:-translate-y-1 transition-all">
+          <div className="p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)]">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-white">24/7 Standard</h3>
@@ -1022,7 +1022,7 @@ export function LandingPage() {
 
           {/* Plan C: 24/7 Priority — FEATURED WITH EMERALD GLOW */}
           <div
-            className="p-7 rounded-[32px] border-2 border-[#10b981] glass-panel glow-card-emerald flex flex-col justify-between relative hover:-translate-y-1 transition-all shadow-[0_0_32px_rgba(16,185,129,0.22)]"
+            className="p-7 rounded-[32px] border-2 border-[#10b981] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between relative shadow-[0_0_32px_rgba(16,185,129,0.22)]"
           >
             <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#10b981] text-[#06090e] text-xs font-bold uppercase tracking-wider shadow flex items-center gap-1">
               <ZapIcon size={12} />
@@ -1068,7 +1068,7 @@ export function LandingPage() {
           </div>
 
           {/* Plan D: Custom Coverage */}
-          <div className="p-7 rounded-[32px] border border-[var(--border)] glass-panel flex flex-col justify-between hover:-translate-y-1 transition-all">
+          <div className="p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)]">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold font-heading text-slate-900 dark:text-white">Custom Coverage</h3>
@@ -1169,7 +1169,7 @@ export function LandingPage() {
               { icon: WrenchIcon, title: "Field Technician", body: "Access today's job roster, update travel and on-site progress, manage certifications, and report completion.", glow: "glow-card-cyan" },
               { icon: SettingsIcon, title: "Administrator", body: "Oversee workforce accounts, review audit trails, monitor SLA breach reports, and configure service boundaries.", glow: "glow-card-indigo" },
             ].map(({ icon: Icon, title, body, glow }) => (
-              <div key={title} className={`p-6 rounded-[28px] border border-[var(--border)] glass-panel ${glow} hover:-translate-y-1 transition-all shadow-[var(--shadow-sm)]`}>
+              <div key={title} className={`p-6 rounded-[28px] border border-[var(--border)] glass-panel premium-card-motion ${glow} shadow-[var(--shadow-sm)]`}>
                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#10b981] dark:text-[#34d399] mb-4">
                   <Icon size={20} />
                 </div>
@@ -1183,8 +1183,8 @@ export function LandingPage() {
 
       {/* ── Section 9: About VoltOps ─────────────────────────────────────── */}
       <section id="about" className="py-24 max-w-6xl mx-auto px-5">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 space-y-5 text-left">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="lg:col-span-6 space-y-3 text-left">
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
               About VoltOps
             </span>
@@ -1194,14 +1194,8 @@ export function LandingPage() {
                 field service coordination
               </span>
             </h2>
-            <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-              VoltOps replaces scattered contractor phone calls with reliable coordination infrastructure — connecting facility managers with vetted technicians across electrical, mechanical, security, IT, and facility upkeep.
-            </p>
-            <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              Every job is backed by guaranteed arrival SLAs, transparent digital tracking, and certified technicians.
-            </p>
           </div>
-          <div className="lg:col-span-5 space-y-3.5">
+          <div className="lg:col-span-6 space-y-3.5">
             {[
               { title: "No uncertified technicians", body: "Trade licenses and safety credentials are confirmed before assignment." },
               { title: "No double bookings", body: "Live location and route matching prevent delayed arrivals." },
