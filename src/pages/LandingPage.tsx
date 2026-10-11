@@ -1418,10 +1418,10 @@ export function LandingPage() {
           <div className="flex items-center gap-2.5">
             <LogoMark size={26} />
             <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-              © 2026 VoltOps · Subscription-based field service coordination
+              © 2026 VoltOps · Technician service & management coordination
             </span>
           </div>
-          <div className="text-xs text-slate-600 dark:text-slate-400">CSE 400 project, BUBT</div>
+          <div className="text-xs text-slate-600 dark:text-slate-400">Team Pranta</div>
         </div>
       </footer>
 
