@@ -1,47 +1,49 @@
 # VoltOps — Frontend
 
-This is the **frontend** for VoltOps (AI-Powered Electrical Workforce & Service
-Management Platform). This is one of two repos for this project:
+This is the **frontend** for VoltOps (AI-Powered Electrical Workforce & Service Management Platform).
 
-- This repo: frontend (React + Vite + TypeScript + Tailwind)
-- **Backend repo:** `<add your backend repo link here once created>` — must be running
-  for this app to actually work (login, data, etc. all come from there)
+- **This repository:** Frontend — React + Vite + TypeScript + Tailwind CSS
+- **Backend repository:** `<add your backend repo link here once created>` — the backend must be running for features such as login and data access to work.
 
-For the full project plan, milestone roadmap, and feature scope, see
-`PROJECT_PLAN.md` in this repo (same file also lives in the backend repo).
+For the full project plan, milestone roadmap, and feature scope, see `PROJECT_PLAN.md` in this repository. The same file also lives in the backend repository.
 
 ---
 
 ## 1. What's already built (Milestone 1)
 
-- Login and registration pages
-- AuthContext — keeps you logged in across page refreshes
-- ProtectedRoute — blocks pages based on login state and role
-- Shared dashboard Layout (sidebar + topbar)
-- One dashboard per role (Admin, Dispatcher, Technician, Customer) — the Technician
-  one is fully functional, showing real skills/certifications/status pulled from the backend
+- Login and registration pages.
+- `AuthContext` — keeps you logged in across page refreshes.
+- `ProtectedRoute` — protects pages based on login state and role.
+- Shared dashboard layout (sidebar + topbar).
+- A dashboard for each role: Admin, Dispatcher, Technician, and Customer. The Technician dashboard is connected to backend skills, certifications, and status data.
 
 ## 2. Prerequisites
 
-- **Node.js** 18+ — https://nodejs.org
-- The **backend repo running** (locally or deployed) — see that repo's README
+- **Node.js 18+** — https://nodejs.org
+- The backend repository running locally or deployed — see its README.
 
 ## 3. First-time setup
+
+Install dependencies:
 
 ```bash
 npm install
 ```
 
+Create your local environment file:
+
 ```bash
-# Windows:
+# Windows CMD:
 copy .env.example .env
+
+# PowerShell:
+Copy-Item .env.example .env
+
 # Mac/Linux/Git Bash:
 cp .env.example .env
 ```
 
-By default, `.env` points at `http://localhost:5000/api` — make sure the backend is
-running there first (see the backend repo's README). If the backend is deployed
-elsewhere, update `VITE_API_URL` to match.
+By default, `.env` points to `http://localhost:5000/api`. Make sure the backend is running there first. If it is deployed elsewhere, update `VITE_API_URL` to the correct backend API URL.
 
 Start the frontend:
 
@@ -49,46 +51,190 @@ Start the frontend:
 npm run dev
 ```
 
-Open the URL shown (usually `http://localhost:5173`).
+Open the URL shown in the terminal (usually `http://localhost:5173`).
 
 ## 4. Try it out
 
-Log in with one of the seeded test accounts from the backend repo (all use password
-`password123`):
-```
+Use one of the seeded test accounts from the backend repository. The documented test password is `password123`:
+
+```text
 admin@voltops.test
 dispatcher@voltops.test
 technician@voltops.test
 customer@voltops.test
 ```
 
+Use test accounts only in local/demo environments.
+
 ## 5. Project structure
 
-```
+```text
 src/
-├── main.tsx             ← entry point
-├── App.tsx              ← all page routes + role-based redirect logic
+├── main.tsx                # Entry point
+├── App.tsx                 # Routes and role-based redirects
 ├── context/
-│   └── AuthContext.tsx  ← who's logged in, available to the whole app
+│   └── AuthContext.tsx     # Shared authentication state
 ├── api/
-│   └── axios.ts         ← talks to the backend, auto-attaches login token
+│   └── axios.ts            # Backend API client and auth token handling
 ├── components/
-│   ├── ProtectedRoute.tsx  ← blocks pages based on login/role
-│   └── Layout.tsx          ← shared sidebar/topbar for all dashboards
-├── pages/                  one file per screen
-└── types/                  shared TypeScript types
+│   ├── ProtectedRoute.tsx  # Role-based route protection
+│   └── Layout.tsx          # Shared dashboard sidebar/topbar
+├── pages/                  # Screens
+└── types/                  # Shared TypeScript types
 ```
 
 ## 6. Deploying
 
-Use https://vercel.com — connect this GitHub repo, set `VITE_API_URL` to your
-deployed backend's URL (from the backend repo), done.
+Use https://vercel.com, connect this GitHub repository, and configure `VITE_API_URL` to point to the deployed backend API URL. Confirm the backend CORS settings allow the deployed frontend origin.
 
 ## 7. Why some things work the way they do
 
-- **Hiding a button for a role is only for a clean UI** — it's not real security. The
-  backend enforces every permission itself, so even if someone tampered with this
-  frontend, the backend would still refuse unauthorized actions. Worth remembering for
-  your viva.
-- **Registering only creates a Customer account** — staff accounts (Admin/Dispatcher/
-  Technician) are created by an Admin, not through this public form.
+- **Hiding a button for a role is not security.** The backend must enforce permissions. The frontend only improves the user experience.
+- **Public registration creates Customer accounts only.** Staff accounts (Admin, Dispatcher, Technician) are created by an Admin, not through the public registration form.
+
+---
+
+# 8. GitHub workflow — প্রতিদিন কাজ শুরু করার আগে
+
+এই অংশটি প্রতিদিন কাজ শুরুর আগে পড়বে। কোনো কমান্ড বুঝতে না পারলে অনুমান করে চালাবে না—টিম লিডকে জিজ্ঞেস করবে।
+
+## আমাদের branch-গুলো
+
+- `main` — stable/shared project branch. এখানে সরাসরি push করা যাবে না।
+- `pranta` — Pranta-র personal working branch.
+- `bani` — Bani-র personal working branch.
+- `meshba` — Mesbah-র personal working branch (আগের design brief-এ Limon নামে ছিল).
+- `prity` — Prity-র personal working branch.
+
+**নিয়ম:** প্রত্যেকে নিজের নামের branch-এ কাজ করবে। অন্য কারও branch-এ অনুমতি ছাড়া commit বা push করবে না। `main`-এ সরাসরি কাজ করবে না।
+
+## 8.1 প্রথমবার নিজের branch setup
+
+নিচের উদাহরণে `bani` ব্যবহার করা হয়েছে। Pranta হলে `pranta`, Mesbah হলে `meshba`, আর Prity হলে `prity` লিখবে।
+
+```bash
+git status
+git fetch origin
+git switch bani
+```
+
+যদি `git switch bani` বলে local branch নেই, তাহলে চালাও:
+
+```bash
+git switch --track origin/bani
+```
+
+তারপর নিশ্চিত হও যে তুমি সঠিক branch-এ আছ:
+
+```bash
+git branch --show-current
+```
+
+Output-এ তোমার নিজের branch-এর নাম থাকতে হবে। ভুল branch দেখালে কোনো ফাইল edit বা commit করবে না।
+
+## 8.2 প্রতিদিন কাজ শুরু করার আগে
+
+প্রথমে বর্তমান কাজ নিরাপদ আছে কি না দেখো:
+
+```bash
+git status
+```
+
+যদি uncommitted changes থাকে, সেগুলো না বুঝে discard, reset বা overwrite করবে না। দরকার হলে আগে commit করো বা টিম লিডের সাহায্য নাও।
+
+তারপর remote-এর সর্বশেষ তথ্য আনো এবং নিজের branch-এ যাও:
+
+```bash
+git fetch origin
+git switch bani
+git log -1 --oneline
+git pull --ff-only origin bani
+```
+
+- `git log -1 --oneline` সর্বশেষ commit দেখায়।
+- `git pull --ff-only origin bani` নিজের remote branch-এর নতুন commit নামায়।
+- `--ff-only` conflict হলে Git-কে জোর করে merge commit বানাতে দেয় না। Command ব্যর্থ হলে থামবে এবং সাহায্য চাইবে।
+
+**সতর্কতা:** যদি তোমার branch-এ local uncommitted changes থাকে, আগে সেগুলো নিরাপদ করো। Pull করার আগে `git status` পরিষ্কার থাকা সবচেয়ে সহজ।
+
+## 8.3 কাজ করার সময়
+
+1. নিজের assigned page/feature-এ কাজ করো।
+2. অন্য teammate-এর ফাইল edit করার আগে তার সঙ্গে কথা বলো, বিশেষ করে shared `App.tsx`, shared components, route, types, API client বা CSS ফাইল হলে।
+3. ছোট ছোট, অর্থপূর্ণ commit করো। কাজের অগ্রগতি নিয়মিত save করো।
+4. `.env`, password, API secret, access token বা private key কখনো GitHub-এ push করবে না।
+5. কাজ শেষে build/test চালাও:
+
+```bash
+npm run build
+```
+
+যদি repository-তে test/lint script থাকে, সেগুলোও চালাও।
+
+## 8.4 নিজের branch-এ code push করার নিয়ম
+
+প্রথমে নিশ্চিত হও যে তুমি নিজের branch-এ আছ:
+
+```bash
+git branch --show-current
+git status
+```
+
+যদি `bani` branch-এ থাকো এবং শুধু তোমার intended files stage করতে চাও:
+
+```bash
+git add path/to/your-file
+git diff --cached
+git commit -m "feat: add service request page"
+git push origin bani
+```
+
+`path/to/your-file`-এর জায়গায় আসল file path লিখবে। একাধিক নির্দিষ্ট file হলে সেগুলো `git add`-এ দিতে পারো। সব পরিবর্তন কার, তা নিশ্চিত না হলে অন্ধভাবে `git add .` চালাবে না।
+
+প্রথমবার local branch remote-এর সঙ্গে যুক্ত না থাকলে:
+
+```bash
+git push -u origin bani
+```
+
+তারপর থেকে সাধারণত `git push origin bani` ব্যবহার করা যাবে।
+
+**খুব গুরুত্বপূর্ণ:** `bani`-র জায়গায় নিজের branch-এর নাম লিখবে। `git push origin main` চালাবে না। ভুল করে `main`-এ push করার চেষ্টা করলে এবং GitHub protection ঠিকভাবে চালু থাকলে push reject হওয়ার কথা—তবুও ভুল কমান্ড না চালানোই নিয়ম।
+
+## 8.5 Feature শেষ হলে Pull Request (PR) কীভাবে করবে
+
+1. নিজের branch-এ সব intended changes commit ও push করো।
+2. GitHub repository খোলো।
+3. **Pull requests → New pull request**-এ যাও।
+4. `base` হবে `main`; `compare` হবে তোমার branch (`bani`, `pranta`, `meshba` বা `prity`)।
+5. Files changed tab-এ diff দেখে নিশ্চিত হও যে অন্যের কাজ, `.env`, অপ্রাসঙ্গিক ফাইল বা অসম্পূর্ণ পরিবর্তন ঢুকে যায়নি।
+6. PR title ও description-এ কী বানিয়েছ, কীভাবে test করেছ, কী বাকি আছে—লিখো।
+7. CI/build checks pass হওয়া এবং reviewer approval না পাওয়া পর্যন্ত merge করবে না। Merge করার অনুমতি টিম লিডের।
+8. PR merge হওয়ার পর তোমার personal branch delete করবে না। এই branch-গুলো team working branch হিসেবে রাখা হবে।
+9. Merge-এর পর নিজের branch-এ ফিরে `main`-এর নতুন পরিবর্তন আনতে টিমের নির্ধারিত পদ্ধতি অনুসরণ করো। নিচের safe sequence ব্যবহার করা যায় যদি তোমার working tree clean থাকে:
+
+```bash
+git fetch origin
+git switch bani
+git pull --ff-only origin bani
+git merge origin/main
+```
+
+যদি merge conflict হয়, আন্দাজ করে file overwrite করবে না। Conflict সমাধানে সাহায্য নাও, তারপর build/test চালিয়ে নিজের branch-এ push করো।
+
+## 8.6 ভুল branch-এ থাকলে কী করবে?
+
+যদি `git branch --show-current` তোমার নিজের branch না দেখায়, কোনো commit বা push করবে না। আগে `git status` দেখো। Uncommitted changes থাকলে সেগুলো নিরাপদ না করে branch switch কোরো না। দরকার হলে টিম লিডকে screenshot বা terminal output পাঠাও।
+
+## 8.7 Team Git rules — অবশ্যই মানতে হবে
+
+- `main`-এ direct push নিষিদ্ধ; PR দিয়ে merge হবে।
+- নিজের personal branch-এ push করবে।
+- অন্যের branch-এ অনুমতি ছাড়া push করবে না।
+- Force push (`git push --force`) চালাবে না।
+- `git reset --hard`, `git clean -fd`, `git checkout .` বা `git restore .` চালিয়ে কাজ মুছবে না—টিম লিডের অনুমতি ছাড়া নয়।
+- Conflict হলে থামবে; ভুল করে accept-all বা পুরো file overwrite করবে না।
+- PR-এ শুধু নিজের feature-এর সম্পর্কিত changes রাখবে।
+- `.env` এবং secrets commit/push করবে না।
+- PR merge করার আগে build/checks pass করতে হবে।
+- কাজ শেষ হলেও `pranta`, `bani`, `meshba`, `prity` personal branch delete করবে না। শুধু অনুমোদিত short-lived feature branch merge হওয়ার পর delete করা যাবে।
