@@ -16,6 +16,15 @@ export function Login() {
     setError("");
     setIsSubmitting(true);
 
+
+ // useEffect(() => {
+   // if (!ref.current) return;
+    //if (typeof IntersectionObserver === "undefined") {
+     // setRevealed(true);
+     // return;
+  //  }
+    
+
     try {
       await login(email, password);
       // We don't redirect to a role-specific path here on purpose — the
