@@ -158,3 +158,59 @@ In accordance with strict frontend development boundary instructions, all four c
 - JSON compliance export (`handleExportJSON`) generating timestamped compliance archives.
 - Inspection drawer with keyboard `Escape` dismiss listener, WAI-ARIA attributes, and event ID clipboard copy feedback.
 - Clear indicator of live endpoint vs offline development baseline.
+
+---
+
+## 7. Milestone 2.1.3: Admin Module Final Verification & Release Gate (COMPLETED)
+
+In Milestone 2.1.3, an independent, rigorous frontend-only quality audit and automated verification cycle was conducted for the entire Admin module.
+
+### A. Defects Discovered & Hardened
+1. **Missing Password Confirmation Field**:
+   - *Defect*: `UserManagement.tsx` only had a single password input, violating enterprise onboarding safety.
+   - *Fix*: Added `newStaffConfirmPassword` field, matching password validation, and dynamic error alerting before API invocation.
+2. **Technician Rejection Audit Justification**:
+   - *Defect*: Rejection of trade credentials was previously possible without requiring an explanatory administrative note.
+   - *Fix*: Added mandatory validation requiring `verificationNotes.trim()` before credential rejection can proceed.
+3. **Technician Verification Confirmation Prompt**:
+   - *Defect*: Verification status updates could be triggered accidentally.
+   - *Fix*: Added an explicit confirmation card workflow ("Confirm & Verify Passport" vs "Confirm Rejection") requiring deliberate user confirmation.
+4. **Keyboard Accessibility & Focus Restoration**:
+   - *Defect*: Closing modals returned keyboard focus to `document.body` instead of the trigger button, breaking screen-reader and keyboard navigation flow.
+   - *Fix*: Added `lastFocusedTriggerRef` to record triggering elements and restore focus upon modal dismissal across `UserManagement.tsx`, `TechnicianVerification.tsx`, and `AuditLog.tsx`. Added `firstInputRef` for automated focus on open.
+5. **Form & Element Labeling**:
+   - *Defect*: Some inputs in `UserManagement.tsx` lacked explicit `id` attributes matched with `<label htmlFor="...">`.
+   - *Fix*: Added unique, descriptive IDs across all form controls and selects.
+6. **Defensive Response Parsing & Malformed Data Quarantine**:
+   - *Defect*: `adminService.ts` would fail abruptly if a reverse proxy returned an HTML error page or unexpected JSON shape.
+   - *Fix*: Added explicit `Array.isArray()` checks and content-type/status classification to safely quarantine unexpected payloads and fallback to typed safe baselines.
+7. **Session Preservation on Transient Offline States**:
+   - *Defect*: `AuthContext.tsx` would wipe user credentials from `localStorage` on any generic network failure.
+   - *Fix*: Restricted session clearing strictly to HTTP 401 Unauthorized responses, preserving offline/local development sessions across backend server restarts.
+
+### B. Automated Test Suite (`tests/adminService.test.mjs`)
+Added an automated Node.js test suite running via Node's native test runner (`node --test tests/adminService.test.mjs`), integrated into `npm test`:
+- **Scenario 1**: GET /api/admin/users handles 404 by returning truthful offline baseline (Passed).
+- **Scenario 2**: POST /api/admin/users returns `success: false` on 404 without fabricating records (Passed).
+- **Scenario 3**: PATCH /api/admin/users/:id/status returns 401 Unauthorized handling (Passed).
+- **Scenario 4**: 500 Server Error on GET /technicians safely falls back to offline passport baseline (Passed).
+- **Scenario 5**: Network failure (`ERR_NETWORK`) classification (Passed).
+- **Scenario 6**: Malformed response shape handling (non-array data quarantine) (Passed).
+- **Scenario 7**: Offline baseline query filtering (search, role, status) (Passed).
+- **Scenario 8**: Self-deactivation safeguard arithmetic (Passed).
+- **Summary**: 8/8 tests passed (0 failures).
+
+### C. Live Browser Automation & Viewport Verification
+Verified using `chrome-devtools-mcp` on live Vite preview server (`http://localhost:4173/`):
+- **Desktop (1440px)**: Client width 1294px, scroll width 1294px, `hasOverflow: false`.
+- **Laptop (1280px)**: Client width 1281px, scroll width 1281px, `hasOverflow: false`.
+- **Tablet (768px)**: Client width 770px, scroll width 770px, `hasOverflow: false`.
+- **Mobile (390px)**: Client width 502px, scroll width 502px, `hasOverflow: false`.
+- **Modal & Keyboard Navigation**: Verified autofocus on first input, `Escape` key dismiss, and focus restoration to the trigger button upon close.
+- **Validation Workflows**: Verified administrative note requirement on rejection and explicit two-step credential confirmation.
+
+### D. Release Decision
+- **Status**: **RELEASE READY (Frontend Admin Module Approved)**
+- **Verification Gate**: Passed with 0 TypeScript errors, 0 Vite build errors, 8/8 automated test passes, and complete responsive layout compliance.
+- **Next Phase**: Authorized to proceed to Milestone 3 (Dispatcher Operations).
+

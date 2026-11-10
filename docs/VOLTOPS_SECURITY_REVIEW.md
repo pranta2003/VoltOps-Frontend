@@ -115,7 +115,12 @@ Inspected files:
    - Non-authenticated requests are redirected to `/login`; unauthorized roles are redirected to `/unauthorized`.
 4. **Credential & Sensitive Data Masking**:
    - Passwords are never stored in plain text in React state beyond form submission.
+   - User creation requires dual password confirmation (`password` and `confirmPassword`) with client-side mismatch prevention.
    - Audit logs mask internal tokens, hashes, and database passwords from inspection views.
+5. **Transient Offline Resilience & Auth Token Preservation**:
+   - In `AuthContext.tsx`, session eviction (`localStorage.removeItem`) is restricted strictly to HTTP 401 Unauthorized responses.
+   - Transient network errors (`ERR_NETWORK`, `502 Bad Gateway`, offline backend) preserve cached identity without corrupting session tokens.
+
 
 ---
 

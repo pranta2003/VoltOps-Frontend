@@ -44,6 +44,33 @@ This document tracks all completed implementation milestones, verified files, co
   32. `507c66b` — `feat(admin): harden UserManagement with genuine API lifecycle, validation, and deactivation safeguards`
   33. `7023cf9` — `feat(admin): harden TechnicianVerification with live backend integration and honest decision handling`
   34. `c252456` — `feat(admin): harden AuditLog with live API retrieval, error states, and export compliance`
+  35. `20fe50f` — `fix(admin): harden accessibility, review note validation, password confirmation, and error boundaries`
+
+---
+
+## Milestone 2.1.3: Admin Module Final Verification & Release Gate ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Accomplishments**:
+  1. **Independent Verification & Defect Hardening**:
+     - Added password confirmation field (`newStaffConfirmPassword`) and mismatch validation in `UserManagement.tsx`.
+     - Required mandatory administrative review notes prior to rejecting technician credentials in `TechnicianVerification.tsx`.
+     - Added a two-step explicit confirmation modal preventing accidental one-click credential changes.
+     - Added `lastFocusedTriggerRef` to restore focus to trigger buttons upon closing modals, and automated autofocus on first input (`firstInputRef`).
+     - Hardened `adminService.ts` against malformed proxy responses and non-array payloads.
+     - Preserved user sessions on transient network errors in `AuthContext.tsx`, strictly restricting token clearing to HTTP 401 Unauthorized responses.
+  2. **Automated Testing Suite**:
+     - Created `tests/adminService.test.mjs` running via Node.js native test runner (`node --test`).
+     - Added `"test": "node --test tests/adminService.test.mjs"` to `package.json`.
+     - 8/8 automated tests passed (404 baselines, safe error handling, network failure classification, malformed payload quarantine, filtering, self-deactivation safeguards).
+  3. **Live Browser Automation & Responsive Viewport Testing**:
+     - Tested on live preview server with `chrome-devtools-mcp`.
+     - Verified zero horizontal overflow (`hasOverflow: false`) across 1440px, 1280px, 768px, and 390px viewports.
+     - Verified keyboard `Escape` dismiss, autofocus, and focus restoration to trigger elements.
+  4. **Release Gate**:
+     - Status: **APPROVED FOR RELEASE**
+     - Next Phase: Milestone 3 (Dispatcher Operations).
+
 
 ---
 
