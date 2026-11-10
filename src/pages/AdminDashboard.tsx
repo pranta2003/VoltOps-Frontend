@@ -9,16 +9,27 @@ export function AdminDashboard() {
   const { user } = useAuth();
 
   return (
-    <Layout title="Admin Dashboard">
-      <div className="bg-white border rounded-lg p-6">
-        <p className="text-gray-700">
-          Welcome, <span className="font-medium">{user?.name}</span>. You are logged in as{" "}
-          <span className="font-medium">{user?.role}</span>.
-        </p>
-        <p className="text-gray-500 text-sm mt-3">
-          This confirms Milestone 1 (auth + role-based routing) is working end-to-end.
-          Staff management, technician oversight, and system-wide reports will appear
-          here in Milestone 2.
+    <Layout
+      title="Admin System Console"
+      subtitle="Operational governance, staff directories, and workforce auditing"
+    >
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 sm:p-8 shadow-sm space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold flex items-center justify-center text-lg">
+            ⚡
+          </div>
+          <div>
+            <h2 className="font-heading font-bold text-lg text-[var(--text-primary)]">
+              Welcome back, {user?.name || "Administrator"}
+            </h2>
+            <p className="text-xs text-[var(--text-muted)]">
+              System Role: <span className="font-semibold text-purple-600 dark:text-purple-400">{user?.role}</span> · Root Branch: EPZ Division
+            </p>
+          </div>
+        </div>
+        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+          This confirms Milestone 1 (authentication + dual-theme role dashboard shell) is functioning end-to-end.
+          Staff management, technician recruitment screening, and system audit logs are provisioned under this console.
         </p>
       </div>
     </Layout>
