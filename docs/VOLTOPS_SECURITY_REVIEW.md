@@ -145,3 +145,22 @@ The following table reflects the verified status of backend endpoints required f
    - Update `requireAuth` in `src/middleware/auth.ts` to check `user.isActive === true` from PostgreSQL to immediately block deactivated accounts.
 3. **Audit Log Database Schema**:
    - Add `model AuditLog` to `prisma/schema.prisma` with fields: `id`, `actorId`, `actorRole`, `actorIp`, `category`, `action`, `targetEntity`, `severity`, `details`, `createdAt`.
+
+---
+
+## 6. Frontend Admin Security Boundary & Hardening (Milestone 2.1.2 Verified)
+
+During Milestone 2.1.2 frontend hardening, the following specific frontend security safeguards were implemented:
+
+1. **Anti-Simulation Security Boundary**:
+   - The UI strictly prohibits mutating client state to simulate backend data persistence when server endpoints are offline or return 404.
+   - User creation (`POST /api/admin/users`), status changes (`PATCH /api/admin/users/:id/status`), and verification decisions (`PATCH /api/technicians/:id/verify`) will **never** falsely report success or alter the visible dataset unless a 2xx response is returned by the server.
+   - If an endpoint returns 404, the modal retains focus and surfaces an explicit error explaining that the backend endpoint is not yet mounted.
+2. **Self-Deactivation Safeguard**:
+   - In `UserManagement.tsx`, the active administrator's own account is checked against `useAuth()`. The deactivation action is disabled for the self-account, preventing accidental administrative lockout.
+3. **Privilege Escalation Prevention in UI**:
+   - Staff creation forms enforce non-empty passwords (minimum 8 characters), strict email syntax, and role selection limited to authorized internal roles (`ADMIN`, `DISPATCHER`, `TECHNICIAN`).
+4. **Modal & Keyboard Isolation**:
+   - All administrative modals (`UserManagement`, `TechnicianVerification`, `AuditLog`) implement keyboard `Escape` dismiss listeners and `role="dialog"`, `aria-modal="true"`, preventing background keystroke leaks.
+5. **Deterministic Baseline Quarantine**:
+   - All offline baseline records are strictly quarantined in `src/services/mockAdminData.ts` and labeled as offline baselines in the UI, ensuring no simulated data is ever mistaken for live server data.

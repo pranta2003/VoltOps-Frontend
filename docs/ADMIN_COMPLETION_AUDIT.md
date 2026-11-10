@@ -114,3 +114,47 @@ flowchart TD
 - Prisma client generation (`npx prisma generate`) is validated.
 - All additions to `TechnicianProfile` are optional or have defaults; no existing columns were dropped or made non-nullable without default.
 - No production database was altered. When an authorized development PostgreSQL database connection is provided via `.env`, migrations can be created safely using `npx prisma migrate dev`.
+
+---
+
+## 6. Frontend Admin Module Hardening (Milestone 2.1.2 — COMPLETED)
+
+In accordance with strict frontend development boundary instructions, all four core Admin modules were hardened exclusively within `VoltOps-Frontend` on branch `pranta`.
+
+### A. Centralized Service Layer & DTO Contracts
+- **File**: `src/services/adminService.ts`
+- **DTOs**: `src/types/admin.ts`
+- **Isolated Offline Baselines**: `src/services/mockAdminData.ts`
+- **Architecture**:
+  - Centralized all HTTP calls using `src/api/axios.ts`.
+  - Defined explicit typed `ServiceResult<T>` interfaces.
+  - Returns honest `isLive` and `endpointConnected` booleans.
+  - Zero fabricated SLA or user metrics.
+  - Never mutates client state to simulate server persistence when backend endpoints return 404.
+
+### B. Admin Dashboard (`src/pages/admin/AdminDashboard.tsx`)
+- Completely eliminated hardcoded `99.2% SLA Compliance` metric card. Replaced with honest `"Awaiting Dispatcher Module & Work Orders"` status indicator.
+- Connected live active technician counting to `AdminService.getDashboardMetrics()`.
+- Replaced hardcoded sample events with live audit retrieval from `AdminService.getAuditLogs()`.
+- Added skeleton loading state, retry action, and live vs offline data source badge.
+
+### C. User Directory & Staff Provisioning (`src/pages/admin/UserManagement.tsx`)
+- Real service integration via `AdminService.getUsers()`.
+- Self-deactivation prevention: Active Admin user cannot deactivate their own account.
+- Privileged staff account creation (`POST /api/admin/users`) with strict client-side validation (matching password, min 8 chars, unique email).
+- If backend endpoint is unavailable (404), displays explicit error notice inside the modal: *"Backend endpoint POST /api/admin/users is required. Cannot persist account creation."* Does NOT fake local persistence!
+- Added WAI-ARIA dialog attributes, keyboard `Escape` dismiss listeners, search clear action, and pagination.
+
+### D. Technician Credential Audit (`src/pages/admin/TechnicianVerification.tsx`)
+- Integrated with `AdminService.getTechnicians()` and `AdminService.submitVerificationDecision()`.
+- Credential audits across all 7 canonical trades with license number, issuing authority, and expiration date.
+- Digital document indicator (`hasLicenseDocument` with Document attached vs Missing file badge).
+- Modal decision workflow (Approve / Reject) with audit notes.
+- If backend returns 404, surfaces clear error inside modal without pretending local persistence.
+- Keyboard `Escape` dismiss listener and WAI-ARIA modal attributes.
+
+### E. Security Audit Ledger (`src/pages/admin/AuditLog.tsx`)
+- Integrated with `AdminService.getAuditLogs()` supporting search, category filter, severity filter, and pagination.
+- JSON compliance export (`handleExportJSON`) generating timestamped compliance archives.
+- Inspection drawer with keyboard `Escape` dismiss listener, WAI-ARIA attributes, and event ID clipboard copy feedback.
+- Clear indicator of live endpoint vs offline development baseline.

@@ -38,7 +38,42 @@ This document tracks all completed implementation milestones, verified files, co
   26. `34f4a08` — `style(landing): refine service card letterform typography and polish subtle pop-up and hover motion`
   27. `326992c` (backend) — `feat(schema): add AuditLog model and technician verification passport fields`
   28. `c38c004` (backend) — `feat(db): add targetId field and composite index to AuditLog model`
-  29. `(in-progress)` — `docs(audit): update verified admin completion audit with schema-to-feature mapping`
+  29. `62233d9` — `docs(audit): update verified admin completion audit with schema-to-feature mapping`
+  30. `e83d025` — `feat(admin): implement centralized adminService, DTOs, and isolated offline mock baselines`
+  31. `d975ed7` — `feat(admin): eliminate fabricated metrics and integrate honest telemetry in AdminDashboard`
+  32. `507c66b` — `feat(admin): harden UserManagement with genuine API lifecycle, validation, and deactivation safeguards`
+  33. `7023cf9` — `feat(admin): harden TechnicianVerification with live backend integration and honest decision handling`
+  34. `c252456` — `feat(admin): harden AuditLog with live API retrieval, error states, and export compliance`
+
+---
+
+## Milestone 2.1.2: Frontend Admin Module Hardening & Truthful Integration ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Accomplishments**:
+  1. **Architectural Service Layer**:
+     - Created `src/types/admin.ts` with strict TypeScript DTO definitions for operational metrics, user management, technician passports, audit logs, and `ServiceResult<T>`.
+     - Created `src/services/adminService.ts` encapsulating all HTTP calls via `src/api/axios.ts` with explicit connection state reporting (`isLive`, `endpointConnected`).
+     - Isolated offline demonstration data in `src/services/mockAdminData.ts` with transparent baseline labels.
+  2. **Elimination of Fabricated Metrics in `AdminDashboard.tsx`**:
+     - Removed hardcoded `99.2% SLA Compliance` metric card; replaced with honest unavailable notice awaiting the work order resolution engine.
+     - Replaced hardcoded recent events with live audit retrieval from `AdminService.getAuditLogs()`.
+     - Added skeleton loading state, retry triggers, and live API telemetry badges.
+  3. **Truthful Lifecycle & Deactivation Safeguards in `UserManagement.tsx`**:
+     - Real API binding via `AdminService.getUsers()`, `AdminService.createStaffUser()`, and `AdminService.updateUserStatus()`.
+     - Self-deactivation prevention: Active Admin user cannot deactivate their own account.
+     - Never simulates persistence on client when backend returns 404; displays clear error message inside modals.
+     - Added keyboard `Escape` dismiss listeners and WAI-ARIA modal attributes.
+  4. **Credential Audit in `TechnicianVerification.tsx`**:
+     - Real API binding via `AdminService.getTechnicians()` and `AdminService.submitVerificationDecision()`.
+     - Complete 7-trade credential inspection (license name, number, issuing authority, expiry date).
+     - Document attachment indicator (`hasLicenseDocument`).
+     - Honest error surfacing if backend decision persistence endpoint returns 404.
+  5. **Audit Ledger & Compliance Export in `AuditLog.tsx`**:
+     - Real API retrieval via `AdminService.getAuditLogs()` with keyword search, category filter, severity filter, and pagination.
+     - Full JSON compliance export feature with comprehensive metadata.
+     - Keyboard accessible inspection drawer with event ID clipboard feedback.
+- **Verification**: `npm run build` (`tsc && vite build`) transformed 116 modules in 6.78s with 0 errors.
 
 ---
 
