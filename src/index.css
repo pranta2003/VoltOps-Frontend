@@ -129,77 +129,54 @@ h1, h2, h3, h4, .font-heading {
   border-color: var(--border-strong);
 }
 
-/* ── Typography for Card Titles (Outfit - Sleek Geometric SaaS Letterforms) ── */
+/* ── Typography for Card Titles (Crisp, High-End Modern Sans Letterforms) ── */
 .font-card-title {
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  letter-spacing: -0.025em;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  font-family: 'Plus Jakarta Sans', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  font-feature-settings: normal;
 }
 
-/* ── Dynamic Pop-Up and Slow Motion Animation for Cards ─────────── */
-@keyframes card-pop-up {
-  0% {
-    opacity: 0;
-    transform: translateY(38px) scale(0.92);
-  }
-  60% {
-    transform: translateY(-5px) scale(1.018);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0px) scale(1);
-  }
-}
-
+/* ── Dynamic Slow Motion Floating Wave & Interactive Hover ─────────── */
 @keyframes card-slow-float {
   0%, 100% {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-7px);
+    transform: translateY(-9px);
   }
 }
 
-/* Entrance pop-up triggered on scroll reveal */
-.card-pop-in {
-  animation: card-pop-up 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
-  will-change: transform, opacity;
-}
+/* Fluid Staggered Float Wave (Graceful Levitation) */
+.card-slow-float-0 { animation: card-slow-float 5.8s ease-in-out infinite; animation-delay: 0s; }
+.card-slow-float-1 { animation: card-slow-float 6.4s ease-in-out infinite; animation-delay: 1.1s; }
+.card-slow-float-2 { animation: card-slow-float 5.6s ease-in-out infinite; animation-delay: 2.2s; }
+.card-slow-float-3 { animation: card-slow-float 6.2s ease-in-out infinite; animation-delay: 3.3s; }
+.card-slow-float-4 { animation: card-slow-float 6.8s ease-in-out infinite; animation-delay: 4.4s; }
 
-.pop-delay-0 { animation-delay: 0.05s; }
-.pop-delay-1 { animation-delay: 0.18s; }
-.pop-delay-2 { animation-delay: 0.31s; }
-.pop-delay-3 { animation-delay: 0.44s; }
-.pop-delay-4 { animation-delay: 0.57s; }
-.pop-delay-5 { animation-delay: 0.70s; }
-
-/* Subtle continuous slow motion wave float (gentle SaaS levitation) */
-.card-slow-float-0 { animation: card-slow-float 7.2s ease-in-out infinite; animation-delay: 0s; }
-.card-slow-float-1 { animation: card-slow-float 7.8s ease-in-out infinite; animation-delay: 1.4s; }
-.card-slow-float-2 { animation: card-slow-float 6.9s ease-in-out infinite; animation-delay: 2.8s; }
-.card-slow-float-3 { animation: card-slow-float 7.5s ease-in-out infinite; animation-delay: 4.2s; }
-.card-slow-float-4 { animation: card-slow-float 8.1s ease-in-out infinite; animation-delay: 5.6s; }
-
+/* Interactive Hover: Card lifts smoothly to the front in motion */
 .premium-card-motion {
   position: relative;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.4s ease;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease;
   will-change: transform, box-shadow;
 }
 
 .premium-card-motion:hover {
-  transform: translateY(-11px) scale(1.022) !important;
-  z-index: 25;
-  box-shadow: 0 24px 48px -10px rgba(15, 23, 32, 0.16),
-              0 0 28px -2px rgba(16, 185, 129, 0.26);
   animation-play-state: paused;
+  transform: translateY(-11px) scale(1.025) !important;
+  z-index: 30 !important;
+  box-shadow: 0 24px 48px -10px rgba(15, 23, 32, 0.16),
+              0 0 32px 0px rgba(16, 185, 129, 0.28) !important;
 }
 
 .dark .premium-card-motion:hover {
-  box-shadow: 0 28px 56px -10px rgba(0, 0, 0, 0.85),
-              0 0 32px -2px rgba(16, 185, 129, 0.38);
   animation-play-state: paused;
+  transform: translateY(-11px) scale(1.025) !important;
+  z-index: 30 !important;
+  box-shadow: 0 28px 56px -10px rgba(0, 0, 0, 0.85),
+              0 0 36px 0px rgba(16, 185, 129, 0.4) !important;
 }
 
 /* ── Ambient Radial Glows ────────────────────────────────────────────── */

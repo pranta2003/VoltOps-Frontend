@@ -13,6 +13,12 @@ function useSectionReveal() {
       setRevealed(true);
       return;
     }
+    // Check if element is already within viewport on initial render
+    const rect = ref.current.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 100 && rect.bottom > -100) {
+      setRevealed(true);
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -22,7 +28,7 @@ function useSectionReveal() {
           }
         });
       },
-      { threshold: 0.1, rootMargin: "0px 0px -30px 0px" }
+      { threshold: 0.05, rootMargin: "0px 0px 80px 0px" }
     );
     observer.observe(ref.current);
     return () => observer.disconnect();
@@ -718,72 +724,75 @@ export function LandingPage() {
             return (
               <div
                 key={trade.id}
-                className={`p-7 sm:p-8 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion ${trade.glowClass} flex flex-col items-center justify-between text-center shadow-[var(--shadow-sm)] group ${
-                  isWide ? "lg:col-span-3" : "lg:col-span-2"
-                } ${
-                  servicesRevealed ? `card-pop-in pop-delay-${idx}` : "opacity-0 translate-y-8"
-                } card-slow-float-${idx % 5}`}
+                className={`${isWide ? "lg:col-span-3" : "lg:col-span-2"} flex flex-col transition-all duration-700 ease-out ${
+                  servicesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.96]"
+                }`}
+                style={{ transitionDelay: `${idx * 110}ms` }}
               >
-                <div className="flex flex-col items-center text-center w-full space-y-4">
-                  {/* Centered Trade Icon with accent color glow */}
-                  <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto transition-transform duration-500 group-hover:scale-110 shadow-sm"
-                    style={{
-                      backgroundColor: `${trade.accentColor}18`,
-                      color: trade.accentColor,
-                      border: `1px solid ${trade.accentColor}35`,
-                    }}
-                  >
-                    <TradeIcon size={26} />
+                <div
+                  className={`h-full p-7 sm:p-8 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion ${trade.glowClass} flex flex-col items-center justify-between text-center shadow-[var(--shadow-sm)] group card-slow-float-${idx % 5}`}
+                >
+                  <div className="flex flex-col items-center text-center w-full space-y-4">
+                    {/* Centered Trade Icon with accent color glow */}
+                    <div
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto transition-transform duration-500 group-hover:scale-110 shadow-sm"
+                      style={{
+                        backgroundColor: `${trade.accentColor}18`,
+                        color: trade.accentColor,
+                        border: `1px solid ${trade.accentColor}35`,
+                      }}
+                    >
+                      <TradeIcon size={26} />
+                    </div>
+
+                    {/* Centered SLA Badge */}
+                    <span
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border mx-auto"
+                      style={{
+                        borderColor: `${trade.accentColor}40`,
+                        color: trade.accentColor,
+                        backgroundColor: `${trade.accentColor}12`,
+                      }}
+                    >
+                      <span>Arrival SLA · {trade.slaBadge}</span>
+                    </span>
+
+                    {/* Centered Title & Minimal Description (Refined Modern Neo-Grotesque Letterforms) */}
+                    <div className="space-y-1.5 pt-1">
+                      <h3 className="text-xl sm:text-[22px] font-bold font-card-title text-[var(--text-primary)] tracking-tight text-center">
+                        {trade.title}
+                      </h3>
+                      <p className="text-[13px] text-slate-600 dark:text-slate-300 text-center leading-relaxed max-w-xs mx-auto font-normal">
+                        {trade.simpleDesc}
+                      </p>
+                    </div>
+
+                    {/* Centered Example Scenario */}
+                    <div className="w-full py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-slate-700 dark:text-slate-300 text-center font-medium">
+                      "{trade.simpleIssue}"
+                    </div>
+
+                    {/* Centered 3 Bullet Points */}
+                    <div className="w-full space-y-2 pt-3 border-t border-[var(--border)]">
+                      {trade.simplePoints.map((pt) => (
+                        <div key={pt} className="flex items-center justify-center gap-2 text-xs font-medium text-slate-800 dark:text-slate-200">
+                          <CheckCircleIcon size={14} className="text-emerald-500 shrink-0" />
+                          <span>{pt}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Centered SLA Badge */}
-                  <span
-                    className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border mx-auto"
-                    style={{
-                      borderColor: `${trade.accentColor}40`,
-                      color: trade.accentColor,
-                      backgroundColor: `${trade.accentColor}12`,
-                    }}
-                  >
-                    <span>Arrival SLA · {trade.slaBadge}</span>
-                  </span>
-
-                  {/* Centered Title & Minimal Description (Outfit Modern SaaS Letterforms) */}
-                  <div className="space-y-1.5 pt-1">
-                    <h3 className="text-xl sm:text-[22px] font-bold font-card-title text-[var(--text-primary)] tracking-tight text-center">
-                      {trade.title}
-                    </h3>
-                    <p className="text-[13px] text-slate-600 dark:text-slate-300 text-center leading-relaxed max-w-xs mx-auto font-normal">
-                      {trade.simpleDesc}
-                    </p>
+                  {/* Centered Action Link / Button */}
+                  <div className="pt-5 border-t border-[var(--border)] mt-5 w-full">
+                    <a
+                      href="#packages"
+                      className="w-full py-2.5 rounded-full text-xs font-semibold text-center border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#06090e] hover:bg-[#10b981] transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                    >
+                      <span>View Plans & SLAs</span>
+                      <ArrowRightIcon size={12} />
+                    </a>
                   </div>
-
-                  {/* Centered Example Scenario */}
-                  <div className="w-full py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-slate-700 dark:text-slate-300 text-center font-medium">
-                    "{trade.simpleIssue}"
-                  </div>
-
-                  {/* Centered 3 Bullet Points */}
-                  <div className="w-full space-y-2 pt-3 border-t border-[var(--border)]">
-                    {trade.simplePoints.map((pt) => (
-                      <div key={pt} className="flex items-center justify-center gap-2 text-xs font-medium text-slate-800 dark:text-slate-200">
-                        <CheckCircleIcon size={14} className="text-emerald-500 shrink-0" />
-                        <span>{pt}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Centered Action Link / Button */}
-                <div className="pt-5 border-t border-[var(--border)] mt-5 w-full">
-                  <a
-                    href="#packages"
-                    className="w-full py-2.5 rounded-full text-xs font-semibold text-center border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#06090e] hover:bg-[#10b981] transition-all flex items-center justify-center gap-1.5 shadow-sm"
-                  >
-                    <span>View Plans & SLAs</span>
-                    <ArrowRightIcon size={12} />
-                  </a>
                 </div>
               </div>
             );
@@ -983,167 +992,185 @@ export function LandingPage() {
         <div ref={packagesRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
 
           {/* Plan A: 8-Hour Daily */}
-          <div className={`p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] ${
-            packagesRevealed ? "card-pop-in pop-delay-0" : "opacity-0 translate-y-8"
-          } card-slow-float-0`}>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">8-Hour Daily</h3>
-                <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-slate-600 dark:text-slate-400">
-                  Plan A
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400">Defined daily operational window</p>
+          <div
+            className={`flex flex-col transition-all duration-700 ease-out ${
+              packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.96]"
+            }`}
+            style={{ transitionDelay: "0ms" }}
+          >
+            <div className="h-full p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] card-slow-float-0">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">8-Hour Daily</h3>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-slate-600 dark:text-slate-400">
+                    Plan A
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Defined daily operational window</p>
 
-              <div className="py-4 border-y border-[var(--border)]">
-                <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing to be announced</div>
-                <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">8 hours per day coverage</div>
+                <div className="py-4 border-y border-[var(--border)]">
+                  <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing to be announced</div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">8 hours per day coverage</div>
+                </div>
+
+                <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
+                  <span className="text-xs text-slate-600 dark:text-slate-400 block">Coverage window:</span>
+                  <span className="text-base font-bold text-slate-900 dark:text-white">8 hours per day</span>
+                </div>
+
+                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                  For businesses that operate during standard daily hours. Contact us for custom shift arrangements.
+                </p>
               </div>
 
-              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                <span className="text-xs text-slate-600 dark:text-slate-400 block">Coverage window:</span>
-                <span className="text-base font-bold text-slate-900 dark:text-white">8 hours per day</span>
-              </div>
-
-              <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                For businesses that operate during standard daily hours. Contact us for custom shift arrangements.
-              </p>
+              <button
+                type="button"
+                onClick={() => handlePlan("8hr")}
+                className="mt-6 w-full py-3 rounded-full font-semibold text-xs border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#10b981] transition-colors"
+              >
+                Select Plan A
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => handlePlan("8hr")}
-              className="mt-6 w-full py-3 rounded-full font-semibold text-xs border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#10b981] transition-colors"
-            >
-              Select Plan A
-            </button>
           </div>
 
           {/* Plan B: 24/7 Standard */}
-          <div className={`p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] ${
-            packagesRevealed ? "card-pop-in pop-delay-1" : "opacity-0 translate-y-8"
-          } card-slow-float-1`}>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">24/7 Standard</h3>
-                <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
-                  Plan B
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400">Round-the-clock reliable coverage</p>
+          <div
+            className={`flex flex-col transition-all duration-700 ease-out ${
+              packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.96]"
+            }`}
+            style={{ transitionDelay: "130ms" }}
+          >
+            <div className="h-full p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] card-slow-float-1">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">24/7 Standard</h3>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                    Plan B
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Round-the-clock reliable coverage</p>
 
-              <div className="py-4 border-y border-[var(--border)]">
-                <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing to be announced</div>
-                <div className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">★ 24 hours · 7 days a week</div>
+                <div className="py-4 border-y border-[var(--border)]">
+                  <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing to be announced</div>
+                  <div className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">★ 24 hours · 7 days a week</div>
+                </div>
+
+                <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
+                  <span className="text-xs text-slate-600 dark:text-slate-400 block">Arrival SLA commitment:</span>
+                  <span className="text-base font-bold text-emerald-700 dark:text-emerald-400">Within 40 minutes on site</span>
+                </div>
+
+                <ul className="space-y-2 text-xs text-slate-800 dark:text-slate-200 font-medium">
+                  {["All 5 service trades covered", "Human dispatcher verification every job", "Digital job history & itemised invoices"].map((b) => (
+                    <li key={b} className="flex items-center gap-2">
+                      <CheckIcon className="w-3.5 h-3.5 text-emerald-500" />{b}
+                    </li>
+                  ))}
+                </ul>
               </div>
 
-              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                <span className="text-xs text-slate-600 dark:text-slate-400 block">Arrival SLA commitment:</span>
-                <span className="text-base font-bold text-emerald-700 dark:text-emerald-400">Within 40 minutes on site</span>
-              </div>
-
-              <ul className="space-y-2 text-xs text-slate-800 dark:text-slate-200 font-medium">
-                {["All 5 service trades covered", "Human dispatcher verification every job", "Digital job history & itemised invoices"].map((b) => (
-                  <li key={b} className="flex items-center gap-2">
-                    <CheckIcon className="w-3.5 h-3.5 text-emerald-500" />{b}
-                  </li>
-                ))}
-              </ul>
+              <button
+                type="button"
+                onClick={() => handlePlan("247-standard")}
+                className="mt-6 w-full py-3 rounded-full font-semibold text-xs border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#10b981] transition-colors"
+              >
+                Select Plan B
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => handlePlan("247-standard")}
-              className="mt-6 w-full py-3 rounded-full font-semibold text-xs border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#10b981] transition-colors"
-            >
-              Select Plan B
-            </button>
           </div>
 
           {/* Plan C: 24/7 Priority — FEATURED WITH EMERALD GLOW */}
           <div
-            className={`p-7 rounded-[32px] border-2 border-[#10b981] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between relative shadow-[0_0_32px_rgba(16,185,129,0.22)] ${
-              packagesRevealed ? "card-pop-in pop-delay-2" : "opacity-0 translate-y-8"
-            } card-slow-float-2`}
+            className={`flex flex-col transition-all duration-700 ease-out ${
+              packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.96]"
+            }`}
+            style={{ transitionDelay: "260ms" }}
           >
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#10b981] text-[#06090e] text-xs font-bold uppercase tracking-wider shadow flex items-center gap-1">
-              <ZapIcon size={12} />
-              <span>Fastest Response</span>
+            <div className="h-full p-7 rounded-[32px] border-2 border-[#10b981] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between relative shadow-[0_0_32px_rgba(16,185,129,0.22)] card-slow-float-2">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#10b981] text-[#06090e] text-xs font-bold uppercase tracking-wider shadow flex items-center gap-1">
+                <ZapIcon size={12} />
+                <span>Fastest Response</span>
+              </div>
+
+              <div className="space-y-4 mt-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">24/7 Priority</h3>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-[#10b981]/20 text-[#10b981] dark:text-[#34d399] border border-[#10b981]/40">
+                    Plan C
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400">For time-critical facilities</p>
+
+                <div className="py-4 border-y border-[var(--border)]">
+                  <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing to be announced</div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">24/7 · 2× faster arrival SLA</div>
+                </div>
+
+                <div className="p-3.5 rounded-2xl border border-[#10b981]/40 bg-[#10b981]/10">
+                  <span className="text-xs font-semibold text-emerald-800 dark:text-[#34d399] block">Arrival SLA commitment:</span>
+                  <span className="text-xl font-extrabold font-heading text-slate-900 dark:text-white">Within 20 minutes on site</span>
+                </div>
+
+                <ul className="space-y-2 text-xs">
+                  {["20-min rapid arrival (2× faster)", "Top-tier emergency dispatcher priority", "Full asset service history & alerts"].map((b, i) => (
+                    <li key={b} className={`flex items-center gap-2 ${i === 0 ? "font-bold text-slate-900 dark:text-white" : "text-slate-800 dark:text-slate-200"}`}>
+                      <CheckIcon className="w-3.5 h-3.5 text-[#10b981]" />{b}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handlePlan("247-priority")}
+                className="mt-6 w-full py-3.5 rounded-full font-bold text-xs bg-[#10b981] text-[#06090e] shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:bg-[#34d399] transition-all flex items-center justify-center gap-1.5"
+              >
+                <span>Select Plan C</span>
+                <ArrowRightIcon size={13} />
+              </button>
             </div>
-
-            <div className="space-y-4 mt-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">24/7 Priority</h3>
-                <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-[#10b981]/20 text-[#10b981] dark:text-[#34d399] border border-[#10b981]/40">
-                  Plan C
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400">For time-critical facilities</p>
-
-              <div className="py-4 border-y border-[var(--border)]">
-                <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing to be announced</div>
-                <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">24/7 · 2× faster arrival SLA</div>
-              </div>
-
-              <div className="p-3.5 rounded-2xl border border-[#10b981]/40 bg-[#10b981]/10">
-                <span className="text-xs font-semibold text-emerald-800 dark:text-[#34d399] block">Arrival SLA commitment:</span>
-                <span className="text-xl font-extrabold font-heading text-slate-900 dark:text-white">Within 20 minutes on site</span>
-              </div>
-
-              <ul className="space-y-2 text-xs">
-                {["20-min rapid arrival (2× faster)", "Top-tier emergency dispatcher priority", "Full asset service history & alerts"].map((b, i) => (
-                  <li key={b} className={`flex items-center gap-2 ${i === 0 ? "font-bold text-slate-900 dark:text-white" : "text-slate-800 dark:text-slate-200"}`}>
-                    <CheckIcon className="w-3.5 h-3.5 text-[#10b981]" />{b}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => handlePlan("247-priority")}
-              className="mt-6 w-full py-3.5 rounded-full font-bold text-xs bg-[#10b981] text-[#06090e] shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:bg-[#34d399] transition-all flex items-center justify-center gap-1.5"
-            >
-              <span>Select Plan C</span>
-              <ArrowRightIcon size={13} />
-            </button>
           </div>
 
           {/* Plan D: Custom Coverage */}
-          <div className={`p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] ${
-            packagesRevealed ? "card-pop-in pop-delay-3" : "opacity-0 translate-y-8"
-          } card-slow-float-3`}>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">Custom Coverage</h3>
-                <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-slate-600 dark:text-slate-400">
-                  Plan D
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400">Tailored to your requirements</p>
+          <div
+            className={`flex flex-col transition-all duration-700 ease-out ${
+              packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.96]"
+            }`}
+            style={{ transitionDelay: "390ms" }}
+          >
+            <div className="h-full p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] card-slow-float-3">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">Custom Coverage</h3>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-slate-600 dark:text-slate-400">
+                    Plan D
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Tailored to your requirements</p>
 
-              <div className="py-4 border-y border-[var(--border)]">
-                <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing upon review</div>
-                <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Discussed after review</div>
+                <div className="py-4 border-y border-[var(--border)]">
+                  <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing upon review</div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Discussed after review</div>
+                </div>
+
+                <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
+                  <span className="text-xs text-slate-600 dark:text-slate-400 block">Example schedules:</span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">6, 8, or 16 hours/day</span>
+                </div>
+
+                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                  Request a tailored schedule matching your facility shift hours. SLAs confirmed after requirements review.
+                </p>
               </div>
 
-              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                <span className="text-xs text-slate-600 dark:text-slate-400 block">Example schedules:</span>
-                <span className="text-sm font-bold text-slate-900 dark:text-white">6, 8, or 16 hours/day</span>
-              </div>
-
-              <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                Request a tailored schedule matching your facility shift hours. SLAs confirmed after requirements review.
-              </p>
+              <button
+                type="button"
+                onClick={() => handlePlan("custom")}
+                className="mt-6 w-full py-3 rounded-full font-semibold text-xs border-2 border-[#10b981] text-slate-900 dark:text-white hover:bg-[#10b981] hover:text-[#06090e] transition-all"
+              >
+                Discuss a Custom Plan →
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => handlePlan("custom")}
-              className="mt-6 w-full py-3 rounded-full font-semibold text-xs border-2 border-[#10b981] text-slate-900 dark:text-white hover:bg-[#10b981] hover:text-[#06090e] transition-all"
-            >
-              Discuss a Custom Plan →
-            </button>
           </div>
 
         </div>
@@ -1215,15 +1242,20 @@ export function LandingPage() {
             ].map(({ icon: Icon, title, body, glow }, idx) => (
               <div
                 key={title}
-                className={`p-6 rounded-[28px] border border-[var(--border)] glass-panel premium-card-motion ${glow} shadow-[var(--shadow-sm)] ${
-                  workspacesRevealed ? `card-pop-in pop-delay-${idx}` : "opacity-0 translate-y-8"
-                } card-slow-float-${idx}`}
+                className={`transition-all duration-700 ease-out flex flex-col ${
+                  workspacesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.96]"
+                }`}
+                style={{ transitionDelay: `${idx * 110}ms` }}
               >
-                <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#10b981] dark:text-[#34d399] mb-4">
-                  <Icon size={20} />
+                <div
+                  className={`h-full p-6 rounded-[28px] border border-[var(--border)] glass-panel premium-card-motion ${glow} shadow-[var(--shadow-sm)] card-slow-float-${idx}`}
+                >
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#10b981] dark:text-[#34d399] mb-4">
+                    <Icon size={20} />
+                  </div>
+                  <h3 className="font-bold font-card-title text-base sm:text-lg text-[var(--text-primary)] mb-2">{title}</h3>
+                  <p className="text-xs leading-relaxed text-[var(--text-secondary)] font-normal">{body}</p>
                 </div>
-                <h3 className="font-bold font-card-title text-base sm:text-lg text-[var(--text-primary)] mb-2">{title}</h3>
-                <p className="text-xs leading-relaxed text-[var(--text-secondary)] font-normal">{body}</p>
               </div>
             ))}
           </div>
