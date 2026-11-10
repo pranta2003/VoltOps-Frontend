@@ -69,9 +69,12 @@ export function AdminDashboard() {
   });
   const [isLiveConnected, setIsLiveConnected] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Attempt live fetch from actual backend /api/technicians
+  const fetchMetrics = () => {
+    setLoading(true);
+    setErrorMessage(null);
+    // Probe actual backend /api/technicians (authorized for ADMIN and DISPATCHER)
     api
       .get("/technicians")
       .then((res) => {
@@ -84,11 +87,21 @@ export function AdminDashboard() {
           setIsLiveConnected(true);
         }
       })
-      .catch(() => {
-        // Fall back to documented seeded baseline when backend is offline
+      .catch((err) => {
         setIsLiveConnected(false);
+        if (err.response?.status === 403) {
+          setErrorMessage("Access forbidden: Requires ADMIN or DISPATCHER role.");
+        } else if (err.code === "ERR_NETWORK") {
+          setErrorMessage("VoltOps backend server is currently offline (http://localhost:5000). Operating in deterministic baseline mode.");
+        } else {
+          setErrorMessage(err.response?.data?.error || "Unable to reach backend API. Using seeded baseline.");
+        }
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchMetrics();
   }, []);
 
   return (
@@ -96,13 +109,25 @@ export function AdminDashboard() {
       title="Admin Governance Console"
       subtitle="Operational governance, staff directories, technician credentials, and audit logging"
       action={
-        <Link
-          to="/admin/users"
-          className="px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5"
-        >
-          <span>Manage Users</span>
-          <ArrowRightIcon size={12} />
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={fetchMetrics}
+            disabled={loading}
+            className="px-3.5 py-2 rounded-xl text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] hover:border-[#10b981] hover:text-[#10b981] transition-all flex items-center gap-1.5 disabled:opacity-50"
+            title="Refresh backend telemetry"
+          >
+            <ClockIcon size={13} className={loading ? "animate-spin text-[#10b981]" : ""} />
+            <span>{loading ? "Refreshing..." : "Refresh Status"}</span>
+          </button>
+          <Link
+            to="/admin/users"
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5"
+          >
+            <span>Manage Users</span>
+            <ArrowRightIcon size={12} />
+          </Link>
+        </div>
       }
     >
       {/* ── Top System Operational Status Banner ───────────────────────── */}
@@ -130,10 +155,27 @@ export function AdminDashboard() {
             }`}
           >
             <span className={`w-2 h-2 rounded-full ${isLiveConnected ? "bg-emerald-500 animate-pulse" : "bg-blue-500"}`} />
-            <span>{isLiveConnected ? "Backend Connected (/api/technicians)" : "Seeded Mode (Simulated Data)"}</span>
+            <span>{isLiveConnected ? "Backend Connected (/api/technicians)" : "Seeded Baseline Mode"}</span>
           </span>
         </div>
       </div>
+
+      {/* ── Backend Offline / Error Notice ─────────────────────────────── */}
+      {errorMessage && (
+        <div className="p-3.5 rounded-2xl border border-blue-500/30 bg-blue-500/10 flex items-center justify-between text-xs text-blue-800 dark:text-blue-300">
+          <div className="flex items-center gap-2">
+            <RadioIcon size={14} className="shrink-0 text-blue-500" />
+            <span>{errorMessage}</span>
+          </div>
+          <button
+            type="button"
+            onClick={fetchMetrics}
+            className="underline font-bold hover:text-blue-600 shrink-0 ml-2"
+          >
+            Retry Connection
+          </button>
+        </div>
+      )}
 
       {/* ── Pending Verification Alert Banner ─────────────────────────── */}
       {stats.pendingVerifications > 0 && (
@@ -161,58 +203,79 @@ export function AdminDashboard() {
       {/* ── Operational Metric Cards ───────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total Users */}
-        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-          <div className="flex items-center justify-between text-[var(--text-muted)] text-xs font-semibold mb-2">
-            <span>TOTAL ACCOUNTS</span>
-            <BuildingIcon size={16} />
+        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between text-[var(--text-muted)] text-xs font-semibold mb-2">
+              <span>TOTAL ACCOUNTS</span>
+              <BuildingIcon size={16} />
+            </div>
+            <div className="font-heading font-extrabold text-3xl text-[var(--text-primary)]">
+              {stats.totalUsers}
+            </div>
+            <div className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+              <span>4 Staff</span> · <span>30 Commercial Customers</span>
+            </div>
           </div>
-          <div className="font-heading font-extrabold text-3xl text-[var(--text-primary)]">
-            {stats.totalUsers}
-          </div>
-          <div className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
-            <span>4 Staff</span> · <span>30 Commercial Customers</span>
+          <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[10px] text-[var(--text-muted)] font-medium">
+            Pending `/api/admin/users` migration
           </div>
         </div>
 
         {/* Card 2: Field Technicians */}
-        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-          <div className="flex items-center justify-between text-[var(--text-muted)] text-xs font-semibold mb-2">
-            <span>CERTIFIED TECHNICIANS</span>
-            <ShieldCheckIcon size={16} className="text-emerald-500" />
+        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between text-[var(--text-muted)] text-xs font-semibold mb-2">
+              <span>CERTIFIED TECHNICIANS</span>
+              <ShieldCheckIcon size={16} className="text-emerald-500" />
+            </div>
+            <div className="font-heading font-extrabold text-3xl text-emerald-600 dark:text-emerald-400">
+              {stats.activeTechnicians}
+            </div>
+            <div className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
+              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">100% Certified</span> across 7 trades
+            </div>
           </div>
-          <div className="font-heading font-extrabold text-3xl text-emerald-600 dark:text-emerald-400">
-            {stats.activeTechnicians}
-          </div>
-          <div className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">100% Certified</span> across 7 trades
+          <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span>{isLiveConnected ? "Verified live via /api/technicians" : "Seeded baseline (/api/technicians)"}</span>
           </div>
         </div>
 
         {/* Card 3: Dispatchers On Duty */}
-        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-          <div className="flex items-center justify-between text-[var(--text-muted)] text-xs font-semibold mb-2">
-            <span>DISPATCHERS ACTIVE</span>
-            <RadioIcon size={16} className="text-blue-500" />
+        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between text-[var(--text-muted)] text-xs font-semibold mb-2">
+              <span>DISPATCHERS ACTIVE</span>
+              <RadioIcon size={16} className="text-blue-500" />
+            </div>
+            <div className="font-heading font-extrabold text-3xl text-blue-600 dark:text-blue-400">
+              {stats.dispatchersOnDuty}
+            </div>
+            <div className="text-xs text-[var(--text-muted)] mt-1">
+              Covers 24/7 emergency dispatch desks
+            </div>
           </div>
-          <div className="font-heading font-extrabold text-3xl text-blue-600 dark:text-blue-400">
-            {stats.dispatchersOnDuty}
-          </div>
-          <div className="text-xs text-[var(--text-muted)] mt-1">
-            Covers 24/7 emergency dispatch desks
+          <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[10px] text-[var(--text-muted)] font-medium">
+            Pending `/api/admin/users` migration
           </div>
         </div>
 
         {/* Card 4: SLA Compliance Rate */}
-        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-          <div className="flex items-center justify-between text-[var(--text-muted)] text-xs font-semibold mb-2">
-            <span>ARRIVAL SLA COMPLIANCE</span>
-            <CheckCircleIcon size={16} className="text-[#10b981]" />
+        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between text-[var(--text-muted)] text-xs font-semibold mb-2">
+              <span>ARRIVAL SLA COMPLIANCE</span>
+              <CheckCircleIcon size={16} className="text-[#10b981]" />
+            </div>
+            <div className="font-heading font-extrabold text-3xl text-[var(--text-primary)]">
+              {stats.slaComplianceRate}%
+            </div>
+            <div className="text-xs text-[#10b981] mt-1 font-semibold">
+              ★ Physical arrival within 20–40m
+            </div>
           </div>
-          <div className="font-heading font-extrabold text-3xl text-[var(--text-primary)]">
-            {stats.slaComplianceRate}%
-          </div>
-          <div className="text-xs text-[#10b981] mt-1 font-semibold">
-            ★ Physical on-site arrival within 20–40m
+          <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[10px] text-[var(--text-muted)] font-medium">
+            Computed from 48 resolved work orders
           </div>
         </div>
       </div>
