@@ -37,9 +37,10 @@ function useSectionReveal() {
       setRevealed(true);
       return;
     }
+    const el = ref.current;
     // Check if element is already within viewport on initial render
-    const rect = ref.current.getBoundingClientRect();
-    if (rect.top < window.innerHeight + 100 && rect.bottom > -100) {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 150) {
       setRevealed(true);
     }
 
@@ -52,9 +53,9 @@ function useSectionReveal() {
           }
         });
       },
-      { threshold: 0.05, rootMargin: "0px 0px 80px 0px" }
+      { threshold: 0.05, rootMargin: "0px 0px 100px 0px" }
     );
-    observer.observe(ref.current);
+    observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
@@ -725,7 +726,7 @@ export function LandingPage() {
               <div
                 key={trade.id}
                 className={`${isWide ? "lg:col-span-3" : "lg:col-span-2"} flex flex-col transition-all duration-700 ease-out ${
-                  servicesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.96]"
+                  servicesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.97]"
                 }`}
                 style={{ transitionDelay: `${idx * 110}ms` }}
               >
@@ -759,7 +760,7 @@ export function LandingPage() {
 
                     {/* Centered Title & Minimal Description (Refined Modern Geometric Letterforms) */}
                     <div className="space-y-1.5 pt-1">
-                      <h3 className="text-xl sm:text-[22px] font-extrabold font-service-title text-[var(--text-primary)] tracking-tight text-center">
+                      <h3 className="text-xl sm:text-[22px] font-bold font-service-title text-[var(--text-primary)] text-center">
                         {trade.title}
                       </h3>
                       <p className="text-[13px] text-slate-600 dark:text-slate-300 text-center leading-relaxed max-w-xs mx-auto font-normal">
@@ -994,7 +995,7 @@ export function LandingPage() {
           {/* Plan A: 8-Hour Daily */}
           <div
             className={`flex flex-col transition-all duration-700 ease-out ${
-              packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.96]"
+              packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.97]"
             }`}
             style={{ transitionDelay: "0ms" }}
           >
@@ -1036,7 +1037,7 @@ export function LandingPage() {
           {/* Plan B: 24/7 Standard */}
           <div
             className={`flex flex-col transition-all duration-700 ease-out ${
-              packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.96]"
+              packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.97]"
             }`}
             style={{ transitionDelay: "130ms" }}
           >
@@ -1082,7 +1083,7 @@ export function LandingPage() {
           {/* Plan C: 24/7 Priority — FEATURED WITH EMERALD GLOW */}
           <div
             className={`flex flex-col transition-all duration-700 ease-out ${
-              packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.96]"
+              packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.97]"
             }`}
             style={{ transitionDelay: "260ms" }}
           >
@@ -1134,7 +1135,7 @@ export function LandingPage() {
           {/* Plan D: Custom Coverage */}
           <div
             className={`flex flex-col transition-all duration-700 ease-out ${
-              packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.96]"
+              packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.97]"
             }`}
             style={{ transitionDelay: "390ms" }}
           >
@@ -1243,7 +1244,7 @@ export function LandingPage() {
               <div
                 key={title}
                 className={`transition-all duration-700 ease-out flex flex-col ${
-                  workspacesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-[0.96]"
+                  workspacesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.97]"
                 }`}
                 style={{ transitionDelay: `${idx * 110}ms` }}
               >
