@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VoltOps | Field Service Coordination Platform</title>
 
-    <!-- Anti-flash: resolve theme before first paint -->
+    <!-- Anti-flash: resolve theme before first paint (Default: strictly Light) -->
     <script>
       (function () {
         try {
           var saved = localStorage.getItem("voltops-theme");
-          if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          if (saved === "dark") {
             document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
           }
         } catch (e) {}
       })();

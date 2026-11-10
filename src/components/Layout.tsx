@@ -11,6 +11,9 @@ import {
   ClockIcon,
   CheckCircleIcon,
   AlertTriangleIcon,
+  MenuIcon,
+  SearchIcon,
+  ZapIcon,
 } from "./Icons";
 
 interface LayoutProps {
@@ -100,8 +103,8 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
           {/* Brand header */}
           <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
             <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-xl bg-[#10b981] flex items-center justify-center text-[#06090e] font-extrabold shadow-sm">
-                ⚡
+              <div className="w-8 h-8 rounded-lg bg-[#10b981] flex items-center justify-center font-extrabold shadow-sm">
+                <ZapIcon size={16} className="text-[#06090e]" />
               </div>
               <div>
                 <span className="font-heading font-extrabold text-lg tracking-tight text-white group-hover:text-[#10b981] transition-colors">
@@ -170,18 +173,18 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              className="lg:hidden p-2 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               aria-label="Toggle Navigation Menu"
             >
-              ☰
+              <MenuIcon size={18} />
             </button>
 
             <div>
-              <h1 className="font-heading font-bold text-lg sm:text-xl text-[var(--text-primary)] truncate">
+              <h1 className="font-heading font-semibold text-lg text-[var(--text-primary)] tracking-tight truncate">
                 {title}
               </h1>
               {subtitle && (
-                <p className="text-xs text-[var(--text-muted)] hidden sm:block truncate">
+                <p className="text-xs text-[var(--text-muted)] hidden sm:block truncate mt-0.5">
                   {subtitle}
                 </p>
               )}
@@ -189,25 +192,25 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
           </div>
 
           {/* Right Header Affordances: Search, Role Badge, Theme Selector, User */}
-          <div className="flex items-center gap-3">
-            {/* Search Input (Observed in Figma Header: 300px) */}
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-muted)] focus-within:border-[#10b981] focus-within:ring-1 focus-within:ring-[#10b981]">
-              <span>🔍</span>
+          <div className="flex items-center gap-2.5">
+            {/* Search Input */}
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-muted)] focus-within:border-[#10b981] focus-within:ring-1 focus-within:ring-[#10b981]/30">
+              <SearchIcon size={14} className="text-[var(--text-muted)] shrink-0" />
               <input
                 type="text"
-                placeholder="Search requests, jobs, assets..."
-                className="bg-transparent border-none outline-none text-[var(--text-primary)] placeholder-[var(--text-muted)] w-44 lg:w-56"
+                placeholder="Search..."
+                className="bg-transparent border-none outline-none text-[var(--text-primary)] placeholder-[var(--text-muted)] w-36 lg:w-48"
               />
             </div>
 
             {/* Role Badge */}
             <span
-              className={`hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${getRoleBadge()}`}
+              className={`hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${getRoleBadge()}`}
             >
               {role}
             </span>
 
-            {/* Dual / System Theme Toggle */}
+            {/* Two-state Theme Toggle */}
             <ThemeToggle />
 
             {/* Header Action slot */}

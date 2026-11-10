@@ -9,67 +9,67 @@
 
 /* ── CSS Custom Properties: Theme Tokens ────────────────────────────── */
 :root {
-  /* Surface colors — Light Mode (Warm Ivory & Organic Alabaster) */
-  --bg-base: #f7f6f0;        /* warm ivory page background */
-  --bg-surface: rgba(255, 255, 255, 0.95); /* frosted card surface */
-  --bg-surface-2: #ede8dc;   /* secondary surface, hover tints */
-  --bg-surface-3: #e2dbcd;   /* raised / interactive background */
-  --bg-overlay: rgba(247, 246, 240, 0.92); /* translucent navbar with blur */
+  /* Surface colors — Light Mode (Clean Modern SaaS Canvas) */
+  --bg-base: #f8fafc;        /* Slate 50 page background */
+  --bg-surface: #ffffff;     /* Pure white card surface */
+  --bg-surface-2: #f1f5f9;   /* Slate 100 secondary surface, inputs, hover */
+  --bg-surface-3: #e2e8f0;   /* Slate 200 raised / interactive */
+  --bg-overlay: rgba(248, 250, 252, 0.88); /* Clean overlay with blur */
 
   /* Border */
-  --border: #dcd4c5;
-  --border-strong: rgba(21, 128, 61, 0.5);
-  --border-subtle: #e7e0d3;
+  --border: #e2e8f0;         /* Slate 200 crisp border */
+  --border-strong: #cbd5e1;  /* Slate 300 strong border */
+  --border-subtle: #f1f5f9;  /* Slate 100 divider */
 
-  /* Text — Enhanced high contrast so light mode cards are perfectly readable */
-  --text-primary: #090d16;   /* deep obsidian black */
-  --text-secondary: #1e293b; /* crisp dark slate */
-  --text-muted: #334155;     /* clear, readable slate grey */
+  /* Text — High-contrast typography */
+  --text-primary: #0f172a;   /* Slate 900 headings / body */
+  --text-secondary: #334155; /* Slate 700 metadata */
+  --text-muted: #64748b;     /* Slate 500 captions */
   --text-inverse: #ffffff;
 
-  /* Accent — Deep forest emerald with lime highlight */
-  --accent: #15803d;
-  --accent-hover: #166534;
-  --accent-text: #14532d;
-  --accent-subtle: rgba(21, 128, 61, 0.08);
-  --accent-glow: rgba(21, 128, 61, 0.22);
+  /* Accent — VoltOps Emerald */
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --accent-text: #047857;
+  --accent-subtle: rgba(16, 185, 129, 0.08);
+  --accent-glow: rgba(16, 185, 129, 0.18);
 
   --lime-accent: #65a30d;
   --amber-accent: #d97706;
   --amber-subtle: rgba(217, 119, 6, 0.10);
 
   /* Atmospheric hero glows (light mode) */
-  --hero-glow-1: rgba(101, 163, 13, 0.13);
-  --hero-glow-2: rgba(21, 128, 61, 0.10);
-  --hero-glow-3: rgba(217, 119, 6, 0.07);
+  --hero-glow-1: rgba(16, 185, 129, 0.10);
+  --hero-glow-2: rgba(5, 150, 105, 0.08);
+  --hero-glow-3: rgba(217, 119, 6, 0.06);
 
   /* Shadow */
-  --shadow-sm: 0 1px 3px rgba(15, 23, 32, 0.04), 0 1px 2px rgba(15, 23, 32, 0.02);
-  --shadow-md: 0 6px 20px rgba(15, 23, 32, 0.06), 0 2px 6px rgba(15, 23, 32, 0.03);
-  --shadow-lg: 0 16px 40px rgba(15, 23, 32, 0.09), 0 4px 12px rgba(15, 23, 32, 0.04);
-  --shadow-float: 0 24px 56px rgba(15, 23, 32, 0.12);
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --shadow-float: 0 20px 25px -5px rgba(15, 23, 42, 0.10);
 
   /* Status */
-  --status-available: #15803d;
-  --status-danger: #b3261e;
+  --status-available: #10b981;
+  --status-danger: #ef4444;
 }
 
 .dark {
-  /* Surface colors — Dark Mode (Deep Midnight Obsidian + Emerald / Mint Accent) */
-  --bg-base: #06090e;        /* atmospheric organic midnight base */
-  --bg-surface: rgba(14, 20, 29, 0.72);  /* translucent smoked glass */
-  --bg-surface-2: rgba(20, 29, 43, 0.85); /* raised frosted panels */
-  --bg-surface-3: rgba(27, 39, 58, 0.95); /* active / focus elements */
-  --bg-overlay: rgba(6, 9, 14, 0.82);    /* translucent navbar with blur */
+  /* Surface colors — Dark Mode (Deep Midnight Obsidian + Emerald / Mint) */
+  --bg-base: #0b1117;        /* Clean deep midnight base */
+  --bg-surface: #111827;     /* Dark card surface */
+  --bg-surface-2: #16202c;   /* Secondary raised panel / inputs */
+  --bg-surface-3: #1e293b;   /* Active / focus elements */
+  --bg-overlay: rgba(11, 17, 23, 0.88);
 
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(16, 185, 129, 0.40);
-  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border: #1e293b;         /* Muted dark slate border */
+  --border-strong: #334155;  /* Crisp dark border */
+  --border-subtle: #16202c;  /* Subtle divider */
 
   --text-primary: #f8fafc;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
-  --text-inverse: #06090e;
+  --text-inverse: #0b1117;
 
   /* Accent — Emerald / Mint Green */
   --accent: #10b981;
@@ -82,22 +82,22 @@
   --amber-accent: #f59e0b;
   --amber-subtle: rgba(245, 158, 11, 0.14);
 
-  /* Atmospheric hero glows (dark mode: Emerald + Mint + Amber bokeh glow) */
-  --hero-glow-1: rgba(16, 185, 129, 0.22);
-  --hero-glow-2: rgba(52, 211, 153, 0.16);
-  --hero-glow-3: rgba(245, 158, 11, 0.14); /* warm golden/amber glow in background */
+  /* Atmospheric hero glows */
+  --hero-glow-1: rgba(16, 185, 129, 0.20);
+  --hero-glow-2: rgba(52, 211, 153, 0.14);
+  --hero-glow-3: rgba(245, 158, 11, 0.12);
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
-  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.70);
-  --shadow-float: 0 28px 64px rgba(0, 0, 0, 0.85);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+  --shadow-float: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
 }
 
 body {
   background-color: var(--bg-base);
   color: var(--text-primary);
   @apply font-sans antialiased;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 h1, h2, h3, h4, .font-heading {
@@ -217,6 +217,30 @@ h1, h2, h3, h4, .font-heading {
 /* ── Scrollbar hiding utility ────────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Micro-Interactions & Polished Transitions ───────────────────────── */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.btn-press {
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.12s ease;
+}
+
+.btn-press:active {
+  transform: scale(0.97);
+}
 
 /* ── Reduced motion ──────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {

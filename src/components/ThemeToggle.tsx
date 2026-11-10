@@ -1,47 +1,34 @@
 import { FC } from "react";
-import { useTheme, ThemePreference } from "../context/ThemeContext";
-import { SunIcon, MoonIcon, LaptopIcon } from "./Icons";
+import { useTheme } from "../context/ThemeContext";
+import { SunIcon, MoonIcon } from "./Icons";
 
 interface ThemeToggleProps {
   className?: string;
 }
 
 export const ThemeToggle: FC<ThemeToggleProps> = ({ className = "" }) => {
-  const { preference, setPreference } = useTheme();
-
-  const options: { value: ThemePreference; label: string; icon: typeof SunIcon }[] = [
-    { value: "light", label: "Light", icon: SunIcon },
-    { value: "dark", label: "Dark", icon: MoonIcon },
-    { value: "system", label: "System", icon: LaptopIcon },
-  ];
+  const { theme, toggleTheme } = useTheme();
+  const isLight = theme === "light";
 
   return (
-    <div
-      className={`inline-flex items-center p-1 rounded-full border border-[var(--border)] bg-[var(--bg-surface-2)] shadow-inner ${className}`}
-      role="radiogroup"
-      aria-label="Theme selection"
+    <button
+      type="button"
+      onClick={toggleTheme}
+      aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
+      title={isLight ? "Switch to dark mode" : "Switch to light mode"}
+      className={`relative inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] focus:outline-none focus:ring-2 focus:ring-[#10b981]/40 active:scale-95 transition-all duration-150 group ${className}`}
     >
-      {options.map(({ value, label, icon: Icon }) => {
-        const isActive = preference === value;
-        return (
-          <button
-            key={value}
-            type="button"
-            onClick={() => setPreference(value)}
-            className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-              isActive
-                ? "bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm font-semibold border border-[var(--border-strong)]"
-                : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-            }`}
-            role="radio"
-            aria-checked={isActive}
-            title={`Switch to ${label} mode`}
-          >
-            <Icon size={13} className={isActive ? "text-[#10b981]" : "text-current"} />
-            <span className="hidden sm:inline">{label}</span>
-          </button>
-        );
-      })}
-    </div>
+      {isLight ? (
+        <SunIcon
+          size={16}
+          className="text-amber-500 group-hover:rotate-45 transition-transform duration-300"
+        />
+      ) : (
+        <MoonIcon
+          size={15}
+          className="text-sky-400 group-hover:-rotate-12 transition-transform duration-300"
+        />
+      )}
+    </button>
   );
 };
