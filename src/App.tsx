@@ -5,6 +5,9 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { AdminDashboard } from "./pages/AdminDashboard";
+import { UserManagement } from "./pages/admin/UserManagement";
+import { TechnicianVerification } from "./pages/admin/TechnicianVerification";
+import { AuditLog } from "./pages/admin/AuditLog";
 import { DispatcherDashboard } from "./pages/DispatcherDashboard";
 import { TechnicianDashboard } from "./pages/TechnicianDashboard";
 import { CustomerDashboard } from "./pages/CustomerDashboard";
@@ -58,6 +61,30 @@ export default function App() {
               element={
                 <ProtectedRoute allowedRoles={["ADMIN"]}>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <UserManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/technicians"
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <TechnicianVerification />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/audit"
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <AuditLog />
                 </ProtectedRoute>
               }
             />
