@@ -28,8 +28,13 @@ This document tracks all completed implementation milestones, verified files, co
   16. `b411f23` — `feat(admin): implement technician skill passports verification directory and approval workflow`
   17. `f9d3242` — `feat(admin): implement system security audit log with event filtering and inspection drawer`
   18. `78da757` — `feat(routes): register admin user management, technician verification, and audit log routes`
-  19. `(current)` — `docs: update implementation progress with Milestone 2 Admin module completion`
-  20. `(pending)` — `feat(landing): elevate service card typography with Plus Jakarta Sans and Google Fonts import, and enhance smooth slow-motion floating wave`
+  19. `e1f231b` — `feat(landing): elevate service card typography and enhance slow-motion floating levitation wave`
+  20. `0c36aba` — `docs(security): expand threat model audit with severity ledger and specify admin backend requirements`
+  21. `3a11954` — `feat(admin): enhance governance dashboard with live telemetry probe and offline error handling`
+  22. `d5949e3` — `feat(admin): implement user directory pagination, deactivation modal, and duplicate prevention`
+  23. `5ab6a98` — `feat(admin): connect live technician profiles across 7 trades with directory pagination`
+  24. `33eaea0` — `feat(admin): add audit ledger JSON export, event ID clipboard action, and pagination`
+  25. `(current)` — `docs: finalize Milestone 2 Admin completion, security validation, and daily commit accounting`
 
 ---
 
@@ -70,26 +75,30 @@ This document tracks all completed implementation milestones, verified files, co
      - Confirmed that changing to HttpOnly cookies unilaterally without backend refactoring would break platform authentication.
   2. **Admin Dashboard (`/admin`)**:
      - Built comprehensive governance overview with 4 metric cards (Total Accounts, Certified Technicians, Active Dispatchers, 99.2% SLA Compliance).
-     - Connected live data probing to backend `GET /api/technicians` with fallback indicator.
+     - Connected live data probing to backend `GET /api/technicians` with fallback indicator and manual "Refresh Status" trigger.
+     - Added transparent labeling distinguishing live `/api/technicians` telemetry from awaiting `/api/admin/users` baselines.
      - Implemented Pending Verification alert banner and quick administrative module navigation.
   3. **User Management Directory (`/admin/users`)**:
      - Built full user directory table supporting keyword search, role pill filter (`ALL`, `ADMIN`, `DISPATCHER`, `TECHNICIAN`, `CUSTOMER`), and status filtering.
-     - Implemented privileged **Create Staff Account modal** (Admin-only role selection for DISPATCHER, TECHNICIAN, ADMIN).
-     - Implemented account activation/deactivation toggle action.
-     - Implemented account inspection details modal.
+     - Implemented paginated directory views with page navigation controls.
+     - Implemented privileged **Create Staff Account modal** (Admin-only role selection for DISPATCHER, TECHNICIAN, ADMIN) with duplicate email validation and password length checks.
+     - Implemented account deactivation confirmation dialog with state persistence.
+     - Implemented account inspection details modal with clipboard copy action.
   4. **Technician Skill Passports & Verification (`/admin/technicians`)**:
      - Directory filtered across all **7 canonical service trades**.
      - Displayed trade license credentials, issuing authorities, registration numbers, and expiration dates.
+     - Mapped live technicians from backend `GET /api/technicians` directly into the verification queue.
      - Implemented interactive Review & Audit modal with approve and reject workflows.
-     - Connected to live backend `GET /api/technicians` endpoint.
+     - Added pagination controls for large technician registries.
   5. **System Security Audit Log (`/admin/audit`)**:
      - Immutable chronological audit ledger with severity badges (`INFO`, `WARNING`, `CRITICAL`) and event categories (`ROLE_CHANGE`, `DISPATCH`, `VERIFICATION`, `SECURITY`, `ACCOUNT`, `AUTH`).
-     - Search and category filters.
-     - Detailed inspection drawer with actor IP, target entity, and extended context.
-     - Explicit transparency notice detailing that records represent deterministic prototype baseline pending backend audit table migration.
+     - Keyword search across action, actor, target entity, and details.
+     - Detailed inspection drawer with actor IP, target entity, clipboard copy, and extended context.
+     - Added **Export Audit Log (JSON)** download action for compliance archiving.
+     - Documented missing backend requirements in [`docs/ADMIN_BACKEND_REQUIREMENTS.md`](file:///e:/BUBT-CSE-4th%20yr/SDP-4/VoltOps/voltops-frontend/voltops-frontend/docs/ADMIN_BACKEND_REQUIREMENTS.md).
   6. **Route Protection & Registration in `src/App.tsx`**:
      - All 4 Admin routes (`/admin`, `/admin/users`, `/admin/technicians`, `/admin/audit`) guarded by `allowedRoles={["ADMIN"]}`.
-- **Verification**: `npm run build` (`tsc && vite build`) transformed 114 modules in 23.32s with 0 errors.
+- **Verification**: `npm run build` (`tsc && vite build`) transformed 114 modules in 7.36s with 0 errors.
 
 ---
 
