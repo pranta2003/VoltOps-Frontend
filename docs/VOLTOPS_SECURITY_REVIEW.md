@@ -76,13 +76,44 @@ If an authenticated user attempts to access a route outside their role, they are
 
 ---
 
-## 6. Financial & AI Operational Boundaries
+## 7. Backend Authentication Security Investigation (Milestone 2 Verified)
 
-- **Invoicing & Billing**:
-  - The frontend never performs autonomous financial calculations or drafts unapproved invoices.
-  - Billing preview screens display a clear disclaimer:
-    > *"Payment is a UI preview only. No real transaction will be processed."*
-  - All financial line items, subtotals, tax rates, and totals must be sourced deterministically from backend work order records.
-- **AI Matching & Dispatch**:
-  - AI recommendations for technicians are purely advisory explanations.
-  - Automatic dispatching without human dispatcher confirmation is blocked.
+An in-depth inspection of the actual backend codebase (`E:\BUBT-CSE-4th yr\SDP-4\VoltOps\voltops-backend\voltops-backend`) was conducted to evaluate the authentication and API security contract.
+
+### 7.1 Backend Token Contract & Cookie Support
+- **Bearer Header Dependency**: The backend middleware (`src/middleware/auth.ts`) strictly requires tokens via `Authorization: Bearer <token>` in the HTTP request headers.
+- **Cookie Support Assessment**:
+  - The backend Express server (`src/app.ts`) does **NOT** use `cookie-parser` and does not set any cookies (`res.cookie` is absent).
+  - Attempting to switch the frontend to `HttpOnly`, `Secure`, `SameSite` cookies unilaterally would **completely break authentication across the platform**, as the backend cannot parse or read cookies from incoming requests.
+  - While `cors({ origin: process.env.FRONTEND_URL || "http://localhost:5173", credentials: true })` enables credential sharing, bearer tokens in headers remain the sole supported authentication transport.
+
+### 7.2 CSRF & Token Lifecycle Evaluation
+- **CSRF Resistance**: Because authentication relies exclusively on explicit Bearer header injection rather than ambient browser cookies, cross-site requests cannot automatically pass authentication headers. Standard CSRF attacks are ineffective against this design.
+- **Token Expiry**: Default duration is 7 days (`JWT_EXPIRES_IN || "7d"` in `src/utils/jwt.ts`).
+- **Refresh & Revocation Limitations**:
+  - **No Refresh Token Flow**: The backend lacks a refresh token endpoint (`/api/auth/refresh` is missing).
+  - **No Server-Side Revocation**: The backend does not maintain an active token blacklist or session store in Prisma/PostgreSQL. Once issued, a JWT remains cryptographically valid until its 7-day expiration unless the account's `isActive` flag is checked in protected queries.
+  - **Client-Side Logout**: Calling `logout()` only clears `localStorage.removeItem("voltops_token")`.
+
+### 7.3 XSS Exposure & Data Safeguards
+- **XSS Vector**: Because JWT is kept in browser `localStorage`, any arbitrary JavaScript execution (e.g., from malicious NPM packages or unchecked DOM injections) could read the token.
+- **Mitigation in Frontend**:
+  - Zero usage of `dangerouslySetInnerHTML`.
+  - Strict React JSX escaping for all rendered user inputs.
+  - Strict input sanitization across forms.
+  - No sensitive credentials, passwords, or tokens logged in console or analytics.
+
+### 7.4 Backend API Endpoint Inventory for Admin Module
+
+| Endpoint | Method | Backend Status | Auth & Role Required | Frontend Integration Strategy |
+|---|---|---|---|---|
+| `/api/auth/login` | POST | **EXISTS** | Public | Connected in `AuthContext.tsx` |
+| `/api/auth/register` | POST | **EXISTS** | Public (Customer only) | Connected in `Register.tsx` |
+| `/api/auth/me` | GET | **EXISTS** | `requireAuth` (Bearer token) | Connected in `AuthContext.tsx` |
+| `/api/technicians` | GET | **EXISTS** | `requireAuth` + `authorize("ADMIN", "DISPATCHER")` | **Directly Connected** in Admin Technician Directory |
+| `/api/technicians/me` | GET | **EXISTS** | `requireAuth` + `authorize("TECHNICIAN")` | Connected in Technician Portal |
+| `/api/admin/users` or `/api/users` | GET | **MISSING** | None implemented in backend routes | UI-only prototype with deterministic seed + explicit backend status badge |
+| `/api/admin/users` | POST | **MISSING** | None implemented in backend routes | UI modal with simulated creation + explicit missing endpoint banner |
+| `/api/users/:id/status` | PATCH | **MISSING** | None implemented in backend routes | Client-side status toggle with notification that backend persistence is pending |
+| `/api/admin/audit` | GET | **MISSING** | None implemented in backend routes | Structured deterministic administrative log with clear *"Awaiting backend audit table"* notice |
+
