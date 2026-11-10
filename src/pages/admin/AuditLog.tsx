@@ -132,6 +132,9 @@ export function AuditLog() {
   const [categoryFilter, setCategoryFilter] = useState<"ALL" | AuditCategory>("ALL");
   const [severityFilter, setSeverityFilter] = useState<"ALL" | "INFO" | "WARNING" | "CRITICAL">("ALL");
   const [selectedEvent, setSelectedEvent] = useState<AuditEvent | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [copiedEventId, setCopiedEventId] = useState(false);
+  const pageSize = 5;
 
   // Filtered events
   const filteredEvents = useMemo(() => {
@@ -148,6 +151,30 @@ export function AuditLog() {
       return matchesSearch && matchesCat && matchesSev;
     });
   }, [events, searchQuery, categoryFilter, severityFilter]);
+
+  // Paginated slice
+  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / pageSize));
+  const paginatedEvents = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredEvents.slice(start, start + pageSize);
+  }, [filteredEvents, currentPage, pageSize]);
+
+  // Export audit logs as downloadable JSON file
+  const handleExportJSON = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(filteredEvents, null, 2));
+    const downloadAnchor = document.createElement("a");
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `voltops-audit-log-${new Date().toISOString().split("T")[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  const handleCopyId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedEventId(true);
+    setTimeout(() => setCopiedEventId(false), 2000);
+  };
 
   const getSeverityBadge = (sev: AuditEvent["severity"]) => {
     switch (sev) {
@@ -182,6 +209,16 @@ export function AuditLog() {
     <Layout
       title="System Audit & Security Event Ledger"
       subtitle="Immutable chronological audit trail recording administrative decisions, role adjustments, and dispatch overrides"
+      action={
+        <button
+          type="button"
+          onClick={handleExportJSON}
+          className="px-4 py-2 rounded-xl text-xs font-bold border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] hover:border-[#10b981] hover:text-[#10b981] transition-all shadow-sm flex items-center gap-1.5"
+          title="Download compliance audit trail in JSON format"
+        >
+          <span>📥 Export Ledger (JSON)</span>
+        </button>
+      }
     >
       {/* ── Security & Integrity Policy Notice ─────────────────────────── */}
       <div className="p-4 rounded-2xl border border-purple-500/30 bg-purple-500/10 flex items-start gap-3 text-xs leading-relaxed">
@@ -263,14 +300,14 @@ export function AuditLog() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border)]">
-              {filteredEvents.length === 0 ? (
+              {paginatedEvents.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-[var(--text-muted)]">
                     No audit records matching criteria.
                   </td>
                 </tr>
               ) : (
-                filteredEvents.map((evt) => (
+                paginatedEvents.map((evt) => (
                   <tr key={evt.id} className="hover:bg-[var(--bg-surface-2)]/50 transition-colors">
                     {/* Timestamp & ID */}
                     <td className="py-3.5 px-4">
@@ -332,6 +369,48 @@ export function AuditLog() {
             </tbody>
           </table>
         </div>
+
+        {/* ── Table Pagination Controls ─────────────────────────────────── */}
+        <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-surface-2)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
+          <div>
+            Showing <strong className="text-[var(--text-primary)]">{filteredEvents.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</strong> to <strong className="text-[var(--text-primary)]">{Math.min(currentPage * pageSize, filteredEvents.length)}</strong> of <strong className="text-[var(--text-primary)]">{filteredEvents.length}</strong> events
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-semibold"
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
+              <button
+                key={pg}
+                type="button"
+                onClick={() => setCurrentPage(pg)}
+                className={`w-7 h-7 rounded-lg text-xs font-bold border transition-all ${
+                  currentPage === pg
+                    ? "bg-[#10b981] text-[#06090e] border-[#10b981]"
+                    : "border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] hover:border-[#10b981]"
+                }`}
+              >
+                {pg}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-semibold"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* ── Modal: Event Inspection Drawer ─────────────────────────────── */}
@@ -343,7 +422,16 @@ export function AuditLog() {
                 <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
                   Audit Event Details
                 </h3>
-                <p className="text-xs text-[var(--text-muted)] font-mono">{selectedEvent.id}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-xs text-[var(--text-muted)] font-mono">{selectedEvent.id}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyId(selectedEvent.id)}
+                    className="px-1.5 py-0.5 rounded text-[10px] font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[#10b981]"
+                  >
+                    {copiedEventId ? "Copied!" : "Copy ID"}
+                  </button>
+                </div>
               </div>
               <button
                 type="button"
