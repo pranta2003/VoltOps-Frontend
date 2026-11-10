@@ -17,22 +17,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   // On first load (or page refresh), check if we have a saved token and,
-  // if so, ask the backend "is this still valid, and who is this?" via
-  // GET /api/auth/me. This is what keeps someone logged in after refresh.
+  // if so, verify session with backend via GET /api/auth/me.
+  // Preserves cached session during transient backend network errors.
   useEffect(() => {
     const savedToken = localStorage.getItem("voltops_token");
+    const savedUserStr = localStorage.getItem("voltops_user");
 
     if (!savedToken) {
       setIsLoading(false);
       return;
     }
 
+    if (savedUserStr) {
+      try {
+        setUser(JSON.parse(savedUserStr));
+      } catch {
+        localStorage.removeItem("voltops_user");
+      }
+    }
+
     api
       .get("/auth/me")
-      .then((res) => setUser(res.data.user))
-      .catch(() => {
-        localStorage.removeItem("voltops_token");
-        localStorage.removeItem("voltops_user");
+      .then((res) => {
+        if (res.data?.user) {
+          setUser(res.data.user);
+          localStorage.setItem("voltops_user", JSON.stringify(res.data.user));
+        }
+      })
+      .catch((err) => {
+        // Only clear credentials if backend explicitly reports unauthorized 401
+        if (err.response?.status === 401) {
+          localStorage.removeItem("voltops_token");
+          localStorage.removeItem("voltops_user");
+          setUser(null);
+        }
       })
       .finally(() => setIsLoading(false));
   }, []);

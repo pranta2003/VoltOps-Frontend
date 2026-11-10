@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Layout } from "../../components/Layout";
 import {
   CANONICAL_SERVICE_CATEGORIES,
@@ -37,9 +37,11 @@ export function TechnicianVerification() {
   // Audit modal state
   const [selectedTech, setSelectedTech] = useState<TechnicianVerificationProfile | null>(null);
   const [reviewNote, setReviewNote] = useState("");
+  const [pendingDecision, setPendingDecision] = useState<"VERIFIED" | "REJECTED" | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
   const [actionSuccessNotice, setActionSuccessNotice] = useState<string | null>(null);
+  const lastFocusedTriggerRef = useRef<HTMLElement | null>(null);
 
   // Load technician directory via AdminService
   const loadTechnicians = useCallback(async () => {
@@ -64,12 +66,20 @@ export function TechnicianVerification() {
     loadTechnicians();
   }, [loadTechnicians]);
 
+  // Focus restoration when modal closes
+  useEffect(() => {
+    if (!selectedTech) {
+      lastFocusedTriggerRef.current?.focus();
+    }
+  }, [selectedTech]);
+
   // Keyboard accessibility: Close modal on Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && selectedTech) {
         setSelectedTech(null);
         setModalError(null);
+        setPendingDecision(null);
         setReviewNote("");
       }
     };
@@ -114,16 +124,28 @@ export function TechnicianVerification() {
     return filteredTechs.slice(start, start + pageSize);
   }, [filteredTechs, currentPage, pageSize]);
 
-  // Handle Verification Decision Submission
-  const handleDecision = async (status: "VERIFIED" | "REJECTED") => {
-    if (!selectedTech) return;
+  // Initiate decision workflow with review note validation
+  const handleInitiateDecision = (status: "VERIFIED" | "REJECTED") => {
+    setModalError(null);
+    if (status === "REJECTED" && !reviewNote.trim()) {
+      setModalError(
+        "Please provide an administrative audit note explaining the rejection reason before proceeding."
+      );
+      return;
+    }
+    setPendingDecision(status);
+  };
+
+  // Execute confirmed decision
+  const executeDecision = async () => {
+    if (!selectedTech || !pendingDecision) return;
 
     setIsSubmitting(true);
     setModalError(null);
 
     const res = await AdminService.submitVerificationDecision(selectedTech.id, {
-      status,
-      notes: reviewNote.trim() || `Administrative ${status.toLowerCase()} decision recorded.`,
+      status: pendingDecision,
+      notes: reviewNote.trim() || `Administrative ${pendingDecision.toLowerCase()} decision recorded.`,
     });
 
     if (res.success && res.data) {
@@ -133,7 +155,7 @@ export function TechnicianVerification() {
           t.id === selectedTech.id
             ? {
                 ...t,
-                verificationStatus: status,
+                verificationStatus: pendingDecision,
                 verifiedAt: new Date().toISOString(),
                 verifiedBy: "Lead Administrator",
                 verificationNotes: reviewNote.trim(),
@@ -144,14 +166,16 @@ export function TechnicianVerification() {
 
       setActionSuccessNotice(
         `Verification successfully ${
-          status === "VERIFIED" ? "approved" : "rejected"
+          pendingDecision === "VERIFIED" ? "approved" : "rejected"
         } for ${selectedTech.technicianName}. Skill passport updated.`
       );
       setSelectedTech(null);
+      setPendingDecision(null);
       setReviewNote("");
       setTimeout(() => setActionSuccessNotice(null), 5000);
     } else {
       // Backend rejected or endpoint 404: display honest error inside modal
+      setPendingDecision(null);
       setModalError(
         res.error ||
           `Backend endpoint PATCH /api/technicians/${selectedTech.id}/verify is unavailable. Decision was NOT saved.`
@@ -458,8 +482,10 @@ export function TechnicianVerification() {
                       <td className="py-4 px-4 text-right">
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={(e) => {
+                            lastFocusedTriggerRef.current = e.currentTarget;
                             setSelectedTech(t);
+                            setPendingDecision(null);
                             setModalError(null);
                             setReviewNote(t.verificationNotes || "");
                           }}
@@ -678,10 +704,11 @@ export function TechnicianVerification() {
 
               {/* Review Note */}
               <div>
-                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
-                  Administrative Audit Note (Optional)
+                <label htmlFor="tech-review-notes" className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+                  Administrative Audit Note {pendingDecision === "REJECTED" ? <span className="text-red-500">* (Required for rejection)</span> : "(Optional)"}
                 </label>
                 <textarea
+                  id="tech-review-notes"
                   value={reviewNote}
                   onChange={(e) => setReviewNote(e.target.value)}
                   placeholder="Document checked with licensing authority. Verified for commercial callouts..."
@@ -691,40 +718,88 @@ export function TechnicianVerification() {
                 />
               </div>
 
-              {/* Action Buttons */}
-              <div className="pt-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-3">
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={() => {
-                    setSelectedTech(null);
-                    setModalError(null);
-                  }}
-                  className="px-4 py-2.5 rounded-xl border border-[var(--border)] text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                >
-                  Cancel
-                </button>
+              {/* Confirmation Prompt when decision is initiated */}
+              {pendingDecision && (
+                <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 space-y-3">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangleIcon size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-bold text-xs text-[var(--text-primary)]">
+                        Confirm {pendingDecision === "VERIFIED" ? "Credential Verification" : "Credential Rejection"}
+                      </h4>
+                      <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                        {pendingDecision === "VERIFIED"
+                          ? `Are you sure you want to verify ${selectedTech.technicianName}'s skill passport? This technician will become eligible for automated dispatch scoring across ${selectedTech.primaryTrade}.`
+                          : `Are you sure you want to reject ${selectedTech.technicianName}'s submitted credential? The technician will remain ineligible for dispatch.`}
+                      </p>
+                    </div>
+                  </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    disabled={isSubmitting}
-                    onClick={() => handleDecision("REJECTED")}
-                    className="px-4 py-2.5 rounded-xl text-xs font-bold border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
-                  >
-                    {isSubmitting ? "Processing..." : "Reject Credential"}
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={isSubmitting}
-                    onClick={() => handleDecision("VERIFIED")}
-                    className="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm disabled:opacity-50"
-                  >
-                    {isSubmitting ? "Processing..." : "✓ Approve & Verify Skill Passport"}
-                  </button>
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-amber-500/20">
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => setPendingDecision(null)}
+                      className="px-3 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={executeDecision}
+                      className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm ${
+                        pendingDecision === "VERIFIED"
+                          ? "bg-[#10b981] text-[#06090e] hover:bg-[#34d399]"
+                          : "bg-red-600 text-white hover:bg-red-700"
+                      } disabled:opacity-50`}
+                    >
+                      {isSubmitting
+                        ? "Submitting..."
+                        : pendingDecision === "VERIFIED"
+                        ? "Confirm & Verify Passport"
+                        : "Confirm Rejection"}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Action Buttons */}
+              {!pendingDecision && (
+                <div className="pt-4 border-t border-[var(--border)] flex flex-wrap items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                      setSelectedTech(null);
+                      setModalError(null);
+                    }}
+                    className="px-4 py-2.5 rounded-xl border border-[var(--border)] text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  >
+                    Cancel
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => handleInitiateDecision("REJECTED")}
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                    >
+                      Reject Credential
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => handleInitiateDecision("VERIFIED")}
+                      className="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm disabled:opacity-50"
+                    >
+                      ✓ Approve & Verify Skill Passport
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

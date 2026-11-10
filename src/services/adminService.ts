@@ -5,13 +5,13 @@
 // boundaries, and honest integration state reporting.
 //
 // INTEGRATION CONTRACTS:
-// - GET   /api/admin/metrics       -> Aggregate governance telemetry
-// - GET   /api/admin/users         -> Paginated staff & user directory
-// - POST  /api/admin/users         -> Privileged staff account creation
+// - GET   /api/admin/metrics          -> Aggregate governance telemetry
+// - GET   /api/admin/users            -> Paginated staff & user directory
+// - POST  /api/admin/users            -> Privileged staff account creation
 // - PATCH /api/admin/users/:id/status -> Account activation/deactivation
-// - GET   /api/technicians         -> Live technician directory (Existing)
+// - GET   /api/technicians            -> Live technician directory (Existing)
 // - PATCH /api/technicians/:id/verify -> Technician credential decisions
-// - GET   /api/admin/audit         -> System security audit log ledger
+// - GET   /api/admin/audit            -> System security audit log ledger
 // ============================================================================
 
 import api from "../api/axios";
@@ -32,7 +32,7 @@ import {
   OFFLINE_BASELINE_TECHNICIANS,
   OFFLINE_BASELINE_AUDIT_EVENTS,
 } from "./mockAdminData";
-import { ServiceCategory } from "../types";
+import { ServiceCategory, Role } from "../types";
 
 export class AdminService {
   /**
@@ -44,13 +44,25 @@ export class AdminService {
     try {
       // 1. Attempt future aggregate metrics endpoint
       const metricsRes = await api.get("/admin/metrics");
-      if (metricsRes.data && metricsRes.data.success) {
+      if (
+        metricsRes.data &&
+        typeof metricsRes.data === "object" &&
+        metricsRes.data.success &&
+        metricsRes.data.data
+      ) {
+        const d = metricsRes.data.data;
         return {
-          totalUsers: metricsRes.data.data.totalUsers ?? null,
-          activeTechnicians: metricsRes.data.data.activeTechnicians ?? null,
-          pendingVerifications: metricsRes.data.data.pendingVerifications ?? null,
-          dispatchersOnDuty: metricsRes.data.data.dispatchersOnDuty ?? null,
-          slaComplianceRate: metricsRes.data.data.slaComplianceRate ?? null,
+          totalUsers: typeof d.totalUsers === "number" ? d.totalUsers : null,
+          activeTechnicians:
+            typeof d.activeTechnicians === "number" ? d.activeTechnicians : null,
+          pendingVerifications:
+            typeof d.pendingVerifications === "number"
+              ? d.pendingVerifications
+              : null,
+          dispatchersOnDuty:
+            typeof d.dispatchersOnDuty === "number" ? d.dispatchersOnDuty : null,
+          slaComplianceRate:
+            typeof d.slaComplianceRate === "number" ? d.slaComplianceRate : null,
           dataSource: "LIVE_API",
           telemetryTimestamp: new Date().toISOString(),
           notes: "Live aggregate telemetry from /api/admin/metrics",
@@ -63,9 +75,11 @@ export class AdminService {
     try {
       // 2. Probe existing live endpoint /api/technicians
       const techRes = await api.get("/technicians");
-      const technicians = techRes.data?.technicians || [];
+      const technicians = Array.isArray(techRes.data?.technicians)
+        ? techRes.data.technicians
+        : [];
       const pendingCount = technicians.filter(
-        (t: any) => t.verificationStatus === "PENDING_REVIEW"
+        (t: any) => t && t.verificationStatus === "PENDING_REVIEW"
       ).length;
 
       return {
@@ -101,17 +115,44 @@ export class AdminService {
   ): Promise<ServiceResult<PaginatedResponse<ManagedUserAccount>>> {
     try {
       const res = await api.get("/admin/users", { params });
-      if (res.data) {
+      if (res.data && typeof res.data === "object") {
+        let users: ManagedUserAccount[] = [];
+        let total = 0;
+        let page = params.page || 1;
+        let limit = params.limit || 6;
+        let totalPages = 1;
+
+        if (Array.isArray(res.data.data)) {
+          users = res.data.data;
+          total = res.data.meta?.total ?? users.length;
+          page = res.data.meta?.page ?? page;
+          limit = res.data.meta?.limit ?? limit;
+          totalPages = res.data.meta?.totalPages ?? Math.max(1, Math.ceil(total / limit));
+        } else if (Array.isArray(res.data.users)) {
+          users = res.data.users;
+          total = res.data.total ?? users.length;
+          totalPages = Math.max(1, Math.ceil(total / limit));
+        } else if (Array.isArray(res.data)) {
+          users = res.data;
+          total = users.length;
+          totalPages = Math.max(1, Math.ceil(total / limit));
+        } else {
+          throw new Error("Malformed API response: expected array of users.");
+        }
+
         return {
           success: true,
-          data: res.data,
+          data: {
+            success: true,
+            data: users,
+            meta: { page, limit, total, totalPages },
+          },
           isLive: true,
           endpointConnected: true,
         };
       }
     } catch (err: any) {
       const status = err.response?.status;
-      // If endpoint is not yet mounted (404) or network failed
       const endpointConnected = status !== 404 && err.code !== "ERR_NETWORK";
 
       // Filter offline baseline for demonstration
@@ -144,7 +185,8 @@ export class AdminService {
         success: true,
         data: {
           success: true,
-          message: "Offline development baseline (endpoint /api/admin/users pending backend implementation)",
+          message:
+            "Offline development baseline (endpoint /api/admin/users pending backend implementation)",
           data: paged,
           meta: { page, limit, total, totalPages },
         },
@@ -163,7 +205,7 @@ export class AdminService {
       data: null,
       isLive: false,
       endpointConnected: false,
-      error: "Unexpected response shape.",
+      error: "Unexpected response shape from user directory API.",
     };
   }
 
@@ -177,10 +219,11 @@ export class AdminService {
   ): Promise<ServiceResult<ManagedUserAccount>> {
     try {
       const res = await api.post("/admin/users", payload);
-      if (res.data?.user || res.data?.data) {
+      const createdUser = res.data?.user || res.data?.data;
+      if (createdUser && typeof createdUser === "object" && createdUser.id) {
         return {
           success: true,
-          data: res.data.user || res.data.data,
+          data: createdUser,
           isLive: true,
           endpointConnected: true,
         };
@@ -192,7 +235,7 @@ export class AdminService {
         err.response?.data?.message ||
         (status === 404
           ? "Backend endpoint POST /api/admin/users is not yet implemented in the backend repository. Account cannot be saved."
-          : err.message);
+          : err.message || "Failed to create staff account.");
 
       return {
         success: false,
@@ -209,7 +252,7 @@ export class AdminService {
       data: null,
       isLive: false,
       endpointConnected: false,
-      error: "Unable to process staff account creation.",
+      error: "Unable to process staff account creation: invalid response structure.",
     };
   }
 
@@ -243,7 +286,7 @@ export class AdminService {
         err.response?.data?.message ||
         (status === 404
           ? "Backend endpoint PATCH /api/admin/users/:id/status is not yet implemented in the backend repository. Status change cannot be saved."
-          : err.message);
+          : err.message || "Failed to update account status.");
 
       return {
         success: false,
@@ -271,7 +314,7 @@ export class AdminService {
   static async getTechnicians(): Promise<ServiceResult<TechnicianVerificationProfile[]>> {
     try {
       const res = await api.get("/technicians");
-      if (res.data?.technicians) {
+      if (res.data && Array.isArray(res.data.technicians)) {
         const liveItems: TechnicianVerificationProfile[] = res.data.technicians.map(
           (bt: any, idx: number) => {
             const primaryCert =
@@ -379,7 +422,7 @@ export class AdminService {
         err.response?.data?.message ||
         (status === 404
           ? "Backend endpoint PATCH /api/technicians/:id/verify is not yet implemented in the backend repository. Decision cannot be saved."
-          : err.message);
+          : err.message || "Failed to submit credential verification decision.");
 
       return {
         success: false,
@@ -409,10 +452,38 @@ export class AdminService {
   ): Promise<ServiceResult<PaginatedResponse<SystemAuditEvent>>> {
     try {
       const res = await api.get("/admin/audit", { params });
-      if (res.data) {
+      if (res.data && typeof res.data === "object") {
+        let events: SystemAuditEvent[] = [];
+        let total = 0;
+        let page = params.page || 1;
+        let limit = params.limit || 5;
+        let totalPages = 1;
+
+        if (Array.isArray(res.data.data)) {
+          events = res.data.data;
+          total = res.data.meta?.total ?? events.length;
+          page = res.data.meta?.page ?? page;
+          limit = res.data.meta?.limit ?? limit;
+          totalPages = res.data.meta?.totalPages ?? Math.max(1, Math.ceil(total / limit));
+        } else if (Array.isArray(res.data.events)) {
+          events = res.data.events;
+          total = res.data.total ?? events.length;
+          totalPages = Math.max(1, Math.ceil(total / limit));
+        } else if (Array.isArray(res.data)) {
+          events = res.data;
+          total = events.length;
+          totalPages = Math.max(1, Math.ceil(total / limit));
+        } else {
+          throw new Error("Malformed API response: expected array of audit events.");
+        }
+
         return {
           success: true,
-          data: res.data,
+          data: {
+            success: true,
+            data: events,
+            meta: { page, limit, total, totalPages },
+          },
           isLive: true,
           endpointConnected: true,
         };
@@ -450,7 +521,8 @@ export class AdminService {
         success: true,
         data: {
           success: true,
-          message: "Offline baseline (endpoint GET /api/admin/audit pending backend implementation)",
+          message:
+            "Offline baseline (endpoint GET /api/admin/audit pending backend implementation)",
           data: paged,
           meta: { page, limit, total, totalPages },
         },

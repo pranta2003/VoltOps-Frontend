@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, FormEvent, useCallback } from "react";
+import { useState, useEffect, useMemo, FormEvent, useCallback, useRef } from "react";
 import { Layout } from "../../components/Layout";
 import { useAuth } from "../../context/AuthContext";
 import { AdminService } from "../../services/adminService";
@@ -35,6 +35,7 @@ export function UserManagement() {
   const [newStaffName, setNewStaffName] = useState("");
   const [newStaffEmail, setNewStaffEmail] = useState("");
   const [newStaffPassword, setNewStaffPassword] = useState("");
+  const [newStaffConfirmPassword, setNewStaffConfirmPassword] = useState("");
   const [newStaffRole, setNewStaffRole] = useState<"DISPATCHER" | "TECHNICIAN" | "ADMIN">("DISPATCHER");
   const [newStaffBranch, setNewStaffBranch] = useState("EPZ Industrial Core");
   const [newStaffDept, setNewStaffDept] = useState("");
@@ -52,6 +53,17 @@ export function UserManagement() {
     targetStatus: boolean;
   } | null>(null);
   const [submittingStatusChange, setSubmittingStatusChange] = useState(false);
+  const lastFocusedTriggerRef = useRef<HTMLElement | null>(null);
+  const firstInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Focus management: Focus first field when modal opens, restore focus on close
+  useEffect(() => {
+    if (createModalOpen) {
+      setTimeout(() => firstInputRef.current?.focus(), 50);
+    } else if (!createModalOpen && !selectedUser && !confirmTargetUser) {
+      lastFocusedTriggerRef.current?.focus();
+    }
+  }, [createModalOpen, selectedUser, confirmTargetUser]);
 
   // Keyboard accessibility: Escape closes any open modal
   useEffect(() => {
@@ -173,6 +185,12 @@ export function UserManagement() {
       return;
     }
 
+    // 4. Password confirmation check
+    if (newStaffPassword !== newStaffConfirmPassword) {
+      setCreateErrorNotice("Passwords do not match. Please ensure both password fields match exactly.");
+      return;
+    }
+
     setSubmittingStaff(true);
 
     const res = await AdminService.createStaffUser({
@@ -194,6 +212,7 @@ export function UserManagement() {
       setNewStaffName("");
       setNewStaffEmail("");
       setNewStaffPassword("");
+      setNewStaffConfirmPassword("");
       setNewStaffDept("");
       setNewStaffDesig("");
       setCreateModalOpen(false);
@@ -234,7 +253,8 @@ export function UserManagement() {
       action={
         <button
           type="button"
-          onClick={() => {
+          onClick={(e) => {
+            lastFocusedTriggerRef.current = e.currentTarget;
             setCreateErrorNotice(null);
             setCreateModalOpen(true);
           }}
@@ -467,7 +487,10 @@ export function UserManagement() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
-                          onClick={() => setSelectedUser(u)}
+                          onClick={(e) => {
+                            lastFocusedTriggerRef.current = e.currentTarget;
+                            setSelectedUser(u);
+                          }}
                           className="px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--text-primary)] hover:border-[#10b981] hover:text-[#10b981] transition-all font-semibold text-[11px]"
                         >
                           Details
@@ -475,7 +498,10 @@ export function UserManagement() {
 
                         <button
                           type="button"
-                          onClick={() => handleInitiateStatusToggle(u)}
+                          onClick={(e) => {
+                            lastFocusedTriggerRef.current = e.currentTarget;
+                            handleInitiateStatusToggle(u);
+                          }}
                           className={`px-2.5 py-1 rounded-lg font-semibold text-[11px] transition-all border ${
                             u.isActive
                               ? "border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/10"
@@ -566,10 +592,12 @@ export function UserManagement() {
 
             <form onSubmit={handleCreateStaff} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+                <label htmlFor="staff-name" className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
                   Full Name <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="staff-name"
+                  ref={firstInputRef}
                   type="text"
                   required
                   value={newStaffName}
@@ -580,10 +608,11 @@ export function UserManagement() {
               </div>
 
               <div>
-                <label className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+                <label htmlFor="staff-email" className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
                   Corporate Email <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="staff-email"
                   type="email"
                   required
                   value={newStaffEmail}
@@ -593,27 +622,47 @@ export function UserManagement() {
                 />
               </div>
 
-              <div>
-                <label className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
-                  Initial Password (Min 8 Characters) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="password"
-                  required
-                  minLength={8}
-                  value={newStaffPassword}
-                  onChange={(e) => setNewStaffPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] outline-none focus:border-[#10b981]"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="staff-password" className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+                    Initial Password (Min 8 Chars) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="staff-password"
+                    type="password"
+                    required
+                    minLength={8}
+                    value={newStaffPassword}
+                    onChange={(e) => setNewStaffPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] outline-none focus:border-[#10b981]"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="staff-confirm-password" className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+                    Confirm Password <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="staff-confirm-password"
+                    type="password"
+                    required
+                    minLength={8}
+                    value={newStaffConfirmPassword}
+                    onChange={(e) => setNewStaffConfirmPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] outline-none focus:border-[#10b981]"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+                  <label htmlFor="staff-role" className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
                     Staff Role <span className="text-red-500">*</span>
                   </label>
                   <select
+                    id="staff-role"
                     value={newStaffRole}
                     onChange={(e) => setNewStaffRole(e.target.value as any)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] outline-none focus:border-[#10b981]"
@@ -625,10 +674,11 @@ export function UserManagement() {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+                  <label htmlFor="staff-branch" className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
                     Operating Branch <span className="text-red-500">*</span>
                   </label>
                   <select
+                    id="staff-branch"
                     value={newStaffBranch}
                     onChange={(e) => setNewStaffBranch(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] outline-none focus:border-[#10b981]"
@@ -643,10 +693,11 @@ export function UserManagement() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+                  <label htmlFor="staff-dept" className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
                     Department (Optional)
                   </label>
                   <input
+                    id="staff-dept"
                     type="text"
                     value={newStaffDept}
                     onChange={(e) => setNewStaffDept(e.target.value)}
@@ -655,10 +706,11 @@ export function UserManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
+                  <label htmlFor="staff-desig" className="block font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">
                     Designation (Optional)
                   </label>
                   <input
+                    id="staff-desig"
                     type="text"
                     value={newStaffDesig}
                     onChange={(e) => setNewStaffDesig(e.target.value)}

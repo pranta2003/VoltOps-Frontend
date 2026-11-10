@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Layout } from "../../components/Layout";
 import {
   SystemAuditEvent,
@@ -35,6 +35,14 @@ export function AuditLog() {
   // Detail Modal & Interaction State
   const [selectedEvent, setSelectedEvent] = useState<SystemAuditEvent | null>(null);
   const [copiedEventId, setCopiedEventId] = useState(false);
+  const lastFocusedTriggerRef = useRef<HTMLElement | null>(null);
+
+  // Restore focus when inspection drawer closes
+  useEffect(() => {
+    if (!selectedEvent) {
+      lastFocusedTriggerRef.current?.focus();
+    }
+  }, [selectedEvent]);
 
   // Fetch audit events via AdminService
   const loadAuditLogs = useCallback(async () => {
@@ -240,6 +248,7 @@ export function AuditLog() {
               <span>🔍</span>
               <input
                 type="text"
+                aria-label="Search audit records"
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="Search audit records by actor, action description, target entity, or event ID..."
@@ -436,7 +445,10 @@ export function AuditLog() {
                       <td className="py-3.5 px-4 text-right">
                         <button
                           type="button"
-                          onClick={() => setSelectedEvent(evt)}
+                          onClick={(e) => {
+                            lastFocusedTriggerRef.current = e.currentTarget;
+                            setSelectedEvent(evt);
+                          }}
                           className="px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--text-primary)] hover:border-[#10b981] hover:text-[#10b981] transition-all font-semibold text-[11px]"
                         >
                           Inspect
