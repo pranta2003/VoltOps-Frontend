@@ -121,6 +121,8 @@ export function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<"ALL" | Role>("ALL");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "INACTIVE">("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 6;
 
   // Create Staff Modal State
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -129,33 +131,58 @@ export function UserManagement() {
   const [newStaffPassword, setNewStaffPassword] = useState("");
   const [newStaffRole, setNewStaffRole] = useState<"DISPATCHER" | "TECHNICIAN" | "ADMIN">("DISPATCHER");
   const [newStaffBranch, setNewStaffBranch] = useState("EPZ Industrial Core");
+  const [createErrorNotice, setCreateErrorNotice] = useState<string | null>(null);
   const [createSuccessNotice, setCreateSuccessNotice] = useState<string | null>(null);
 
   // User Details Modal State
   const [selectedUser, setSelectedUser] = useState<ManagedUser | null>(null);
+  const [copiedId, setCopiedId] = useState(false);
+
+  // Deactivation Confirmation State
+  const [confirmDeactivateUser, setConfirmDeactivateUser] = useState<ManagedUser | null>(null);
 
   // Toggle user active status
-  const handleToggleStatus = (userId: string) => {
-    setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === userId) {
-          const nextState = !u.isActive;
-          return { ...u, isActive: nextState };
-        }
-        return u;
-      })
-    );
+  const handleToggleStatus = (user: ManagedUser) => {
+    if (user.isActive) {
+      // Prompt confirmation before deactivating
+      setConfirmDeactivateUser(user);
+    } else {
+      // Reactivate immediately
+      setUsers((prev) =>
+        prev.map((u) => (u.id === user.id ? { ...u, isActive: true } : u))
+      );
+    }
   };
 
-  // Submit new staff account
+  const confirmDeactivation = () => {
+    if (!confirmDeactivateUser) return;
+    setUsers((prev) =>
+      prev.map((u) => (u.id === confirmDeactivateUser.id ? { ...u, isActive: false } : u))
+    );
+    setConfirmDeactivateUser(null);
+  };
+
+  // Submit new staff account with duplicate email validation
   const handleCreateStaff = (e: FormEvent) => {
     e.preventDefault();
-    if (!newStaffName || !newStaffEmail || !newStaffPassword) return;
+    setCreateErrorNotice(null);
+
+    const emailTrimmed = newStaffEmail.trim().toLowerCase();
+    const existing = users.find((u) => u.email.toLowerCase() === emailTrimmed);
+    if (existing) {
+      setCreateErrorNotice(`An account with email "${emailTrimmed}" already exists in the system.`);
+      return;
+    }
+
+    if (newStaffPassword.length < 6) {
+      setCreateErrorNotice("Password must be at least 6 characters.");
+      return;
+    }
 
     const newAccount: ManagedUser = {
       id: `usr-staff-${Date.now()}`,
-      name: newStaffName,
-      email: newStaffEmail,
+      name: newStaffName.trim(),
+      email: emailTrimmed,
       role: newStaffRole,
       branch: newStaffBranch,
       isActive: true,
@@ -191,6 +218,19 @@ export function UserManagement() {
       return matchesSearch && matchesRole && matchesStatus;
     });
   }, [users, searchQuery, roleFilter, statusFilter]);
+
+  // Paginated slice
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredUsers.slice(start, start + pageSize);
+  }, [filteredUsers, currentPage, pageSize]);
+
+  const handleCopyId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
+  };
 
   const getRoleBadge = (role: Role) => {
     switch (role) {
@@ -307,14 +347,14 @@ export function UserManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border)]">
-              {filteredUsers.length === 0 ? (
+              {paginatedUsers.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-[var(--text-muted)]">
                     No users matching the selected filters.
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((u) => (
+                paginatedUsers.map((u) => (
                   <tr key={u.id} className="hover:bg-[var(--bg-surface-2)]/50 transition-colors">
                     {/* Name & Email */}
                     <td className="py-4 px-4">
@@ -370,7 +410,7 @@ export function UserManagement() {
 
                         <button
                           type="button"
-                          onClick={() => handleToggleStatus(u.id)}
+                          onClick={() => handleToggleStatus(u)}
                           className={`px-2.5 py-1 rounded-lg font-semibold text-[11px] transition-all border ${
                             u.isActive
                               ? "border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/10"
@@ -386,6 +426,48 @@ export function UserManagement() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* ── Table Pagination Controls ─────────────────────────────────── */}
+        <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-surface-2)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
+          <div>
+            Showing <strong className="text-[var(--text-primary)]">{filteredUsers.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</strong> to <strong className="text-[var(--text-primary)]">{Math.min(currentPage * pageSize, filteredUsers.length)}</strong> of <strong className="text-[var(--text-primary)]">{filteredUsers.length}</strong> accounts
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-semibold"
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
+              <button
+                key={pg}
+                type="button"
+                onClick={() => setCurrentPage(pg)}
+                className={`w-7 h-7 rounded-lg text-xs font-bold border transition-all ${
+                  currentPage === pg
+                    ? "bg-[#10b981] text-[#06090e] border-[#10b981]"
+                    : "border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] hover:border-[#10b981]"
+                }`}
+              >
+                {pg}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-semibold"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
 
@@ -488,6 +570,12 @@ export function UserManagement() {
                 </div>
               </div>
 
+              {createErrorNotice && (
+                <div className="p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-xs font-semibold text-red-600 dark:text-red-400">
+                  {createErrorNotice}
+                </div>
+              )}
+
               <div className="pt-4 flex items-center justify-end gap-3 border-t border-[var(--border)]">
                 <button
                   type="button"
@@ -526,9 +614,18 @@ export function UserManagement() {
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-2xl bg-[var(--bg-surface-2)] space-y-1">
-                <div className="text-[var(--text-muted)]">User ID:</div>
-                <div className="font-mono text-[var(--text-primary)] font-bold">{selectedUser.id}</div>
+              <div className="p-3 rounded-2xl bg-[var(--bg-surface-2)] flex items-center justify-between">
+                <div>
+                  <div className="text-[var(--text-muted)]">User ID:</div>
+                  <div className="font-mono text-[var(--text-primary)] font-bold">{selectedUser.id}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopyId(selectedUser.id)}
+                  className="px-2 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[11px] font-semibold text-[var(--text-muted)] hover:text-[#10b981] hover:border-[#10b981] transition-all"
+                >
+                  {copiedId ? "Copied!" : "Copy"}
+                </button>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -573,6 +670,42 @@ export function UserManagement() {
                 className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--bg-surface-2)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[#10b981]"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Deactivation Confirmation Prompt ────────────────────── */}
+      {confirmDeactivateUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-sm rounded-3xl border border-red-500/30 bg-[var(--bg-surface)] p-6 shadow-2xl space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mx-auto text-xl font-bold">
+              ⚠️
+            </div>
+            <div className="text-center space-y-1">
+              <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                Confirm Account Deactivation
+              </h3>
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                Are you sure you want to deactivate <strong className="text-[var(--text-primary)]">{confirmDeactivateUser.name}</strong> ({confirmDeactivateUser.email})? They will be immediately blocked from logging in.
+              </p>
+            </div>
+
+            <div className="pt-2 flex items-center justify-end gap-2 border-t border-[var(--border)]">
+              <button
+                type="button"
+                onClick={() => setConfirmDeactivateUser(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeactivation}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-red-600 text-white hover:bg-red-700 transition-all shadow-sm"
+              >
+                Deactivate User
               </button>
             </div>
           </div>
