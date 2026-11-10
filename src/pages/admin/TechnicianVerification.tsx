@@ -128,6 +128,8 @@ export function TechnicianVerification() {
   const [searchQuery, setSearchQuery] = useState("");
   const [tradeFilter, setTradeFilter] = useState<string>("ALL");
   const [verStatusFilter, setVerStatusFilter] = useState<"ALL" | "PENDING_REVIEW" | "VERIFIED" | "REJECTED">("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 4;
 
   // Inspection modal
   const [selectedTech, setSelectedTech] = useState<VerificationItem | null>(null);
@@ -140,6 +142,39 @@ export function TechnicianVerification() {
       .get("/technicians")
       .then((res) => {
         if (res.data?.technicians && res.data.technicians.length > 0) {
+          const liveItems: VerificationItem[] = res.data.technicians.map((bt: any, idx: number) => {
+            const primaryCert = bt.certifications?.[0]?.certification?.name || "Electrical Safety Certification";
+            const primarySkill = bt.skills?.[0]?.skill?.name || "Electrical and power systems";
+            const expiryStr = bt.certifications?.[0]?.expiryDate
+              ? new Date(bt.certifications[0].expiryDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+              : "15 Dec 2027";
+
+            return {
+              id: bt.id || `tech-live-${idx}`,
+              technicianName: bt.user?.name || `Technician ${idx + 1}`,
+              employeeId: bt.employeeId || `TECH-00${idx + 1}`,
+              email: bt.user?.email || "technician@voltops.test",
+              branch: bt.branch || "EPZ Industrial Core",
+              currentArea: bt.currentArea || "Industrial Zone 1",
+              status: bt.status || "AVAILABLE",
+              primaryTrade: "Electrical and power systems" as ServiceCategory,
+              secondaryTrades: ["AC, HVAC, and cooling" as ServiceCategory],
+              licenseName: primaryCert,
+              licenseNumber: `ELB-${bt.employeeId || idx + 101}`,
+              issuingAuthority: "Electrical Licensing Board (ELB), Bangladesh",
+              expiryDate: expiryStr,
+              verificationStatus: "VERIFIED" as const,
+              submittedDate: new Date(bt.joiningDate || Date.now()).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+            };
+          });
+
+          // Merge live technicians with seeded directory so all 7 canonical trades remain viewable
+          setTechnicians((prev) => {
+            const liveEmails = new Set(liveItems.map((l) => l.email));
+            const remainingSeed = prev.filter((p) => !liveEmails.has(p.email));
+            return [...liveItems, ...remainingSeed];
+          });
+
           setIsLiveConnected(true);
         }
       })
@@ -168,6 +203,13 @@ export function TechnicianVerification() {
       return matchesSearch && matchesTrade && matchesStatus;
     });
   }, [technicians, searchQuery, tradeFilter, verStatusFilter]);
+
+  // Paginated slice
+  const totalPages = Math.max(1, Math.ceil(filteredTechs.length / pageSize));
+  const paginatedTechs = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredTechs.slice(start, start + pageSize);
+  }, [filteredTechs, currentPage, pageSize]);
 
   const handleApprove = (techId: string) => {
     setTechnicians((prev) =>
@@ -318,14 +360,14 @@ export function TechnicianVerification() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border)]">
-              {filteredTechs.length === 0 ? (
+              {paginatedTechs.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-[var(--text-muted)]">
                     No technicians matching the selected criteria.
                   </td>
                 </tr>
               ) : (
-                filteredTechs.map((t) => (
+                paginatedTechs.map((t) => (
                   <tr key={t.id} className="hover:bg-[var(--bg-surface-2)]/50 transition-colors">
                     {/* Tech Name & Employee ID */}
                     <td className="py-4 px-4">
@@ -396,6 +438,48 @@ export function TechnicianVerification() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* ── Table Pagination Controls ─────────────────────────────────── */}
+        <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-surface-2)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
+          <div>
+            Showing <strong className="text-[var(--text-primary)]">{filteredTechs.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}</strong> to <strong className="text-[var(--text-primary)]">{Math.min(currentPage * pageSize, filteredTechs.length)}</strong> of <strong className="text-[var(--text-primary)]">{filteredTechs.length}</strong> certified technicians
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-semibold"
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
+              <button
+                key={pg}
+                type="button"
+                onClick={() => setCurrentPage(pg)}
+                className={`w-7 h-7 rounded-lg text-xs font-bold border transition-all ${
+                  currentPage === pg
+                    ? "bg-[#10b981] text-[#06090e] border-[#10b981]"
+                    : "border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] hover:border-[#10b981]"
+                }`}
+              >
+                {pg}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-semibold"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
 
