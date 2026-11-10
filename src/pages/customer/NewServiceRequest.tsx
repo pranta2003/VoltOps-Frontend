@@ -1,0 +1,245 @@
+import { useState, FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Layout } from "../../components/Layout";
+import { CANONICAL_SERVICE_CATEGORIES, ServiceCategory, PriorityLevel } from "../../types";
+import {
+  AlertTriangleIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  WrenchIcon,
+  ArrowRightIcon,
+} from "../../components/Icons";
+
+const CUSTOMER_ASSETS = [
+  "Standby Generator G-01 (Cummins 250kVA)",
+  "Main Substation Transformer T-04 (500kVA)",
+  "Central Chiller Unit #2 (Carrier 120TR)",
+  "Core Network Switch Rack SW-01",
+  "Perimeter CCTV Optical Node 08",
+  "Water Booster Pump P-03",
+  "Server Room Precision AC Unit PAC-01",
+  "Other / Unlisted Commercial Asset",
+];
+
+export function NewServiceRequest() {
+  const navigate = useNavigate();
+
+  // Form states
+  const [selectedCategory, setSelectedCategory] = useState<ServiceCategory>("Electrical and power systems");
+  const [selectedAsset, setSelectedAsset] = useState<string>(CUSTOMER_ASSETS[0]);
+  const [problemTitle, setProblemTitle] = useState("");
+  const [problemDescription, setProblemDescription] = useState("");
+  const [priority, setPriority] = useState<PriorityLevel>("URGENT");
+  const [preferredDate, setPreferredDate] = useState("2026-11-10");
+  const [preferredTime, setPreferredTime] = useState("Immediate / ASAP");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedSuccess, setSubmittedSuccess] = useState(false);
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!problemTitle.trim() || !problemDescription.trim()) return;
+
+    setIsSubmitting(true);
+    // Simulate instantaneous dispatch queue registration
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSubmittedSuccess(true);
+      setTimeout(() => {
+        navigate("/customer");
+      }, 1800);
+    }, 600);
+  };
+
+  return (
+    <Layout
+      title="Submit Service Request"
+      subtitle="Figma Source: Customer new request (1440 × 1024px) · Log a commercial breakdown across any of our 7 trades"
+    >
+      <div className="max-w-4xl mx-auto">
+        {submittedSuccess ? (
+          <div className="p-8 rounded-3xl border border-emerald-500/30 bg-emerald-500/10 text-center space-y-4 animate-fade-in">
+            <div className="w-16 h-16 rounded-2xl bg-[#10b981] text-[#06090e] font-extrabold text-2xl mx-auto flex items-center justify-center">
+              ✓
+            </div>
+            <h2 className="font-heading font-bold text-2xl text-[var(--text-primary)]">
+              Service Request Logged Successfully!
+            </h2>
+            <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
+              Your request has been routed to the active Dispatcher queue. The matching engine is calculating eligible technicians based on your 24/7 Standard 40-minute arrival SLA.
+            </p>
+            <div className="pt-2 text-xs font-semibold text-[#10b981]">
+              Redirecting to request tracker...
+            </div>
+          </div>
+        ) : (
+          <form
+            onSubmit={handleSubmit}
+            className="p-6 sm:p-8 rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-8"
+          >
+            {/* ── 1. Canonical Service Trade Selection (Strict 7 Trades) ── */}
+            <div className="space-y-3">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                1. Select Service Trade <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                {CANONICAL_SERVICE_CATEGORIES.map((cat) => {
+                  const isSelected = selectedCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`p-3.5 rounded-2xl border text-left text-xs font-semibold transition-all flex items-start gap-2.5 ${
+                        isSelected
+                          ? "border-[#10b981] bg-[#10b981]/10 text-[var(--text-primary)] shadow-sm font-bold ring-1 ring-[#10b981]"
+                          : "border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:border-[var(--border-strong)]"
+                      }`}
+                    >
+                      <span className="text-[#10b981] font-bold">⚡</span>
+                      <span>{cat}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── 2. Facility Asset Selector ────────────────────────────── */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                2. Affected Facility Equipment / Asset <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={selectedAsset}
+                onChange={(e) => setSelectedAsset(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-sm focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none"
+              >
+                {CUSTOMER_ASSETS.map((asset) => (
+                  <option key={asset} value={asset}>
+                    {asset}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* ── 3. Problem Title & Symptoms Breakdown ─────────────────── */}
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  3. Problem Summary / Title <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Overheating Transformer & Severe Voltage Fluctuation"
+                  value={problemTitle}
+                  onChange={(e) => setProblemTitle(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-sm focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  Detailed Symptoms & Emergency Context <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  rows={4}
+                  required
+                  placeholder="Describe visible alarms, temperatures, tripping breakers, or operational impact on your facility..."
+                  value={problemDescription}
+                  onChange={(e) => setProblemDescription(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-sm focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none leading-relaxed"
+                />
+              </div>
+            </div>
+
+            {/* ── 4. Priority Radio Options (Figma: Selected radio tinted) ─ */}
+            <div className="space-y-3">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                4. Urgency Level & SLA Target <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                {[
+                  { level: "URGENT", label: "Urgent", sub: "20–40m Arrival SLA", color: "border-red-500 bg-red-500/10 text-red-700 dark:text-red-300" },
+                  { level: "HIGH", label: "High", sub: "Within 2 hours", color: "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300" },
+                  { level: "MEDIUM", label: "Medium", sub: "Same day shift", color: "border-blue-500 bg-blue-500/10 text-blue-700 dark:text-blue-300" },
+                  { level: "LOW", label: "Low", sub: "Scheduled upkeep", color: "border-slate-500 bg-slate-500/10 text-slate-700 dark:text-slate-300" },
+                ].map(({ level, label, sub, color }) => {
+                  const isChecked = priority === level;
+                  return (
+                    <label
+                      key={level}
+                      className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
+                        isChecked
+                          ? `${color} ring-1 ring-current font-bold shadow-sm`
+                          : "border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)]"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-bold">{label}</span>
+                        <input
+                          type="radio"
+                          name="priority"
+                          value={level}
+                          checked={isChecked}
+                          onChange={() => setPriority(level as PriorityLevel)}
+                          className="accent-[#10b981]"
+                        />
+                      </div>
+                      <span className="text-[11px] opacity-80">{sub}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── 5. Preferred Timing ───────────────────────────────────── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  Preferred Date
+                </label>
+                <input
+                  type="date"
+                  value={preferredDate}
+                  onChange={(e) => setPreferredDate(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-sm focus:border-[#10b981] outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  Target Service Window
+                </label>
+                <input
+                  type="text"
+                  value={preferredTime}
+                  onChange={(e) => setPreferredTime(e.target.value)}
+                  placeholder="Immediate / ASAP or Specific Shift"
+                  className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-sm focus:border-[#10b981] outline-none"
+                />
+              </div>
+            </div>
+
+            {/* ── Form Actions ─────────────────────────────────────────── */}
+            <div className="pt-4 border-t border-[var(--border)] flex items-center justify-end gap-3">
+              <Link
+                to="/customer"
+                className="px-5 py-2.5 rounded-xl text-xs font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+              >
+                Cancel
+              </Link>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <span>{isSubmitting ? "Dispatching..." : "Submit Service Request"}</span>
+                <ArrowRightIcon size={14} />
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </Layout>
+  );
+}
