@@ -1,108 +1,87 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
-import api from "../api/axios";
+import { AdminService } from "../services/adminService";
+import { AdminOperationalMetrics, SystemAuditEvent } from "../types/admin";
 import {
   ShieldCheckIcon,
   ClockIcon,
   AlertTriangleIcon,
   CheckCircleIcon,
-  WrenchIcon,
   BuildingIcon,
-  SettingsIcon,
   RadioIcon,
   ArrowRightIcon,
 } from "../components/Icons";
 
-interface AdminStats {
-  totalUsers: number;
-  activeTechnicians: number;
-  pendingVerifications: number;
-  dispatchersOnDuty: number;
-  slaComplianceRate: number;
-}
-
-const RECENT_ADMIN_EVENTS = [
-  {
-    id: "evt-101",
-    timestamp: "10 Nov 2026, 11:20 AM",
-    actor: "Pranta (Lead Admin)",
-    action: "Assigned EPZ Branch supervisor role to Dispatcher Tania",
-    category: "ROLE_CHANGE",
-    badge: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
-  },
-  {
-    id: "evt-102",
-    timestamp: "10 Nov 2026, 10:45 AM",
-    actor: "System Sentinel",
-    action: "Technician Rafiqul Islam uploaded High Voltage License (A-Grade)",
-    category: "VERIFICATION",
-    badge: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
-  },
-  {
-    id: "evt-103",
-    timestamp: "10 Nov 2026, 09:15 AM",
-    actor: "Pranta (Lead Admin)",
-    action: "Activated new corporate facility customer: Rahimafrooz Hub",
-    category: "USER_STATUS",
-    badge: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
-  },
-  {
-    id: "evt-104",
-    timestamp: "09 Nov 2026, 04:30 PM",
-    actor: "Dispatcher Tania",
-    action: "Approved emergency work order WO-2048 dispatch override",
-    category: "DISPATCH",
-    badge: "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20",
-  },
-];
-
 export function AdminDashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<AdminStats>({
-    totalUsers: 34,
-    activeTechnicians: 18,
-    pendingVerifications: 3,
-    dispatchersOnDuty: 4,
-    slaComplianceRate: 99.2,
+  const [metrics, setMetrics] = useState<AdminOperationalMetrics>({
+    totalUsers: null,
+    activeTechnicians: null,
+    pendingVerifications: null,
+    dispatchersOnDuty: null,
+    slaComplianceRate: null,
+    dataSource: "UNAVAILABLE",
   });
-  const [isLiveConnected, setIsLiveConnected] = useState(false);
+  const [recentEvents, setRecentEvents] = useState<SystemAuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const fetchMetrics = () => {
+  const loadDashboardData = useCallback(async () => {
     setLoading(true);
     setErrorMessage(null);
-    // Probe actual backend /api/technicians (authorized for ADMIN and DISPATCHER)
-    api
-      .get("/technicians")
-      .then((res) => {
-        if (res.data?.technicians) {
-          const count = res.data.technicians.length;
-          setStats((prev) => ({
-            ...prev,
-            activeTechnicians: count,
-          }));
-          setIsLiveConnected(true);
-        }
-      })
-      .catch((err) => {
-        setIsLiveConnected(false);
-        if (err.response?.status === 403) {
-          setErrorMessage("Access forbidden: Requires ADMIN or DISPATCHER role.");
-        } else if (err.code === "ERR_NETWORK") {
-          setErrorMessage("VoltOps backend server is currently offline (http://localhost:5000). Operating in deterministic baseline mode.");
-        } else {
-          setErrorMessage(err.response?.data?.error || "Unable to reach backend API. Using seeded baseline.");
-        }
-      })
-      .finally(() => setLoading(false));
-  };
+
+    try {
+      // 1. Fetch honest governance telemetry
+      const telemetry = await AdminService.getDashboardMetrics();
+      setMetrics(telemetry);
+
+      // 2. Fetch recent audit activity
+      const auditRes = await AdminService.getAuditLogs({ page: 1, limit: 4 });
+      if (auditRes.data?.data) {
+        setRecentEvents(auditRes.data.data);
+      } else {
+        setRecentEvents([]);
+      }
+
+      if (telemetry.dataSource === "OFFLINE_BASELINE") {
+        setErrorMessage(
+          "VoltOps backend server is currently unreachable (http://localhost:5000). Operating in offline demonstration mode with zero fabricated metrics."
+        );
+      }
+    } catch (err: any) {
+      setErrorMessage(
+        err.message || "Failed to load administrative telemetry from backend."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    fetchMetrics();
-  }, []);
+    loadDashboardData();
+  }, [loadDashboardData]);
+
+  const getCategoryBadgeClass = (category: string) => {
+    switch (category) {
+      case "ROLE_CHANGE":
+        return "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20";
+      case "VERIFICATION":
+        return "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20";
+      case "ACCOUNT":
+        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20";
+      case "DISPATCH":
+        return "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20";
+      case "SECURITY":
+        return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
+      case "AUTH":
+      default:
+        return "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20";
+    }
+  };
+
+  const isLive = metrics.dataSource === "LIVE_API";
 
   return (
     <Layout
@@ -112,13 +91,13 @@ export function AdminDashboard() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={fetchMetrics}
+            onClick={loadDashboardData}
             disabled={loading}
             className="px-3.5 py-2 rounded-xl text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] hover:border-[#10b981] hover:text-[#10b981] transition-all flex items-center gap-1.5 disabled:opacity-50"
             title="Refresh backend telemetry"
           >
             <ClockIcon size={13} className={loading ? "animate-spin text-[#10b981]" : ""} />
-            <span>{loading ? "Refreshing..." : "Refresh Status"}</span>
+            <span>{loading ? "Refreshing..." : "Refresh Telemetry"}</span>
           </button>
           <Link
             to="/admin/users"
@@ -149,28 +128,28 @@ export function AdminDashboard() {
         <div className="flex items-center gap-2">
           <span
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
-              isLiveConnected
+              isLive
                 ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
-                : "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20"
+                : "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
             }`}
           >
-            <span className={`w-2 h-2 rounded-full ${isLiveConnected ? "bg-emerald-500 animate-pulse" : "bg-blue-500"}`} />
-            <span>{isLiveConnected ? "Backend Connected (/api/technicians)" : "Seeded Baseline Mode"}</span>
+            <span className={`w-2 h-2 rounded-full ${isLive ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
+            <span>{isLive ? "Backend Live Telemetry" : "Offline / Development Mode"}</span>
           </span>
         </div>
       </div>
 
-      {/* ── Backend Offline / Error Notice ─────────────────────────────── */}
+      {/* ── Offline Notice & Error Banner ──────────────────────────────── */}
       {errorMessage && (
-        <div className="p-3.5 rounded-2xl border border-blue-500/30 bg-blue-500/10 flex items-center justify-between text-xs text-blue-800 dark:text-blue-300">
+        <div className="p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex items-center justify-between text-xs text-amber-900 dark:text-amber-300">
           <div className="flex items-center gap-2">
-            <RadioIcon size={14} className="shrink-0 text-blue-500" />
+            <RadioIcon size={14} className="shrink-0 text-amber-600 dark:text-amber-400" />
             <span>{errorMessage}</span>
           </div>
           <button
             type="button"
-            onClick={fetchMetrics}
-            className="underline font-bold hover:text-blue-600 shrink-0 ml-2"
+            onClick={loadDashboardData}
+            className="underline font-bold hover:text-amber-700 dark:hover:text-amber-200 shrink-0 ml-2"
           >
             Retry Connection
           </button>
@@ -178,13 +157,13 @@ export function AdminDashboard() {
       )}
 
       {/* ── Pending Verification Alert Banner ─────────────────────────── */}
-      {stats.pendingVerifications > 0 && (
-        <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
+      {metrics.pendingVerifications !== null && metrics.pendingVerifications > 0 && (
+        <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <AlertTriangleIcon size={20} className="text-amber-600 dark:text-amber-400 shrink-0" />
             <div>
               <div className="text-sm font-bold text-slate-900 dark:text-white">
-                {stats.pendingVerifications} Technician Credentials Awaiting Administrative Review
+                {metrics.pendingVerifications} Technician Credentials Awaiting Administrative Review
               </div>
               <p className="text-xs text-slate-700 dark:text-slate-300">
                 New trade licenses and electrical safety passports require human admin sign-off before dispatch matching eligibility.
@@ -200,7 +179,7 @@ export function AdminDashboard() {
         </div>
       )}
 
-      {/* ── Operational Metric Cards ───────────────────────────────────── */}
+      {/* ── Operational Metric Cards (Strictly Honest, Zero Fabricated Metrics) ─ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total Users */}
         <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col justify-between">
@@ -209,35 +188,53 @@ export function AdminDashboard() {
               <span>TOTAL ACCOUNTS</span>
               <BuildingIcon size={16} />
             </div>
-            <div className="font-heading font-extrabold text-3xl text-[var(--text-primary)]">
-              {stats.totalUsers}
-            </div>
-            <div className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
-              <span>4 Staff</span> · <span>30 Commercial Customers</span>
+            {loading ? (
+              <div className="h-9 w-20 bg-[var(--bg-surface-2)] rounded animate-pulse" />
+            ) : (
+              <div className="font-heading font-extrabold text-3xl text-[var(--text-primary)]">
+                {metrics.totalUsers !== null ? metrics.totalUsers : "—"}
+              </div>
+            )}
+            <div className="text-xs text-[var(--text-muted)] mt-1">
+              {metrics.totalUsers !== null
+                ? "Live verified accounts in system"
+                : "Awaiting /api/admin/users integration"}
             </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[10px] text-[var(--text-muted)] font-medium">
-            Pending `/api/admin/users` migration
+          <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[10px] text-[var(--text-muted)] font-medium flex items-center justify-between">
+            <span>Status</span>
+            <span className={metrics.totalUsers !== null ? "text-emerald-600 font-semibold" : "text-amber-600 font-semibold"}>
+              {metrics.totalUsers !== null ? "Live Telemetry" : "Endpoint Pending"}
+            </span>
           </div>
         </div>
 
-        {/* Card 2: Field Technicians */}
+        {/* Card 2: Certified Technicians */}
         <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between text-[var(--text-muted)] text-xs font-semibold mb-2">
               <span>CERTIFIED TECHNICIANS</span>
               <ShieldCheckIcon size={16} className="text-emerald-500" />
             </div>
-            <div className="font-heading font-extrabold text-3xl text-emerald-600 dark:text-emerald-400">
-              {stats.activeTechnicians}
-            </div>
-            <div className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
-              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">100% Certified</span> across 7 trades
+            {loading ? (
+              <div className="h-9 w-20 bg-[var(--bg-surface-2)] rounded animate-pulse" />
+            ) : (
+              <div className="font-heading font-extrabold text-3xl text-emerald-600 dark:text-emerald-400">
+                {metrics.activeTechnicians !== null ? metrics.activeTechnicians : "—"}
+              </div>
+            )}
+            <div className="text-xs text-[var(--text-muted)] mt-1">
+              {metrics.activeTechnicians !== null
+                ? "Technician profiles loaded from backend"
+                : "Backend offline / unreachable"}
             </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>{isLiveConnected ? "Verified live via /api/technicians" : "Seeded baseline (/api/technicians)"}</span>
+          <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center justify-between">
+            <span>Source</span>
+            <span className="flex items-center gap-1">
+              <span className={`w-1.5 h-1.5 rounded-full ${metrics.activeTechnicians !== null ? "bg-emerald-500" : "bg-slate-400"}`} />
+              <span>{metrics.activeTechnicians !== null ? "Live via /api/technicians" : "Offline"}</span>
+            </span>
           </div>
         </div>
 
@@ -248,34 +245,52 @@ export function AdminDashboard() {
               <span>DISPATCHERS ACTIVE</span>
               <RadioIcon size={16} className="text-blue-500" />
             </div>
-            <div className="font-heading font-extrabold text-3xl text-blue-600 dark:text-blue-400">
-              {stats.dispatchersOnDuty}
-            </div>
+            {loading ? (
+              <div className="h-9 w-20 bg-[var(--bg-surface-2)] rounded animate-pulse" />
+            ) : (
+              <div className="font-heading font-extrabold text-3xl text-blue-600 dark:text-blue-400">
+                {metrics.dispatchersOnDuty !== null ? metrics.dispatchersOnDuty : "—"}
+              </div>
+            )}
             <div className="text-xs text-[var(--text-muted)] mt-1">
-              Covers 24/7 emergency dispatch desks
+              {metrics.dispatchersOnDuty !== null
+                ? "On-duty emergency dispatchers"
+                : "Awaiting /api/admin/users integration"}
             </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[10px] text-[var(--text-muted)] font-medium">
-            Pending `/api/admin/users` migration
+          <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[10px] text-[var(--text-muted)] font-medium flex items-center justify-between">
+            <span>Status</span>
+            <span className={metrics.dispatchersOnDuty !== null ? "text-emerald-600 font-semibold" : "text-amber-600 font-semibold"}>
+              {metrics.dispatchersOnDuty !== null ? "Live Telemetry" : "Endpoint Pending"}
+            </span>
           </div>
         </div>
 
-        {/* Card 4: SLA Compliance Rate */}
+        {/* Card 4: SLA Compliance Rate (HONEST: No fake 99.2%) */}
         <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between text-[var(--text-muted)] text-xs font-semibold mb-2">
               <span>ARRIVAL SLA COMPLIANCE</span>
               <CheckCircleIcon size={16} className="text-[#10b981]" />
             </div>
-            <div className="font-heading font-extrabold text-3xl text-[var(--text-primary)]">
-              {stats.slaComplianceRate}%
-            </div>
-            <div className="text-xs text-[#10b981] mt-1 font-semibold">
-              ★ Physical arrival within 20–40m
+            {loading ? (
+              <div className="h-9 w-20 bg-[var(--bg-surface-2)] rounded animate-pulse" />
+            ) : (
+              <div className="font-heading font-extrabold text-3xl text-[var(--text-primary)]">
+                {metrics.slaComplianceRate !== null ? `${metrics.slaComplianceRate}%` : "—"}
+              </div>
+            )}
+            <div className="text-xs text-[var(--text-muted)] mt-1">
+              {metrics.slaComplianceRate !== null
+                ? "Physical arrival within 20–40m SLA"
+                : "No resolved work orders recorded yet"}
             </div>
           </div>
-          <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[10px] text-[var(--text-muted)] font-medium">
-            Computed from 48 resolved work orders
+          <div className="mt-3 pt-2.5 border-t border-[var(--border)] text-[10px] text-[var(--text-muted)] font-medium flex items-center justify-between">
+            <span>Data State</span>
+            <span className="text-blue-600 dark:text-blue-400 font-semibold">
+              Awaiting Dispatcher Module
+            </span>
           </div>
         </div>
       </div>
@@ -354,34 +369,67 @@ export function AdminDashboard() {
       {/* ── Recent Administrative Activity Feed ────────────────────────── */}
       <div className="p-6 rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
-            Recent Administrative Activity
-          </h3>
-          <Link to="/admin/audit" className="text-xs font-bold text-[#10b981] hover:underline">
-            View Full Audit Log →
+          <div className="flex items-center gap-2">
+            <h3 className="font-heading font-bold text-base text-[var(--text-primary)]">
+              Recent Administrative Activity
+            </h3>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border border-[var(--border)] text-[var(--text-muted)]">
+              Live / Baseline
+            </span>
+          </div>
+          <Link to="/admin/audit" className="text-xs font-bold text-[#10b981] hover:underline flex items-center gap-1">
+            <span>View Full Audit Log</span>
+            <ArrowRightIcon size={12} />
           </Link>
         </div>
 
-        <div className="divide-y divide-[var(--border)]">
-          {RECENT_ADMIN_EVENTS.map((evt) => (
-            <div key={evt.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-              <div className="space-y-1">
-                <div className="font-medium text-[var(--text-primary)]">
-                  {evt.action}
+        {loading ? (
+          <div className="space-y-3 py-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-12 bg-[var(--bg-surface-2)] rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : recentEvents.length === 0 ? (
+          <div className="py-8 text-center text-xs text-[var(--text-muted)] border border-dashed border-[var(--border)] rounded-2xl">
+            No administrative events recorded yet. Connects to `/api/admin/audit` once events occur.
+          </div>
+        ) : (
+          <div className="divide-y divide-[var(--border)]">
+            {recentEvents.map((evt) => (
+              <div
+                key={evt.id}
+                className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+              >
+                <div className="space-y-1">
+                  <div className="font-medium text-[var(--text-primary)]">
+                    {evt.action}
+                  </div>
+                  <div className="text-[var(--text-muted)] flex items-center gap-2">
+                    <span>
+                      Actor: <strong>{evt.actorName}</strong> ({evt.actorRole})
+                    </span>
+                    <span>•</span>
+                    <span>{evt.timestamp}</span>
+                    {evt.targetEntity && (
+                      <>
+                        <span>•</span>
+                        <span className="font-mono text-[10px]">{evt.targetEntity}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div className="text-[var(--text-muted)] flex items-center gap-2">
-                  <span>Actor: <strong>{evt.actor}</strong></span>
-                  <span>•</span>
-                  <span>{evt.timestamp}</span>
-                </div>
-              </div>
 
-              <span className={`px-2.5 py-0.5 rounded-full font-bold border shrink-0 text-[10px] uppercase tracking-wider ${evt.badge}`}>
-                {evt.category}
-              </span>
-            </div>
-          ))}
-        </div>
+                <span
+                  className={`px-2.5 py-0.5 rounded-full font-bold border shrink-0 text-[10px] uppercase tracking-wider ${getCategoryBadgeClass(
+                    evt.category
+                  )}`}
+                >
+                  {evt.category}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </Layout>
   );
