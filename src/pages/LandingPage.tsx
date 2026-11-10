@@ -1,6 +1,30 @@
 import { useState, useEffect, useRef, FormEvent, CSSProperties, FC } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme, ThemePreference } from "../context/ThemeContext";
+import {
+  IconProps,
+  ZapIcon,
+  SnowflakeIcon,
+  ShieldCheckIcon,
+  ServerIcon,
+  WrenchIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  MapPinIcon,
+  UserCheckIcon,
+  ArrowRightIcon,
+  BuildingIcon,
+  CompassIcon,
+  FileTextIcon,
+  AlertTriangleIcon,
+  RadioIcon,
+  SunIcon,
+  MoonIcon,
+  LaptopIcon,
+  MailIcon,
+  PhoneIcon,
+  SettingsIcon,
+} from "../components/Icons";
 
 // ── Viewport Scroll Reveal Hook for Pop-Up & Slow Motion Animations ───────
 function useSectionReveal() {
@@ -36,30 +60,6 @@ function useSectionReveal() {
 
   return [ref, revealed] as const;
 }
-import {
-  IconProps,
-  ZapIcon,
-  SnowflakeIcon,
-  ShieldCheckIcon,
-  ServerIcon,
-  WrenchIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  MapPinIcon,
-  UserCheckIcon,
-  ArrowRightIcon,
-  BuildingIcon,
-  CompassIcon,
-  FileTextIcon,
-  AlertTriangleIcon,
-  RadioIcon,
-  SunIcon,
-  MoonIcon,
-  LaptopIcon,
-  MailIcon,
-  PhoneIcon,
-  SettingsIcon,
-} from "../components/Icons";
 
 // ── Coverage Plan IDs ────────────────────────────────────────────────────
 export type PlanId = "8hr" | "247-standard" | "247-priority" | "custom";
@@ -757,9 +757,9 @@ export function LandingPage() {
                       <span>Arrival SLA · {trade.slaBadge}</span>
                     </span>
 
-                    {/* Centered Title & Minimal Description (Refined Modern Neo-Grotesque Letterforms) */}
+                    {/* Centered Title & Minimal Description (Refined Modern Geometric Letterforms) */}
                     <div className="space-y-1.5 pt-1">
-                      <h3 className="text-xl sm:text-[22px] font-bold font-card-title text-[var(--text-primary)] tracking-tight text-center">
+                      <h3 className="text-xl sm:text-[22px] font-extrabold font-service-title text-[var(--text-primary)] tracking-tight text-center">
                         {trade.title}
                       </h3>
                       <p className="text-[13px] text-slate-600 dark:text-slate-300 text-center leading-relaxed max-w-xs mx-auto font-normal">

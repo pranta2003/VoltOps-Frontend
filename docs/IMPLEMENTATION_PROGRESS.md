@@ -21,7 +21,15 @@ This document tracks all completed implementation milestones, verified files, co
   9. `b9b6f24` — `feat(technician): implement technician daily job roster and status transition modal`
   10. `c6e8b5f` — `fix(theme): improve dark mode contrast and semantic styling across admin, 404, and 403 screens`
   11. `022bcaf` — `feat(routes): register customer request submission, invoice billing, and dashboard navigation routes`
-  12. `(current)` — `docs: record Milestone 0 & 1 quality gate verification and daily commit accounting`
+  12. `73d5cee` — `docs: record Milestone 0 & 1 quality gate verification and daily commit accounting`
+  13. `6fcb5a0` — `docs(security): document backend JWT authentication inspection and cookie CSRF analysis`
+  14. `3685fc4` — `feat(admin): implement administrative governance dashboard with operational metrics and verification alerts`
+  15. `086b1b2` — `feat(admin): implement user management directory, role filtering, and staff account creation modal`
+  16. `b411f23` — `feat(admin): implement technician skill passports verification directory and approval workflow`
+  17. `f9d3242` — `feat(admin): implement system security audit log with event filtering and inspection drawer`
+  18. `78da757` — `feat(routes): register admin user management, technician verification, and audit log routes`
+  19. `(current)` — `docs: update implementation progress with Milestone 2 Admin module completion`
+  20. `(pending)` — `feat(landing): elevate service card typography with Plus Jakarta Sans and Google Fonts import, and enhance smooth slow-motion floating wave`
 
 ---
 
@@ -34,10 +42,6 @@ This document tracks all completed implementation milestones, verified files, co
   - Authored comprehensive design audit: [`docs/VOLTOPS_DESIGN_AUDIT.md`](file:///e:/BUBT-CSE-4th%20yr/SDP-4/VoltOps/voltops-frontend/voltops-frontend/docs/VOLTOPS_DESIGN_AUDIT.md).
   - Authored frontend security review & threat boundary documentation: [`docs/VOLTOPS_SECURITY_REVIEW.md`](file:///e:/BUBT-CSE-4th%20yr/SDP-4/VoltOps/voltops-frontend/voltops-frontend/docs/VOLTOPS_SECURITY_REVIEW.md).
   - Maintained root project directives in [`AGENTS.md`](file:///e:/BUBT-CSE-4th%20yr/SDP-4/VoltOps/voltops-frontend/voltops-frontend/AGENTS.md).
-- **Files Created / Updated**:
-  - `docs/VOLTOPS_DESIGN_AUDIT.md`
-  - `docs/VOLTOPS_SECURITY_REVIEW.md`
-  - `docs/IMPLEMENTATION_PROGRESS.md`
 - **Verification**: `npm run build` succeeds (0 errors).
 
 ---
@@ -56,22 +60,59 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
-## Role Portals & Core Screens Status (Verified in Code)
-
-| Screen | Route | Role | Figma Reference | Status | Key Features |
-|---|---|---|---|---|---|
-| **Landing Page** | `/` (logged out) | Public | Web spec | Completed | Plus Jakarta Sans cards, decoupled viewport scroll pop-up & floating wave levitation. |
-| **Dispatcher Board** | `/dispatcher` | Dispatcher / Admin | Frame 1 (`10:162`) | Completed | 4 metric cards, urgent request banner, active work order table, Matching Engine modal with scoring & ETA. |
-| **Customer Requests** | `/customer` | Customer | Embed `27:658` | Completed | Breakdown request tracker, status badges, arrival SLA countdowns, 24/7 plan indicators. |
-| **New Service Request** | `/customer/new-request` | Customer | Frame 10 | Completed | 7 canonical trade selector cards, equipment/asset dropdown, priority radio cards, window picker. |
-| **Customer Invoices** | `/customer/invoices` | Customer / Admin | Frame 12 | Completed | Itemized commercial billing table, labor/parts lines, PDF action, preview payment disclaimer. |
-| **Technician Jobs** | `/technician` | Technician | Frame 11 | Completed | Tabbed roster (All, Today, Upcoming, Completed), SLA timers, Job Progress updater modal. |
-| **Admin Console** | `/admin` | Admin | Shell | Completed | System role banner, semantic tokens, dark-mode verified shell. |
-| **Auth & Guards** | `/login`, `/register`, `/unauthorized`, `*` | All | Security spec | Completed | JWT auto-injection, anti-privilege escalation (Customer-only register), role route guards. |
+## Milestone 2: Admin Staff, User Management & Security Review ✅
+- **Date Completed**: 10 November 2026
+- **Branch**: `pranta`
+- **Accomplishments**:
+  1. **Backend Auth & Security Investigation**:
+     - Inspected actual `voltops-backend` repository located on local filesystem.
+     - Documented backend JWT contract, Bearer header requirements, 7-day token expiry, lack of cookie support/cookie-parser, and CSRF/XSS threat model in [`docs/VOLTOPS_SECURITY_REVIEW.md`](file:///e:/BUBT-CSE-4th%20yr/SDP-4/VoltOps/voltops-frontend/voltops-frontend/docs/VOLTOPS_SECURITY_REVIEW.md).
+     - Confirmed that changing to HttpOnly cookies unilaterally without backend refactoring would break platform authentication.
+  2. **Admin Dashboard (`/admin`)**:
+     - Built comprehensive governance overview with 4 metric cards (Total Accounts, Certified Technicians, Active Dispatchers, 99.2% SLA Compliance).
+     - Connected live data probing to backend `GET /api/technicians` with fallback indicator.
+     - Implemented Pending Verification alert banner and quick administrative module navigation.
+  3. **User Management Directory (`/admin/users`)**:
+     - Built full user directory table supporting keyword search, role pill filter (`ALL`, `ADMIN`, `DISPATCHER`, `TECHNICIAN`, `CUSTOMER`), and status filtering.
+     - Implemented privileged **Create Staff Account modal** (Admin-only role selection for DISPATCHER, TECHNICIAN, ADMIN).
+     - Implemented account activation/deactivation toggle action.
+     - Implemented account inspection details modal.
+  4. **Technician Skill Passports & Verification (`/admin/technicians`)**:
+     - Directory filtered across all **7 canonical service trades**.
+     - Displayed trade license credentials, issuing authorities, registration numbers, and expiration dates.
+     - Implemented interactive Review & Audit modal with approve and reject workflows.
+     - Connected to live backend `GET /api/technicians` endpoint.
+  5. **System Security Audit Log (`/admin/audit`)**:
+     - Immutable chronological audit ledger with severity badges (`INFO`, `WARNING`, `CRITICAL`) and event categories (`ROLE_CHANGE`, `DISPATCH`, `VERIFICATION`, `SECURITY`, `ACCOUNT`, `AUTH`).
+     - Search and category filters.
+     - Detailed inspection drawer with actor IP, target entity, and extended context.
+     - Explicit transparency notice detailing that records represent deterministic prototype baseline pending backend audit table migration.
+  6. **Route Protection & Registration in `src/App.tsx`**:
+     - All 4 Admin routes (`/admin`, `/admin/users`, `/admin/technicians`, `/admin/audit`) guarded by `allowedRoles={["ADMIN"]}`.
+- **Verification**: `npm run build` (`tsc && vite build`) transformed 114 modules in 23.32s with 0 errors.
 
 ---
 
-## Next Recommended Milestone: Milestone 2 — Admin Staff & User Management
-- Implement Staff Management table (Dispatcher, Technician, Admin accounts).
-- Implement Technician Skill & Certification Verification view.
-- Implement System Audit Log with immutable event stream.
+## Role Portals & Core Screens Status (Verified in Code)
+
+| Screen | Route | Role | Figma Reference | Backend Status | Status |
+|---|---|---|---|---|---|
+| **Landing Page** | `/` (logged out) | Public | Web spec | Static | Completed |
+| **Login** | `/login` | Public | Auth spec | `POST /api/auth/login` | Connected |
+| **Register** | `/register` | Public | Auth spec | `POST /api/auth/register` (Customer only) | Connected |
+| **Admin Console** | `/admin` | `ADMIN` | Shell | Probes `GET /api/technicians` | Completed |
+| **Admin Users** | `/admin/users` | `ADMIN` | Admin Spec | Seeded baseline (Missing `/api/admin/users`) | Completed |
+| **Admin Technicians** | `/admin/technicians` | `ADMIN` | Admin Spec | Connected to `GET /api/technicians` | Completed |
+| **Admin Audit Log** | `/admin/audit` | `ADMIN` | Audit Spec | Seeded baseline (Missing `/api/admin/audit`) | Completed |
+| **Dispatcher Board** | `/dispatcher` | `DISPATCHER`, `ADMIN` | Frame 1 (`10:162`) | Seeded baseline | Completed |
+| **Customer Requests** | `/customer` | `CUSTOMER` | Embed `27:658` | Seeded baseline | Completed |
+| **New Service Request** | `/customer/new-request` | `CUSTOMER` | Frame 10 | Seeded baseline | Completed |
+| **Customer Invoices** | `/customer/invoices` | `CUSTOMER`, `ADMIN` | Frame 12 | Deterministic billing preview | Completed |
+| **Technician Jobs** | `/technician` | `TECHNICIAN` | Frame 11 | Seeded baseline | Completed |
+
+---
+
+## Next Recommended Milestone: Milestone 3 — Dispatcher Operations & Work Orders
+- Build dedicated Service Requests Queue list (`/dispatcher/requests`, Figma Frame 2).
+- Build Service Request Detail & Work Order Conversion screen (`/dispatcher/requests/:id`, Figma Frame 3).
+- Build Work Orders Board (`/dispatcher/work-orders`).
