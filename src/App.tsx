@@ -8,6 +8,8 @@ import { AdminDashboard } from "./pages/AdminDashboard";
 import { DispatcherDashboard } from "./pages/DispatcherDashboard";
 import { TechnicianDashboard } from "./pages/TechnicianDashboard";
 import { CustomerDashboard } from "./pages/CustomerDashboard";
+import { NewServiceRequest } from "./pages/customer/NewServiceRequest";
+import { CustomerInvoices } from "./pages/customer/CustomerInvoices";
 import { NotFound } from "./pages/NotFound";
 import { Unauthorized } from "./pages/Unauthorized";
 
@@ -62,7 +64,23 @@ export default function App() {
             <Route
               path="/dispatcher"
               element={
-                <ProtectedRoute allowedRoles={["DISPATCHER"]}>
+                <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
+                  <DispatcherDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dispatcher/requests"
+              element={
+                <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
+                  <DispatcherDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dispatcher/work-orders"
+              element={
+                <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
                   <DispatcherDashboard />
                 </ProtectedRoute>
               }
@@ -76,10 +94,34 @@ export default function App() {
               }
             />
             <Route
+              path="/technician/jobs"
+              element={
+                <ProtectedRoute allowedRoles={["TECHNICIAN"]}>
+                  <TechnicianDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/customer"
               element={
                 <ProtectedRoute allowedRoles={["CUSTOMER"]}>
                   <CustomerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/customer/new-request"
+              element={
+                <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+                  <NewServiceRequest />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/customer/invoices"
+              element={
+                <ProtectedRoute allowedRoles={["CUSTOMER", "ADMIN"]}>
+                  <CustomerInvoices />
                 </ProtectedRoute>
               }
             />
