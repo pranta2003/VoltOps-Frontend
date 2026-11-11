@@ -217,11 +217,11 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
             </button>
 
             <div className="min-w-0">
-              <h1 className="font-heading font-semibold text-sm sm:text-base text-[var(--text-primary)] tracking-tight truncate">
+              <h1 className="font-heading font-bold text-base sm:text-lg lg:text-xl text-[var(--text-primary)] tracking-tight truncate">
                 {title}
               </h1>
               {subtitle && (
-                <p className="text-[11px] text-[var(--text-muted)] hidden md:block truncate">
+                <p className="text-xs text-[var(--text-muted)] hidden md:block truncate">
                   {subtitle}
                 </p>
               )}
@@ -232,7 +232,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
           <div className="flex items-center gap-2 shrink-0">
             {/* Role Badge */}
             <span
-              className={`hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${getRoleBadge()}`}
+              className={`hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider border ${getRoleBadge()}`}
             >
               {role}
             </span>
