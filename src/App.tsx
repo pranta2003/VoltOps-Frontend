@@ -8,7 +8,10 @@ import { AdminDashboard } from "./pages/AdminDashboard";
 import { UserManagement } from "./pages/admin/UserManagement";
 import { TechnicianVerification } from "./pages/admin/TechnicianVerification";
 import { AuditLog } from "./pages/admin/AuditLog";
-import { DispatcherDashboard } from "./pages/DispatcherDashboard";
+import { DispatcherDashboard } from "./pages/dispatcher/DispatcherDashboard";
+import { ServiceRequests } from "./pages/dispatcher/ServiceRequests";
+import { WorkOrders } from "./pages/dispatcher/WorkOrders";
+import { TechnicianRoster } from "./pages/dispatcher/TechnicianRoster";
 import { TechnicianDashboard } from "./pages/TechnicianDashboard";
 import { CustomerDashboard } from "./pages/CustomerDashboard";
 import { NewServiceRequest } from "./pages/customer/NewServiceRequest";
@@ -100,7 +103,7 @@ export default function App() {
               path="/dispatcher/requests"
               element={
                 <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
-                  <DispatcherDashboard />
+                  <ServiceRequests />
                 </ProtectedRoute>
               }
             />
@@ -108,7 +111,23 @@ export default function App() {
               path="/dispatcher/work-orders"
               element={
                 <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
-                  <DispatcherDashboard />
+                  <WorkOrders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dispatcher/technicians"
+              element={
+                <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
+                  <TechnicianRoster />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dispatcher/schedule"
+              element={
+                <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
+                  <TechnicianRoster />
                 </ProtectedRoute>
               }
             />

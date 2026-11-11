@@ -47,7 +47,36 @@ This document tracks all completed implementation milestones, verified files, co
   35. `20fe50f` — `fix(admin): harden accessibility, review note validation, password confirmation, and error boundaries`
   36. `e5a2d11` — `docs(admin): finalize Milestone 2.1.3 verification, test audit, and release gate`
   37. `724f9fc` — `feat(design): reset global SaaS design system, two-state theme toggle, and streamline technician verification`
-  38. `f296841` — `feat(admin): enforce unified SaaS product design system and zero-overflow layouts across all admin views`
+  38. `0a2e89f` — `feat(admin): enforce unified SaaS product design system and zero-overflow layouts across all admin views`
+  39. `5e455ff` — `docs(audit): capture genuine browser screenshots for Admin visual acceptance review across light and dark modes`
+  40. `b64b5e9` — `feat(dispatcher): implement professional dispatcher operations module with 4 dedicated views, matching engine, and zero-overflow tables`
+
+---
+
+## Milestone 3.0: VoltOps Dispatcher Operations Module ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Scope**: Complete Dispatcher Operations module adhering strictly to the approved Admin visual standard (`docs/VOLTOPS_DESIGN_SYSTEM_RESET.md`).
+- **Accomplishments**:
+  1. **Four Dedicated High-Density Operational Views**:
+     - `/dispatcher` (`DispatcherDashboard.tsx`): Operational overview, 4 compact KPI cards (Unassigned Requests, Active Work Orders, Technicians on Duty, Urgent SLA Watch), emergency breakdown queue, 7-trade dispatch coverage matrix, and recent dispatch activity feed.
+     - `/dispatcher/requests` (`ServiceRequests.tsx`): Inbound commercial breakdown intake ledger with single-row filter toolbar, status filters (`New`, `Reviewing`, `Converted`), and modal triage/conversion into Work Orders with arrival SLA deadline targets.
+     - `/dispatcher/work-orders` (`WorkOrders.tsx`): Full operational work order management ledger with lifecycle filters (`Unassigned`, `In Transit`, `On Site`, `Completed`), slide-over inspection drawer with lifecycle status transitions, and technician matching trigger.
+     - `/dispatcher/technicians` (`TechnicianRoster.tsx`): Real-time field staff availability board, branch location filters, trade competencies across 7 canonical trades, verified government licenses, active job counts, and skill passport inspection modal.
+  2. **Deterministic Arithmetic Matching Engine & Safe Human Assignment**:
+     - Hard eligibility constraints: strictly filters by required trade skill, active verified government license, and non-conflicting shift (excludes off-duty/unavailable technicians).
+     - Arithmetic match scoring (0–100%) and plain-English advisory explanation.
+     - Human-confirmed assignment workflow: AI is strictly advisory; dispatchers verify credentials, enter optional dispatch notes, and explicitly confirm assignments.
+  3. **Typed API Architecture & Offline Fallback (`dispatcherService.ts`)**:
+     - Centralized Axios client with automatic fallback to deterministic demonstration data on 404, 500, or network failure.
+     - Honest connection indicators (`Live API` / `Offline data`) across all 4 headers.
+  4. **Automated Unit Testing & Build Verification**:
+     - Automated test suite (`tests/dispatcherService.test.mjs`) passing 5/5 scenarios (metrics, conversion, matching engine, assignment, technician release upon completion).
+     - Full test suite (`npm test`) passing 13/13 scenarios in ~136ms.
+     - Production build (`tsc && vite build`) transformed 121 modules with 0 errors.
+  5. **Multi-Viewport & Dual-Theme Browser Verification**:
+     - Tested via `chrome-devtools-mcp` across 1440px desktop, 1280px laptop, 768px tablet, and 390px mobile in both Light and Dark modes.
+     - Confirmed zero horizontal document overflow (`clientWidth === scrollWidth === 390px`) and intentional, touch-usable horizontal scrolling for all data tables.
 
 ---
 

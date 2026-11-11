@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "test": "node --test tests/adminService.test.mjs",
+    "test": "node --test tests/adminService.test.mjs tests/dispatcherService.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
