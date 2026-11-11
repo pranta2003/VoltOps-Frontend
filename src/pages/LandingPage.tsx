@@ -548,24 +548,33 @@ export function LandingPage() {
       {/* ── HERO SECTION: INDUSTRIAL MAINTENANCE PHOTOGRAPHY & ENTRANCE ─── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       <header className="relative overflow-hidden pt-12 pb-20 lg:pt-16 lg:pb-28 text-center">
-        {/* Hero Background Layer: Industrial Switchgear Technician Photography */}
+        {/* Hero Background Layer: Looping Cinematic Slow-Motion Video with Dark CSS Overlay */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden -z-1">
-          <div
-            className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 opacity-80 dark:opacity-55"
-            style={{
-              backgroundImage: "url('/images/hero-technician.jpg')",
-              backgroundPosition: "center 25%",
-            }}
-          />
-          {/* Radial dark vignette around headline for razor-sharp readability */}
+          {/* Highly compressed looping 16:9 video */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster="/images/hero-technician.jpg"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          >
+            <source src="/videos/hero-background.mp4" type="video/mp4" />
+            <source src="/videos/hero-background.webm" type="video/webm" />
+            <img
+              src="/images/hero-technician.jpg"
+              alt="Commercial Field Service Operations"
+              className="w-full h-full object-cover object-center"
+            />
+          </video>
+
+          {/* Dark CSS Overlay directly over video layer for 100% text readability & vibrant accent pop */}
           <div
             className="absolute inset-0"
-            style={{
-              background: isDark
-                ? "radial-gradient(ellipse 85% 70% at 50% 35%, rgba(6,9,14,0.45) 0%, rgba(6,9,14,0.85) 60%, var(--bg-base) 100%)"
-                : "radial-gradient(ellipse 90% 75% at 50% 32%, rgba(247,246,240,0.82) 0%, rgba(247,246,240,0.60) 40%, rgba(247,246,240,0.25) 72%, var(--bg-base) 100%)",
-            }}
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.70)" }}
           />
+
+          {/* Bottom fade into base theme background */}
           <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-b from-transparent to-[var(--bg-base)]" />
         </div>
 
@@ -578,10 +587,10 @@ export function LandingPage() {
           {/* Editorial Headline with Word/Line Stagger */}
           <motion.h1
             variants={heroItemVariants}
-            className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[66px] tracking-tight leading-[1.08] text-[var(--text-primary)] max-w-4xl mx-auto drop-shadow-sm"
+            className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[66px] tracking-tight leading-[1.08] text-white max-w-4xl mx-auto drop-shadow-md"
           >
             Our platform simplifies your{" "}
-            <span className="font-serif-italic font-normal">
+            <span className="font-serif-italic font-normal text-emerald-300">
               facility operations
             </span>
           </motion.h1>
@@ -589,10 +598,10 @@ export function LandingPage() {
           {/* Subtitle */}
           <motion.p
             variants={heroItemVariants}
-            className="text-base sm:text-lg lg:text-xl font-heading font-medium text-slate-950 dark:text-slate-100 max-w-2xl mx-auto leading-relaxed mt-4 tracking-tight drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] dark:drop-shadow-none"
+            className="text-base sm:text-lg lg:text-xl font-heading font-medium text-slate-200 max-w-2xl mx-auto leading-relaxed mt-4 tracking-tight drop-shadow-sm"
           >
             One unified subscription for commercial facility maintenance — certified technicians dispatched with guaranteed arrival in{" "}
-            <span className="font-bold text-emerald-700 dark:text-[#34d399] underline decoration-emerald-500/50 underline-offset-4">
+            <span className="font-bold text-[#34d399] underline decoration-emerald-500/50 underline-offset-4">
               20 to 40 minutes
             </span>.
           </motion.p>
@@ -615,9 +624,9 @@ export function LandingPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               href="#how"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:text-[var(--text-primary)] bg-[var(--bg-surface)] backdrop-blur-xl transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm border border-white/20 text-white hover:text-white bg-white/10 hover:bg-white/15 backdrop-blur-xl transition-all"
             >
-              <CompassIcon size={15} className="text-[#10b981]" />
+              <CompassIcon size={15} className="text-[#34d399]" />
               <span>See How It Works</span>
             </motion.a>
           </motion.div>
