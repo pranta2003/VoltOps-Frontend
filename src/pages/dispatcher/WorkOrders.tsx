@@ -416,84 +416,87 @@ export const WorkOrders: FC = () => {
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
-                  <th className="py-2.5 px-3.5">Order ID</th>
-                  <th className="py-2.5 px-3.5">Customer & Facility</th>
-                  <th className="py-2.5 px-3.5">Trade & Asset</th>
-                  <th className="py-2.5 px-3.5">Priority</th>
-                  <th className="py-2.5 px-3.5">Status</th>
-                  <th className="py-2.5 px-3.5">Assigned Technician</th>
-                  <th className="py-2.5 px-3.5">Arrival SLA</th>
-                  <th className="py-2.5 px-3.5 text-right">Actions</th>
+                  <th className="py-2 px-3">Order ID</th>
+                  <th className="py-2 px-3">Customer</th>
+                  <th className="py-2 px-3">Trade / Asset</th>
+                  <th className="py-2 px-3">Priority</th>
+                  <th className="py-2 px-3">Status</th>
+                  <th className="py-2 px-3">Technician</th>
+                  <th className="py-2 px-3">Arrival Target</th>
+                  <th className="py-2 px-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={8} className="py-8 text-center text-xs text-[var(--text-muted)]">
                       Loading work orders...
                     </td>
                   </tr>
                 ) : workOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={8} className="py-8 text-center text-xs text-[var(--text-muted)]">
                       No work orders match the selected filters.
                     </td>
                   </tr>
                 ) : (
                   workOrders.map((wo) => (
                     <tr key={wo.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-3 px-3.5 font-mono font-bold text-[var(--text-primary)]">{wo.id}</td>
-                      <td className="py-3 px-3.5">
-                        <div className="font-semibold text-[var(--text-primary)]">{wo.customerName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)] truncate max-w-xs">{wo.facilityAddress}</div>
+                      <td className="py-2 px-3 font-mono font-bold text-[var(--text-primary)] whitespace-nowrap">{wo.id}</td>
+                      <td className="py-2 px-3">
+                        <div className="font-semibold text-[var(--text-primary)] truncate max-w-[160px]" title={`${wo.customerName} - ${wo.facilityAddress}`}>
+                          {wo.customerName}
+                        </div>
                       </td>
-                      <td className="py-3 px-3.5">
-                        <div className="font-medium text-[var(--text-primary)]">{wo.assetName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)]">{wo.category}</div>
+                      <td className="py-2 px-3">
+                        <div className="text-[var(--text-primary)] truncate max-w-[150px]" title={`${wo.assetName} (${wo.category})`}>
+                          <span className="font-medium">{wo.assetName}</span>
+                          <span className="text-[11px] text-[var(--text-muted)] ml-1">· {wo.category}</span>
+                        </div>
                       </td>
-                      <td className="py-3 px-3.5">
+                      <td className="py-2 px-3 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${getPriorityBadge(
+                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border ${getPriorityBadge(
                             wo.priority
                           )}`}
                         >
                           {wo.priority}
                         </span>
                       </td>
-                      <td className="py-3 px-3.5">{getStatusBadge(wo.status)}</td>
-                      <td className="py-3 px-3.5">
+                      <td className="py-2 px-3 whitespace-nowrap">{getStatusBadge(wo.status)}</td>
+                      <td className="py-2 px-3 whitespace-nowrap">
                         {wo.assignedTechnicianName ? (
                           <div className="flex items-center gap-1.5">
-                            <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center">
+                            <span className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 text-[9px] font-bold flex items-center justify-center shrink-0">
                               {wo.assignedTechnicianName.substring(0, 2).toUpperCase()}
                             </span>
-                            <span className="font-medium text-[var(--text-primary)] truncate max-w-[180px]">
+                            <span className="font-medium text-[var(--text-primary)] truncate max-w-[130px]" title={wo.assignedTechnicianName}>
                               {wo.assignedTechnicianName}
                             </span>
                           </div>
                         ) : (
-                          <span className="text-rose-600 dark:text-rose-400 font-semibold italic text-[11px]">
-                            Unassigned · Needs Tech
+                          <span className="text-amber-600 dark:text-amber-400 font-medium text-[11px]">
+                            Unassigned
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-3.5 whitespace-nowrap">
+                      <td className="py-2 px-3 whitespace-nowrap text-[11px]">
                         {renderArrivalSla(wo)}
                       </td>
-                      <td className="py-3 px-3.5 text-right whitespace-nowrap space-x-1.5">
+                      <td className="py-2 px-3 text-right whitespace-nowrap space-x-1">
                         {wo.status === "UNASSIGNED" && (
                           <button
                             type="button"
                             onClick={(e) => handleOpenAssign(wo, e)}
-                            className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
+                            className="px-2 py-0.5 rounded text-[11px] font-bold bg-brand text-white hover:bg-brand-dark active:scale-95 transition-all shadow-xs"
                           >
-                            Assign Tech
+                            Assign
                           </button>
                         )}
                         <button
                           type="button"
                           onClick={(e) => handleOpenInspect(wo, e)}
-                          className="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                          className="px-2 py-0.5 rounded text-[11px] font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
                         >
                           Inspect
                         </button>
