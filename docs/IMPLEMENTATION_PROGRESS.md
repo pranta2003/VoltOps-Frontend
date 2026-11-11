@@ -48,8 +48,41 @@ This document tracks all completed implementation milestones, verified files, co
   36. `e5a2d11` — `docs(admin): finalize Milestone 2.1.3 verification, test audit, and release gate`
   37. `724f9fc` — `feat(design): reset global SaaS design system, two-state theme toggle, and streamline technician verification`
   38. `0a2e89f` — `feat(admin): enforce unified SaaS product design system and zero-overflow layouts across all admin views`
-  39. `5e455ff` — `docs(audit): capture genuine browser screenshots for Admin visual acceptance review across light and dark modes`
+  39: `5e455ff` — `docs(audit): capture genuine browser screenshots for Admin visual acceptance review across light and dark modes`
   40. `b64b5e9` — `feat(dispatcher): implement professional dispatcher operations module with 4 dedicated views, matching engine, and zero-overflow tables`
+  41. `f502309` — `docs(screenshots): add genuine browser screenshot evidence for 4 dispatcher views in light and dark modes`
+  42. `pending` — `fix(dispatcher): harden business logic, license expiry validation, SLA coverage rules, and offline honesty`
+
+---
+
+## Milestone 3.0.1: Dispatcher Business-Logic, Data-Integrity & Visual Acceptance Audit ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Scope**: Comprehensive audit and hardening of Dispatcher module business logic, SLA plan commitments, matching engine hard constraints, license expiry, unverified credential disqualification, linear lifecycle validation, and honest local demonstration transparency.
+- **Accomplishments**:
+  1. **Honest Local Demonstration & Telemetry Transparency**:
+     - Swapped ambiguous "Offline data" badge for clear "Local preview" badge.
+     - Formatted simulated mutation feedbacks as explicit local previews: `"[Local Demo] Dispatched ... (Simulated locally; will not persist to server)"`.
+     - Ensured HTTP 401 Unauthorized and 403 Forbidden errors are thrown immediately to the caller and NEVER swallowed into offline demonstration fallback.
+  2. **Canonical Coverage Plans & SLA Target Adherence (4 Plans)**:
+     - Plan A (8-Hour Daily Coverage): Strictly enforced **no physical arrival SLA** (`slaDeadline: null`, UI shows `No Arrival SLA (Window: 08:00–17:00)`).
+     - Plan B (24/7 Standard): Enforced 40-minute physical arrival SLA.
+     - Plan C (24/7 Priority): Enforced 20-minute rapid physical arrival SLA.
+     - Plan D (Custom Coverage): Negotiated terms; **no invented price or arrival SLA** (`slaDeadline: null`, UI shows `Custom Terms (Negotiated)`).
+  3. **Arithmetic Matching Engine Hard Constraints & Disqualification**:
+     - Disqualifies technicians with expired licenses (`tech-09` expired in 2023).
+     - Disqualifies technicians with pending/unverified credentials (`tech-10`).
+     - Disqualifies off-duty (`tech-12`) and on-leave (`tech-11`) personnel.
+     - Disqualifies overloaded technicians with 3 or more in-flight jobs (`tech-13`).
+     - Replaced raw ambiguous match percentage with transparent heuristic tiers: `Tier 1: Preferred` (standby certified) vs `Tier 2: Eligible` (in-flight jobs), with factor pills (`✓ Active License`, `✓ Standby`, `✓ Branch Match`).
+  4. **Strict Work Order Linear State Transitions**:
+     - Enforced `VALID_WORK_ORDER_TRANSITIONS`: `UNASSIGNED` -> `ASSIGNED` -> `TRAVELLING` -> `ON_SITE` -> `COMPLETED`.
+     - Explicit error thrown on illegal jumps (e.g. `UNASSIGNED` to `COMPLETED`) or attempting to re-open `COMPLETED` orders.
+     - Debounced transition action buttons with loading states (`isUpdatingStatus`).
+  5. **Automated Unit Testing & Verification**:
+     - Expanded `tests/dispatcherService.test.mjs` to 12 automated test scenarios (100% pass rate).
+     - Full suite (`npm test`) passing 20/20 tests across both admin and dispatcher modules.
+     - Production build (`tsc && vite build`) passing with 0 errors.
 
 ---
 

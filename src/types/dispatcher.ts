@@ -36,7 +36,14 @@ export interface TechnicianRecommendation {
   branch: string;
   status: TechnicianStatus;
   etaMinutes: number;
-  matchScore: number; // 0..100 calculated arithmetic score
+  matchScore: number; // Deterministic heuristic score (0..100)
+  recommendationTier: "TIER_1_PREFERRED" | "TIER_2_ELIGIBLE" | "INELIGIBLE";
+  eligibilityFactors: {
+    tradeMatched: boolean;
+    licenseVerifiedAndActive: boolean;
+    standbyAvailable: boolean;
+    branchMatched: boolean;
+  };
   skills: string[];
   certifications: string[];
   explanation: string;
@@ -47,7 +54,8 @@ export interface TechnicianRecommendation {
 export interface CreateWorkOrderDTO {
   requestId: string;
   priority: PriorityLevel;
-  slaDeadline: string; // ISO 8601
+  slaDeadline?: string | null; // ISO 8601 or null if no physical arrival SLA
+  coveragePlan?: "8hr" | "247-standard" | "247-priority" | "custom";
   notes?: string;
 }
 

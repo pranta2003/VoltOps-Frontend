@@ -28,6 +28,19 @@ let localWorkOrders: WorkOrder[] = JSON.parse(JSON.stringify(INITIAL_WORK_ORDERS
 let localTechnicians: TechnicianProfile[] = JSON.parse(JSON.stringify(INITIAL_FIELD_TECHNICIANS));
 let localEvents: DispatchEventLog[] = JSON.parse(JSON.stringify(INITIAL_DISPATCH_EVENTS));
 
+/**
+ * Work Order valid linear state transitions map.
+ * Enforces strict operational lifecycle integrity and prevents illegal jumps.
+ */
+export const VALID_WORK_ORDER_TRANSITIONS: Record<WorkOrder["status"], WorkOrder["status"][]> = {
+  UNASSIGNED: ["ASSIGNED", "CANCELLED"],
+  ASSIGNED: ["TRAVELLING", "CANCELLED"],
+  TRAVELLING: ["ON_SITE", "CANCELLED"],
+  ON_SITE: ["COMPLETED", "CANCELLED"],
+  COMPLETED: [], // Terminal state
+  CANCELLED: [], // Terminal state
+};
+
 export const dispatcherService = {
   /**
    * Probe backend connectivity to provide truthful UI state indicator
@@ -55,7 +68,10 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        throw err;
+      }
       // Offline fallback
     }
 
@@ -90,7 +106,7 @@ export const dispatcherService = {
         tradeCoverage,
       },
       isOffline: true,
-      message: "Backend offline. Displaying verified local demonstration metrics.",
+      message: "[Local Demonstration Session] Backend offline or unmounted. Displaying verified local demonstration metrics.",
       timestamp: new Date().toISOString(),
     };
   },
@@ -109,7 +125,10 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        throw err;
+      }
       // Fallback
     }
 
@@ -143,7 +162,7 @@ export const dispatcherService = {
       success: true,
       data: results,
       isOffline: true,
-      message: "Operating on local demonstration requests baseline.",
+      message: "[Local Demonstration Session] Operating on local demonstration requests baseline.",
       timestamp: new Date().toISOString(),
     };
   },
@@ -162,13 +181,30 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        throw err;
+      }
       // Offline fallback
     }
 
     const request = localRequests.find((r) => r.id === dto.requestId);
     if (!request) {
       throw new Error(`Service request ${dto.requestId} not found.`);
+    }
+
+    const plan = dto.coveragePlan || request.coveragePlan || "247-standard";
+    let slaDeadline: string | null = null;
+
+    if (dto.slaDeadline !== undefined) {
+      slaDeadline = dto.slaDeadline;
+    } else if (plan === "247-priority") {
+      slaDeadline = new Date(Date.now() + 20 * 60 * 1000).toISOString();
+    } else if (plan === "247-standard") {
+      slaDeadline = new Date(Date.now() + 40 * 60 * 1000).toISOString();
+    } else {
+      // 8hr Daily window or Custom coverage: no physical arrival SLA
+      slaDeadline = null;
     }
 
     const newWorkOrderId = `WO-${3000 + localWorkOrders.length + 1}`;
@@ -182,7 +218,8 @@ export const dispatcherService = {
       problemSummary: request.problemTitle,
       priority: dto.priority || request.priority,
       status: "UNASSIGNED",
-      slaDeadline: dto.slaDeadline || new Date(Date.now() + 40 * 60 * 1000).toISOString(),
+      coveragePlan: plan,
+      slaDeadline,
       createdAt: new Date().toISOString(),
       workNotes: dto.notes,
     };
@@ -199,7 +236,7 @@ export const dispatcherService = {
       action: "ORDER_CREATED",
       actorName: "Tania Akter (Dispatcher)",
       targetId: newWorkOrderId,
-      summary: `Converted service request ${request.id} into Work Order ${newWorkOrderId} (${request.category}).`,
+      summary: `Converted request ${request.id} into Work Order ${newWorkOrderId} (${request.category}). Plan: ${plan}.`,
       severity: dto.priority === "URGENT" ? "CRITICAL" : "INFO",
     });
 
@@ -207,7 +244,7 @@ export const dispatcherService = {
       success: true,
       data: newWorkOrder,
       isOffline: true,
-      message: `Work Order ${newWorkOrderId} created in local demonstration environment.`,
+      message: `[Local Demonstration Session] Work Order ${newWorkOrderId} simulated locally. (Will not persist to remote backend).`,
       timestamp: new Date().toISOString(),
     };
   },
@@ -226,7 +263,10 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        throw err;
+      }
       // Fallback
     }
 
@@ -260,7 +300,7 @@ export const dispatcherService = {
       success: true,
       data: results,
       isOffline: true,
-      message: "Operating on local demonstration work orders baseline.",
+      message: "[Local Demonstration Session] Operating on local demonstration work orders baseline.",
       timestamp: new Date().toISOString(),
     };
   },
@@ -279,7 +319,10 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        throw err;
+      }
       // Fallback
     }
 
@@ -305,14 +348,14 @@ export const dispatcherService = {
    * Arithmetic Matching Engine: Computes ranked eligible technicians for a work order.
    * Hard constraints:
    * 1. Must possess at least one skill in work order category
-   * 2. Must possess an active verified certification
-   * 3. Must not be UNAVAILABLE or ON_LEAVE
+   * 2. Must possess an active, non-expired verified certification in trade
+   * 3. Must not be UNAVAILABLE, ON_LEAVE, or OFF_DUTY
+   * 4. Must not exceed maximum active concurrent jobs (<= 2 jobs)
    *
-   * Soft ranking criteria (0..100%):
-   * - Base skill category match: 50%
-   * - Verified license in trade: +25%
-   * - Currently AVAILABLE (0 jobs): +15% (if ON_JOB: +5%)
-   * - Branch/location proximity affinity: +10%
+   * Transparent Tiering:
+   * - TIER_1_PREFERRED: Trade certified, active license, 0 active jobs (standby)
+   * - TIER_2_ELIGIBLE: Trade certified, active license, currently has 1-2 active jobs
+   * - INELIGIBLE: Disqualified by hard constraints (filtered out)
    */
   async getMatchingTechnicians(workOrderId: string): Promise<DispatcherApiResponse<TechnicianRecommendation[]>> {
     try {
@@ -325,7 +368,10 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        throw err;
+      }
       // Fallback to client-side arithmetic matching engine
     }
 
@@ -337,51 +383,79 @@ export const dispatcherService = {
     const recommendations: TechnicianRecommendation[] = [];
 
     for (const tech of localTechnicians) {
-      // Hard check: unavailable staff excluded
+      // Hard check 1: Status exclusion (off duty, on leave, unavailable)
       if (tech.status === "UNAVAILABLE" || tech.status === "ON_LEAVE" || tech.status === "OFF_DUTY") {
         continue;
       }
 
-      // Check skill in target trade
+      // Hard check 2: Overloaded technician exclusion (max concurrent active jobs is 2)
+      if (tech.activeJobCount >= 3) {
+        continue;
+      }
+
+      // Hard check 3: Trade skill constraint
       const hasSkill = tech.skills.some((s) => s.category === order.category);
       if (!hasSkill) {
-        continue; // Hard constraint: wrong trade
+        continue;
       }
 
-      // Check verified certifications
-      const verifiedCerts = tech.certifications.filter((c) => c.verified);
-      const hasVerifiedCert = verifiedCerts.length > 0;
+      // Hard check 4: License verification and expiry constraint
+      // Must have at least one verified AND unexpired certification
+      const activeVerifiedCerts = tech.certifications.filter((c) => {
+        if (!c.verified) return false;
+        if (!c.expiryDate) return true;
+        const exp = new Date(c.expiryDate);
+        return !isNaN(exp.getTime()) && exp >= new Date();
+      });
 
-      // Arithmetic Score Calculation
-      let score = 50; // Base trade match
-      if (hasVerifiedCert) score += 25;
-      if (tech.status === "AVAILABLE" && tech.activeJobCount === 0) {
-        score += 15;
-      } else if (tech.activeJobCount < 2) {
-        score += 5;
+      if (activeVerifiedCerts.length === 0) {
+        continue; // Hard constraint: No active, verified license
       }
+
+      const isStandby = tech.status === "AVAILABLE" && tech.activeJobCount === 0;
 
       // Proximity / branch affinity
       const facilityLower = order.facilityAddress.toLowerCase();
       const branchLower = tech.branch.toLowerCase();
-      let eta = 28; // Default estimated arrival
-      if (
+      const branchMatched =
         (facilityLower.includes("epz") && branchLower.includes("epz")) ||
         (facilityLower.includes("gazipur") && branchLower.includes("gazipur")) ||
-        (facilityLower.includes("tejgaon") && branchLower.includes("tejgaon"))
-      ) {
+        (facilityLower.includes("tejgaon") && branchLower.includes("tejgaon")) ||
+        (facilityLower.includes("uttara") && branchLower.includes("uttara"));
+
+      // Arithmetic Score Calculation (Deterministic Heuristic)
+      let score = 50; // Trade skill matched
+      score += 25; // Verified active license
+      if (isStandby) {
+        score += 15;
+      } else if (tech.activeJobCount === 1) {
         score += 10;
-        eta = 16;
-      } else if (tech.status === "AVAILABLE") {
+      } else if (tech.activeJobCount === 2) {
+        score += 5;
+      }
+
+      let eta = 28;
+      if (branchMatched && isStandby) {
+        score += 10;
+        eta = 15;
+      } else if (branchMatched) {
+        score += 10;
         eta = 22;
+      } else if (isStandby) {
+        eta = 25;
       } else {
         eta = 35;
       }
 
-      // Clamp score
       score = Math.min(100, Math.max(0, score));
 
-      const explanation = `${score}% Arithmetic match: Certified in ${order.category} (${verifiedCerts.map((c) => c.name).join(", ") || "Standard skills"}). Currently ${tech.status.toLowerCase()} with ${tech.activeJobCount} active jobs. Estimated arrival ~${eta}m from ${tech.currentArea || tech.branch}.`;
+      const recommendationTier: "TIER_1_PREFERRED" | "TIER_2_ELIGIBLE" =
+        isStandby ? "TIER_1_PREFERRED" : "TIER_2_ELIGIBLE";
+
+      const tierBadge = recommendationTier === "TIER_1_PREFERRED" ? "Tier 1: Preferred" : "Tier 2: Eligible";
+      const explanation = `${tierBadge} — Verified: ${activeVerifiedCerts.map((c) => c.name).join(", ")}. ${
+        isStandby ? "Standby (0 active jobs)" : `Active with ${tech.activeJobCount} in-flight job(s)`
+      }. Location: ${branchMatched ? "Local branch match" : "Cross-zone dispatch"} (~${eta}m ETA).`;
 
       recommendations.push({
         technicianId: tech.id,
@@ -393,8 +467,15 @@ export const dispatcherService = {
         status: tech.status,
         etaMinutes: eta,
         matchScore: score,
+        recommendationTier,
+        eligibilityFactors: {
+          tradeMatched: true,
+          licenseVerifiedAndActive: true,
+          standbyAvailable: isStandby,
+          branchMatched,
+        },
         skills: tech.skills.filter((s) => s.category === order.category).map((s) => s.name),
-        certifications: verifiedCerts.map((c) => c.name),
+        certifications: activeVerifiedCerts.map((c) => c.name),
         explanation,
         isEligible: true,
         activeJobCount: tech.activeJobCount,
@@ -408,7 +489,7 @@ export const dispatcherService = {
       success: true,
       data: recommendations,
       isOffline: true,
-      message: "Ranked via client-side arithmetic matching engine.",
+      message: "[Local Demonstration Session] Ranked via transparent arithmetic matching engine.",
       timestamp: new Date().toISOString(),
     };
   },
@@ -427,7 +508,10 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        throw err;
+      }
       // Fallback
     }
 
@@ -439,6 +523,11 @@ export const dispatcherService = {
     const tech = localTechnicians.find((t) => t.id === dto.technicianId);
     if (!tech) {
       throw new Error(`Technician ${dto.technicianId} not found.`);
+    }
+
+    // State transition guard: can only assign from UNASSIGNED
+    if (order.status !== "UNASSIGNED") {
+      throw new Error(`Cannot assign technician to work order ${order.id} with status "${order.status}". Work order must be UNASSIGNED.`);
     }
 
     // Update work order
@@ -468,13 +557,13 @@ export const dispatcherService = {
       success: true,
       data: order,
       isOffline: true,
-      message: `Technician ${tech.name} successfully assigned to ${order.id}.`,
+      message: `[Local Demonstration Session] Technician ${tech.name} assigned to ${order.id} locally. (Simulation only; real technician not notified).`,
       timestamp: new Date().toISOString(),
     };
   },
 
   /**
-   * Update work order operational lifecycle status
+   * Update work order operational lifecycle status with linear validation guard
    */
   async updateWorkOrderStatus(
     id: string,
@@ -491,13 +580,26 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        throw err;
+      }
       // Fallback
     }
 
     const order = localWorkOrders.find((w) => w.id === id);
     if (!order) {
       throw new Error(`Work order ${id} not found.`);
+    }
+
+    // Lifecycle transition validation guard
+    const allowedTransitions = VALID_WORK_ORDER_TRANSITIONS[order.status] || [];
+    if (!allowedTransitions.includes(status)) {
+      throw new Error(
+        `Invalid status transition: Cannot transition Work Order ${order.id} from "${order.status}" to "${status}". Allowed transitions are: [${
+          allowedTransitions.length ? allowedTransitions.join(", ") : "none (terminal state)"
+        }].`
+      );
     }
 
     order.status = status;
@@ -526,7 +628,7 @@ export const dispatcherService = {
       action: "STATUS_CHANGED",
       actorName: "Tania Akter (Dispatcher)",
       targetId: order.id,
-      summary: `Work Order ${order.id} status transitioned to ${status}.`,
+      summary: `Work Order ${order.id} status transitioned from ${order.status} to ${status}.`,
       severity: "INFO",
     });
 
@@ -534,6 +636,7 @@ export const dispatcherService = {
       success: true,
       data: order,
       isOffline: true,
+      message: `[Local Demonstration Session] Work Order ${order.id} transitioned to ${status} locally.`,
       timestamp: new Date().toISOString(),
     };
   },
@@ -552,7 +655,10 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
-    } catch {
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        throw err;
+      }
       // Fallback
     }
 

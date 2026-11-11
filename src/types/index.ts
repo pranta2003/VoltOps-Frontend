@@ -59,7 +59,8 @@ export interface ServiceRequest {
   status: RequestStatus;
   submittedAt: string; // ISO 8601
   preferredDateTime?: string;
-  slaRemainingMinutes?: number;
+  coveragePlan?: "8hr" | "247-standard" | "247-priority" | "custom";
+  slaRemainingMinutes?: number | null;
   workOrderId?: string;
 }
 
@@ -78,7 +79,8 @@ export interface WorkOrder {
   status: WorkOrderStatus;
   assignedTechnicianId?: string;
   assignedTechnicianName?: string;
-  slaDeadline: string; // ISO 8601
+  coveragePlan?: "8hr" | "247-standard" | "247-priority" | "custom";
+  slaDeadline?: string | null; // ISO 8601 or null for 8-Hour/Custom coverage without physical arrival SLA
   createdAt: string;
   startedAt?: string;
   completedAt?: string;

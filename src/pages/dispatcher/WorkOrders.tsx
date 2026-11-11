@@ -7,7 +7,7 @@ import { Layout } from "../../components/Layout";
 import { WorkOrder, ServiceCategory, PriorityLevel, WorkOrderStatus } from "../../types";
 import { CANONICAL_SERVICE_CATEGORIES } from "../../types";
 import { TechnicianRecommendation } from "../../types/dispatcher";
-import { dispatcherService } from "../../services/dispatcherService";
+import { dispatcherService, VALID_WORK_ORDER_TRANSITIONS } from "../../services/dispatcherService";
 import {
   SearchIcon,
   XIcon,
@@ -121,7 +121,9 @@ export const WorkOrders: FC = () => {
       });
 
       if (res.success) {
-        setAssignSuccess(`Assigned ${selectedTech.technicianName} to ${assignOrder.id}`);
+        setAssignSuccess(
+          `[Local Demo] Assigned ${selectedTech.technicianName} to ${assignOrder.id} (Simulated locally; will not persist to server).`
+        );
         setTimeout(() => {
           handleCloseModals();
           fetchOrders();
@@ -216,9 +218,26 @@ export const WorkOrders: FC = () => {
     }
   };
 
+  const renderArrivalSla = (wo: WorkOrder) => {
+    if (!wo.slaDeadline) {
+      if (wo.coveragePlan === "8hr") {
+        return <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">No SLA (08:00–17:00)</span>;
+      }
+      if (wo.coveragePlan === "custom") {
+        return <span className="text-[10px] text-sky-700 dark:text-sky-400 font-medium">Custom Terms</span>;
+      }
+      return <span className="text-[10px] text-[var(--text-muted)]">No Arrival SLA</span>;
+    }
+    return (
+      <span className="font-mono text-[11px] text-[var(--text-primary)]">
+        {new Date(wo.slaDeadline).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+      </span>
+    );
+  };
+
   return (
     <Layout
-      title="Work Orders"
+      title="Work Orders Ledger"
       action={
         <div className="flex items-center gap-2">
           <span
@@ -229,15 +248,15 @@ export const WorkOrders: FC = () => {
             }`}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${isOffline ? "bg-amber-500" : "bg-emerald-500"}`} />
-            {isOffline ? "Offline data" : "Live API"}
+            {isOffline ? "Local preview" : "Live API"}
           </span>
 
           <button
             type="button"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            aria-label="Refresh work orders"
-            title="Refresh work orders"
+            aria-label="Refresh orders"
+            title="Refresh orders"
             className="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] active:scale-95 transition-all duration-150 disabled:opacity-50"
           >
             <RefreshCwIcon size={15} className={isRefreshing ? "animate-spin text-emerald-500" : ""} />
@@ -249,13 +268,13 @@ export const WorkOrders: FC = () => {
         {/* Subheader */}
         <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pb-1 border-b border-[var(--border)]">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-[var(--text-primary)]">{workOrders.length} Orders Active</span>
+            <span className="font-semibold text-[var(--text-primary)]">{workOrders.length} Work Orders</span>
             <span>•</span>
-            <span>Field Service Dispatch Ledger</span>
+            <span>Operations Lifecycle & Linear State Transitions</span>
           </div>
         </div>
 
-        {/* ── Compact Filter Toolbar (Single Row) ─────────────────────────── */}
+        {/* ── Filter Toolbar ─────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Search Input */}
           <div className="relative flex-1 min-w-[220px]">
@@ -267,7 +286,7 @@ export const WorkOrders: FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by order ID, customer, asset, technician..."
+              placeholder="Search by ID, customer, asset, technician..."
               aria-label="Search work orders"
               className="w-full text-xs pl-9 pr-8 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
@@ -283,7 +302,7 @@ export const WorkOrders: FC = () => {
             )}
           </div>
 
-          {/* Category Dropdown */}
+          {/* Trade Category Filter */}
           <div className="relative">
             <select
               value={selectedCategory}
@@ -416,8 +435,8 @@ export const WorkOrders: FC = () => {
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-3.5 text-[11px] text-[var(--text-muted)] font-mono whitespace-nowrap">
-                        {new Date(wo.slaDeadline).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      <td className="py-3 px-3.5 whitespace-nowrap">
+                        {renderArrivalSla(wo)}
                       </td>
                       <td className="py-3 px-3.5 text-right whitespace-nowrap space-x-1.5">
                         {wo.status === "UNASSIGNED" && (
@@ -539,8 +558,16 @@ export const WorkOrders: FC = () => {
                 </div>
                 <div>
                   <span className="text-[var(--text-muted)] block text-[11px]">Physical Arrival SLA</span>
-                  <span className="font-mono font-semibold text-[var(--text-primary)]">
-                    {new Date(inspectOrder.slaDeadline).toLocaleTimeString()}
+                  <span className="font-semibold text-[var(--text-primary)]">
+                    {inspectOrder.slaDeadline ? (
+                      <span className="font-mono">
+                        {new Date(inspectOrder.slaDeadline).toLocaleTimeString()} ({inspectOrder.coveragePlan === "247-priority" ? "20m Rapid SLA" : "40m Standard SLA"})
+                      </span>
+                    ) : (
+                      <span className="text-amber-700 dark:text-amber-400">
+                        {inspectOrder.coveragePlan === "8hr" ? "Plan A (Window: 08:00–17:00, No Arrival SLA)" : "Plan D (Custom Negotiated Terms)"}
+                      </span>
+                    )}
                   </span>
                 </div>
               </div>
@@ -563,34 +590,34 @@ export const WorkOrders: FC = () => {
               <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2">
                 <div className="text-xs font-semibold text-[var(--text-primary)]">Update Field Status:</div>
                 <div className="flex flex-wrap gap-2">
-                  {inspectOrder.status === "ASSIGNED" && (
+                  {VALID_WORK_ORDER_TRANSITIONS[inspectOrder.status]?.includes("TRAVELLING") && (
                     <button
                       type="button"
                       onClick={() => handleTransitionStatus("TRAVELLING")}
                       disabled={isUpdatingStatus}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 active:scale-95 transition-all"
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 active:scale-95 transition-all disabled:opacity-50"
                     >
-                      Mark In Transit (TRAVELLING)
+                      {isUpdatingStatus ? "Updating..." : "Mark In Transit (TRAVELLING)"}
                     </button>
                   )}
-                  {inspectOrder.status === "TRAVELLING" && (
+                  {VALID_WORK_ORDER_TRANSITIONS[inspectOrder.status]?.includes("ON_SITE") && (
                     <button
                       type="button"
                       onClick={() => handleTransitionStatus("ON_SITE")}
                       disabled={isUpdatingStatus}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all"
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-50"
                     >
-                      Mark Arrived (ON_SITE)
+                      {isUpdatingStatus ? "Updating..." : "Mark Arrived (ON_SITE)"}
                     </button>
                   )}
-                  {inspectOrder.status === "ON_SITE" && (
+                  {VALID_WORK_ORDER_TRANSITIONS[inspectOrder.status]?.includes("COMPLETED") && (
                     <button
                       type="button"
                       onClick={() => handleTransitionStatus("COMPLETED")}
                       disabled={isUpdatingStatus}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all"
+                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all disabled:opacity-50"
                     >
-                      Mark Sign-off Complete (COMPLETED)
+                      {isUpdatingStatus ? "Updating..." : "Mark Sign-off Complete (COMPLETED)"}
                     </button>
                   )}
                 </div>
@@ -704,16 +731,34 @@ export const WorkOrders: FC = () => {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <span className="font-bold text-xs text-[var(--text-primary)]">
                                 {candidate.technicianName}
                               </span>
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                                {candidate.matchScore}% Match
+                              <span
+                                className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${
+                                  candidate.recommendationTier === "TIER_1_PREFERRED"
+                                    ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20"
+                                    : "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20"
+                                }`}
+                              >
+                                {candidate.recommendationTier === "TIER_1_PREFERRED" ? "Tier 1: Preferred" : "Tier 2: Eligible"}
                               </span>
                               <span className="text-[11px] text-[var(--text-muted)]">· ETA ~{candidate.etaMinutes}m</span>
                             </div>
-                            <div className="text-[11px] text-[var(--text-muted)]">{candidate.designation}</div>
+                            <div className="text-[11px] text-[var(--text-muted)] flex flex-wrap items-center gap-1.5 pt-0.5">
+                              <span>{candidate.designation}</span>
+                              <span>•</span>
+                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">✓ Active License</span>
+                              <span>•</span>
+                              <span>{candidate.eligibilityFactors?.standbyAvailable ? "✓ Standby" : `${candidate.activeJobCount} Active Job(s)`}</span>
+                              {candidate.eligibilityFactors?.branchMatched && (
+                                <>
+                                  <span>•</span>
+                                  <span className="text-sky-600 dark:text-sky-400 font-medium">✓ Branch Match</span>
+                                </>
+                              )}
+                            </div>
                             <p className="text-[11px] text-slate-600 dark:text-slate-300 italic pt-0.5">
                               "{candidate.explanation}"
                             </p>

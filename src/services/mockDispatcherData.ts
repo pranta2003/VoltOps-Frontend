@@ -20,6 +20,7 @@ export const INITIAL_SERVICE_REQUESTS: ServiceRequest[] = [
     status: "NEW",
     submittedAt: "2026-11-11T09:15:00Z",
     preferredDateTime: "Immediate / Emergency Dispatch",
+    coveragePlan: "247-priority",
     slaRemainingMinutes: 18,
   },
   {
@@ -37,7 +38,8 @@ export const INITIAL_SERVICE_REQUESTS: ServiceRequest[] = [
     status: "REVIEWING",
     submittedAt: "2026-11-11T09:40:00Z",
     preferredDateTime: "Within 2 Hours",
-    slaRemainingMinutes: 72,
+    coveragePlan: "247-standard",
+    slaRemainingMinutes: 38,
   },
   {
     id: "SR-1003",
@@ -54,7 +56,8 @@ export const INITIAL_SERVICE_REQUESTS: ServiceRequest[] = [
     status: "NEW",
     submittedAt: "2026-11-11T10:05:00Z",
     preferredDateTime: "Today Afternoon",
-    slaRemainingMinutes: 140,
+    coveragePlan: "8hr",
+    slaRemainingMinutes: null, // Plan A: 8-Hour Daily Coverage has no physical arrival SLA
   },
   {
     id: "SR-1004",
@@ -105,6 +108,8 @@ export const INITIAL_SERVICE_REQUESTS: ServiceRequest[] = [
     status: "NEW",
     submittedAt: "2026-11-11T10:30:00Z",
     preferredDateTime: "Today by 4:00 PM",
+    coveragePlan: "247-standard",
+    slaRemainingMinutes: 40,
   },
   {
     id: "SR-1007",
@@ -121,6 +126,8 @@ export const INITIAL_SERVICE_REQUESTS: ServiceRequest[] = [
     status: "NEW",
     submittedAt: "2026-11-11T10:45:00Z",
     preferredDateTime: "Today by 1:00 PM",
+    coveragePlan: "custom",
+    slaRemainingMinutes: null, // Plan D: Custom Coverage has negotiated terms, no invented arrival SLA
   },
 ];
 
@@ -135,6 +142,7 @@ export const INITIAL_WORK_ORDERS: WorkOrder[] = [
     problemSummary: "SFP Uplink Intermittent Flapping & Packet Drops",
     priority: "HIGH",
     status: "UNASSIGNED",
+    coveragePlan: "247-standard",
     slaDeadline: "2026-11-11T12:00:00Z",
     createdAt: "2026-11-11T08:35:00Z",
     workNotes: "Customer has on-site spare SFP+ 10G-SR transceiver available in server room cabinet.",
@@ -151,6 +159,7 @@ export const INITIAL_WORK_ORDERS: WorkOrder[] = [
     status: "TRAVELLING",
     assignedTechnicianId: "tech-03",
     assignedTechnicianName: "Tanvir Ahmed (Senior Fluid Systems Tech)",
+    coveragePlan: "247-priority",
     slaDeadline: "2026-11-11T10:30:00Z",
     createdAt: "2026-11-11T09:00:00Z",
     startedAt: "2026-11-11T09:10:00Z",
@@ -168,6 +177,7 @@ export const INITIAL_WORK_ORDERS: WorkOrder[] = [
     status: "ON_SITE",
     assignedTechnicianId: "tech-01",
     assignedTechnicianName: "Kamrul Islam (Certified Master Electrician)",
+    coveragePlan: "247-priority",
     slaDeadline: "2026-11-11T10:00:00Z",
     createdAt: "2026-11-11T08:15:00Z",
     startedAt: "2026-11-11T08:25:00Z",
@@ -185,7 +195,8 @@ export const INITIAL_WORK_ORDERS: WorkOrder[] = [
     status: "ASSIGNED",
     assignedTechnicianId: "tech-02",
     assignedTechnicianName: "Farhan Kabir (HVAC Specialist)",
-    slaDeadline: "2026-11-11T14:00:00Z",
+    coveragePlan: "8hr",
+    slaDeadline: null, // Plan A: 8-Hour Daily Coverage has no physical arrival SLA
     createdAt: "2026-11-11T09:30:00Z",
     workNotes: "Scheduled for 11:30 AM arrival following Kaliakair bypass route.",
   },
@@ -201,7 +212,8 @@ export const INITIAL_WORK_ORDERS: WorkOrder[] = [
     status: "COMPLETED",
     assignedTechnicianId: "tech-04",
     assignedTechnicianName: "Mehedi Hasan (Security Systems Engineer)",
-    slaDeadline: "2026-11-11T09:00:00Z",
+    coveragePlan: "custom",
+    slaDeadline: null, // Plan D: Custom coverage terms, no invented arrival SLA
     createdAt: "2026-11-11T06:30:00Z",
     startedAt: "2026-11-11T07:15:00Z",
     completedAt: "2026-11-11T08:50:00Z",
@@ -421,6 +433,116 @@ export const INITIAL_FIELD_TECHNICIANS: TechnicianProfile[] = [
         name: "Siemens Certified PLC Engineer",
         issuedBy: "Siemens Industrial Training",
         expiryDate: "2027-11-25",
+        verified: true,
+      },
+    ],
+  },
+  {
+    id: "tech-09",
+    employeeId: "EMP-E-09",
+    name: "Rashidul Huq (Expired License)",
+    email: "rashidul.elec@voltops.internal",
+    phone: "+880 1716-112244",
+    branch: "EPZ Industrial Core",
+    designation: "Substation Electrician",
+    status: "AVAILABLE",
+    currentArea: "DEPZ Gate 2",
+    activeJobCount: 0,
+    skills: [{ id: "sk-01", name: "High Voltage Panels", category: "Electrical and power systems" }],
+    certifications: [
+      {
+        id: "cert-10",
+        name: "BEE Grade-B Electrical License (EXPIRED)",
+        issuedBy: "Chief Electric Inspector",
+        expiryDate: "2023-01-15", // EXPIRED LICENSE
+        verified: true,
+      },
+    ],
+  },
+  {
+    id: "tech-10",
+    employeeId: "EMP-S-10",
+    name: "Farooq Hossain (Pending Verification)",
+    email: "farooq.sec@voltops.internal",
+    phone: "+880 1815-334455",
+    branch: "Tejgaon Industrial Hub",
+    designation: "Security Systems Technician",
+    status: "AVAILABLE",
+    currentArea: "Tejgaon",
+    activeJobCount: 0,
+    skills: [{ id: "sk-11", name: "PTZ Dome Cameras", category: "CCTV and security" }],
+    certifications: [
+      {
+        id: "cert-11",
+        name: "SIA Security Surveillance Installer",
+        issuedBy: "Security Industry Association",
+        expiryDate: "2028-12-31",
+        verified: false, // UNVERIFIED / PENDING CREDENTIAL
+      },
+    ],
+  },
+  {
+    id: "tech-11",
+    employeeId: "EMP-H-11",
+    name: "Sajid Karim (On Leave)",
+    email: "sajid.hvac@voltops.internal",
+    phone: "+880 1917-889911",
+    branch: "Gazipur Industrial Zone",
+    designation: "HVAC Chiller Specialist",
+    status: "ON_LEAVE", // ON LEAVE
+    currentArea: "Off-site",
+    activeJobCount: 0,
+    skills: [{ id: "sk-04", name: "Centrifugal Chillers", category: "AC, HVAC, and cooling" }],
+    certifications: [
+      {
+        id: "cert-12",
+        name: "EPA 608 Universal Handler",
+        issuedBy: "HVAC Excellence",
+        expiryDate: "2028-05-10",
+        verified: true,
+      },
+    ],
+  },
+  {
+    id: "tech-12",
+    employeeId: "EMP-E-12",
+    name: "Jahangir Alam (Off Duty)",
+    email: "jahangir.elec@voltops.internal",
+    phone: "+880 1718-223344",
+    branch: "EPZ Industrial Core",
+    designation: "Industrial Electrician",
+    status: "OFF_DUTY", // OFF DUTY
+    currentArea: "Residence",
+    activeJobCount: 0,
+    skills: [{ id: "sk-01", name: "High Voltage Panels", category: "Electrical and power systems" }],
+    certifications: [
+      {
+        id: "cert-13",
+        name: "BEE Grade-A Electrical License",
+        issuedBy: "Chief Electric Inspector",
+        expiryDate: "2027-10-01",
+        verified: true,
+      },
+    ],
+  },
+  {
+    id: "tech-13",
+    employeeId: "EMP-P-13",
+    name: "Belal Ahmed (Overloaded)",
+    email: "belal.pipe@voltops.internal",
+    phone: "+880 1819-990011",
+    branch: "Tejgaon Industrial Hub",
+    designation: "Plumbing Specialist",
+    status: "ON_JOB",
+    currentArea: "Tejgaon Industrial Area",
+    activeJobCount: 3, // OVERLOADED WITH 3 JOBS
+    skills: [{ id: "sk-07", name: "High Pressure Booster Pumps", category: "Plumbing and water systems" }],
+    certifications: [
+      {
+        id: "cert-14",
+        name: "Commercial Piping Class-1",
+        issuedBy: "TTC",
+        expiryDate: "2027-08-15",
         verified: true,
       },
     ],

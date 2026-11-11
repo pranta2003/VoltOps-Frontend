@@ -100,7 +100,9 @@ export const DispatcherDashboard: FC = () => {
       });
 
       if (res.success) {
-        setAssignmentSuccess(`Dispatched ${selectedTech.technicianName} to ${selectedWorkOrder.id}`);
+        setAssignmentSuccess(
+          `[Local Demo] Dispatched ${selectedTech.technicianName} to ${selectedWorkOrder.id} (Simulated locally; will not persist to server).`
+        );
         setTimeout(() => {
           setSelectedWorkOrder(null);
           setSelectedTech(null);
@@ -191,7 +193,7 @@ export const DispatcherDashboard: FC = () => {
             <span
               className={`w-1.5 h-1.5 rounded-full ${isOffline ? "bg-amber-500" : "bg-emerald-500 animate-pulse"}`}
             />
-            {isOffline ? "Offline data" : "Live API"}
+            {isOffline ? "Local preview" : "Live API"}
           </span>
 
           {/* Refresh button */}
@@ -300,7 +302,7 @@ export const DispatcherDashboard: FC = () => {
           </Link>
 
           {/* Card 4 */}
-          <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-500/5 dark:bg-rose-950/20 shadow-sm">
+          <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-50/50 dark:bg-rose-950/20 shadow-sm">
             <div className="flex items-center justify-between text-xs font-semibold text-rose-700 dark:text-rose-400 uppercase tracking-wider">
               <span>SLA Watch (Urgent)</span>
               <ClockIcon size={15} className="text-rose-500" />
@@ -309,7 +311,7 @@ export const DispatcherDashboard: FC = () => {
               {isLoading ? "—" : metrics?.urgentSlaWatch ?? 0}
             </div>
             <div className="mt-1 text-[11px] text-rose-700/80 dark:text-rose-400/80">
-              20–40m Physical Arrival Target
+              20–40m Physical Target (24/7 Plans)
             </div>
           </div>
         </div>
@@ -339,7 +341,13 @@ export const DispatcherDashboard: FC = () => {
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-mono font-bold text-rose-700 dark:text-rose-400">{req.id}</span>
                       <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-300 bg-rose-100 dark:bg-rose-950 px-2 py-0.5 rounded">
-                        ~{req.slaRemainingMinutes || 20}m remaining
+                        {req.coveragePlan === "8hr"
+                          ? "Plan A (8-Hr Window)"
+                          : req.coveragePlan === "custom"
+                          ? "Plan D (Custom)"
+                          : req.slaRemainingMinutes != null
+                          ? `~${req.slaRemainingMinutes}m physical SLA`
+                          : "Immediate Triage"}
                       </span>
                     </div>
                     <div className="text-xs font-bold text-[var(--text-primary)] truncate">{req.customerName}</div>
@@ -598,16 +606,34 @@ export const DispatcherDashboard: FC = () => {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <span className="font-bold text-xs text-[var(--text-primary)]">
                                 {candidate.technicianName}
                               </span>
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                                {candidate.matchScore}% Match
+                              <span
+                                className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${
+                                  candidate.recommendationTier === "TIER_1_PREFERRED"
+                                    ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20"
+                                    : "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20"
+                                }`}
+                              >
+                                {candidate.recommendationTier === "TIER_1_PREFERRED" ? "Tier 1: Preferred" : "Tier 2: Eligible"}
                               </span>
                               <span className="text-[11px] text-[var(--text-muted)]">· ETA ~{candidate.etaMinutes}m</span>
                             </div>
-                            <div className="text-[11px] text-[var(--text-muted)]">{candidate.designation}</div>
+                            <div className="text-[11px] text-[var(--text-muted)] flex flex-wrap items-center gap-1.5 pt-0.5">
+                              <span>{candidate.designation}</span>
+                              <span>•</span>
+                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">✓ Active License</span>
+                              <span>•</span>
+                              <span>{candidate.eligibilityFactors?.standbyAvailable ? "✓ Standby" : `${candidate.activeJobCount} Active Job(s)`}</span>
+                              {candidate.eligibilityFactors?.branchMatched && (
+                                <>
+                                  <span>•</span>
+                                  <span className="text-sky-600 dark:text-sky-400 font-medium">✓ Branch Match</span>
+                                </>
+                              )}
+                            </div>
                             <p className="text-[11px] text-slate-600 dark:text-slate-300 italic pt-0.5">
                               "{candidate.explanation}"
                             </p>

@@ -34,7 +34,7 @@ export const ServiceRequests: FC = () => {
   // Triage / Convert Modal State
   const [triageRequest, setTriageRequest] = useState<ServiceRequest | null>(null);
   const [targetPriority, setTargetPriority] = useState<PriorityLevel>("HIGH");
-  const [slaTargetMinutes, setSlaTargetMinutes] = useState<number>(40);
+  const [slaTargetMinutes, setSlaTargetMinutes] = useState<number | null>(40);
   const [triageNotes, setTriageNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [conversionSuccess, setConversionSuccess] = useState<string | null>(null);
@@ -74,7 +74,16 @@ export const ServiceRequests: FC = () => {
     lastFocusedTriggerRef.current = e.currentTarget;
     setTriageRequest(req);
     setTargetPriority(req.priority);
-    setSlaTargetMinutes(req.priority === "URGENT" ? 20 : 40);
+
+    // Enforce canonical SLA rules based on contract coverage plan
+    if (req.coveragePlan === "8hr" || req.coveragePlan === "custom") {
+      setSlaTargetMinutes(null); // No physical arrival SLA
+    } else if (req.coveragePlan === "247-priority") {
+      setSlaTargetMinutes(20);
+    } else {
+      setSlaTargetMinutes(40);
+    }
+
     setTriageNotes("");
     setConversionSuccess(null);
   };
@@ -92,20 +101,26 @@ export const ServiceRequests: FC = () => {
     setIsSubmitting(true);
 
     try {
-      const deadline = new Date(Date.now() + slaTargetMinutes * 60 * 1000).toISOString();
+      const deadline =
+        slaTargetMinutes !== null
+          ? new Date(Date.now() + slaTargetMinutes * 60 * 1000).toISOString()
+          : null;
+
       const res = await dispatcherService.convertRequestToWorkOrder({
         requestId: triageRequest.id,
         priority: targetPriority,
+        coveragePlan: triageRequest.coveragePlan,
         slaDeadline: deadline,
         notes: triageNotes.trim() || undefined,
       });
 
       if (res.success) {
-        setConversionSuccess(`Created Work Order ${res.data.id}`);
+        setConversionSuccess(
+          `[Local Demo] Created Work Order ${res.data.id} (Simulated locally; will not persist to server).`
+        );
         setTimeout(() => {
           handleCloseModal();
           fetchRequests();
-          // Optionally navigate to Work Orders board
           navigate("/dispatcher/work-orders");
         }, 1200);
       }
@@ -162,6 +177,21 @@ export const ServiceRequests: FC = () => {
     }
   };
 
+  const getPlanLabel = (plan?: string) => {
+    switch (plan) {
+      case "8hr":
+        return "Plan A (8-Hr Window)";
+      case "247-standard":
+        return "Plan B (24/7 Standard)";
+      case "247-priority":
+        return "Plan C (24/7 Priority)";
+      case "custom":
+        return "Plan D (Custom)";
+      default:
+        return "Commercial Plan";
+    }
+  };
+
   return (
     <Layout
       title="Service Requests"
@@ -175,7 +205,7 @@ export const ServiceRequests: FC = () => {
             }`}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${isOffline ? "bg-amber-500" : "bg-emerald-500"}`} />
-            {isOffline ? "Offline data" : "Live API"}
+            {isOffline ? "Local preview" : "Live API"}
           </span>
 
           <button
@@ -192,22 +222,16 @@ export const ServiceRequests: FC = () => {
       }
     >
       <div className="space-y-4">
-        {/* Subheader & Counter */}
+        {/* Subheader */}
         <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pb-1 border-b border-[var(--border)]">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-[var(--text-primary)]">{requests.length} Requests</span>
+            <span className="font-semibold text-[var(--text-primary)]">{requests.length} Requests Inbound</span>
             <span>•</span>
-            <span>Inbound Client Breakdowns</span>
+            <span>Triage to Dispatched Work Orders</span>
           </div>
-          <Link
-            to="/dispatcher/work-orders"
-            className="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
-          >
-            View Work Orders Board <ArrowRightIcon size={12} />
-          </Link>
         </div>
 
-        {/* ── Compact Filter Toolbar (Single Row) ─────────────────────────── */}
+        {/* ── Filter Toolbar ─────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Search Input */}
           <div className="relative flex-1 min-w-[220px]">
@@ -219,7 +243,7 @@ export const ServiceRequests: FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by customer, facility, asset, or ID..."
+              placeholder="Search by ID, customer, asset, problem..."
               aria-label="Search service requests"
               className="w-full text-xs pl-9 pr-8 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
@@ -235,15 +259,15 @@ export const ServiceRequests: FC = () => {
             )}
           </div>
 
-          {/* Category Dropdown */}
+          {/* Trade Category Filter */}
           <div className="relative">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              aria-label="Filter by service category"
+              aria-label="Filter by trade category"
               className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
-              <option value="ALL">All Categories (7 Trades)</option>
+              <option value="ALL">All Trades (7 Canonical)</option>
               {CANONICAL_SERVICE_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
@@ -265,7 +289,7 @@ export const ServiceRequests: FC = () => {
               className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
               <option value="ALL">All Priorities</option>
-              <option value="URGENT">Urgent (Emergency)</option>
+              <option value="URGENT">Urgent (20–40m SLA)</option>
               <option value="HIGH">High Priority</option>
               <option value="MEDIUM">Medium Priority</option>
               <option value="LOW">Low Priority</option>
@@ -278,18 +302,23 @@ export const ServiceRequests: FC = () => {
 
           {/* Status Tabs */}
           <div className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] p-0.5 text-xs">
-            {["ALL", "NEW", "REVIEWING", "CONVERTED"].map((tab) => (
+            {[
+              { id: "ALL", label: "All" },
+              { id: "NEW", label: "New" },
+              { id: "REVIEWING", label: "Reviewing" },
+              { id: "CONVERTED", label: "Converted" },
+            ].map((tab) => (
               <button
-                key={tab}
+                key={tab.id}
                 type="button"
-                onClick={() => setSelectedStatus(tab)}
+                onClick={() => setSelectedStatus(tab.id)}
                 className={`px-3 py-1 rounded-md font-medium transition-all ${
-                  selectedStatus === tab
+                  selectedStatus === tab.id
                     ? "bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-sm"
                     : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 }`}
               >
-                {tab === "ALL" ? "All" : tab.charAt(0) + tab.slice(1).toLowerCase()}
+                {tab.label}
               </button>
             ))}
           </div>
@@ -302,7 +331,7 @@ export const ServiceRequests: FC = () => {
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-2.5 px-3.5">Request ID</th>
-                  <th className="py-2.5 px-3.5">Customer & Facility</th>
+                  <th className="py-2.5 px-3.5">Customer & Plan</th>
                   <th className="py-2.5 px-3.5">Trade & Equipment</th>
                   <th className="py-2.5 px-3.5">Problem Summary</th>
                   <th className="py-2.5 px-3.5">Priority</th>
@@ -330,7 +359,13 @@ export const ServiceRequests: FC = () => {
                       <td className="py-3 px-3.5 font-mono font-bold text-[var(--text-primary)]">{req.id}</td>
                       <td className="py-3 px-3.5">
                         <div className="font-semibold text-[var(--text-primary)]">{req.customerName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)] truncate max-w-xs">{req.facilityAddress}</div>
+                        <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1.5">
+                          <span>{req.facilityAddress}</span>
+                          <span>•</span>
+                          <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                            {getPlanLabel(req.coveragePlan)}
+                          </span>
+                        </div>
                       </td>
                       <td className="py-3 px-3.5">
                         <div className="font-medium text-[var(--text-primary)]">{req.assetName}</div>
@@ -412,7 +447,9 @@ export const ServiceRequests: FC = () => {
             <div className="p-3.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-[var(--text-primary)]">{triageRequest.customerName}</span>
-                <span className="text-[11px] text-[var(--text-muted)] font-mono">{triageRequest.contactPhone}</span>
+                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                  {getPlanLabel(triageRequest.coveragePlan)}
+                </span>
               </div>
               <div className="text-[11px] text-[var(--text-muted)]">{triageRequest.facilityAddress}</div>
               <div className="pt-1 border-t border-[var(--border)]">
@@ -442,11 +479,7 @@ export const ServiceRequests: FC = () => {
                     <select
                       id="triage-priority"
                       value={targetPriority}
-                      onChange={(e) => {
-                        const p = e.target.value as PriorityLevel;
-                        setTargetPriority(p);
-                        setSlaTargetMinutes(p === "URGENT" ? 20 : p === "HIGH" ? 40 : 120);
-                      }}
+                      onChange={(e) => setTargetPriority(e.target.value as PriorityLevel)}
                       className="w-full text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     >
                       <option value="URGENT">Urgent (Plan C 20m SLA)</option>
@@ -458,19 +491,27 @@ export const ServiceRequests: FC = () => {
 
                   <div>
                     <label htmlFor="triage-sla" className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
-                      Arrival SLA Deadline:
+                      Arrival SLA Target:
                     </label>
-                    <select
-                      id="triage-sla"
-                      value={slaTargetMinutes}
-                      onChange={(e) => setSlaTargetMinutes(Number(e.target.value))}
-                      className="w-full text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                    >
-                      <option value={20}>20 Minutes (24/7 Priority Plan C)</option>
-                      <option value={40}>40 Minutes (24/7 Standard Plan B)</option>
-                      <option value={120}>2 Hours (Standard Commercial)</option>
-                      <option value={240}>4 Hours (Non-Critical)</option>
-                    </select>
+                    {triageRequest.coveragePlan === "8hr" ? (
+                      <div className="text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
+                        No Arrival SLA (Window: 08:00–17:00)
+                      </div>
+                    ) : triageRequest.coveragePlan === "custom" ? (
+                      <div className="text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
+                        Custom Terms (Negotiated)
+                      </div>
+                    ) : (
+                      <select
+                        id="triage-sla"
+                        value={slaTargetMinutes ?? 40}
+                        onChange={(e) => setSlaTargetMinutes(Number(e.target.value))}
+                        className="w-full text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      >
+                        <option value={20}>20 Minutes (24/7 Priority Plan C)</option>
+                        <option value={40}>40 Minutes (24/7 Standard Plan B)</option>
+                      </select>
+                    )}
                   </div>
                 </div>
 

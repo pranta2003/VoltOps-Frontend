@@ -14,6 +14,7 @@ import {
   ChevronDownIcon,
   ShieldCheckIcon,
   BadgeCheckIcon,
+  AlertTriangleIcon,
 } from "../../components/Icons";
 
 export const TechnicianRoster: FC = () => {
@@ -113,6 +114,20 @@ export const TechnicianRoster: FC = () => {
             In Transit
           </span>
         );
+      case "ON_LEAVE":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200 dark:border-purple-900">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+            On Leave
+          </span>
+        );
+      case "UNAVAILABLE":
+        return (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-900">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+            Unavailable
+          </span>
+        );
       case "OFF_DUTY":
       default:
         return (
@@ -137,7 +152,7 @@ export const TechnicianRoster: FC = () => {
             }`}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${isOffline ? "bg-amber-500" : "bg-emerald-500"}`} />
-            {isOffline ? "Offline data" : "Live API"}
+            {isOffline ? "Local preview" : "Live API"}
           </span>
 
           <button
@@ -159,11 +174,11 @@ export const TechnicianRoster: FC = () => {
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[var(--text-primary)]">{technicians.length} Field Technicians</span>
             <span>•</span>
-            <span>7-Trade Verified Passports</span>
+            <span>7-Trade Verified Passports & License Expiry Telemetry</span>
           </div>
         </div>
 
-        {/* ── Compact Filter Toolbar (Single Row) ─────────────────────────── */}
+        {/* ── Filter Toolbar ─────────────────────────────────────────────── */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Search Input */}
           <div className="relative flex-1 min-w-[220px]">
@@ -238,6 +253,7 @@ export const TechnicianRoster: FC = () => {
               { id: "AVAILABLE", label: "Available" },
               { id: "ON_JOB", label: "On Job" },
               { id: "TRAVELLING", label: "In Transit" },
+              { id: "ON_LEAVE", label: "On Leave" },
               { id: "OFF_DUTY", label: "Off Duty" },
             ].map((tab) => (
               <button
@@ -264,7 +280,7 @@ export const TechnicianRoster: FC = () => {
                 <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-2.5 px-3.5">Technician</th>
                   <th className="py-2.5 px-3.5">Trade Skills</th>
-                  <th className="py-2.5 px-3.5">Verified Licenses</th>
+                  <th className="py-2.5 px-3.5">Verified Licenses & Status</th>
                   <th className="py-2.5 px-3.5">Branch Hub & Current Area</th>
                   <th className="py-2.5 px-3.5">Active Jobs</th>
                   <th className="py-2.5 px-3.5">Status</th>
@@ -311,15 +327,44 @@ export const TechnicianRoster: FC = () => {
                       {/* Verified Certifications */}
                       <td className="py-3 px-3.5">
                         <div className="flex flex-wrap gap-1 max-w-xs">
-                          {tech.certifications.map((c) => (
-                            <span
-                              key={c.id || c.name}
-                              className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
-                            >
-                              <BadgeCheckIcon size={11} className="text-emerald-500" />
-                              {c.name}
-                            </span>
-                          ))}
+                          {tech.certifications.map((c) => {
+                            const isExpired = c.expiryDate && new Date(c.expiryDate) < new Date();
+                            const isPending = !c.verified;
+
+                            if (isExpired) {
+                              return (
+                                <span
+                                  key={c.id || c.name}
+                                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20"
+                                >
+                                  <AlertTriangleIcon size={11} className="text-rose-500" />
+                                  {c.name} (Expired)
+                                </span>
+                              );
+                            }
+
+                            if (isPending) {
+                              return (
+                                <span
+                                  key={c.id || c.name}
+                                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20"
+                                >
+                                  <AlertTriangleIcon size={11} className="text-amber-500" />
+                                  {c.name} (Pending)
+                                </span>
+                              );
+                            }
+
+                            return (
+                              <span
+                                key={c.id || c.name}
+                                className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
+                              >
+                                <BadgeCheckIcon size={11} className="text-emerald-500" />
+                                {c.name}
+                              </span>
+                            );
+                          })}
                         </div>
                       </td>
 
@@ -338,8 +383,8 @@ export const TechnicianRoster: FC = () => {
                             0 (Ready)
                           </span>
                         ) : (
-                          <span className="text-[11px] text-sky-600 dark:text-sky-400 font-bold">
-                            {tech.activeJobCount} active
+                          <span className={`text-[11px] font-bold ${tech.activeJobCount >= 3 ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}>
+                            {tech.activeJobCount} active {tech.activeJobCount >= 3 ? "(Overloaded)" : ""}
                           </span>
                         )}
                       </td>
@@ -423,26 +468,56 @@ export const TechnicianRoster: FC = () => {
             {/* Verified Certifications */}
             <div className="space-y-2">
               <div className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                Verified Credentials & Government Licenses
+                Government Licenses & Compliance State
               </div>
               <div className="space-y-1.5">
-                {inspectTech.certifications.map((cert) => (
-                  <div
-                    key={cert.id || cert.name}
-                    className="p-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 flex items-center justify-between text-xs"
-                  >
-                    <div>
-                      <div className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
-                        <BadgeCheckIcon size={13} className="text-emerald-500" />
-                        {cert.name}
+                {inspectTech.certifications.map((cert) => {
+                  const isExpired = cert.expiryDate && new Date(cert.expiryDate) < new Date();
+                  const isPending = !cert.verified;
+
+                  return (
+                    <div
+                      key={cert.id || cert.name}
+                      className={`p-2.5 rounded-lg border flex items-center justify-between text-xs ${
+                        isExpired
+                          ? "border-rose-500/30 bg-rose-50/40 dark:bg-rose-950/20"
+                          : isPending
+                          ? "border-amber-500/30 bg-amber-50/40 dark:bg-amber-950/20"
+                          : "border-emerald-500/20 bg-emerald-500/5"
+                      }`}
+                    >
+                      <div>
+                        <div className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                          {isExpired ? (
+                            <AlertTriangleIcon size={13} className="text-rose-500" />
+                          ) : isPending ? (
+                            <AlertTriangleIcon size={13} className="text-amber-500" />
+                          ) : (
+                            <BadgeCheckIcon size={13} className="text-emerald-500" />
+                          )}
+                          {cert.name}
+                        </div>
+                        <div className="text-[11px] text-[var(--text-muted)]">Issued by: {cert.issuedBy}</div>
                       </div>
-                      <div className="text-[11px] text-[var(--text-muted)]">Issued by: {cert.issuedBy}</div>
+                      <div className="text-right">
+                        <span
+                          className={`text-[11px] font-mono font-semibold block ${
+                            isExpired
+                              ? "text-rose-600 dark:text-rose-400"
+                              : isPending
+                              ? "text-amber-600 dark:text-amber-400"
+                              : "text-emerald-700 dark:text-emerald-300"
+                          }`}
+                        >
+                          {isExpired ? "EXPIRED" : isPending ? "PENDING VERIFICATION" : "VALID & ACTIVE"}
+                        </span>
+                        <span className="text-[10px] text-[var(--text-muted)]">
+                          {cert.expiryDate ? `Expires: ${cert.expiryDate}` : "Indefinite"}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-[11px] font-mono text-emerald-700 dark:text-emerald-300">
-                      Valid to {cert.expiryDate}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
