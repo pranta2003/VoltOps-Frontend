@@ -46,7 +46,40 @@ This document tracks all completed implementation milestones, verified files, co
   34. `c252456` — `feat(admin): harden AuditLog with live API retrieval, error states, and export compliance`
   35. `20fe50f` — `fix(admin): harden accessibility, review note validation, password confirmation, and error boundaries`
   36. `e5a2d11` — `docs(admin): finalize Milestone 2.1.3 verification, test audit, and release gate`
-  37. `feat(design): reset global SaaS design system, two-state theme toggle, and streamline technician verification`
+  37. `724f9fc` — `feat(design): reset global SaaS design system, two-state theme toggle, and streamline technician verification`
+  38. `f296841` — `feat(admin): enforce unified SaaS product design system and zero-overflow layouts across all admin views`
+
+---
+
+## Milestone 2.1.4: Admin-Wide Visual Consistency & Product Design Enforcement ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Scope**: Complete visual design harmonization across all 4 Admin views (`/admin`, `/admin/users`, `/admin/technicians`, `/admin/audit`) and shared layout.
+- **Accomplishments**:
+  1. **Audit Log Complete Visual Redesign (`src/pages/admin/AuditLog.tsx`)**:
+     - Stripped 100% of verbose policy text, legalistic non-repudiation banners, and decorative noise.
+     - Implemented compact single-row toolbar: search with instant clear (`XIcon`), category dropdown, and segmented severity filter tabs (`All`, `Info`, `Warning`, `Critical`).
+     - Modern high-density table matching Stripe/Linear patterns: clean ISO timestamps, actor initials, monospace IDs, colored severity dots, and contextual `Inspect` trigger.
+     - Preserved 100% of capabilities: live API retrieval, offline demonstration fallback, JSON export, inspection drawer, copy ID feedback, and ARIA modal accessibility.
+  2. **User Management Complete Visual Redesign (`src/pages/admin/UserManagement.tsx`)**:
+     - Eliminated verbose directory descriptions, redundant helper cards, and text bloat.
+     - Consolidated toolbar: search input, role select dropdown, and segmented status tabs (`All`, `Active`, `Inactive`).
+     - High-density user table with initials avatar, monospace email, `You` self-badge, role pill, branch, status dot, and contextual action buttons.
+     - Preserved staff creation modal with password confirmation, role assignment, autofocus, and self-deactivation protection.
+  3. **Admin Dashboard Refinement (`src/pages/AdminDashboard.tsx`)**:
+     - Modernized header with compact "Admin Console" title, live telemetry refresh button, and direct navigation links.
+     - Industrial subheader with honest connection state badge (`Live API` / `Offline data`).
+     - Refined 4 compact metric cards with zero fabricated claims and verified local baselines.
+     - Clean navigation cards to Admin workspaces and high-density recent activity ledger.
+  4. **Zero-Overflow Responsive Shell (`src/components/Layout.tsx`, `src/index.css`)**:
+     - Added global overflow safeguards (`html, body { max-width: 100%; overflow-x: hidden; }` and `main { min-w-0 }`).
+     - Wrapped all tables in responsive horizontal scroll containers (`overflow-x-auto w-full max-w-full`).
+     - Verified zero horizontal overflow on true mobile 390px (`clientWidth === scrollWidth === 390px`).
+  5. **Future Module Design Contract (`docs/VOLTOPS_DESIGN_SYSTEM_RESET.md`)**:
+     - Documented mandatory design tokens, component standards, typography scales, table rules, and pre-release review checklist for upcoming Dispatcher, Technician, and Customer modules.
+  6. **Multi-Viewport & Dual-Theme Verification**:
+     - Verified using `chrome-devtools-mcp` across 1440px desktop, 1280px laptop, 768px tablet, and 390px mobile viewports in both Light and Dark modes.
+     - Clean production build (`tsc && vite build`) and 8/8 automated test pass.
 
 ---
 

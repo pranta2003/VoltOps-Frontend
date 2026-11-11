@@ -337,8 +337,8 @@ export function TechnicianVerification() {
         </div>
 
         {/* ── Technicians Table ─────────────────────────────────────────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden w-full max-w-full">
+          <div className="overflow-x-auto w-full">
             <table className="w-full text-left text-xs">
               <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] uppercase tracking-wider text-[11px] font-semibold border-b border-[var(--border)]">
                 <tr>

@@ -167,24 +167,24 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
       {/* ── Main Content Shell ─────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Header Bar */}
-        <header className="h-16 shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] backdrop-blur-md px-4 sm:px-8 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
+        <header className="h-14 sm:h-16 shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] backdrop-blur-md px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             {/* Mobile menu trigger */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              className="lg:hidden p-1.5 sm:p-2 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] shrink-0"
               aria-label="Toggle Navigation Menu"
             >
               <MenuIcon size={18} />
             </button>
 
-            <div>
-              <h1 className="font-heading font-semibold text-lg text-[var(--text-primary)] tracking-tight truncate">
+            <div className="min-w-0">
+              <h1 className="font-heading font-semibold text-base sm:text-lg text-[var(--text-primary)] tracking-tight truncate">
                 {title}
               </h1>
               {subtitle && (
-                <p className="text-xs text-[var(--text-muted)] hidden sm:block truncate mt-0.5">
+                <p className="text-xs text-[var(--text-muted)] hidden md:block truncate mt-0.5">
                   {subtitle}
                 </p>
               )}
@@ -192,7 +192,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
           </div>
 
           {/* Right Header Affordances: Search, Role Badge, Theme Selector, User */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Search Input */}
             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-muted)] focus-within:border-[#10b981] focus-within:ring-1 focus-within:ring-[#10b981]/30">
               <SearchIcon size={14} className="text-[var(--text-muted)] shrink-0" />
@@ -241,8 +241,8 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
         )}
 
         {/* Scrollable Dashboard Body */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 lg:p-8 w-full min-w-0">
+          <div className="max-w-7xl mx-auto space-y-4 w-full min-w-0">
             {children}
           </div>
         </main>

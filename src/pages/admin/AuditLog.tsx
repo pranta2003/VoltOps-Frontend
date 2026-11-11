@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Layout } from "../../components/Layout";
 import {
   SystemAuditEvent,
@@ -7,14 +7,13 @@ import {
 } from "../../types/admin";
 import { AdminService } from "../../services/adminService";
 import {
-  ClockIcon,
-  ShieldCheckIcon,
   AlertTriangleIcon,
   CheckCircleIcon,
-  BuildingIcon,
-  RadioIcon,
-  SettingsIcon,
   FileTextIcon,
+  SearchIcon,
+  XIcon,
+  RefreshCwIcon,
+  EyeIcon,
 } from "../../components/Icons";
 
 export function AuditLog() {
@@ -143,12 +142,21 @@ export function AuditLog() {
   const getSeverityBadge = (sev: AuditSeverity) => {
     switch (sev) {
       case "CRITICAL":
-        return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30";
+        return {
+          container: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20",
+          dot: "bg-red-500",
+        };
       case "WARNING":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30";
+        return {
+          container: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
+          dot: "bg-amber-500",
+        };
       case "INFO":
       default:
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+        return {
+          container: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
+          dot: "bg-blue-500",
+        };
     }
   };
 
@@ -172,40 +180,43 @@ export function AuditLog() {
 
   return (
     <Layout
-      title="System Audit & Security Event Ledger"
-      subtitle="Immutable chronological audit trail recording administrative decisions, role adjustments, and dispatch overrides"
+      title="Audit Log"
       action={
         <button
           type="button"
           onClick={handleExportJSON}
           disabled={events.length === 0}
-          className="px-4 py-2 rounded-xl text-xs font-bold border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] hover:border-[#10b981] hover:text-[#10b981] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-40"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all shadow-sm disabled:opacity-40 btn-press"
           title="Download compliance audit trail in JSON format"
         >
-          <span>📥 Export Ledger (JSON)</span>
+          <FileTextIcon size={14} className="text-[var(--text-muted)]" />
+          <span>Export JSON</span>
         </button>
       }
     >
-      <div className="space-y-6">
-        {/* ── Security Policy & Source Notice ─────────────────────────── */}
-        <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2.5">
-            <ShieldCheckIcon size={18} className="text-[#10b981] shrink-0" />
-            <span className="text-[var(--text-primary)]">
-              <strong>Non-Repudiation Standard:</strong> Administrative decisions and security events are logged with actor identity, IP, and timestamp.
+      <div className="space-y-4">
+        {/* ── Sub-header / Status Toolbar ───────────────────────────────── */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-[var(--text-muted)]">
+              {totalCount} events recorded
+            </span>
+            <span className="text-xs text-[var(--text-muted)] hidden sm:inline">•</span>
+            <span className="text-xs text-[var(--text-muted)] hidden sm:inline">
+              Immutable ledger
             </span>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2">
             {isLiveConnected ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold border bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Live Endpoint Active (GET /api/admin/audit)
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live API
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold border bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20">
-                <span className="w-2 h-2 rounded-full bg-blue-500" />
-                Offline Audit Baseline
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                Offline data
               </span>
             )}
 
@@ -214,147 +225,144 @@ export function AuditLog() {
               onClick={loadAuditLogs}
               disabled={isLoading}
               title="Refresh audit ledger"
-              className="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] disabled:opacity-50 transition-colors"
+              aria-label="Refresh audit ledger"
+              className="p-1.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] disabled:opacity-40 transition-colors btn-press"
             >
-              🔄
+              <RefreshCwIcon size={14} className={isLoading ? "animate-spin" : ""} />
             </button>
           </div>
         </div>
 
-        {/* ── Integration Error / Offline Notice ─────────────────────────── */}
+        {/* ── Integration Error / Offline Notice (Compact) ─────────────── */}
         {apiError && (
-          <div className="p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between gap-2">
+          <div className="p-3 rounded-lg border border-amber-500/20 bg-amber-500/10 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <AlertTriangleIcon size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
-              <span>
-                <strong>Integration Notice:</strong> {apiError}
-              </span>
+              <AlertTriangleIcon size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
+              <span>{apiError}</span>
             </div>
             <button
               type="button"
               onClick={loadAuditLogs}
-              className="px-2.5 py-1 rounded-lg border border-amber-500/30 bg-amber-500/20 font-bold hover:bg-amber-500/30 transition-colors shrink-0"
+              className="text-xs font-semibold underline hover:no-underline shrink-0"
             >
               Retry
             </button>
           </div>
         )}
 
-        {/* ── Filters & Search ───────────────────────────────────────────── */}
-        <div className="p-5 rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-4">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-            {/* Search */}
-            <div className="flex-1 flex items-center gap-2 px-3.5 py-2 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-muted)] focus-within:border-[#10b981] focus-within:ring-1 focus-within:ring-[#10b981]">
-              <span>🔍</span>
-              <input
-                type="text"
-                aria-label="Search audit records"
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder="Search audit records by actor, action description, target entity, or event ID..."
-                className="bg-transparent border-none outline-none text-[var(--text-primary)] placeholder-[var(--text-muted)] w-full"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => handleSearchChange("")}
-                  className="text-[var(--text-muted)] hover:text-[var(--text-primary)] px-1"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            {/* Severity Filter */}
-            <div className="flex items-center gap-1.5 shrink-0 text-xs font-medium">
-              <span className="text-[var(--text-muted)]">Severity:</span>
-              {(["ALL", "INFO", "WARNING", "CRITICAL"] as const).map((sev) => (
-                <button
-                  key={sev}
-                  type="button"
-                  onClick={() => handleSeverityChange(sev)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
-                    severityFilter === sev
-                      ? "bg-[var(--text-primary)] text-[var(--bg-base)] border-transparent"
-                      : "border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                  }`}
-                >
-                  {sev}
-                </button>
-              ))}
-            </div>
+        {/* ── Compact Filter Bar ────────────────────────────────────────── */}
+        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
+          {/* Search input */}
+          <div className="relative flex-1 min-w-[200px]">
+            <SearchIcon
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+            />
+            <input
+              type="text"
+              aria-label="Search audit records"
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search by actor, action, target entity, or event ID..."
+              className="w-full pl-8 pr-7 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981]/30 transition-all"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => handleSearchChange("")}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5"
+              >
+                <XIcon size={12} />
+              </button>
+            )}
           </div>
 
-          {/* Category Pills */}
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--border)] text-xs">
-            <span className="font-bold uppercase tracking-wider text-[var(--text-muted)] mr-1">
-              Category:
-            </span>
+          {/* Category Dropdown */}
+          <div className="shrink-0">
+            <select
+              value={categoryFilter}
+              onChange={(e) => handleCategoryChange(e.target.value as any)}
+              aria-label="Filter by category"
+              className="w-full md:w-auto px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#10b981] transition-all cursor-pointer font-medium"
+            >
+              <option value="ALL">All Categories</option>
+              <option value="ROLE_CHANGE">Role Changes</option>
+              <option value="VERIFICATION">Verifications</option>
+              <option value="DISPATCH">Dispatch Events</option>
+              <option value="SECURITY">Security</option>
+              <option value="ACCOUNT">Account Provisioning</option>
+              <option value="AUTH">Authentication</option>
+            </select>
+          </div>
+
+          {/* Severity Segmented Tabs */}
+          <div className="flex items-center gap-1 shrink-0 p-0.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]">
             {(
               [
-                "ALL",
-                "ROLE_CHANGE",
-                "VERIFICATION",
-                "DISPATCH",
-                "SECURITY",
-                "ACCOUNT",
-                "AUTH",
+                { id: "ALL", label: "All" },
+                { id: "INFO", label: "Info" },
+                { id: "WARNING", label: "Warning" },
+                { id: "CRITICAL", label: "Critical" },
               ] as const
-            ).map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => handleCategoryChange(cat)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all border ${
-                  categoryFilter === cat
-                    ? "bg-[#10b981] text-[#06090e] border-[#10b981] font-bold shadow-sm"
-                    : "border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                {cat.replace("_", " ")}
-              </button>
-            ))}
+            ).map(({ id, label }) => {
+              const isActive = severityFilter === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => handleSeverityChange(id)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                    isActive
+                      ? "bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm font-semibold"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* ── Audit Ledger Table ─────────────────────────────────────────── */}
-        <div className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
+          <div className="overflow-x-auto w-full">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border)]">
+              <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] uppercase tracking-wider text-[11px] font-semibold border-b border-[var(--border)]">
                 <tr>
-                  <th className="py-3.5 px-4 font-semibold">Timestamp / Event ID</th>
-                  <th className="py-3.5 px-4 font-semibold">Actor / IP</th>
-                  <th className="py-3.5 px-4 font-semibold">Category</th>
-                  <th className="py-3.5 px-4 font-semibold">Action Description</th>
-                  <th className="py-3.5 px-4 font-semibold">Severity</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Details</th>
+                  <th className="py-2.5 px-4">Timestamp</th>
+                  <th className="py-2.5 px-4">Actor</th>
+                  <th className="py-2.5 px-4">Action</th>
+                  <th className="py-2.5 px-4">Category</th>
+                  <th className="py-2.5 px-4">Severity</th>
+                  <th className="py-2.5 px-4 text-right">Detail</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, idx) => (
                     <tr key={`skel-audit-${idx}`} className="animate-pulse">
-                      <td className="py-3.5 px-4">
-                        <div className="h-4 w-32 bg-[var(--border)] rounded mb-1" />
+                      <td className="py-3 px-4">
+                        <div className="h-4 w-28 bg-[var(--border)] rounded mb-1" />
+                        <div className="h-3 w-16 bg-[var(--border)] rounded" />
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="h-4 w-24 bg-[var(--border)] rounded mb-1" />
                         <div className="h-3 w-20 bg-[var(--border)] rounded" />
                       </td>
-                      <td className="py-3.5 px-4">
-                        <div className="h-4 w-28 bg-[var(--border)] rounded mb-1" />
-                        <div className="h-3 w-36 bg-[var(--border)] rounded" />
+                      <td className="py-3 px-4">
+                        <div className="h-4 w-44 bg-[var(--border)] rounded mb-1" />
+                        <div className="h-3 w-24 bg-[var(--border)] rounded" />
                       </td>
-                      <td className="py-3.5 px-4">
-                        <div className="h-5 w-24 bg-[var(--border)] rounded-full" />
+                      <td className="py-3 px-4">
+                        <div className="h-5 w-20 bg-[var(--border)] rounded-full" />
                       </td>
-                      <td className="py-3.5 px-4">
-                        <div className="h-4 w-64 bg-[var(--border)] rounded mb-1" />
-                        <div className="h-3 w-32 bg-[var(--border)] rounded" />
-                      </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3 px-4">
                         <div className="h-5 w-16 bg-[var(--border)] rounded-full" />
                       </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="h-6 w-16 bg-[var(--border)] rounded-lg inline-block" />
+                      <td className="py-3 px-4 text-right">
+                        <div className="h-6 w-14 bg-[var(--border)] rounded-md inline-block" />
                       </td>
                     </tr>
                   ))
@@ -362,7 +370,7 @@ export function AuditLog() {
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-[var(--text-muted)]">
                       <div className="max-w-xs mx-auto space-y-2">
-                        <p className="font-semibold text-[var(--text-primary)]">
+                        <p className="font-semibold text-sm text-[var(--text-primary)]">
                           No audit records found
                         </p>
                         <p className="text-xs">
@@ -376,135 +384,130 @@ export function AuditLog() {
                             setSeverityFilter("ALL");
                             setCurrentPage(1);
                           }}
-                          className="px-3 py-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs font-bold text-[var(--text-primary)] hover:border-[#10b981]"
+                          className="px-3 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs font-medium text-[var(--text-primary)] hover:border-[#10b981] transition-colors"
                         >
-                          Clear Filters
+                          Clear filters
                         </button>
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  events.map((evt) => (
-                    <tr key={evt.id} className="hover:bg-[var(--bg-surface-2)]/50 transition-colors">
-                      {/* Timestamp & ID */}
-                      <td className="py-3.5 px-4">
-                        <div className="font-medium text-[var(--text-primary)]">
-                          {evt.timestamp}
-                        </div>
-                        <div className="text-[10px] text-[var(--text-muted)] font-mono">
-                          {evt.id}
-                        </div>
-                      </td>
+                  events.map((evt) => {
+                    const sevStyle = getSeverityBadge(evt.severity);
 
-                      {/* Actor */}
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-[var(--text-primary)]">
-                          {evt.actorName}
-                        </div>
-                        <div className="text-[10px] text-[var(--text-muted)] font-mono">
-                          {evt.actorRole} · {evt.actorIp}
-                        </div>
-                      </td>
+                    return (
+                      <tr
+                        key={evt.id}
+                        className="hover:bg-[var(--bg-surface-2)]/60 transition-colors"
+                      >
+                        {/* Timestamp & ID */}
+                        <td className="py-3 px-4">
+                          <div className="font-medium text-[var(--text-primary)] whitespace-nowrap">
+                            {evt.timestamp}
+                          </div>
+                          <div className="text-[11px] text-[var(--text-muted)] font-mono">
+                            {evt.id}
+                          </div>
+                        </td>
 
-                      {/* Category */}
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getCategoryBadge(
-                            evt.category
-                          )}`}
-                        >
-                          {evt.category.replace("_", " ")}
-                        </span>
-                      </td>
+                        {/* Actor */}
+                        <td className="py-3 px-4">
+                          <div className="font-medium text-[var(--text-primary)]">
+                            {evt.actorName}
+                          </div>
+                          <div className="text-[11px] text-[var(--text-muted)] font-mono">
+                            {evt.actorRole} · {evt.actorIp}
+                          </div>
+                        </td>
 
-                      {/* Action */}
-                      <td className="py-3.5 px-4">
-                        <div className="font-medium text-[var(--text-primary)] max-w-md">
-                          {evt.action}
-                        </div>
-                        <div className="text-[10px] text-[var(--text-muted)]">
-                          Target:{" "}
-                          <span className="font-mono text-emerald-600 dark:text-emerald-400">
-                            {evt.targetEntity}
+                        {/* Action Description & Target */}
+                        <td className="py-3 px-4">
+                          <div className="font-medium text-[var(--text-primary)] max-w-sm truncate" title={evt.action}>
+                            {evt.action}
+                          </div>
+                          <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 mt-0.5">
+                            <span>Target:</span>
+                            <span className="font-mono text-emerald-600 dark:text-emerald-400 font-medium">
+                              {evt.targetEntity}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Category */}
+                        <td className="py-3 px-4">
+                          <span
+                            className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold border ${getCategoryBadge(
+                              evt.category
+                            )}`}
+                          >
+                            {evt.category.replace("_", " ")}
                           </span>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Severity */}
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getSeverityBadge(
-                            evt.severity
-                          )}`}
-                        >
-                          {evt.severity}
-                        </span>
-                      </td>
+                        {/* Severity */}
+                        <td className="py-3 px-4">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border ${sevStyle.container}`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${sevStyle.dot}`} />
+                            {evt.severity}
+                          </span>
+                        </td>
 
-                      {/* Details Action */}
-                      <td className="py-3.5 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            lastFocusedTriggerRef.current = e.currentTarget;
-                            setSelectedEvent(evt);
-                          }}
-                          className="px-2.5 py-1 rounded-lg border border-[var(--border)] text-[var(--text-primary)] hover:border-[#10b981] hover:text-[#10b981] transition-all font-semibold text-[11px]"
-                        >
-                          Inspect
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                        {/* Details Action */}
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              lastFocusedTriggerRef.current = e.currentTarget;
+                              setSelectedEvent(evt);
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all btn-press"
+                          >
+                            <EyeIcon size={12} className="text-[var(--text-muted)]" />
+                            <span>Inspect</span>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
 
-          {/* ── Table Pagination Controls ─────────────────────────────────── */}
-          <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-surface-2)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
+          {/* ── Compact Pagination Controls ───────────────────────────────── */}
+          <div className="py-2.5 px-4 border-t border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
             <div>
-              Showing{" "}
-              <strong className="text-[var(--text-primary)]">
-                {totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1}
-              </strong>{" "}
-              to{" "}
-              <strong className="text-[var(--text-primary)]">
-                {Math.min(currentPage * pageSize, totalCount)}
-              </strong>{" "}
-              of <strong className="text-[var(--text-primary)]">{totalCount}</strong> recorded events
+              {totalCount > 0 ? (
+                <>
+                  Showing {(currentPage - 1) * pageSize + 1}–
+                  {Math.min(currentPage * pageSize, totalCount)} of {totalCount}
+                </>
+              ) : (
+                "0 events"
+              )}
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               <button
                 type="button"
                 disabled={currentPage <= 1 || isLoading}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-semibold"
+                className="px-2.5 py-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-medium text-xs btn-press"
               >
                 Previous
               </button>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
-                <button
-                  key={pg}
-                  type="button"
-                  onClick={() => setCurrentPage(pg)}
-                  className={`w-7 h-7 rounded-lg text-xs font-bold border transition-all ${
-                    currentPage === pg
-                      ? "bg-[#10b981] text-[#06090e] border-[#10b981]"
-                      : "border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] hover:border-[#10b981]"
-                  }`}
-                >
-                  {pg}
-                </button>
-              ))}
+              <span className="px-2 text-[var(--text-muted)]">
+                {currentPage} / {totalPages}
+              </span>
 
               <button
                 type="button"
                 disabled={currentPage >= totalPages || isLoading}
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-semibold"
+                className="px-2.5 py-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-medium text-xs btn-press"
               >
                 Next
               </button>
@@ -520,10 +523,14 @@ export function AuditLog() {
             aria-labelledby="audit-modal-title"
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
           >
-            <div className="w-full max-w-lg rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 sm:p-8 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+            <div className="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+              {/* Header */}
+              <div className="flex items-start justify-between border-b border-[var(--border)] pb-3">
                 <div>
-                  <h3 id="audit-modal-title" className="font-heading font-bold text-base text-[var(--text-primary)]">
+                  <h3
+                    id="audit-modal-title"
+                    className="font-heading font-semibold text-base text-[var(--text-primary)]"
+                  >
                     Audit Event Details
                   </h3>
                   <div className="flex items-center gap-2 mt-0.5">
@@ -533,73 +540,82 @@ export function AuditLog() {
                     <button
                       type="button"
                       onClick={() => handleCopyId(selectedEvent.id)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[#10b981]"
+                      className="px-1.5 py-0.5 rounded text-[10px] font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[#10b981] transition-colors"
                     >
-                      {copiedEventId ? "Copied!" : "Copy ID"}
+                      {copiedEventId ? "Copied" : "Copy ID"}
                     </button>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedEvent(null)}
-                  className="w-7 h-7 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  aria-label="Close dialog"
+                  className="p-1 rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-colors"
                 >
-                  ✕
+                  <XIcon size={14} />
                 </button>
               </div>
 
+              {/* Metadata Grid */}
               <div className="space-y-3 text-xs">
-                <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
+                <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
                   <div>
-                    <span className="text-[var(--text-muted)] block">Timestamp:</span>
+                    <span className="text-[var(--text-muted)] text-[11px] block">Timestamp</span>
                     <span className="font-medium text-[var(--text-primary)]">
                       {selectedEvent.timestamp}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--text-muted)] block">Severity Level:</span>
+                    <span className="text-[var(--text-muted)] text-[11px] block">Severity</span>
                     <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold border mt-0.5 ${getSeverityBadge(
-                        selectedEvent.severity
-                      )}`}
+                      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border mt-0.5 ${
+                        getSeverityBadge(selectedEvent.severity).container
+                      }`}
                     >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          getSeverityBadge(selectedEvent.severity).dot
+                        }`}
+                      />
                       {selectedEvent.severity}
                     </span>
                   </div>
                 </div>
 
-                <div>
-                  <span className="text-[var(--text-muted)] block">Actor:</span>
-                  <span className="font-bold text-[var(--text-primary)] text-sm">
-                    {selectedEvent.actorName}
-                  </span>
-                  <span className="text-[var(--text-muted)] font-mono ml-2">
-                    ({selectedEvent.actorRole} · IP {selectedEvent.actorIp})
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-[var(--text-muted)] block">Action:</span>
-                  <span className="font-medium text-[var(--text-primary)]">
-                    {selectedEvent.action}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-[var(--text-muted)] block">Target Entity:</span>
-                  <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                    {selectedEvent.targetEntity}
-                  </span>
-                  {selectedEvent.targetId && (
-                    <span className="text-[var(--text-muted)] font-mono text-[11px] ml-2">
-                      (ID: {selectedEvent.targetId})
+                <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-2">
+                  <div>
+                    <span className="text-[var(--text-muted)] text-[11px] block">Actor</span>
+                    <span className="font-semibold text-[var(--text-primary)]">
+                      {selectedEvent.actorName}
                     </span>
-                  )}
+                    <span className="text-[var(--text-muted)] font-mono text-[11px] ml-1.5">
+                      ({selectedEvent.actorRole} · IP {selectedEvent.actorIp})
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-[var(--text-muted)] text-[11px] block">Action</span>
+                    <span className="font-medium text-[var(--text-primary)]">
+                      {selectedEvent.action}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-[var(--text-muted)] text-[11px] block">Target Entity</span>
+                    <span className="font-mono text-emerald-600 dark:text-emerald-400 font-medium">
+                      {selectedEvent.targetEntity}
+                    </span>
+                    {selectedEvent.targetId && (
+                      <span className="text-[var(--text-muted)] font-mono text-[11px] ml-1.5">
+                        (ID: {selectedEvent.targetId})
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-1">
-                  <span className="text-[var(--text-muted)] font-bold uppercase tracking-wider text-[10px] block">
-                    Extended Audit Context:
+                <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-1">
+                  <span className="text-[var(--text-muted)] font-semibold text-[11px] block">
+                    Context Details
                   </span>
                   <p className="text-[var(--text-secondary)] leading-relaxed">
                     {selectedEvent.details}
@@ -607,13 +623,14 @@ export function AuditLog() {
                 </div>
               </div>
 
+              {/* Footer */}
               <div className="pt-3 border-t border-[var(--border)] flex justify-end">
                 <button
                   type="button"
                   onClick={() => setSelectedEvent(null)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--bg-surface-2)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[#10b981]"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-[var(--bg-surface-2)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-all btn-press"
                 >
-                  Close Inspection
+                  Close
                 </button>
               </div>
             </div>

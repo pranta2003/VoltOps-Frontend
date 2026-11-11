@@ -93,6 +93,12 @@
   --shadow-float: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   background-color: var(--bg-base);
   color: var(--text-primary);
