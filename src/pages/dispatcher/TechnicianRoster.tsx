@@ -315,16 +315,24 @@ export const TechnicianRoster: FC = () => {
 
         {/* ── High-Density Technicians Table ──────────────────────────────── */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
-          <div className="w-full max-w-full overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-[13px]">
+          <div className="w-full max-w-full overflow-x-auto scrollbar-thin">
+            <table className="w-full min-w-[880px] text-left text-xs sm:text-[13px] border-collapse table-fixed">
+              <colgroup>
+                <col className="w-[220px]" />
+                <col className="w-[210px]" />
+                <col className="w-[140px]" />
+                <col className="w-[150px]" />
+                <col className="w-[150px]" />
+                <col className="w-[100px]" />
+              </colgroup>
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
-                  <th className="py-2.5 px-3.5 sm:px-4">Technician</th>
-                  <th className="py-2.5 px-3.5 sm:px-4">Primary Trade</th>
-                  <th className="py-2.5 px-3.5 sm:px-4">Credential Status</th>
-                  <th className="py-2.5 px-3.5 sm:px-4">Branch</th>
-                  <th className="py-2.5 px-3.5 sm:px-4">Availability</th>
-                  <th className="py-2.5 px-3.5 sm:px-4 text-right">Action</th>
+                  <th className="py-2.5 px-3">Technician</th>
+                  <th className="py-2.5 px-3">Primary Trade</th>
+                  <th className="py-2.5 px-3">Credential Status</th>
+                  <th className="py-2.5 px-3">Branch</th>
+                  <th className="py-2.5 px-3">Availability</th>
+                  <th className="py-2.5 px-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -352,13 +360,13 @@ export const TechnicianRoster: FC = () => {
                     return (
                       <tr key={tech.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
                         {/* 1. Technician Name & ID */}
-                        <td className="py-2.5 px-3.5 sm:px-4">
+                        <td className="py-2.5 px-3">
                           <div className="flex items-center gap-2.5">
                             <span className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-xs font-bold flex items-center justify-center shrink-0">
                               {tech.name.substring(0, 2).toUpperCase()}
                             </span>
-                            <div>
-                              <span className="font-semibold text-[var(--text-primary)] text-xs sm:text-[13px] block truncate max-w-[160px]" title={tech.name}>
+                            <div className="min-w-0">
+                              <span className="font-semibold text-[var(--text-primary)] text-xs sm:text-[13px] block truncate" title={tech.name}>
                                 {tech.name}
                               </span>
                               <span className="text-xs text-[var(--text-muted)] font-mono">{tech.employeeId}</span>
@@ -367,17 +375,17 @@ export const TechnicianRoster: FC = () => {
                         </td>
 
                         {/* 2. Primary Trade */}
-                        <td className="py-2.5 px-3.5 sm:px-4">
-                          <div className="font-medium text-[var(--text-primary)] text-xs sm:text-[13px] truncate max-w-[170px]" title={`${primaryTrade} · ${tech.designation}`}>
+                        <td className="py-2.5 px-3">
+                          <div className="font-medium text-[var(--text-primary)] text-xs sm:text-[13px] truncate" title={`${primaryTrade} · ${tech.designation}`}>
                             {primaryTrade}
                           </div>
-                          <div className="text-xs text-[var(--text-muted)] truncate max-w-[170px]">
+                          <div className="text-xs text-[var(--text-muted)] truncate">
                             {tech.designation}
                           </div>
                         </td>
 
                         {/* 3. Credential Status */}
-                        <td className="py-2.5 px-3.5 sm:px-4 whitespace-nowrap">
+                        <td className="py-2.5 px-3 whitespace-nowrap">
                           {hasVerifiedActive ? (
                             <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
                               <BadgeCheckIcon size={13} className="text-emerald-500" />
@@ -392,12 +400,12 @@ export const TechnicianRoster: FC = () => {
                         </td>
 
                         {/* 4. Branch */}
-                        <td className="py-2.5 px-3.5 sm:px-4 whitespace-nowrap">
+                        <td className="py-2.5 px-3 whitespace-nowrap">
                           <span className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)]">{tech.branch}</span>
                         </td>
 
                         {/* 5. Availability */}
-                        <td className="py-2.5 px-3.5 sm:px-4 whitespace-nowrap">
+                        <td className="py-2.5 px-3 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             {getStatusBadge(tech.status)}
                             {tech.activeJobCount > 0 && (
@@ -413,11 +421,11 @@ export const TechnicianRoster: FC = () => {
                         </td>
 
                         {/* 6. Action */}
-                        <td className="py-2.5 px-3.5 sm:px-4 text-right whitespace-nowrap">
+                        <td className="py-2.5 px-3 text-right whitespace-nowrap">
                           <button
                             type="button"
                             onClick={(e) => handleOpenInspect(tech, e)}
-                            className="px-3 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                            className="px-2 py-0.5 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
                           >
                             Passport
                           </button>
