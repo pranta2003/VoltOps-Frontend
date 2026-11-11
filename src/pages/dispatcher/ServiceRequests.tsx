@@ -368,17 +368,17 @@ export const ServiceRequests: FC = () => {
         {/* ── High-Density Requests Table ─────────────────────────────────── */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
           <div className="w-full max-w-full overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs sm:text-[13px]">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
-                  <th className="py-2 px-3">ID</th>
-                  <th className="py-2 px-3">Customer / Facility</th>
-                  <th className="py-2 px-3">Trade / Asset</th>
-                  <th className="py-2 px-3">Problem</th>
-                  <th className="py-2 px-3">Priority</th>
-                  <th className="py-2 px-3">Status</th>
-                  <th className="py-2 px-3">Time</th>
-                  <th className="py-2 px-3 text-right">Action</th>
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
+                  <th className="py-2.5 px-3.5 sm:px-4">ID</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Customer & Facility</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Trade & Asset</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Problem</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Priority</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Status</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Time</th>
+                  <th className="py-2.5 px-3.5 sm:px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -397,36 +397,36 @@ export const ServiceRequests: FC = () => {
                 ) : (
                   requests.map((req) => (
                     <tr key={req.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-2 px-3 font-mono font-bold text-[var(--text-primary)]">{req.id}</td>
-                      <td className="py-2 px-3">
-                        <div className="font-semibold text-[var(--text-primary)] truncate max-w-[180px]">{req.customerName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)] truncate max-w-[180px]">{req.facilityAddress}</div>
+                      <td className="py-2.5 px-3.5 sm:px-4 font-mono font-bold text-xs text-[var(--text-primary)]">{req.id}</td>
+                      <td className="py-2.5 px-3.5 sm:px-4">
+                        <div className="font-semibold text-[var(--text-primary)] truncate max-w-[200px]" title={req.customerName}>{req.customerName}</div>
+                        <div className="text-xs text-[var(--text-muted)] truncate max-w-[200px]" title={req.facilityAddress}>{req.facilityAddress}</div>
                       </td>
-                      <td className="py-2 px-3">
-                        <div className="font-medium text-[var(--text-primary)] truncate max-w-[160px]">{req.assetName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)] truncate max-w-[160px]">{req.category}</div>
+                      <td className="py-2.5 px-3.5 sm:px-4">
+                        <div className="font-medium text-[var(--text-primary)] truncate max-w-[180px]" title={req.assetName}>{req.assetName}</div>
+                        <div className="text-xs text-[var(--text-muted)] truncate max-w-[180px]" title={req.category}>{req.category}</div>
                       </td>
-                      <td className="py-2 px-3 max-w-xs">
-                        <div className="font-medium text-[var(--text-primary)] truncate text-[11px]">{req.problemTitle}</div>
+                      <td className="py-2.5 px-3.5 sm:px-4 max-w-xs">
+                        <div className="font-medium text-[var(--text-secondary)] truncate text-xs sm:text-[13px]" title={req.problemTitle}>{req.problemTitle}</div>
                       </td>
-                      <td className="py-2 px-3">
+                      <td className="py-2.5 px-3.5 sm:px-4">
                         <span
-                          className={`inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold border ${getPriorityBadge(
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${getPriorityBadge(
                             req.priority
                           )}`}
                         >
                           {req.priority}
                         </span>
                       </td>
-                      <td className="py-2 px-3">{getStatusBadge(req.status)}</td>
-                      <td className="py-2 px-3 text-[11px] text-[var(--text-muted)] font-mono whitespace-nowrap">
+                      <td className="py-2.5 px-3.5 sm:px-4">{getStatusBadge(req.status)}</td>
+                      <td className="py-2.5 px-3.5 sm:px-4 text-xs text-[var(--text-muted)] font-mono whitespace-nowrap">
                         {new Date(req.submittedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </td>
-                      <td className="py-2 px-3 text-right whitespace-nowrap">
+                      <td className="py-2.5 px-3.5 sm:px-4 text-right whitespace-nowrap">
                         {req.status === "CONVERTED" ? (
                           <Link
                             to="/dispatcher/work-orders"
-                            className="px-2 py-0.5 rounded text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                            className="px-3 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
                           >
                             Order
                           </Link>
@@ -434,7 +434,7 @@ export const ServiceRequests: FC = () => {
                           <button
                             type="button"
                             onClick={(e) => handleOpenTriage(req, e)}
-                            className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
+                            className="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
                           >
                             Triage
                           </button>
