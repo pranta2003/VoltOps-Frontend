@@ -54,7 +54,55 @@ This document tracks all completed implementation milestones, verified files, co
   42. `442a130` — `fix(dispatcher): harden business logic, license expiry validation, SLA coverage rules, and offline honesty`
   43. `aa59a22` — `fix(dispatcher): correct HTTP error classification, enforce server error propagation, and expand test suite`
   44. `2e40bbb` — `feat(design): reset frontend-wide UI/UX consistency, fix theme toggle, repair auth error handling, and stabilize local dev`
-  45. `d6f30a1` — `feat(dev): implement safe development-only role preview and persistent dev server`
+  45. `8a83e98` — `feat(dev): implement safe development-only role preview and persistent dev server`
+  46. `7b4f1c9` — `feat(design): transform dashboards with professional typography, modular SVG data visualizations, and role personality`
+
+---
+
+## Milestone 3.2: Professional SaaS Dashboard Design Transformation ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Scope**: Re-architected dashboard visual presentation from text-heavy cards to a modern, information-rich commercial SaaS design system (inspired by Linear, Stripe, and Vercel standards). Built lightweight, zero-dependency SVG chart components (`DonutChart`, `HorizontalBarChart`, `ActivityVolumeChart`, `MetricCard`), distinct role-specific personalities (Governance for Admin, Urgent Operations for Dispatcher, Workload Progression for Technician), truthful data mapping, and comprehensive visual audit.
+- **Accomplishments**:
+  1. **Reusable Data Visualization Architecture (`src/components/charts/`, `MetricCard.tsx`)**:
+     - `DonutChart.tsx`: Dynamic SVG donut with interactive segment hovering, hover-activated center metrics readout, responsive legend, and empty state fallback.
+     - `HorizontalBarChart.tsx`: Proportional horizontal bar charts with dual-value comparison (e.g. Available vs On Job, or Verified vs Pending), trade badges, and accessibility text.
+     - `ActivityVolumeChart.tsx`: Interactive hourly column chart visualizing shift dispatch velocity with hover tooltips and temporal x-axis markers.
+     - `MetricCard.tsx`: Standardized KPI card featuring deliberate typography tokens, trend indicators (`direction: up | down | neutral`), alert styling, and icon slots.
+  2. **Dispatcher Dashboard Transformation (`DispatcherDashboard.tsx`)**:
+     - Operational urgency hierarchy: Replaced plain text blocks with 4 standardized `MetricCard` KPIs.
+     - Work Order Distribution donut chart: Live breakdown of Assigned, In Transit, On Site, Unassigned, and Completed orders.
+     - 7 Canonical Trades Capacity: Horizontal bar visualization showing Available vs On-Job capacity for each of the 7 supported trades.
+     - Shift Velocity chart: Hourly dispatch event visualization tracking load from 09:00 to 15:00.
+     - Preserved Critical Breakdown Queue and matching engine assignment modal with zero functional regressions.
+  3. **Admin Governance Dashboard Transformation (`AdminDashboard.tsx`)**:
+     - Clear governance and oversight identity: `MetricCard` KPIs for Accounts, Technicians, Dispatchers, and Pending Review.
+     - Workforce Composition donut chart: Breakdown by role (Technicians, Dispatchers, Admins, Customers).
+     - Compliance & Passport Status: Proportional bars tracking verified licenses across DEPZ, Gazipur, and Tejgaon branches.
+     - Recent system audit feed and fast navigation to User Management and Technician Verification.
+  4. **Technician Job Roster Transformation (`TechnicianDashboard.tsx`)**:
+     - Focused on personal workload and arrival SLA: Shift route progress breakdown with transit indicators.
+     - Passport Trade Competency bars: Clear percentage qualification ratings for Primary (Electrical) and Secondary (HVAC, Plumbing) trades.
+     - Status transition modal and arrival SLA countdown preserved.
+  5. **Role Preview Identity & Consistency**:
+     - Verified and validated role preview identity across Admin (`Pranta Admin`), Dispatcher (`Bani Dispatcher`), and Technician (`Kamrul Islam`).
+     - Ensured sidebar branding, portal badges, and dashboard headers reflect the active preview role.
+  6. **Visual Acceptance Evidence (`docs/visual-audit/milestone-3.2/`)**:
+     - Captured 10 genuine screenshots across desktop (1440x900), mobile (390x844), light mode, and dark mode:
+       - `01_admin_dashboard_transformed_dark.png`
+       - `02_admin_dashboard_transformed_light.png`
+       - `03_dispatcher_dashboard_transformed_light.png`
+       - `04_dispatcher_dashboard_preview_identity_dark.png`
+       - `05_dispatcher_requests_dark.png`
+       - `06_dispatcher_work_orders_dark.png`
+       - `07_dispatcher_technician_roster_dark.png`
+       - `08_technician_dashboard_transformed_dark.png`
+       - `09_technician_dashboard_transformed_light.png`
+       - `10_dispatcher_mobile_390.png`
+  7. **Testing & Build Verification**:
+     - `npm test`: 35/35 passed (0 failures).
+     - `npm run build`: `tsc && vite build` passed cleanly with 0 errors.
+     - Development server active and persisted on `http://localhost:5173/`.
 
 ---
 

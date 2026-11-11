@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Layout } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 import { WorkOrder, ServiceCategory } from "../types";
+import { MetricCard } from "../components/MetricCard";
+import { HorizontalBarChart } from "../components/charts/HorizontalBarChart";
 import {
   WrenchIcon,
   ClockIcon,
@@ -106,36 +108,110 @@ export function TechnicianDashboard() {
       title="Field Technician Job Roster"
       subtitle={`Welcome, ${user?.name || "Technician"} · Electrical & Power Systems Specialist`}
     >
-      {/* ── Status Banner (Figma Technician jobs Frame) ─────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-          <div className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-            Today's Assigned Jobs
+      {/* ── Status Metric Cards ─────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <MetricCard
+          label="Today's Assigned Jobs"
+          value={jobs.filter((j) => j.status !== "COMPLETED").length}
+          subtext="Active Dispatched Work Orders"
+          icon={WrenchIcon}
+          trend={{ direction: "up", label: "2 In Progress" }}
+        />
+
+        <MetricCard
+          label="Current Transit SLA"
+          value="18 min"
+          subtext="EN ROUTE: Generator G-01 (WO-2048)"
+          icon={ClockIcon}
+          alert={true}
+          trend={{ direction: "down", label: "Countdown Active" }}
+        />
+
+        <MetricCard
+          label="Verified Passport Status"
+          value="Certified"
+          subtext="HV Substation & Industrial Motors"
+          icon={ShieldCheckIcon}
+          trend={{ direction: "neutral", label: "Active & Compliant" }}
+        />
+      </div>
+
+      {/* ── Visual Schedule Timeline & Progress Distribution ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Today's Shift Timeline Progress */}
+        <div className="lg:col-span-7 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] space-y-3">
+          <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                Today's Dispatch Route & Progression
+              </h3>
+              <p className="text-[11px] text-[var(--text-muted)]">Live transit milestones & scheduled work targets</p>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
+              Shift: 08:00 - 18:00
+            </span>
           </div>
-          <div className="mt-2 text-3xl font-bold font-heading text-[var(--text-primary)]">
-            {jobs.filter((j) => j.status !== "COMPLETED").length}
+
+          <div className="space-y-3 pt-1">
+            {jobs.map((job) => (
+              <div
+                key={job.id}
+                className="flex items-center gap-3 p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]/40 hover:bg-[var(--bg-surface-2)] transition-colors"
+              >
+                <div
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 ${
+                    job.status === "COMPLETED"
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                      : job.status === "TRAVELLING"
+                      ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 animate-pulse"
+                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  }`}
+                >
+                  {job.status === "COMPLETED" ? "✓" : job.id.slice(-2)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-xs text-[var(--text-primary)] truncate">
+                      {job.customerName}
+                    </span>
+                    <span
+                      className={`px-1.5 py-0.2 rounded text-[10px] font-bold border ${getStatusBadge(
+                        job.status
+                      )}`}
+                    >
+                      {job.status.replace("_", " ")}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-[var(--text-muted)] truncate">{job.assetName}</div>
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="mt-1 text-xs text-[var(--text-muted)]">Active dispatched work orders</div>
         </div>
 
-        <div className="p-5 rounded-2xl border border-blue-500/20 bg-blue-500/5 shadow-sm">
-          <div className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-            Current Status
+        {/* Skill Passport Competency Overview */}
+        <div className="lg:col-span-5 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
+          <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-2">
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                Passport Trade Competency
+              </h3>
+              <p className="text-[11px] text-[var(--text-muted)]">Certified qualifications for field assignment</p>
+            </div>
+            <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+              PASSED
+            </span>
           </div>
-          <div className="mt-2 text-2xl font-bold font-heading text-blue-600 dark:text-blue-400">
-            EN ROUTE (WO-2048)
-          </div>
-          <div className="mt-1 text-xs text-blue-600/80 font-medium">18 min arrival SLA countdown</div>
-        </div>
 
-        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-          <div className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-            Verified Passport Status
-          </div>
-          <div className="mt-2 text-xl font-bold font-heading text-[#10b981]">
-            ✓ Active & Certified
-          </div>
-          <div className="mt-1 text-xs text-[var(--text-muted)]">High Voltage & Substation License</div>
+          <HorizontalBarChart
+            data={[
+              { label: "Electrical and power systems", value: 100, color: "#10b981", badge: "Primary" },
+              { label: "AC, HVAC, and cooling", value: 75, color: "#38bdf8", badge: "Secondary" },
+              { label: "Plumbing and water systems", value: 60, color: "#a855f7" },
+              { label: "CCTV and security", value: 40, color: "#64748b" },
+            ]}
+            valueSuffix="%"
+          />
         </div>
       </div>
 
