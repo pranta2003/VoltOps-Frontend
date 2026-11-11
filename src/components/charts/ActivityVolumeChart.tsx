@@ -38,7 +38,7 @@ export const ActivityVolumeChart: FC<ActivityVolumeChartProps> = ({
   return (
     <div className="w-full">
       {/* Active Bar Tooltip Readout */}
-      <div className="h-5 flex items-center justify-between text-[11px] px-1 mb-2">
+      <div className="h-5 flex items-center justify-between text-xs px-1 mb-2">
         {activeTooltip ? (
           <>
             <span className="font-semibold text-[var(--text-primary)]">
@@ -49,8 +49,8 @@ export const ActivityVolumeChart: FC<ActivityVolumeChartProps> = ({
             </span>
           </>
         ) : (
-          <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">
-            Hover column to inspect activity volume
+          <span className="text-[11px] text-[var(--text-muted)] font-medium">
+            Hourly dispatch volume across active shift
           </span>
         )}
       </div>
@@ -72,7 +72,7 @@ export const ActivityVolumeChart: FC<ActivityVolumeChartProps> = ({
               className="flex-1 flex flex-col items-center justify-end h-full group cursor-pointer"
             >
               <div
-                className={`w-full max-w-[28px] rounded-t-md transition-all duration-300 ${
+                className={`w-full max-w-[32px] rounded-t-md transition-all duration-300 ${
                   isSelected
                     ? "bg-[var(--accent)] shadow-sm scale-y-105"
                     : "bg-[var(--border-strong)] group-hover:bg-[var(--accent)]/70"
@@ -85,9 +85,9 @@ export const ActivityVolumeChart: FC<ActivityVolumeChartProps> = ({
       </div>
 
       {/* X-Axis labels */}
-      <div className="flex items-center justify-between text-[10px] text-[var(--text-muted)] font-mono pt-1.5 px-1">
+      <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)] font-mono pt-1.5 px-1">
         {data.map((item) => (
-          <span key={item.key} className="truncate max-w-[40px] text-center">
+          <span key={item.key} className="truncate max-w-[44px] text-center">
             {item.label}
           </span>
         ))}

@@ -53,22 +53,22 @@ export const HorizontalBarChart: FC<HorizontalBarChartProps> = ({
             }`}
           >
             {/* Header / Labels */}
-            <div className="flex items-center justify-between text-xs mb-1 gap-2">
-              <span className="font-medium text-[var(--text-primary)] truncate text-[11px] sm:text-xs">
+            <div className="flex items-center justify-between text-xs mb-1.5 gap-2">
+              <span className="font-semibold text-[var(--text-primary)] truncate text-xs sm:text-[13px]">
                 {item.label}
               </span>
-              <div className="flex items-center gap-1.5 shrink-0 font-mono text-[11px]">
+              <div className="flex items-center gap-1.5 shrink-0 font-mono text-xs">
                 <span className="font-bold text-[var(--text-primary)]">
                   {item.value}
                   {valueSuffix}
                 </span>
                 {item.secondaryValue !== undefined && (
-                  <span className="text-[var(--text-muted)] text-[10px]">
+                  <span className="text-[var(--text-muted)] text-[11px]">
                     / {item.secondaryValue} {item.secondaryLabel || ""}
                   </span>
                 )}
                 {item.badge && (
-                  <span className="px-1.5 py-0.2 rounded text-[9px] uppercase font-bold tracking-wider bg-[var(--accent-subtle)] text-[var(--accent)] border border-[var(--accent)]/20 ml-1">
+                  <span className="px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-[var(--accent-subtle)] text-[var(--accent-text)] border border-[var(--accent)]/30 ml-1">
                     {item.badge}
                   </span>
                 )}
@@ -76,7 +76,7 @@ export const HorizontalBarChart: FC<HorizontalBarChartProps> = ({
             </div>
 
             {/* Stacked / Proportional Bar */}
-            <div className="h-2 w-full bg-[var(--border)] rounded-full overflow-hidden flex items-center">
+            <div className="h-2.5 w-full bg-[var(--border)] rounded-full overflow-hidden flex items-center">
               <div
                 className="h-full rounded-full transition-all duration-500 ease-out"
                 style={{
