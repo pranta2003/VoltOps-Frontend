@@ -1,6 +1,6 @@
 // Centralized Dispatcher Operations API Service
-// Strictly follows VoltOps API contract: live endpoints with deterministic fallback,
-// honest connection telemetry, safe human-verified assignment, and arithmetic matching.
+// Strictly follows VoltOps API contract: live endpoints with deliberate error classification,
+// honest telemetry, human-verified assignment, and arithmetic matching.
 
 import api from "../api/axios";
 import { ServiceRequest, WorkOrder, TechnicianProfile, ServiceCategory } from "../types";
@@ -22,7 +22,40 @@ import {
   INITIAL_DISPATCH_EVENTS,
 } from "./mockDispatcherData";
 
-// Local mutable state for demonstration / offline operation
+/**
+ * Custom error class for Dispatcher API operations with explicit classification flags.
+ */
+export class DispatcherApiError extends Error {
+  status?: number;
+  code?: string;
+  isServerError?: boolean;
+  isAuthError?: boolean;
+  isResourceNotFound?: boolean;
+  isMalformedResponse?: boolean;
+
+  constructor(
+    message: string,
+    options?: {
+      status?: number;
+      code?: string;
+      isServerError?: boolean;
+      isAuthError?: boolean;
+      isResourceNotFound?: boolean;
+      isMalformedResponse?: boolean;
+    }
+  ) {
+    super(message);
+    this.name = "DispatcherApiError";
+    this.status = options?.status;
+    this.code = options?.code;
+    this.isServerError = options?.isServerError;
+    this.isAuthError = options?.isAuthError;
+    this.isResourceNotFound = options?.isResourceNotFound;
+    this.isMalformedResponse = options?.isMalformedResponse;
+  }
+}
+
+// Local mutable state for demonstration / offline preview
 let localRequests: ServiceRequest[] = JSON.parse(JSON.stringify(INITIAL_SERVICE_REQUESTS));
 let localWorkOrders: WorkOrder[] = JSON.parse(JSON.stringify(INITIAL_WORK_ORDERS));
 let localTechnicians: TechnicianProfile[] = JSON.parse(JSON.stringify(INITIAL_FIELD_TECHNICIANS));
@@ -37,9 +70,97 @@ export const VALID_WORK_ORDER_TRANSITIONS: Record<WorkOrder["status"], WorkOrder
   ASSIGNED: ["TRAVELLING", "CANCELLED"],
   TRAVELLING: ["ON_SITE", "CANCELLED"],
   ON_SITE: ["COMPLETED", "CANCELLED"],
-  COMPLETED: [], // Terminal state
+  COMPLETED: [], // Terminal state - cannot be reopened
   CANCELLED: [], // Terminal state
 };
+
+/**
+ * Deliberate HTTP Error Classifier.
+ * Distinguishes authentication, authorization, server crashes, missing resources,
+ * and confirmed unmounted route endpoints.
+ */
+function handleDispatcherHttpError(
+  err: any,
+  context: { isCollectionQuery?: boolean; resourceId?: string; actionName?: string }
+): void {
+  const status = err.response?.status;
+  const data = err.response?.data;
+  const message = data?.message || data?.error || err.message;
+
+  // 1. Network unavailable: permitted to activate local preview
+  if (err.code === "ERR_NETWORK" || !err.response || err.message?.includes("Network Error")) {
+    return; // Fall through to local preview
+  }
+
+  // 2. Authentication failure: must propagate
+  if (status === 401) {
+    throw new DispatcherApiError(`Authentication required (401): ${message}`, {
+      status: 401,
+      isAuthError: true,
+    });
+  }
+
+  // 3. Authorization failure: must propagate
+  if (status === 403) {
+    throw new DispatcherApiError(`Access forbidden (403): ${message}`, {
+      status: 403,
+      isAuthError: true,
+    });
+  }
+
+  // 4. Server failures (500, 502, 503): MUST throw error and NEVER silently fall back
+  if (status && status >= 500) {
+    throw new DispatcherApiError(`Server error (${status}): ${message}`, {
+      status,
+      isServerError: true,
+    });
+  }
+
+  // 5. Missing resource 404 vs unmounted endpoint 404:
+  if (status === 404) {
+    // If response indicates an unmounted route or unimplemented endpoint router
+    if (
+      message === "Route not found" ||
+      message?.toLowerCase().includes("cannot get") ||
+      message?.toLowerCase().includes("cannot post") ||
+      message?.toLowerCase().includes("cannot patch")
+    ) {
+      return; // Fall through to local preview baseline
+    }
+
+    // If a specific resource ID was requested and endpoint returned 404, resource does not exist!
+    if (context.resourceId) {
+      throw new DispatcherApiError(`Resource not found (404): ${message || `Resource ${context.resourceId} not found`}`, {
+        status: 404,
+        isResourceNotFound: true,
+      });
+    }
+
+    // If data indicates an entity was missing
+    if (data?.code === "RESOURCE_NOT_FOUND") {
+      throw new DispatcherApiError(`Resource not found (404): ${message}`, {
+        status: 404,
+        isResourceNotFound: true,
+      });
+    }
+
+    // For collection queries (e.g. GET /dispatcher/requests), a 404 represents an unmounted endpoint router
+    if (context.isCollectionQuery) {
+      return; // Fall through to local preview baseline
+    }
+
+    // For any other 404, throw resource not found
+    throw new DispatcherApiError(`Endpoint or target not found (404): ${message}`, {
+      status: 404,
+      isResourceNotFound: true,
+    });
+  }
+
+  // For any other HTTP error (e.g. 400 Bad Request, 422 Unprocessable), throw immediately
+  throw new DispatcherApiError(`Request failed (${status || "UNKNOWN"}): ${message}`, {
+    status,
+  });
+}
 
 export const dispatcherService = {
   /**
@@ -60,7 +181,7 @@ export const dispatcherService = {
   async getMetrics(): Promise<DispatcherApiResponse<DispatcherMetrics>> {
     try {
       const res = await api.get("/dispatcher/metrics");
-      if (res.data?.success && res.data?.data) {
+      if (res.data?.success && res.data?.data && typeof res.data.data === "object") {
         return {
           success: true,
           data: res.data.data,
@@ -68,11 +189,12 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
+      throw new DispatcherApiError("Malformed response: expected metrics data object from server", {
+        isMalformedResponse: true,
+      });
     } catch (err: any) {
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        throw err;
-      }
-      // Offline fallback
+      if (err instanceof DispatcherApiError) throw err;
+      handleDispatcherHttpError(err, { isCollectionQuery: true, actionName: "getMetrics" });
     }
 
     // Compute truthful metrics from baseline state
@@ -106,7 +228,7 @@ export const dispatcherService = {
         tradeCoverage,
       },
       isOffline: true,
-      message: "[Local Demonstration Session] Backend offline or unmounted. Displaying verified local demonstration metrics.",
+      message: "[Local Preview] Backend offline or router unmounted. Displaying local demonstration metrics.",
       timestamp: new Date().toISOString(),
     };
   },
@@ -125,11 +247,12 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
+      throw new DispatcherApiError("Malformed response: expected array of service requests from server", {
+        isMalformedResponse: true,
+      });
     } catch (err: any) {
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        throw err;
-      }
-      // Fallback
+      if (err instanceof DispatcherApiError) throw err;
+      handleDispatcherHttpError(err, { isCollectionQuery: true, actionName: "getServiceRequests" });
     }
 
     let results = [...localRequests];
@@ -162,7 +285,7 @@ export const dispatcherService = {
       success: true,
       data: results,
       isOffline: true,
-      message: "[Local Demonstration Session] Operating on local demonstration requests baseline.",
+      message: "[Local Preview] Operating on local demonstration requests baseline.",
       timestamp: new Date().toISOString(),
     };
   },
@@ -173,7 +296,7 @@ export const dispatcherService = {
   async convertRequestToWorkOrder(dto: CreateWorkOrderDTO): Promise<DispatcherApiResponse<WorkOrder>> {
     try {
       const res = await api.post("/dispatcher/work-orders", dto);
-      if (res.data?.success && res.data.data) {
+      if (res.data?.success && res.data.data && typeof res.data.data === "object") {
         return {
           success: true,
           data: res.data.data,
@@ -181,16 +304,27 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
+      throw new DispatcherApiError("Malformed response: expected work order data object from server", {
+        isMalformedResponse: true,
+      });
     } catch (err: any) {
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        throw err;
-      }
-      // Offline fallback
+      if (err instanceof DispatcherApiError) throw err;
+      handleDispatcherHttpError(err, { resourceId: dto.requestId, actionName: "convertRequestToWorkOrder" });
     }
 
+    // Atomic local validation before modifying state
     const request = localRequests.find((r) => r.id === dto.requestId);
     if (!request) {
-      throw new Error(`Service request ${dto.requestId} not found.`);
+      throw new DispatcherApiError(`Service request ${dto.requestId} not found in local baseline.`, {
+        status: 404,
+        isResourceNotFound: true,
+      });
+    }
+
+    if (request.status === "CONVERTED") {
+      throw new DispatcherApiError(`Service request ${dto.requestId} is already converted into a Work Order.`, {
+        code: "ALREADY_CONVERTED",
+      });
     }
 
     const plan = dto.coveragePlan || request.coveragePlan || "247-standard";
@@ -224,7 +358,7 @@ export const dispatcherService = {
       workNotes: dto.notes,
     };
 
-    // Update local state
+    // Update local state atomically
     request.status = "CONVERTED";
     request.workOrderId = newWorkOrderId;
     localWorkOrders.unshift(newWorkOrder);
@@ -244,7 +378,7 @@ export const dispatcherService = {
       success: true,
       data: newWorkOrder,
       isOffline: true,
-      message: `[Local Demonstration Session] Work Order ${newWorkOrderId} simulated locally. (Will not persist to remote backend).`,
+      message: `[Local Demonstration Session] Work Order ${newWorkOrderId} created in local preview. (Will not persist to remote backend).`,
       timestamp: new Date().toISOString(),
     };
   },
@@ -263,11 +397,12 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
+      throw new DispatcherApiError("Malformed response: expected array of work orders from server", {
+        isMalformedResponse: true,
+      });
     } catch (err: any) {
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        throw err;
-      }
-      // Fallback
+      if (err instanceof DispatcherApiError) throw err;
+      handleDispatcherHttpError(err, { isCollectionQuery: true, actionName: "getWorkOrders" });
     }
 
     let results = [...localWorkOrders];
@@ -300,7 +435,7 @@ export const dispatcherService = {
       success: true,
       data: results,
       isOffline: true,
-      message: "[Local Demonstration Session] Operating on local demonstration work orders baseline.",
+      message: "[Local Preview] Operating on local demonstration work orders baseline.",
       timestamp: new Date().toISOString(),
     };
   },
@@ -319,11 +454,12 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
+      throw new DispatcherApiError("Malformed response: expected array of technicians from server", {
+        isMalformedResponse: true,
+      });
     } catch (err: any) {
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        throw err;
-      }
-      // Fallback
+      if (err instanceof DispatcherApiError) throw err;
+      handleDispatcherHttpError(err, { isCollectionQuery: true, actionName: "getTechnicians" });
     }
 
     let results = [...localTechnicians];
@@ -347,10 +483,10 @@ export const dispatcherService = {
   /**
    * Arithmetic Matching Engine: Computes ranked eligible technicians for a work order.
    * Hard constraints:
-   * 1. Must possess at least one skill in work order category
+   * 1. Must possess at least one skill in target trade (primary or secondary)
    * 2. Must possess an active, non-expired verified certification in trade
    * 3. Must not be UNAVAILABLE, ON_LEAVE, or OFF_DUTY
-   * 4. Must not exceed maximum active concurrent jobs (<= 2 jobs)
+   * 4. Must not exceed maximum active concurrent jobs (< 3 jobs)
    *
    * Transparent Tiering:
    * - TIER_1_PREFERRED: Trade certified, active license, 0 active jobs (standby)
@@ -368,16 +504,20 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
+      throw new DispatcherApiError("Malformed response: expected array of recommendations from server", {
+        isMalformedResponse: true,
+      });
     } catch (err: any) {
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        throw err;
-      }
-      // Fallback to client-side arithmetic matching engine
+      if (err instanceof DispatcherApiError) throw err;
+      handleDispatcherHttpError(err, { resourceId: workOrderId, actionName: "getMatchingTechnicians" });
     }
 
     const order = localWorkOrders.find((w) => w.id === workOrderId);
     if (!order) {
-      throw new Error(`Work order ${workOrderId} not found.`);
+      throw new DispatcherApiError(`Work order ${workOrderId} not found in local baseline.`, {
+        status: 404,
+        isResourceNotFound: true,
+      });
     }
 
     const recommendations: TechnicianRecommendation[] = [];
@@ -393,7 +533,7 @@ export const dispatcherService = {
         continue;
       }
 
-      // Hard check 3: Trade skill constraint
+      // Hard check 3: Trade skill constraint (primary or secondary trade competency)
       const hasSkill = tech.skills.some((s) => s.category === order.category);
       if (!hasSkill) {
         continue;
@@ -403,9 +543,9 @@ export const dispatcherService = {
       // Must have at least one verified AND unexpired certification
       const activeVerifiedCerts = tech.certifications.filter((c) => {
         if (!c.verified) return false;
-        if (!c.expiryDate) return true;
+        if (!c.expiryDate) return true; // Indefinite valid license
         const exp = new Date(c.expiryDate);
-        return !isNaN(exp.getTime()) && exp >= new Date();
+        return !isNaN(exp.getTime()) && exp.getTime() >= Date.now();
       });
 
       if (activeVerifiedCerts.length === 0) {
@@ -421,7 +561,8 @@ export const dispatcherService = {
         (facilityLower.includes("epz") && branchLower.includes("epz")) ||
         (facilityLower.includes("gazipur") && branchLower.includes("gazipur")) ||
         (facilityLower.includes("tejgaon") && branchLower.includes("tejgaon")) ||
-        (facilityLower.includes("uttara") && branchLower.includes("uttara"));
+        (facilityLower.includes("uttara") && branchLower.includes("uttara")) ||
+        ((facilityLower.includes("rupganj") || facilityLower.includes("narsingdi")) && branchLower.includes("epz"));
 
       // Arithmetic Score Calculation (Deterministic Heuristic)
       let score = 50; // Trade skill matched
@@ -489,7 +630,7 @@ export const dispatcherService = {
       success: true,
       data: recommendations,
       isOffline: true,
-      message: "[Local Demonstration Session] Ranked via transparent arithmetic matching engine.",
+      message: "[Local Preview] Ranked via transparent arithmetic matching engine.",
       timestamp: new Date().toISOString(),
     };
   },
@@ -500,7 +641,7 @@ export const dispatcherService = {
   async assignTechnician(dto: AssignTechnicianDTO): Promise<DispatcherApiResponse<WorkOrder>> {
     try {
       const res = await api.post(`/dispatcher/work-orders/${dto.workOrderId}/assign`, dto);
-      if (res.data?.success && res.data.data) {
+      if (res.data?.success && res.data.data && typeof res.data.data === "object") {
         return {
           success: true,
           data: res.data.data,
@@ -508,29 +649,48 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
+      throw new DispatcherApiError("Malformed response: expected assigned work order object from server", {
+        isMalformedResponse: true,
+      });
     } catch (err: any) {
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        throw err;
-      }
-      // Fallback
+      if (err instanceof DispatcherApiError) throw err;
+      handleDispatcherHttpError(err, { resourceId: dto.workOrderId, actionName: "assignTechnician" });
     }
 
+    // Atomic local validation before modifying state
     const order = localWorkOrders.find((w) => w.id === dto.workOrderId);
     if (!order) {
-      throw new Error(`Work order ${dto.workOrderId} not found.`);
+      throw new DispatcherApiError(`Work order ${dto.workOrderId} not found in local baseline.`, {
+        status: 404,
+        isResourceNotFound: true,
+      });
+    }
+
+    // Duplicate assignment prevention: cannot assign if already ASSIGNED or in-flight
+    if (order.status !== "UNASSIGNED") {
+      throw new DispatcherApiError(
+        `Cannot assign technician to work order ${order.id} with status "${order.status}". Work order must be UNASSIGNED.`,
+        { code: "INVALID_STATUS" }
+      );
     }
 
     const tech = localTechnicians.find((t) => t.id === dto.technicianId);
     if (!tech) {
-      throw new Error(`Technician ${dto.technicianId} not found.`);
+      throw new DispatcherApiError(`Technician ${dto.technicianId} not found in local baseline.`, {
+        status: 404,
+        isResourceNotFound: true,
+      });
     }
 
-    // State transition guard: can only assign from UNASSIGNED
-    if (order.status !== "UNASSIGNED") {
-      throw new Error(`Cannot assign technician to work order ${order.id} with status "${order.status}". Work order must be UNASSIGNED.`);
+    // Overload safeguard: technician cannot take a 4th job
+    if (tech.activeJobCount >= 3) {
+      throw new DispatcherApiError(
+        `Cannot dispatch ${tech.name}: technician has ${tech.activeJobCount} active jobs and is overloaded (maximum is 2).`,
+        { code: "TECHNICIAN_OVERLOADED" }
+      );
     }
 
-    // Update work order
+    // Update work order state atomically
     order.status = "ASSIGNED";
     order.assignedTechnicianId = tech.id;
     order.assignedTechnicianName = `${tech.name} (${tech.designation})`;
@@ -570,9 +730,23 @@ export const dispatcherService = {
     status: WorkOrder["status"],
     notes?: string
   ): Promise<DispatcherApiResponse<WorkOrder>> {
+    // 1. Lifecycle transition validation guard - reject invalid transitions BEFORE calling network
+    const localOrder = localWorkOrders.find((w) => w.id === id);
+    if (localOrder) {
+      const allowedTransitions = VALID_WORK_ORDER_TRANSITIONS[localOrder.status] || [];
+      if (!allowedTransitions.includes(status)) {
+        throw new DispatcherApiError(
+          `Invalid status transition: Cannot transition Work Order ${localOrder.id} from "${localOrder.status}" to "${status}". Allowed transitions are: [${
+            allowedTransitions.length ? allowedTransitions.join(", ") : "none (terminal state)"
+          }].`,
+          { code: "INVALID_TRANSITION" }
+        );
+      }
+    }
+
     try {
       const res = await api.patch(`/dispatcher/work-orders/${id}/status`, { status, notes });
-      if (res.data?.success && res.data.data) {
+      if (res.data?.success && res.data.data && typeof res.data.data === "object") {
         return {
           success: true,
           data: res.data.data,
@@ -580,37 +754,30 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
+      throw new DispatcherApiError("Malformed response: expected updated work order from server", {
+        isMalformedResponse: true,
+      });
     } catch (err: any) {
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        throw err;
-      }
-      // Fallback
+      if (err instanceof DispatcherApiError) throw err;
+      handleDispatcherHttpError(err, { resourceId: id, actionName: "updateWorkOrderStatus" });
     }
 
-    const order = localWorkOrders.find((w) => w.id === id);
-    if (!order) {
-      throw new Error(`Work order ${id} not found.`);
+    if (!localOrder) {
+      throw new DispatcherApiError(`Work order ${id} not found in local baseline.`, {
+        status: 404,
+        isResourceNotFound: true,
+      });
     }
 
-    // Lifecycle transition validation guard
-    const allowedTransitions = VALID_WORK_ORDER_TRANSITIONS[order.status] || [];
-    if (!allowedTransitions.includes(status)) {
-      throw new Error(
-        `Invalid status transition: Cannot transition Work Order ${order.id} from "${order.status}" to "${status}". Allowed transitions are: [${
-          allowedTransitions.length ? allowedTransitions.join(", ") : "none (terminal state)"
-        }].`
-      );
-    }
-
-    order.status = status;
-    if (status === "TRAVELLING" && !order.startedAt) {
-      order.startedAt = new Date().toISOString();
+    localOrder.status = status;
+    if (status === "TRAVELLING" && !localOrder.startedAt) {
+      localOrder.startedAt = new Date().toISOString();
     }
     if (status === "COMPLETED") {
-      order.completedAt = new Date().toISOString();
+      localOrder.completedAt = new Date().toISOString();
       // Free technician
-      if (order.assignedTechnicianId) {
-        const tech = localTechnicians.find((t) => t.id === order.assignedTechnicianId);
+      if (localOrder.assignedTechnicianId) {
+        const tech = localTechnicians.find((t) => t.id === localOrder.assignedTechnicianId);
         if (tech && tech.activeJobCount > 0) {
           tech.activeJobCount -= 1;
           if (tech.activeJobCount === 0) tech.status = "AVAILABLE";
@@ -619,7 +786,7 @@ export const dispatcherService = {
     }
 
     if (notes) {
-      order.workNotes = order.workNotes ? `${order.workNotes} | ${notes}` : notes;
+      localOrder.workNotes = localOrder.workNotes ? `${localOrder.workNotes} | ${notes}` : notes;
     }
 
     localEvents.unshift({
@@ -627,16 +794,16 @@ export const dispatcherService = {
       timestamp: new Date().toISOString(),
       action: "STATUS_CHANGED",
       actorName: "Tania Akter (Dispatcher)",
-      targetId: order.id,
-      summary: `Work Order ${order.id} status transitioned from ${order.status} to ${status}.`,
+      targetId: localOrder.id,
+      summary: `Work Order ${localOrder.id} status transitioned from ${localOrder.status} to ${status}.`,
       severity: "INFO",
     });
 
     return {
       success: true,
-      data: order,
+      data: localOrder,
       isOffline: true,
-      message: `[Local Demonstration Session] Work Order ${order.id} transitioned to ${status} locally.`,
+      message: `[Local Demonstration Session] Work Order ${localOrder.id} transitioned to ${status} locally.`,
       timestamp: new Date().toISOString(),
     };
   },
@@ -655,11 +822,12 @@ export const dispatcherService = {
           timestamp: new Date().toISOString(),
         };
       }
+      throw new DispatcherApiError("Malformed response: expected array of events from server", {
+        isMalformedResponse: true,
+      });
     } catch (err: any) {
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        throw err;
-      }
-      // Fallback
+      if (err instanceof DispatcherApiError) throw err;
+      handleDispatcherHttpError(err, { isCollectionQuery: true, actionName: "getDispatchEvents" });
     }
 
     return {

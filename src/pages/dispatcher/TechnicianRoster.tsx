@@ -31,6 +31,8 @@ export const TechnicianRoster: FC = () => {
 
   // Passport Modal State
   const [inspectTech, setInspectTech] = useState<TechnicianProfile | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isStale, setIsStale] = useState(false);
 
   const modalHeadingId = useId();
   const lastFocusedTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -62,8 +64,11 @@ export const TechnicianRoster: FC = () => {
 
       setTechnicians(results);
       setIsOffline(res.isOffline);
-    } catch {
-      setIsOffline(true);
+      setErrorMessage(null);
+      setIsStale(false);
+    } catch (err: any) {
+      setErrorMessage(err.message || "Failed to retrieve technician roster from server");
+      setIsStale(true);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -146,13 +151,33 @@ export const TechnicianRoster: FC = () => {
         <div className="flex items-center gap-2">
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-              isOffline
+              errorMessage && technicians.length === 0
+                ? "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20"
+                : isStale
+                ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20"
+                : isOffline
                 ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20"
                 : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20"
             }`}
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${isOffline ? "bg-amber-500" : "bg-emerald-500"}`} />
-            {isOffline ? "Local preview" : "Live API"}
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                errorMessage && technicians.length === 0
+                  ? "bg-rose-500"
+                  : isStale
+                  ? "bg-amber-500"
+                  : isOffline
+                  ? "bg-amber-500"
+                  : "bg-emerald-500"
+              }`}
+            />
+            {errorMessage && technicians.length === 0
+              ? "Connection Error"
+              : isStale
+              ? "Stale Data"
+              : isOffline
+              ? "Local preview"
+              : "Live API"}
           </span>
 
           <button
@@ -169,6 +194,22 @@ export const TechnicianRoster: FC = () => {
       }
     >
       <div className="space-y-4">
+        {/* Error notification banner if request failed */}
+        {errorMessage && (
+          <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
+            <div className="flex items-center gap-2">
+              <AlertTriangleIcon size={15} className="text-rose-500 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-semibold hover:bg-rose-700 active:scale-95 transition-all text-xs"
+            >
+              Retry
+            </button>
+          </div>
+        )}
         {/* Subheader */}
         <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pb-1 border-b border-[var(--border)]">
           <div className="flex items-center gap-2">

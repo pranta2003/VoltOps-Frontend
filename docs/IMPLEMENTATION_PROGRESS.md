@@ -51,7 +51,39 @@ This document tracks all completed implementation milestones, verified files, co
   39: `5e455ff` — `docs(audit): capture genuine browser screenshots for Admin visual acceptance review across light and dark modes`
   40. `b64b5e9` — `feat(dispatcher): implement professional dispatcher operations module with 4 dedicated views, matching engine, and zero-overflow tables`
   41. `f502309` — `docs(screenshots): add genuine browser screenshot evidence for 4 dispatcher views in light and dark modes`
-  42. `pending` — `fix(dispatcher): harden business logic, license expiry validation, SLA coverage rules, and offline honesty`
+  42. `442a130` — `fix(dispatcher): harden business logic, license expiry validation, SLA coverage rules, and offline honesty`
+  43. `pending` — `fix(dispatcher): correct HTTP error classification, enforce server error propagation, and expand test suite`
+
+---
+
+## Milestone 3.0.2: Dispatcher Error-Handling Correction & Final Acceptance ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Scope**: Rigorous HTTP error classification correction in `dispatcherService.ts`, full propagation of 500/502/503 server errors (zero fallback on crash), explicit 404 missing resource vs unmounted route distinction, 4-state truthful UI telemetry indicators (`Live API`, `Local preview`, `Stale Data`, `Connection Error`), expanded 27-test automated suite (35/35 across project), and visual acceptance verification.
+- **Accomplishments**:
+  1. **HTTP Error-Handling & Fallback Correction**:
+     - Eliminated contradictory fallback behavior where HTTP 500 had been reported to fall back to offline demonstration data.
+     - HTTP 500, 502, 503 Server Errors: strictly throw `DispatcherApiError` with `isServerError: true`. Never silently fall back to local preview.
+     - HTTP 401 Unauthorized / 403 Forbidden: strictly throw `DispatcherApiError` with `isAuthError: true`. Propagates directly to caller for session/permission handling.
+     - HTTP 404 Missing Resource: targeting a specific entity ID (e.g. `/dispatcher/work-orders/:id`) throws `DispatcherApiError` with `isResourceNotFound: true`. Never silently swallows missing resource errors.
+     - HTTP 404 Unmounted Router / Unimplemented Collection: collection queries (e.g. `GET /dispatcher/requests`) with `"Route not found"` or `"Cannot GET ..."` activate clearly-labelled local preview during frontend development.
+     - Malformed Responses: non-array payloads or corrupted JSON throw `DispatcherApiError` with `isMalformedResponse: true`. Local baseline is never activated on malformed server payloads.
+  2. **Truthful 4-State UI Status Indicators & Error Banners**:
+     - All 4 Dispatcher views (`DispatcherDashboard`, `ServiceRequests`, `WorkOrders`, `TechnicianRoster`) render a real-time status pill:
+       - `Live API` (green) when backend responds normally with fresh data.
+       - `Local preview` (amber) when operating offline or on unmounted dev router.
+       - `Stale Data` (yellow) when server error occurs but cached data is preserved.
+       - `Connection Error` (rose) with an inline actionable retry banner.
+  3. **Expanded Test Suite (27 Scenarios in Dispatcher, 35 Total)**:
+     - 11 HTTP error and mutation tests: 500/502/503 propagation, network error fallback, 401/403 propagation, 404 missing resource vs unmounted route, malformed responses, local simulation labeling, and atomic rollback on mutation failure.
+     - 6 Matching Engine tests: branch proximity (+10 points and lower ETA), secondary trade eligibility, active jobs ranking (0 standby > 1 job > 2 jobs, 3+ excluded), missing/indefinite license validity, yesterday vs tomorrow expiry boundary, and unverified credentials disqualification.
+     - 5 SLA Plan tests: Plan A 8-hr null SLA, Plan B 40m SLA, Plan C 20m SLA, Plan D Custom null SLA, and physical arrival vs repair completion distinction.
+     - 5 Work Order Lifecycle tests: linear transitions (`UNASSIGNED` -> `ASSIGNED` -> `TRAVELLING` -> `ON_SITE` -> `COMPLETED`), completed order terminal lock, duplicate assignment prevention, duplicate conversion prevention, and technician release upon completion.
+  4. **Build & Type Safety**:
+     - `npm test`: 35 passed, 0 failed (100% pass rate).
+     - `npm run build`: `tsc && vite build` clean with 0 TypeScript errors.
+  5. **Visual Evidence**:
+     - Genuine browser screenshots captured across all 4 routes in both light and dark modes, plus mobile responsive viewport.
 
 ---
 

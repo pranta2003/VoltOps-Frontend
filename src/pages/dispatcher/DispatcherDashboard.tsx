@@ -28,6 +28,8 @@ export const DispatcherDashboard: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<string>("ALL");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isStale, setIsStale] = useState(false);
 
   // Assignment Modal State
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);
@@ -54,8 +56,11 @@ export const DispatcherDashboard: FC = () => {
       setActiveOrders(ordersRes.data.slice(0, 5));
       setUrgentRequests(requestsRes.data.slice(0, 3));
       setRecentEvents(eventsRes.data.slice(0, 4));
-    } catch {
-      setIsOffline(true);
+      setErrorMessage(null);
+      setIsStale(false);
+    } catch (err: any) {
+      setErrorMessage(err.message || "Failed to load dispatcher telemetry");
+      setIsStale(true);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -182,18 +187,36 @@ export const DispatcherDashboard: FC = () => {
       title="Dispatcher Console"
       action={
         <div className="flex items-center gap-2">
-          {/* Status pill */}
+          {/* Status pill: Distinguishes Live, Local Preview, Stale, and Error */}
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-              isOffline
+              errorMessage && !metrics
+                ? "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20"
+                : isStale
+                ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20"
+                : isOffline
                 ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20"
                 : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20"
             }`}
           >
             <span
-              className={`w-1.5 h-1.5 rounded-full ${isOffline ? "bg-amber-500" : "bg-emerald-500 animate-pulse"}`}
+              className={`w-1.5 h-1.5 rounded-full ${
+                errorMessage && !metrics
+                  ? "bg-rose-500"
+                  : isStale
+                  ? "bg-amber-500"
+                  : isOffline
+                  ? "bg-amber-500"
+                  : "bg-emerald-500 animate-pulse"
+              }`}
             />
-            {isOffline ? "Local preview" : "Live API"}
+            {errorMessage && !metrics
+              ? "Connection Error"
+              : isStale
+              ? "Stale Data"
+              : isOffline
+              ? "Local preview"
+              : "Live API"}
           </span>
 
           {/* Refresh button */}
@@ -211,6 +234,23 @@ export const DispatcherDashboard: FC = () => {
       }
     >
       <div className="space-y-5">
+        {/* Error notification banner if request failed */}
+        {errorMessage && (
+          <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
+            <div className="flex items-center gap-2">
+              <AlertTriangleIcon size={15} className="text-rose-500 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-semibold hover:bg-rose-700 active:scale-95 transition-all text-xs"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Subheader & Hub Filter */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-1 border-b border-[var(--border)]">
           <div className="flex items-center gap-2 text-xs font-medium text-[var(--text-muted)]">
