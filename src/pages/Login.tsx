@@ -3,13 +3,20 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export function Login() {
-  const { login } = useAuth();
+  const { login, enterPreviewRole } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function handleSelectPreview(role: "ADMIN" | "DISPATCHER" | "TECHNICIAN") {
+    if (enterPreviewRole) {
+      enterPreviewRole(role);
+      navigate("/");
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -121,6 +128,54 @@ export function Login() {
             </Link>
           </p>
         </form>
+
+        {/* Development-Only Role Preview (strictly stripped or dormant in production builds) */}
+        {import.meta.env.DEV && (
+          <div
+            className="mt-6 border rounded-2xl p-5 shadow-[var(--shadow-sm)]"
+            style={{
+              background: "var(--bg-surface)",
+              borderColor: "var(--border)",
+            }}
+          >
+            <div className="flex items-center justify-between gap-2 mb-2.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                Developer Preview
+              </span>
+              <span className="text-[10px] text-[var(--text-muted)] font-mono">DEV MODE ONLY</span>
+            </div>
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-4">
+              Explore internal operational dashboards directly without a live backend session. No credentials or JWT tokens stored.
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => handleSelectPreview("ADMIN")}
+                className="px-2.5 py-2 text-xs font-semibold rounded-xl border transition-all text-purple-400 bg-purple-500/10 border-purple-500/20 hover:bg-purple-500/20 active:scale-[0.98] text-center truncate"
+                title="Preview as Admin (/admin)"
+              >
+                Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSelectPreview("DISPATCHER")}
+                className="px-2.5 py-2 text-xs font-semibold rounded-xl border transition-all text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20 active:scale-[0.98] text-center truncate"
+                title="Preview as Dispatcher (/dispatcher)"
+              >
+                Dispatcher
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSelectPreview("TECHNICIAN")}
+                className="px-2.5 py-2 text-xs font-semibold rounded-xl border transition-all text-cyan-400 bg-cyan-500/10 border-cyan-500/20 hover:bg-cyan-500/20 active:scale-[0.98] text-center truncate"
+                title="Preview as Technician (/technician)"
+              >
+                Technician
+              </button>
+            </div>
+          </div>
+        )}
 
         <p className="text-center text-xs text-[var(--text-muted)] mt-6">
           Staff test logins are listed in the project README (seeded accounts).

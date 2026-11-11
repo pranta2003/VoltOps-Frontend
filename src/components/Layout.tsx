@@ -24,7 +24,7 @@ interface LayoutProps {
 }
 
 export function Layout({ children, title, subtitle, action }: LayoutProps) {
-  const { user, logout } = useAuth();
+  const { user, logout, isPreview, exitPreview } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -180,6 +180,29 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
 
       {/* ── Main Content Shell ─────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* Local Preview Notification Strip (Strictly dev mode) */}
+        {isPreview && (
+          <aside
+            aria-label="Developer Preview Notice"
+            className="shrink-0 bg-amber-500/15 border-b border-amber-500/30 px-3.5 py-1.5 flex items-center justify-between text-xs text-amber-700 dark:text-amber-300 font-medium select-none z-20"
+          >
+            <div className="flex items-center gap-2 truncate">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+              <span className="font-bold tracking-tight">LOCAL PREVIEW</span>
+              <span className="hidden sm:inline text-amber-600/80 dark:text-amber-400/80 font-normal">
+                — Offline Demonstration Mode ({role}). Backend APIs bypassed.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={exitPreview}
+              className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 border border-amber-500/40 transition-colors shrink-0"
+            >
+              Exit Preview
+            </button>
+          </aside>
+        )}
+
         {/* Top Header Bar */}
         <header className="h-14 shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 sm:px-6 flex items-center justify-between gap-3 min-w-0 w-full">
           <div className="flex items-center gap-2.5 min-w-0">

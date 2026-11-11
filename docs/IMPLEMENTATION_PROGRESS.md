@@ -54,6 +54,38 @@ This document tracks all completed implementation milestones, verified files, co
   42. `442a130` — `fix(dispatcher): harden business logic, license expiry validation, SLA coverage rules, and offline honesty`
   43. `aa59a22` — `fix(dispatcher): correct HTTP error classification, enforce server error propagation, and expand test suite`
   44. `2e40bbb` — `feat(design): reset frontend-wide UI/UX consistency, fix theme toggle, repair auth error handling, and stabilize local dev`
+  45. `d6f30a1` — `feat(dev): implement safe development-only role preview and persistent dev server`
+
+---
+
+## Milestone 3.1.1: Local Frontend Demo Access & Development Server Persistence ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Scope**: Implemented safe, isolated development-only role preview ("Developer Preview") on the login route for Admin, Dispatcher, and Technician roles; configured persistent development server daemon on `http://localhost:5173/`; guarded preview logic strictly with `import.meta.env.DEV` ensuring zero leakage into production builds; implemented prominent `"LOCAL PREVIEW — NOT AUTHENTICATED"` layout banner with instant exit; verified route navigation and captured visual audit evidence.
+- **Accomplishments**:
+  1. **Safe Development-Only Role Preview (`AuthContext.tsx`, `Login.tsx`)**:
+     - Added `enterPreviewRole(role: "ADMIN" | "DISPATCHER" | "TECHNICIAN")` and `exitPreview()` to `AuthContext`.
+     - Strictly gated by `if (!import.meta.env.DEV) return;`.
+     - Completely bypassed real auth API, created no fake JWTs, and made zero writes to `localStorage` auth keys (`voltops_token`).
+     - Session state remembered non-destructively in `sessionStorage` (`voltops_preview_role`) for reload convenience during local UI review.
+     - On `/login`, renders a clean, dedicated "Developer Preview" panel with one-click direct access to Admin (`/admin`), Dispatcher (`/dispatcher`), and Technician (`/technician`) dashboards.
+  2. **Truthful Preview Indicator & Exit Action (`Layout.tsx`)**:
+     - When `isPreview` is active, displays an amber top notification strip across all internal views:
+       `"LOCAL PREVIEW — Offline Demonstration Mode (<ROLE>). Backend APIs bypassed."`.
+     - Includes a prominent `"Exit Preview"` action button that clears `sessionStorage` and returns the user immediately to `/login`.
+  3. **Development Server Persistence**:
+     - Verified active Vite development server running on `http://localhost:5173/` (`strictPort: true`).
+     - Process retained active and persistent (not killed).
+  4. **Visual Audit & Screenshot Verification**:
+     - Captured genuine screenshots using Chrome DevTools MCP:
+       - `docs/visual-audit/milestone-3.1.1/01_login_developer_preview.png`: Login screen displaying developer preview buttons.
+       - `docs/visual-audit/milestone-3.1.1/02_admin_dashboard_preview.png`: Admin console with amber Local Preview banner.
+       - `docs/visual-audit/milestone-3.1.1/03_dispatcher_dashboard_preview.png`: Dispatcher console with amber Local Preview banner.
+       - `docs/visual-audit/milestone-3.1.1/04_dispatcher_requests_preview.png`: Service Requests triage queue with amber Local Preview banner.
+       - `docs/visual-audit/milestone-3.1.1/05_technician_dashboard_preview.png`: Technician field job roster with amber Local Preview banner.
+  5. **Automated Verification**:
+     - `npm test`: 35 passed, 0 failed.
+     - `npm run build`: `tsc && vite build` passed cleanly with 0 errors.
 
 ---
 
