@@ -55,7 +55,53 @@ This document tracks all completed implementation milestones, verified files, co
   43. `aa59a22` — `fix(dispatcher): correct HTTP error classification, enforce server error propagation, and expand test suite`
   44. `2e40bbb` — `feat(design): reset frontend-wide UI/UX consistency, fix theme toggle, repair auth error handling, and stabilize local dev`
   45. `8a83e98` — `feat(dev): implement safe development-only role preview and persistent dev server`
-  46. `7b4f1c9` — `feat(design): transform dashboards with professional typography, modular SVG data visualizations, and role personality`
+  46. `2f30170` — `feat(design): transform dashboards with professional typography, modular SVG data visualizations, and role personality`
+  47. `98d5b59` — `docs(workflow): codify permanent 30-40 daily commit policy and engineering standards`
+  48. `79b1753` — `fix(charts): resize donut chart and tighten legend alignment`
+  49. `106e903` — `refactor(dispatcher): eliminate dashboard paragraph subtitles and compact layout`
+  50. `3aa23b1` — `refactor(dispatcher): simplify service requests table to compact single-line cells`
+  51. `4987dbf` — `refactor(dispatcher): simplify work orders table to compact single-line rows`
+  52. `97d3db5` — `refactor(dispatcher): compact technician roster table layout`
+  53. `007a6fe` — `refactor(admin): remove redundant subtitles and tighten governance dashboard`
+  54. `f697e68` — `refactor(technician): remove paragraph subtitles and compact field jobs table`
+  55. `fbade8e` — `docs(visual-audit): capture before-and-after screenshots of simplified dashboards`
+
+---
+
+## Milestone 3.2.1: Visual Simplification, Content Reduction & Layout Correction ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Scope**: Rigorous simplification pass enforcing "Show less, communicate more" across Admin, Dispatcher, and Technician dashboards. Eliminated paragraph walls, redundant descriptions, wrapping table rows, and oversized visualization containers. Tightened DonutChart geometry and responsive legend alignment. Codified permanent 30–40 daily commit policy into project workflow documentation.
+- **Accomplishments**:
+  1. **Permanent 30–40 Daily Commit Standard (`AGENTS.md`, `docs/ENGINEERING_WORKFLOW.md`)**:
+     - Codified permanent conventional commit cadence (minimum 30, preferred 40 meaningful commits per full productive coding day).
+     - Mandated focused, granular commits with verifiable build and test integrity.
+  2. **Chart Layout & Geometry Correction (`DonutChart.tsx`, `DispatcherDashboard.tsx`)**:
+     - Resized donut radius from 140px to 105px with proportional 13-14px stroke width.
+     - Streamlined center readout typography to prevent vertical blowout.
+     - Removed empty rectangular letterboxing by synchronizing card height with neighboring panels.
+  3. **High-Density, Single-Line Compact Tables**:
+     - `ServiceRequests.tsx`: Compact single-line table cells (ID, Customer, Trade/Asset, Problem preview, Priority, Status, Time, Action) with strict truncation (`max-w-[170px]`) and `py-2 px-3` padding.
+     - `WorkOrders.tsx`: Streamlined single-line layout (Order ID, Customer, Trade/Asset, Priority, Status, Technician, Arrival Target, Action) eliminating multi-line cell wrapping.
+     - `TechnicianRoster.tsx`: Clean 6-column layout (`Technician`, `Primary Trade`, `Credential Status`, `Branch`, `Availability`, `Action`) with passport details strictly in the inspection modal.
+  4. **Subtitles & Card Content Elimination**:
+     - `AdminDashboard.tsx`: Removed paragraph subtitles from Workforce Composition, Compliance & Passport Status, and compacted navigation cards.
+     - `TechnicianDashboard.tsx`: Removed explanatory subtitles from Route Progression, Competency Overview, and Assigned Field Jobs; tightened job table padding.
+     - `DispatcherDashboard.tsx`: Eliminated paragraph descriptions from Work Order Distribution, Trade Capacity, and Shift Velocity cards; sliced operational event feed to 3 clean items.
+  5. **Visual Audit & Screenshot Verification (`docs/visual-audit/milestone-3.2.1/`)**:
+     - Captured 8 genuine browser screenshots across desktop (1440x900) and mobile (390x844):
+       - `01_dispatcher_dashboard_simplified_dark.png`
+       - `02_dispatcher_dashboard_simplified_light.png`
+       - `03_service_requests_compact_dark.png`
+       - `04_work_orders_compact_dark.png`
+       - `05_technician_roster_compact_dark.png`
+       - `06_admin_dashboard_simplified_dark.png`
+       - `07_technician_dashboard_simplified_dark.png`
+       - `08_dispatcher_mobile_390.png`
+  6. **Automated Verification**:
+     - `npm test`: 35/35 passed (0 failures).
+     - `npm run build`: `tsc && vite build` passed cleanly with 0 errors.
+     - Dev server running persistently at `http://localhost:5173/`.
 
 ---
 
