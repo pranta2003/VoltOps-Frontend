@@ -54,6 +54,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
           { label: "Work Orders", path: "/dispatcher/work-orders", icon: WrenchIcon },
           { label: "Technicians", path: "/dispatcher/technicians", icon: ShieldCheckIcon },
           { label: "Schedule", path: "/dispatcher/schedule", icon: ClockIcon },
+          { label: "Audit Log", path: "/dispatcher/audit", icon: CheckCircleIcon },
         ];
       case "ADMIN":
         return [

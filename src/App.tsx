@@ -12,7 +12,10 @@ import { DispatcherDashboard } from "./pages/dispatcher/DispatcherDashboard";
 import { ServiceRequests } from "./pages/dispatcher/ServiceRequests";
 import { WorkOrders } from "./pages/dispatcher/WorkOrders";
 import { TechnicianRoster } from "./pages/dispatcher/TechnicianRoster";
+import { DispatcherSchedule } from "./pages/dispatcher/DispatcherSchedule";
+import { DispatchAuditLog } from "./pages/dispatcher/DispatchAuditLog";
 import { TechnicianDashboard } from "./pages/TechnicianDashboard";
+import { MyJobs } from "./pages/technician/MyJobs";
 import { CustomerDashboard } from "./pages/CustomerDashboard";
 import { NewServiceRequest } from "./pages/customer/NewServiceRequest";
 import { CustomerInvoices } from "./pages/customer/CustomerInvoices";
@@ -127,7 +130,15 @@ export default function App() {
               path="/dispatcher/schedule"
               element={
                 <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
-                  <TechnicianRoster />
+                  <DispatcherSchedule />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dispatcher/audit"
+              element={
+                <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
+                  <DispatchAuditLog />
                 </ProtectedRoute>
               }
             />
@@ -143,7 +154,7 @@ export default function App() {
               path="/technician/jobs"
               element={
                 <ProtectedRoute allowedRoles={["TECHNICIAN"]}>
-                  <TechnicianDashboard />
+                  <MyJobs />
                 </ProtectedRoute>
               }
             />
