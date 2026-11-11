@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ThemeToggle } from "./ThemeToggle";
@@ -12,7 +12,7 @@ import {
   CheckCircleIcon,
   AlertTriangleIcon,
   MenuIcon,
-  SearchIcon,
+  XIcon,
   ZapIcon,
 } from "./Icons";
 
@@ -27,6 +27,20 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Close mobile drawer on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Derive navigation links based on user role
   const role = user?.role || "CUSTOMER";
@@ -96,29 +110,29 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
     : "VO";
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)]">
-      {/* ── Sidebar (Figma: #1B3644 deep slate; 260px wide) ─────────────── */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col justify-between border-r border-[var(--border)] bg-[#1B3644] text-[#BAC9CE] select-none">
+    <div className="flex h-screen w-full max-w-full overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)]">
+      {/* ── Desktop Sidebar (Linear / Vercel Neutral Slate: 240px wide) ──── */}
+      <aside className="hidden lg:flex w-60 shrink-0 flex-col justify-between border-r border-slate-800/80 bg-[#0b1117] text-slate-300 select-none">
         <div>
           {/* Brand header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
             <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-lg bg-[#10b981] flex items-center justify-center font-extrabold shadow-sm">
-                <ZapIcon size={16} className="text-[#06090e]" />
+              <div className="w-7 h-7 rounded-lg bg-[#10b981] flex items-center justify-center font-extrabold shadow-sm">
+                <ZapIcon size={15} className="text-[#06090e]" />
               </div>
               <div>
-                <span className="font-heading font-extrabold text-lg tracking-tight text-white group-hover:text-[#10b981] transition-colors">
+                <span className="font-heading font-extrabold text-base tracking-tight text-white group-hover:text-[#10b981] transition-colors">
                   VoltOps
                 </span>
-                <span className="block text-[10px] font-bold uppercase tracking-wider text-[#91a7af]">
-                  {role} PORTAL
+                <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                  {role} Portal
                 </span>
               </div>
             </Link>
           </div>
 
           {/* Navigation Links */}
-          <nav className="p-3 space-y-1">
+          <nav className="p-2.5 space-y-0.5">
             {navLinks.map((item) => {
               const isActive = location.pathname === item.path;
               const Icon = item.icon;
@@ -126,13 +140,13 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                     isActive
-                      ? "bg-white/15 text-white font-semibold shadow-sm"
-                      : "text-[#BAC9CE] hover:text-white hover:bg-white/10"
+                      ? "bg-white/[0.12] text-white font-semibold shadow-sm"
+                      : "text-slate-400 hover:text-white hover:bg-white/[0.06]"
                   }`}
                 >
-                  <Icon size={18} className={isActive ? "text-[#10b981]" : "text-[#BAC9CE]"} />
+                  <Icon size={16} className={isActive ? "text-[#10b981]" : "text-slate-400"} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -141,21 +155,21 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
         </div>
 
         {/* User Account / Footer Card */}
-        <div className="p-4 border-t border-white/10">
-          <div className="p-3 rounded-2xl bg-[#164275] border border-white/10 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 rounded-xl bg-white/20 text-white font-bold text-xs flex items-center justify-center shrink-0 border border-white/20">
+        <div className="p-3 border-t border-white/[0.08]">
+          <div className="p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-[#10b981]/20 text-[#10b981] font-bold text-xs flex items-center justify-center shrink-0 border border-[#10b981]/30">
                 {initials}
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-semibold text-white truncate">{user?.name || "User"}</div>
-                <div className="text-[10px] text-white/70 uppercase tracking-wider truncate">{user?.role}</div>
+                <div className="text-[10px] text-slate-400 uppercase tracking-wider truncate">{user?.role}</div>
               </div>
             </div>
             <button
               onClick={logout}
               type="button"
-              className="text-xs text-white/80 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-white/10 shrink-0"
+              className="text-[11px] text-slate-400 hover:text-white transition-colors px-2 py-1 rounded-md hover:bg-white/10 shrink-0"
               title="Sign Out"
             >
               Sign out
@@ -165,44 +179,34 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
       </aside>
 
       {/* ── Main Content Shell ─────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Top Header Bar */}
-        <header className="h-14 sm:h-16 shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] backdrop-blur-md px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4 min-w-0">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <header className="h-14 shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 sm:px-6 flex items-center justify-between gap-3 min-w-0 w-full">
+          <div className="flex items-center gap-2.5 min-w-0">
             {/* Mobile menu trigger */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-1.5 sm:p-2 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] shrink-0"
+              className="lg:hidden p-1.5 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] shrink-0"
               aria-label="Toggle Navigation Menu"
             >
-              <MenuIcon size={18} />
+              <MenuIcon size={17} />
             </button>
 
             <div className="min-w-0">
-              <h1 className="font-heading font-semibold text-base sm:text-lg text-[var(--text-primary)] tracking-tight truncate">
+              <h1 className="font-heading font-semibold text-sm sm:text-base text-[var(--text-primary)] tracking-tight truncate">
                 {title}
               </h1>
               {subtitle && (
-                <p className="text-xs text-[var(--text-muted)] hidden md:block truncate mt-0.5">
+                <p className="text-[11px] text-[var(--text-muted)] hidden md:block truncate">
                   {subtitle}
                 </p>
               )}
             </div>
           </div>
 
-          {/* Right Header Affordances: Search, Role Badge, Theme Selector, User */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-            {/* Search Input */}
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-muted)] focus-within:border-[#10b981] focus-within:ring-1 focus-within:ring-[#10b981]/30">
-              <SearchIcon size={14} className="text-[var(--text-muted)] shrink-0" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="bg-transparent border-none outline-none text-[var(--text-primary)] placeholder-[var(--text-muted)] w-36 lg:w-48"
-              />
-            </div>
-
+          {/* Right Header Affordances: Role Badge, Two-state Theme Toggle, Header Action */}
+          <div className="flex items-center gap-2 shrink-0">
             {/* Role Badge */}
             <span
               className={`hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${getRoleBadge()}`}
@@ -214,34 +218,77 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
             <ThemeToggle />
 
             {/* Header Action slot */}
-            {action && <div>{action}</div>}
+            {action && <div className="flex items-center gap-1.5">{action}</div>}
           </div>
         </header>
 
-        {/* Mobile Navigation Drawer */}
+        {/* Mobile Navigation Drawer Overlay */}
         {mobileMenuOpen && (
-          <div className="lg:hidden p-4 border-b border-[var(--border)] bg-[#1B3644] text-white space-y-1">
-            {navLinks.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-white/10"
-              >
-                <span>{item.label}</span>
-              </Link>
-            ))}
-            <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-              <span className="text-xs text-white/70">{user?.name}</span>
-              <button onClick={logout} className="text-xs text-[#10b981] font-bold">
-                Sign out
-              </button>
+          <div className="lg:hidden fixed inset-0 z-50 flex">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            {/* Slide-over Menu */}
+            <div className="relative w-64 max-w-[80vw] h-full bg-[#0b1117] text-slate-200 border-r border-slate-800 p-4 flex flex-col justify-between z-10 shadow-2xl">
+              <div>
+                <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-md bg-[#10b981] flex items-center justify-center font-bold text-xs text-black">
+                      <ZapIcon size={13} />
+                    </div>
+                    <span className="font-bold text-sm text-white">VoltOps</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-1 rounded-md text-slate-400 hover:text-white"
+                  >
+                    <XIcon size={16} />
+                  </button>
+                </div>
+
+                <nav className="space-y-1">
+                  {navLinks.map((item) => {
+                    const isActive = location.pathname === item.path;
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium ${
+                          isActive
+                            ? "bg-white/15 text-white font-semibold"
+                            : "text-slate-400 hover:text-white hover:bg-white/[0.06]"
+                        }`}
+                      >
+                        <Icon size={15} className={isActive ? "text-[#10b981]" : "text-slate-400"} />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+              </div>
+
+              <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between">
+                <span className="text-xs text-slate-400 truncate">{user?.name}</span>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="text-xs text-[#10b981] font-semibold hover:underline"
+                >
+                  Sign out
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {/* Scrollable Dashboard Body */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 lg:p-8 w-full min-w-0">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 lg:p-6 w-full min-w-0">
           <div className="max-w-7xl mx-auto space-y-4 w-full min-w-0">
             {children}
           </div>

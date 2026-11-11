@@ -19,14 +19,14 @@ export const ThemeToggle: FC<ThemeToggleProps> = ({ className = "" }) => {
       className={`relative inline-flex items-center justify-center w-8 h-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] focus:outline-none focus:ring-2 focus:ring-[#10b981]/40 active:scale-95 transition-all duration-150 group ${className}`}
     >
       {isLight ? (
-        <SunIcon
-          size={16}
-          className="text-amber-500 group-hover:rotate-45 transition-transform duration-300"
-        />
-      ) : (
         <MoonIcon
           size={15}
-          className="text-sky-400 group-hover:-rotate-12 transition-transform duration-300"
+          className="text-slate-600 dark:text-slate-300 group-hover:-rotate-12 transition-transform duration-200"
+        />
+      ) : (
+        <SunIcon
+          size={16}
+          className="text-amber-400 group-hover:rotate-45 transition-transform duration-200"
         />
       )}
     </button>

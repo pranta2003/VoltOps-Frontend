@@ -358,51 +358,51 @@ export const DispatcherDashboard: FC = () => {
 
         {/* ── 2. Urgent Emergency Action Queue (If Any) ──────────────────── */}
         {urgentRequests.length > 0 && (
-          <div className="rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 p-4 space-y-3">
+          <div className="rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 p-3 sm:p-4 space-y-2.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping" />
                 <h3 className="text-xs font-bold uppercase tracking-wider text-rose-900 dark:text-rose-200">
-                  Emergency Breakdown Queue — Immediate Allocation Required
+                  Critical Breakdown Queue
                 </h3>
               </div>
-              <span className="text-xs text-rose-700 dark:text-rose-300 font-mono">
+              <span className="text-xs text-rose-700 dark:text-rose-300 font-mono font-medium">
                 {urgentRequests.length} critical breakdown{urgentRequests.length > 1 ? "s" : ""}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
               {urgentRequests.map((req) => (
                 <div
                   key={req.id}
-                  className="p-3 rounded-lg border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between gap-2.5"
+                  className="p-3 rounded-lg border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between gap-2"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-mono font-bold text-rose-700 dark:text-rose-400">{req.id}</span>
-                      <span className="text-[11px] font-semibold text-rose-600 dark:text-rose-300 bg-rose-100 dark:bg-rose-950 px-2 py-0.5 rounded">
+                      <span className="text-[10px] font-semibold text-rose-600 dark:text-rose-300 bg-rose-100 dark:bg-rose-950 px-1.5 py-0.5 rounded">
                         {req.coveragePlan === "8hr"
-                          ? "Plan A (8-Hr Window)"
+                          ? "Plan A (Window)"
                           : req.coveragePlan === "custom"
                           ? "Plan D (Custom)"
                           : req.slaRemainingMinutes != null
-                          ? `~${req.slaRemainingMinutes}m physical SLA`
-                          : "Immediate Triage"}
+                          ? `~${req.slaRemainingMinutes}m SLA`
+                          : "Urgent"}
                       </span>
                     </div>
                     <div className="text-xs font-bold text-[var(--text-primary)] truncate">{req.customerName}</div>
-                    <div className="text-[11px] text-[var(--text-muted)] line-clamp-2">
+                    <div className="text-[11px] text-[var(--text-muted)] line-clamp-1">
                       {req.assetName}: {req.problemTitle}
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between">
-                    <span className="text-[10px] font-medium text-[var(--text-muted)]">{req.category}</span>
+                  <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between text-xs">
+                    <span className="text-[10px] text-[var(--text-muted)] truncate max-w-[140px]">{req.category}</span>
                     <Link
                       to="/dispatcher/requests"
-                      className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                      className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 hover:underline text-[11px]"
                     >
-                      Triage <ArrowRightIcon size={12} />
+                      Triage <ArrowRightIcon size={11} />
                     </Link>
                   </div>
                 </div>
@@ -413,16 +413,13 @@ export const DispatcherDashboard: FC = () => {
 
         {/* ── 3. Active Work Orders Operational Ledger ─────────────────────── */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
-          <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
-            <div className="space-y-0.5">
-              <h2 className="text-sm font-bold text-[var(--text-primary)]">Active Work Orders Roster</h2>
-              <p className="text-xs text-[var(--text-muted)]">Live field deployments and technician status</p>
-            </div>
+          <div className="p-3 sm:p-4 border-b border-[var(--border)] flex items-center justify-between">
+            <h2 className="text-sm font-bold text-[var(--text-primary)]">Active Work Orders</h2>
             <Link
               to="/dispatcher/work-orders"
               className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
             >
-              View Full Board <ArrowRightIcon size={13} />
+              View All <ArrowRightIcon size={12} />
             </Link>
           </div>
 
@@ -501,13 +498,13 @@ export const DispatcherDashboard: FC = () => {
           </div>
         </div>
 
-        {/* ── 4. Two-Column Grid: 7-Trade Matrix & Recent Dispatch Activity ─ */}
+        {/* ── 4. Two-Column Grid: Dispatch Coverage Matrix & Recent Activity ─ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Trade Matrix */}
           <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-3">
             <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
               <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                7 Canonical Trades — Live Coverage Matrix
+                Dispatch Coverage Matrix
               </h3>
               <Link to="/dispatcher/technicians" className="text-xs font-semibold text-emerald-600 hover:underline">
                 View Roster →

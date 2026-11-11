@@ -79,13 +79,53 @@ export function Register() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+
+    // Client-side pre-validation
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    if (trimmedName.length < 2) {
+      setError("Please provide a valid full name (at least 2 characters).");
+      return;
+    }
+
+    if (!trimmedEmail.includes("@") || !trimmedEmail.includes(".")) {
+      setError("Please provide a valid email address.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters in length.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await register(name, email, password);
+      await register(trimmedName, trimmedEmail, password);
       navigate("/");
     } catch (err: any) {
-      setError(err.response?.data?.error || "Something went wrong. Please try again.");
+      // Clear sensitive credential from input on failure
+      setPassword("");
+
+      // Deliberate HTTP & Network error classification
+      if (err.code === "ERR_NETWORK" || !err.response || err.message?.includes("Network Error")) {
+        setError(
+          "Service temporarily unavailable: Unable to reach the authentication server. Please verify your connection or try again shortly."
+        );
+      } else if (err.response?.status === 409) {
+        setError("An account with this email address already exists. Please log in instead.");
+      } else if (err.response?.status === 400 || err.response?.status === 422) {
+        setError(
+          err.response?.data?.error ||
+            err.response?.data?.message ||
+            "Invalid registration data. Please verify your details."
+        );
+      } else if (err.response?.status >= 500) {
+        setError("Server error (500): The authentication service encountered an error. Please try again later.");
+      } else {
+        setError(err.response?.data?.error || "Registration could not be completed. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }

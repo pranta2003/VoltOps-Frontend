@@ -312,7 +312,7 @@ export const WorkOrders: FC = () => {
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[var(--text-primary)]">{workOrders.length} Work Orders</span>
             <span>•</span>
-            <span>Operations Lifecycle & Linear State Transitions</span>
+            <span>Operations Ledger</span>
           </div>
         </div>
 

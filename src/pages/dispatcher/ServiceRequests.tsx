@@ -266,9 +266,9 @@ export const ServiceRequests: FC = () => {
         {/* Subheader */}
         <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pb-1 border-b border-[var(--border)]">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-[var(--text-primary)]">{requests.length} Requests Inbound</span>
+            <span className="font-semibold text-[var(--text-primary)]">{requests.length} Breakdown Requests</span>
             <span>•</span>
-            <span>Triage to Dispatched Work Orders</span>
+            <span>Intake & Triage</span>
           </div>
         </div>
 

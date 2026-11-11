@@ -14,17 +14,43 @@ export function Login() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail.includes("@") || !trimmedEmail.includes(".")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!password) {
+      setError("Please enter your password.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
+      await login(trimmedEmail, password);
       // We don't redirect to a role-specific path here on purpose — the
       // "/" route (see App.tsx) already looks at the logged-in user's role
       // and sends them to the right dashboard. One place decides that,
       // instead of repeating the logic in every page that logs someone in.
       navigate("/");
     } catch (err: any) {
-      setError(err.response?.data?.error || "Something went wrong. Please try again.");
+      setPassword("");
+
+      if (err.code === "ERR_NETWORK" || !err.response || err.message?.includes("Network Error")) {
+        setError(
+          "Service temporarily unavailable: Unable to reach the authentication server. Please ensure the backend service is running or try again shortly."
+        );
+      } else if (err.response?.status === 401) {
+        setError("Invalid email or password. Please verify your credentials and try again.");
+      } else if (err.response?.status === 403) {
+        setError("Account suspended or restricted. Please contact your system administrator.");
+      } else if (err.response?.status >= 500) {
+        setError("Server error (500): The authentication service encountered an error. Please try again later.");
+      } else {
+        setError(err.response?.data?.error || "Login failed. Please verify your credentials.");
+      }
     } finally {
       setIsSubmitting(false);
     }

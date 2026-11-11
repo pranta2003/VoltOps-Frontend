@@ -53,6 +53,42 @@ This document tracks all completed implementation milestones, verified files, co
   41. `f502309` — `docs(screenshots): add genuine browser screenshot evidence for 4 dispatcher views in light and dark modes`
   42. `442a130` — `fix(dispatcher): harden business logic, license expiry validation, SLA coverage rules, and offline honesty`
   43. `aa59a22` — `fix(dispatcher): correct HTTP error classification, enforce server error propagation, and expand test suite`
+  44. `pending` — `feat(design): reset frontend-wide UI/UX consistency, fix theme toggle, repair auth error handling, and stabilize local dev`
+
+---
+
+## Milestone 3.1: Frontend-Wide UI/UX Quality Reset + Local Development Repair ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Scope**: Comprehensive frontend-wide visual reset to Stripe / Linear / Vercel operational dashboard standards; strict two-state theme toggle fix; honest authentication & registration error handling; elimination of redundant banners, oversized titles, and crowded header items; responsive zero-overflow tables; local development port stabilization (`strictPort`); and full visual verification.
+- **Accomplishments**:
+  1. **Two-State Theme Toggle Fix (`ThemeToggle.tsx`)**:
+     - Display Moon icon when in light mode (switches to dark on click).
+     - Display Sun icon when in dark mode (switches to light on click).
+     - Clean single-button click action, zero dropdowns, persistent `localStorage` preference, and zero initial load flash.
+  2. **Authentication & Registration Error Handling (`Register.tsx`, `Login.tsx`)**:
+     - Eliminated generic "Something went wrong. Please try again." on registration/login failure.
+     - Detects offline backend and network errors to display clear, honest message: `"Service temporarily unavailable: Unable to reach the authentication server. Please verify your connection or try again shortly."`.
+     - Preserves user input values (`name`, `email`) while safely clearing only passwords.
+     - Pre-validates name (min 2 chars), email pattern, and password length (min 6 chars).
+  3. **Shared Layout & Overflow Repair (`Layout.tsx`)**:
+     - Fixed horizontal clipping by removing redundant global header search input that crowded action controls.
+     - Desktop sidebar width set to crisp 240px (`w-60`) in neutral slate `#0b1117`, matching Linear/Vercel standard.
+     - Responsive mobile slide-over drawer with backdrop overlay, escape-to-close, and route transition auto-close.
+     - Wrapped all tables in `overflow-x-auto` with zero horizontal document-level scrolling.
+  4. **Information Density & Restraint Across Pages**:
+     - `TechnicianRoster.tsx`: Refactored main table to strictly 6 decision-essential columns (`Technician`, `Primary Trade`, `Credential Status`, `Branch`, `Availability`, `Action`), removing noisy dumps of all certificates from table cells into the passport drawer.
+     - `DispatcherDashboard.tsx`: Clean hierarchy with 4 compact KPI cards, compact Critical Breakdown Queue, Active Work Orders without redundant subtitles, and clean Coverage Matrix.
+     - `AuditLog.tsx`, `UserManagement.tsx`, `TechnicianVerification.tsx`: Standardized badge naming to `"Local preview"`, removed redundant subtitle explanations, and truncated long descriptions.
+  5. **Local Development Workflow & Port Standardization**:
+     - Configured `strictPort: true` in `vite.config.ts` for both `server` (port 5173) and `preview` (port 4173).
+     - Authored `docs/LOCAL_DEVELOPMENT.md` detailing development server vs production bundle preview workflows.
+  6. **Visual Acceptance Verification**:
+     - Genuine browser screenshots captured across desktop (1440x900), tablet (768x1024), mobile (390x844), light mode, and dark mode.
+     - Saved 13 screenshots to `docs/visual-audit/milestone-3.1/`.
+  7. **Testing & Integrity**:
+     - `npm test`: 35 passed, 0 failed.
+     - `npm run build`: `tsc && vite build` passed cleanly with 0 errors.
 
 ---
 

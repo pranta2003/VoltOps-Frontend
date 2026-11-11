@@ -215,7 +215,7 @@ export const TechnicianRoster: FC = () => {
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[var(--text-primary)]">{technicians.length} Field Technicians</span>
             <span>•</span>
-            <span>7-Trade Verified Passports & License Expiry Telemetry</span>
+            <span>Availability & Skill Passports</span>
           </div>
         </div>
 
@@ -320,131 +320,106 @@ export const TechnicianRoster: FC = () => {
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-2.5 px-3.5">Technician</th>
-                  <th className="py-2.5 px-3.5">Trade Skills</th>
-                  <th className="py-2.5 px-3.5">Verified Licenses & Status</th>
-                  <th className="py-2.5 px-3.5">Branch Hub & Current Area</th>
-                  <th className="py-2.5 px-3.5">Active Jobs</th>
-                  <th className="py-2.5 px-3.5">Status</th>
-                  <th className="py-2.5 px-3.5 text-right">Actions</th>
+                  <th className="py-2.5 px-3.5">Primary Trade</th>
+                  <th className="py-2.5 px-3.5">Credential Status</th>
+                  <th className="py-2.5 px-3.5">Branch</th>
+                  <th className="py-2.5 px-3.5">Availability</th>
+                  <th className="py-2.5 px-3.5 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={6} className="py-12 text-center text-xs text-[var(--text-muted)]">
                       Loading technician roster...
                     </td>
                   </tr>
                 ) : technicians.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={6} className="py-12 text-center text-xs text-[var(--text-muted)]">
                       No technicians match the selected filters.
                     </td>
                   </tr>
                 ) : (
-                  technicians.map((tech) => (
-                    <tr key={tech.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      {/* Name & ID */}
-                      <td className="py-3 px-3.5">
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold flex items-center justify-center shrink-0">
-                            {tech.name.substring(0, 2).toUpperCase()}
-                          </span>
-                          <div>
-                            <div className="font-semibold text-[var(--text-primary)]">{tech.name}</div>
-                            <div className="text-[11px] text-[var(--text-muted)] font-mono">{tech.employeeId}</div>
+                  technicians.map((tech) => {
+                    const primaryTrade = tech.skills[0]?.category || tech.designation;
+                    const hasVerifiedActive = tech.certifications.some((c) => {
+                      if (!c.verified) return false;
+                      if (!c.expiryDate) return true;
+                      return new Date(c.expiryDate) >= new Date();
+                    });
+
+                    return (
+                      <tr key={tech.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
+                        {/* 1. Technician Name & ID */}
+                        <td className="py-3 px-3.5">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold flex items-center justify-center shrink-0">
+                              {tech.name.substring(0, 2).toUpperCase()}
+                            </span>
+                            <div>
+                              <div className="font-semibold text-[var(--text-primary)]">{tech.name}</div>
+                              <div className="text-[11px] text-[var(--text-muted)] font-mono">{tech.employeeId}</div>
+                            </div>
                           </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Trade Skills */}
-                      <td className="py-3 px-3.5">
-                        <div className="font-medium text-[var(--text-primary)]">{tech.designation}</div>
-                        <div className="text-[11px] text-[var(--text-muted)] truncate max-w-xs">
-                          {tech.skills.map((s) => s.name).join(", ")}
-                        </div>
-                      </td>
+                        {/* 2. Primary Trade */}
+                        <td className="py-3 px-3.5">
+                          <div className="font-medium text-[var(--text-primary)]">{primaryTrade}</div>
+                          <div className="text-[11px] text-[var(--text-muted)] truncate max-w-xs">{tech.designation}</div>
+                        </td>
 
-                      {/* Verified Certifications */}
-                      <td className="py-3 px-3.5">
-                        <div className="flex flex-wrap gap-1 max-w-xs">
-                          {tech.certifications.map((c) => {
-                            const isExpired = c.expiryDate && new Date(c.expiryDate) < new Date();
-                            const isPending = !c.verified;
+                        {/* 3. Credential Status */}
+                        <td className="py-3 px-3.5">
+                          {hasVerifiedActive ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                              <BadgeCheckIcon size={11} className="text-emerald-500" />
+                              Verified License
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                              <AlertTriangleIcon size={11} className="text-amber-500" />
+                              Pending / Expired
+                            </span>
+                          )}
+                        </td>
 
-                            if (isExpired) {
-                              return (
-                                <span
-                                  key={c.id || c.name}
-                                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20"
-                                >
-                                  <AlertTriangleIcon size={11} className="text-rose-500" />
-                                  {c.name} (Expired)
-                                </span>
-                              );
-                            }
+                        {/* 4. Branch */}
+                        <td className="py-3 px-3.5">
+                          <div className="font-medium text-[var(--text-primary)]">{tech.branch}</div>
+                          <div className="text-[11px] text-[var(--text-muted)] truncate max-w-xs">{tech.currentArea || "At Depot"}</div>
+                        </td>
 
-                            if (isPending) {
-                              return (
-                                <span
-                                  key={c.id || c.name}
-                                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20"
-                                >
-                                  <AlertTriangleIcon size={11} className="text-amber-500" />
-                                  {c.name} (Pending)
-                                </span>
-                              );
-                            }
-
-                            return (
-                              <span
-                                key={c.id || c.name}
-                                className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20"
-                              >
-                                <BadgeCheckIcon size={11} className="text-emerald-500" />
-                                {c.name}
+                        {/* 5. Availability */}
+                        <td className="py-3 px-3.5">
+                          <div className="flex items-center gap-2">
+                            {getStatusBadge(tech.status)}
+                            {tech.activeJobCount > 0 && (
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                                tech.activeJobCount >= 3
+                                  ? "bg-rose-500/10 text-rose-600 border-rose-500/20"
+                                  : "bg-sky-500/10 text-sky-600 border-sky-500/20"
+                              }`}>
+                                {tech.activeJobCount} active
                               </span>
-                            );
-                          })}
-                        </div>
-                      </td>
+                            )}
+                          </div>
+                        </td>
 
-                      {/* Branch & Location */}
-                      <td className="py-3 px-3.5">
-                        <div className="font-medium text-[var(--text-primary)]">{tech.branch}</div>
-                        <div className="text-[11px] text-[var(--text-muted)] truncate max-w-xs">
-                          {tech.currentArea || "At Depot"}
-                        </div>
-                      </td>
-
-                      {/* Active Jobs */}
-                      <td className="py-3 px-3.5">
-                        {tech.activeJobCount === 0 ? (
-                          <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                            0 (Ready)
-                          </span>
-                        ) : (
-                          <span className={`text-[11px] font-bold ${tech.activeJobCount >= 3 ? "text-rose-600 dark:text-rose-400" : "text-sky-600 dark:text-sky-400"}`}>
-                            {tech.activeJobCount} active {tech.activeJobCount >= 3 ? "(Overloaded)" : ""}
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-3 px-3.5">{getStatusBadge(tech.status)}</td>
-
-                      {/* Actions */}
-                      <td className="py-3 px-3.5 text-right whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={(e) => handleOpenInspect(tech, e)}
-                          className="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
-                        >
-                          Passport
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                        {/* 6. Action */}
+                        <td className="py-3 px-3.5 text-right whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={(e) => handleOpenInspect(tech, e)}
+                            className="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                          >
+                            Passport
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
