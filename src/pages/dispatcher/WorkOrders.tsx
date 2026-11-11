@@ -413,17 +413,17 @@ export const WorkOrders: FC = () => {
         {/* ── High-Density Work Orders Table ──────────────────────────────── */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
           <div className="w-full max-w-full overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs sm:text-[13px]">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
-                  <th className="py-2 px-3">Order ID</th>
-                  <th className="py-2 px-3">Customer</th>
-                  <th className="py-2 px-3">Trade / Asset</th>
-                  <th className="py-2 px-3">Priority</th>
-                  <th className="py-2 px-3">Status</th>
-                  <th className="py-2 px-3">Technician</th>
-                  <th className="py-2 px-3">Arrival Target</th>
-                  <th className="py-2 px-3 text-right">Actions</th>
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
+                  <th className="py-2.5 px-3.5 sm:px-4">Order ID</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Customer</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Trade & Asset</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Priority</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Status</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Technician</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Arrival Target</th>
+                  <th className="py-2.5 px-3.5 sm:px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -442,53 +442,56 @@ export const WorkOrders: FC = () => {
                 ) : (
                   workOrders.map((wo) => (
                     <tr key={wo.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-2 px-3 font-mono font-bold text-[var(--text-primary)] whitespace-nowrap">{wo.id}</td>
-                      <td className="py-2 px-3">
-                        <div className="font-semibold text-[var(--text-primary)] truncate max-w-[160px]" title={`${wo.customerName} - ${wo.facilityAddress}`}>
+                      <td className="py-2.5 px-3.5 sm:px-4 font-mono font-bold text-xs text-[var(--text-primary)] whitespace-nowrap">{wo.id}</td>
+                      <td className="py-2.5 px-3.5 sm:px-4">
+                        <div className="font-semibold text-[var(--text-primary)] truncate max-w-[200px]" title={`${wo.customerName} - ${wo.facilityAddress}`}>
                           {wo.customerName}
                         </div>
-                      </td>
-                      <td className="py-2 px-3">
-                        <div className="text-[var(--text-primary)] truncate max-w-[150px]" title={`${wo.assetName} (${wo.category})`}>
-                          <span className="font-medium">{wo.assetName}</span>
-                          <span className="text-[11px] text-[var(--text-muted)] ml-1">· {wo.category}</span>
+                        <div className="text-xs text-[var(--text-muted)] truncate max-w-[200px]">
+                          {wo.facilityAddress}
                         </div>
                       </td>
-                      <td className="py-2 px-3 whitespace-nowrap">
+                      <td className="py-2.5 px-3.5 sm:px-4">
+                        <div className="text-[var(--text-primary)] truncate max-w-[180px]" title={`${wo.assetName} (${wo.category})`}>
+                          <span className="font-medium text-xs sm:text-[13px]">{wo.assetName}</span>
+                          <span className="text-xs text-[var(--text-muted)] ml-1">· {wo.category}</span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-3.5 sm:px-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border ${getPriorityBadge(
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${getPriorityBadge(
                             wo.priority
                           )}`}
                         >
                           {wo.priority}
                         </span>
                       </td>
-                      <td className="py-2 px-3 whitespace-nowrap">{getStatusBadge(wo.status)}</td>
-                      <td className="py-2 px-3 whitespace-nowrap">
+                      <td className="py-2.5 px-3.5 sm:px-4 whitespace-nowrap">{getStatusBadge(wo.status)}</td>
+                      <td className="py-2.5 px-3.5 sm:px-4 whitespace-nowrap">
                         {wo.assignedTechnicianName ? (
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 text-[9px] font-bold flex items-center justify-center shrink-0">
+                          <div className="flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0">
                               {wo.assignedTechnicianName.substring(0, 2).toUpperCase()}
                             </span>
-                            <span className="font-medium text-[var(--text-primary)] truncate max-w-[130px]" title={wo.assignedTechnicianName}>
+                            <span className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)] truncate max-w-[150px]" title={wo.assignedTechnicianName}>
                               {wo.assignedTechnicianName}
                             </span>
                           </div>
                         ) : (
-                          <span className="text-amber-600 dark:text-amber-400 font-medium text-[11px]">
+                          <span className="text-amber-600 dark:text-amber-400 font-semibold text-xs">
                             Unassigned
                           </span>
                         )}
                       </td>
-                      <td className="py-2 px-3 whitespace-nowrap text-[11px]">
+                      <td className="py-2.5 px-3.5 sm:px-4 whitespace-nowrap text-xs">
                         {renderArrivalSla(wo)}
                       </td>
-                      <td className="py-2 px-3 text-right whitespace-nowrap space-x-1">
+                      <td className="py-2.5 px-3.5 sm:px-4 text-right whitespace-nowrap space-x-1.5">
                         {wo.status === "UNASSIGNED" && (
                           <button
                             type="button"
                             onClick={(e) => handleOpenAssign(wo, e)}
-                            className="px-2 py-0.5 rounded text-[11px] font-bold bg-brand text-white hover:bg-brand-dark active:scale-95 transition-all shadow-xs"
+                            className="px-3 py-1 rounded-lg text-xs font-bold bg-brand text-white hover:bg-brand-dark active:scale-95 transition-all shadow-sm"
                           >
                             Assign
                           </button>
@@ -496,7 +499,7 @@ export const WorkOrders: FC = () => {
                         <button
                           type="button"
                           onClick={(e) => handleOpenInspect(wo, e)}
-                          className="px-2 py-0.5 rounded text-[11px] font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                          className="px-3 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
                         >
                           Inspect
                         </button>
