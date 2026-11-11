@@ -371,79 +371,72 @@ export const ServiceRequests: FC = () => {
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
-                  <th className="py-2.5 px-3.5">Request ID</th>
-                  <th className="py-2.5 px-3.5">Customer & Plan</th>
-                  <th className="py-2.5 px-3.5">Trade & Equipment</th>
-                  <th className="py-2.5 px-3.5">Problem Summary</th>
-                  <th className="py-2.5 px-3.5">Priority</th>
-                  <th className="py-2.5 px-3.5">Status</th>
-                  <th className="py-2.5 px-3.5">Submitted</th>
-                  <th className="py-2.5 px-3.5 text-right">Action</th>
+                  <th className="py-2 px-3">ID</th>
+                  <th className="py-2 px-3">Customer / Facility</th>
+                  <th className="py-2 px-3">Trade / Asset</th>
+                  <th className="py-2 px-3">Problem</th>
+                  <th className="py-2 px-3">Priority</th>
+                  <th className="py-2 px-3">Status</th>
+                  <th className="py-2 px-3">Time</th>
+                  <th className="py-2 px-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={8} className="py-8 text-center text-xs text-[var(--text-muted)]">
                       Loading service requests...
                     </td>
                   </tr>
                 ) : requests.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-xs text-[var(--text-muted)]">
-                      No service requests match the selected filters.
+                    <td colSpan={8} className="py-8 text-center text-xs text-[var(--text-muted)]">
+                      No service requests match filters.
                     </td>
                   </tr>
                 ) : (
                   requests.map((req) => (
                     <tr key={req.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-3 px-3.5 font-mono font-bold text-[var(--text-primary)]">{req.id}</td>
-                      <td className="py-3 px-3.5">
-                        <div className="font-semibold text-[var(--text-primary)]">{req.customerName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1.5">
-                          <span>{req.facilityAddress}</span>
-                          <span>•</span>
-                          <span className="font-semibold text-emerald-700 dark:text-emerald-400">
-                            {getPlanLabel(req.coveragePlan)}
-                          </span>
-                        </div>
+                      <td className="py-2 px-3 font-mono font-bold text-[var(--text-primary)]">{req.id}</td>
+                      <td className="py-2 px-3">
+                        <div className="font-semibold text-[var(--text-primary)] truncate max-w-[180px]">{req.customerName}</div>
+                        <div className="text-[11px] text-[var(--text-muted)] truncate max-w-[180px]">{req.facilityAddress}</div>
                       </td>
-                      <td className="py-3 px-3.5">
-                        <div className="font-medium text-[var(--text-primary)]">{req.assetName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)]">{req.category}</div>
+                      <td className="py-2 px-3">
+                        <div className="font-medium text-[var(--text-primary)] truncate max-w-[160px]">{req.assetName}</div>
+                        <div className="text-[11px] text-[var(--text-muted)] truncate max-w-[160px]">{req.category}</div>
                       </td>
-                      <td className="py-3 px-3.5">
-                        <div className="font-medium text-[var(--text-primary)] truncate max-w-xs">{req.problemTitle}</div>
-                        <div className="text-[11px] text-[var(--text-muted)] line-clamp-1">{req.problemDescription}</div>
+                      <td className="py-2 px-3 max-w-xs">
+                        <div className="font-medium text-[var(--text-primary)] truncate text-[11px]">{req.problemTitle}</div>
                       </td>
-                      <td className="py-3 px-3.5">
+                      <td className="py-2 px-3">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${getPriorityBadge(
+                          className={`inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-bold border ${getPriorityBadge(
                             req.priority
                           )}`}
                         >
                           {req.priority}
                         </span>
                       </td>
-                      <td className="py-3 px-3.5">{getStatusBadge(req.status)}</td>
-                      <td className="py-3 px-3.5 text-[11px] text-[var(--text-muted)] font-mono whitespace-nowrap">
+                      <td className="py-2 px-3">{getStatusBadge(req.status)}</td>
+                      <td className="py-2 px-3 text-[11px] text-[var(--text-muted)] font-mono whitespace-nowrap">
                         {new Date(req.submittedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </td>
-                      <td className="py-3 px-3.5 text-right whitespace-nowrap">
+                      <td className="py-2 px-3 text-right whitespace-nowrap">
                         {req.status === "CONVERTED" ? (
                           <Link
                             to="/dispatcher/work-orders"
-                            className="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                            className="px-2 py-0.5 rounded text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
                           >
-                            View Order
+                            Order
                           </Link>
                         ) : (
                           <button
                             type="button"
                             onClick={(e) => handleOpenTriage(req, e)}
-                            className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
+                            className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
                           >
-                            Triage & Convert
+                            Triage
                           </button>
                         )}
                       </td>
