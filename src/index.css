@@ -17,14 +17,14 @@
   --bg-overlay: rgba(248, 250, 252, 0.88); /* Clean overlay with blur */
 
   /* Border */
-  --border: #e2e8f0;         /* Slate 200 crisp border */
-  --border-strong: #cbd5e1;  /* Slate 300 strong border */
-  --border-subtle: #f1f5f9;  /* Slate 100 divider */
+  --border: #cbd5e1;         /* Slate 300 crisp border — enhanced light mode definition */
+  --border-strong: #94a3b8;  /* Slate 400 strong border */
+  --border-subtle: #e2e8f0;  /* Slate 200 subtle divider */
 
-  /* Text — High-contrast typography */
-  --text-primary: #0f172a;   /* Slate 900 headings / body */
-  --text-secondary: #334155; /* Slate 700 metadata */
-  --text-muted: #64748b;     /* Slate 500 captions */
+  /* Text — High-contrast typography (WCAG 2.2 AA compliant across all surfaces) */
+  --text-primary: #0f172a;   /* Slate 900 headings / body (16.5:1 contrast) */
+  --text-secondary: #1e293b; /* Slate 800 secondary / metadata (13.5:1 contrast) */
+  --text-muted: #475569;     /* Slate 600 captions / table headers (7.0:1 contrast, passes AA) */
   --text-inverse: #ffffff;
 
   /* Accent — VoltOps Emerald */
