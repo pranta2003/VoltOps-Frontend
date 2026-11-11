@@ -137,82 +137,86 @@ export function TechnicianDashboard() {
       </div>
 
       {/* ── Visual Schedule Timeline & Progress Distribution ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
         {/* Today's Shift Timeline Progress */}
-        <div className="lg:col-span-7 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] space-y-3">
-          <div className="flex items-center justify-between border-b border-[var(--border)] pb-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              Today's Dispatch Route & Progression
-            </h3>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
-              Shift: 08:00 - 18:00
-            </span>
-          </div>
+        <div className="lg:col-span-7 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] space-y-3 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                Today's Dispatch Route & Progression
+              </h3>
+              <span className="text-xs font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-medium">
+                Shift: 08:00 - 18:00
+              </span>
+            </div>
 
-          <div className="space-y-2 pt-1">
-            {jobs.map((job) => (
-              <div
-                key={job.id}
-                className="flex items-center gap-3 p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]/40 hover:bg-[var(--bg-surface-2)] transition-colors"
-              >
+            <div className="space-y-2.5 pt-0.5">
+              {jobs.map((job) => (
                 <div
-                  className={`w-6 h-6 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 ${
-                    job.status === "COMPLETED"
-                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                      : job.status === "TRAVELLING"
-                      ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 animate-pulse"
-                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                  }`}
+                  key={job.id}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]/50 hover:bg-[var(--bg-surface-2)] transition-colors"
                 >
-                  {job.status === "COMPLETED" ? "✓" : job.id.slice(-2)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-semibold text-xs text-[var(--text-primary)] truncate">
-                      {job.customerName}
-                    </span>
-                    <span
-                      className={`px-1.5 py-0.2 rounded text-[10px] font-bold border ${getStatusBadge(
-                        job.status
-                      )}`}
-                    >
-                      {job.status.replace("_", " ")}
-                    </span>
+                  <div
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 ${
+                      job.status === "COMPLETED"
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        : job.status === "TRAVELLING"
+                        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 animate-pulse"
+                        : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                    }`}
+                  >
+                    {job.status === "COMPLETED" ? "✓" : job.id.slice(-2)}
                   </div>
-                  <div className="text-[11px] text-[var(--text-muted)] truncate">{job.assetName}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] truncate">
+                        {job.customerName}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-md text-xs font-semibold border ${getStatusBadge(
+                          job.status
+                        )}`}
+                      >
+                        {job.status.replace("_", " ")}
+                      </span>
+                    </div>
+                    <div className="text-xs text-[var(--text-muted)] truncate mt-0.5">{job.assetName} · {job.facilityAddress}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Skill Passport Competency Overview */}
-        <div className="lg:col-span-5 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
-          <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-              Passport Trade Competency
-            </h3>
-            <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-              PASSED
-            </span>
-          </div>
+        <div className="lg:col-span-5 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                Passport Trade Competency
+              </h3>
+              <span className="text-xs font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded font-bold">
+                PASSED
+              </span>
+            </div>
 
-          <HorizontalBarChart
-            data={[
-              { label: "Electrical and power systems", value: 100, color: "#10b981", badge: "Primary" },
-              { label: "AC, HVAC, and cooling", value: 75, color: "#38bdf8", badge: "Secondary" },
-              { label: "Plumbing and water systems", value: 60, color: "#a855f7" },
-              { label: "CCTV and security", value: 40, color: "#64748b" },
-            ]}
-            valueSuffix="%"
-          />
+            <HorizontalBarChart
+              data={[
+                { label: "Electrical and power systems", value: 100, color: "#10b981", badge: "Primary" },
+                { label: "AC, HVAC, and cooling", value: 75, color: "#38bdf8", badge: "Secondary" },
+                { label: "Plumbing and water systems", value: 60, color: "#a855f7" },
+                { label: "CCTV and security", value: 40, color: "#64748b" },
+              ]}
+              valueSuffix="%"
+            />
+          </div>
         </div>
       </div>
 
       {/* ── Tabs & Jobs List (Figma Frame 11: All / Today / Upcoming / Completed) ─ */}
       <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
-        <div className="p-3 border-b border-[var(--border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-          <h2 className="font-heading font-bold text-sm text-[var(--text-primary)]">
+        <div className="p-3.5 sm:p-4 border-b border-[var(--border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <h2 className="font-heading font-bold text-sm sm:text-base text-[var(--text-primary)]">
             Assigned Field Jobs
           </h2>
 
@@ -222,7 +226,7 @@ export function TechnicianDashboard() {
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
-                className={`px-2.5 py-0.5 rounded-md font-medium transition-all text-xs ${
+                className={`px-3 py-1 rounded-md font-medium transition-all text-xs ${
                   activeTab === tab
                     ? "bg-[var(--bg-surface)] text-[var(--text-primary)] font-bold shadow-xs"
                     : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
@@ -236,61 +240,61 @@ export function TechnicianDashboard() {
 
         {/* Data Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs sm:text-[13px]">
             <thead>
-              <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
-                <th className="py-2 px-3">Job ID</th>
-                <th className="py-2 px-3">Customer & Location</th>
-                <th className="py-2 px-3">Trade & Asset</th>
-                <th className="py-2 px-3">Problem Summary</th>
-                <th className="py-2 px-3">Status</th>
-                <th className="py-2 px-3">Arrival SLA</th>
-                <th className="py-2 px-3 text-right">Actions</th>
+              <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
+                <th className="py-2.5 px-3.5 sm:px-4">Job ID</th>
+                <th className="py-2.5 px-3.5 sm:px-4">Customer & Location</th>
+                <th className="py-2.5 px-3.5 sm:px-4">Trade & Asset</th>
+                <th className="py-2.5 px-3.5 sm:px-4">Problem Summary</th>
+                <th className="py-2.5 px-3.5 sm:px-4">Status</th>
+                <th className="py-2.5 px-3.5 sm:px-4">Arrival SLA</th>
+                <th className="py-2.5 px-3.5 sm:px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border)]">
               {filteredJobs.map((job) => (
                 <tr key={job.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                  <td className="py-2 px-3 font-mono font-bold text-[var(--text-primary)] whitespace-nowrap">
+                  <td className="py-2.5 px-3.5 sm:px-4 font-mono font-bold text-xs text-[var(--text-primary)] whitespace-nowrap">
                     {job.id}
                   </td>
-                  <td className="py-2 px-3">
-                    <div className="font-semibold text-[var(--text-primary)] truncate max-w-[150px]">{job.customerName}</div>
-                    <div className="text-[11px] text-[var(--text-muted)] truncate max-w-[150px]">
+                  <td className="py-2.5 px-3.5 sm:px-4">
+                    <div className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] truncate max-w-[180px]" title={job.customerName}>{job.customerName}</div>
+                    <div className="text-xs text-[var(--text-muted)] truncate max-w-[180px]" title={job.facilityAddress}>
                       {job.facilityAddress}
                     </div>
                   </td>
-                  <td className="py-2 px-3">
-                    <div className="font-medium text-[var(--text-primary)] truncate max-w-[140px]">{job.assetName}</div>
-                    <div className="text-[11px] text-[var(--text-muted)] truncate max-w-[140px]">{job.category}</div>
+                  <td className="py-2.5 px-3.5 sm:px-4">
+                    <div className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)] truncate max-w-[160px]" title={job.assetName}>{job.assetName}</div>
+                    <div className="text-xs text-[var(--text-muted)] truncate max-w-[160px]">{job.category}</div>
                   </td>
-                  <td className="py-2 px-3">
-                    <div className="truncate font-medium text-[var(--text-primary)] max-w-[160px]">{job.problemSummary}</div>
-                    <div className="text-[11px] text-[var(--text-muted)]">{job.scheduledTime}</div>
+                  <td className="py-2.5 px-3.5 sm:px-4 max-w-xs">
+                    <div className="truncate font-medium text-xs sm:text-[13px] text-[var(--text-secondary)]" title={job.problemSummary}>{job.problemSummary}</div>
+                    <div className="text-xs text-[var(--text-muted)] mt-0.5">{job.scheduledTime}</div>
                   </td>
-                  <td className="py-2 px-3 whitespace-nowrap">
+                  <td className="py-2.5 px-3.5 sm:px-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getStatusBadge(
+                      className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${getStatusBadge(
                         job.status
                       )}`}
                     >
                       {job.status.replace("_", " ")}
                     </span>
                   </td>
-                  <td className="py-2 px-3 text-xs font-semibold whitespace-nowrap">
+                  <td className="py-2.5 px-3.5 sm:px-4 text-xs font-semibold whitespace-nowrap">
                     {job.arrivalSlaRemainingMinutes ? (
-                      <span className="text-red-600 dark:text-red-400">
-                        {job.arrivalSlaRemainingMinutes}m left
+                      <span className="text-red-600 dark:text-red-400 font-mono">
+                        {job.arrivalSlaRemainingMinutes}m remaining
                       </span>
                     ) : (
                       <span className="text-[var(--text-muted)]">—</span>
                     )}
                   </td>
-                  <td className="py-2 px-3 text-right whitespace-nowrap">
+                  <td className="py-2.5 px-3.5 sm:px-4 text-right whitespace-nowrap">
                     <button
                       type="button"
                       onClick={() => setSelectedJob(job)}
-                      className="px-2 py-0.5 rounded text-[11px] font-bold bg-brand text-white hover:bg-brand-dark transition-all shadow-xs"
+                      className="px-3 py-1 rounded-lg text-xs font-bold bg-brand text-white hover:bg-brand-dark transition-all shadow-sm"
                     >
                       Update
                     </button>
