@@ -17,8 +17,8 @@ interface DonutChartProps {
 export const DonutChart: FC<DonutChartProps> = ({
   data,
   totalLabel = "Total",
-  size = 140,
-  strokeWidth = 18,
+  size = 110,
+  strokeWidth = 14,
   emptyMessage = "No data available",
 }) => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
@@ -29,12 +29,7 @@ export const DonutChart: FC<DonutChartProps> = ({
 
   if (total === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-6 text-center text-xs text-[var(--text-muted)]">
-        <div
-          className="w-20 h-20 rounded-full border-2 border-dashed border-[var(--border)] flex items-center justify-center mb-2"
-        >
-          <span className="text-[10px] uppercase font-mono">0</span>
-        </div>
+      <div className="flex items-center justify-center py-3 text-center text-xs text-[var(--text-muted)]">
         <span>{emptyMessage}</span>
       </div>
     );
@@ -58,7 +53,7 @@ export const DonutChart: FC<DonutChartProps> = ({
   const activeSegment = hoveredIdx !== null ? data[hoveredIdx] : null;
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-5 w-full">
+    <div className="flex items-center gap-4 w-full justify-between">
       {/* SVG Donut */}
       <div className="relative shrink-0 flex items-center justify-center" style={{ width: size, height: size }}>
         <svg
@@ -88,7 +83,7 @@ export const DonutChart: FC<DonutChartProps> = ({
               r={radius}
               fill="transparent"
               stroke={seg.color}
-              strokeWidth={hoveredIdx === seg.idx ? strokeWidth + 3 : strokeWidth}
+              strokeWidth={hoveredIdx === seg.idx ? strokeWidth + 2 : strokeWidth}
               strokeDasharray={seg.strokeDasharray}
               strokeDashoffset={seg.strokeDashoffset}
               strokeLinecap="round"
@@ -101,17 +96,17 @@ export const DonutChart: FC<DonutChartProps> = ({
 
         {/* Center Readout */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-1">
-          <span className="font-heading font-extrabold text-lg text-[var(--text-primary)] leading-none">
+          <span className="font-heading font-extrabold text-base text-[var(--text-primary)] leading-none">
             {activeSegment ? activeSegment.value : total}
           </span>
-          <span className="text-[10px] font-semibold text-[var(--text-muted)] tracking-wider uppercase mt-0.5 truncate max-w-[80px]">
+          <span className="text-[9px] font-semibold text-[var(--text-muted)] tracking-wider uppercase mt-0.5 truncate max-w-[70px]">
             {activeSegment ? activeSegment.label : totalLabel}
           </span>
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex-1 w-full space-y-1.5 min-w-0">
+      {/* Compact Proportional Legend */}
+      <div className="flex-1 space-y-1 min-w-0">
         {data.map((seg, idx) => {
           const pct = Math.round((seg.value / total) * 100);
           const isHovered = hoveredIdx === idx;
@@ -121,22 +116,22 @@ export const DonutChart: FC<DonutChartProps> = ({
               type="button"
               onMouseEnter={() => setHoveredIdx(idx)}
               onMouseLeave={() => setHoveredIdx(null)}
-              className={`w-full flex items-center justify-between text-xs px-2 py-1 rounded-md transition-all text-left ${
+              className={`w-full flex items-center justify-between text-xs px-1.5 py-0.5 rounded transition-all text-left ${
                 isHovered
                   ? "bg-[var(--bg-surface-2)] font-semibold"
                   : "hover:bg-[var(--bg-surface-2)]/60 text-[var(--text-secondary)]"
               }`}
             >
-              <div className="flex items-center gap-2 min-w-0 truncate">
+              <div className="flex items-center gap-1.5 min-w-0 truncate">
                 <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  className="w-2 h-2 rounded-full shrink-0"
                   style={{ backgroundColor: seg.color }}
                 />
-                <span className="truncate">{seg.label}</span>
+                <span className="truncate text-[11px]">{seg.label}</span>
               </div>
-              <div className="flex items-center gap-2 shrink-0 font-mono text-[11px] ml-2">
+              <div className="flex items-center gap-1 shrink-0 font-mono text-[11px] ml-2">
                 <span className="text-[var(--text-primary)] font-bold">{seg.value}</span>
-                <span className="text-[var(--text-muted)] text-[10px] w-7 text-right">({pct}%)</span>
+                <span className="text-[var(--text-muted)] text-[10px] w-6 text-right">{pct}%</span>
               </div>
             </button>
           );
