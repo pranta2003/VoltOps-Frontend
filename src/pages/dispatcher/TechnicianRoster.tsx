@@ -319,24 +319,24 @@ export const TechnicianRoster: FC = () => {
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
-                  <th className="py-2.5 px-3.5">Technician</th>
-                  <th className="py-2.5 px-3.5">Primary Trade</th>
-                  <th className="py-2.5 px-3.5">Credential Status</th>
-                  <th className="py-2.5 px-3.5">Branch</th>
-                  <th className="py-2.5 px-3.5">Availability</th>
-                  <th className="py-2.5 px-3.5 text-right">Action</th>
+                  <th className="py-2 px-3">Technician</th>
+                  <th className="py-2 px-3">Primary Trade</th>
+                  <th className="py-2 px-3">Credential Status</th>
+                  <th className="py-2 px-3">Branch</th>
+                  <th className="py-2 px-3">Availability</th>
+                  <th className="py-2 px-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={6} className="py-8 text-center text-xs text-[var(--text-muted)]">
                       Loading technician roster...
                     </td>
                   </tr>
                 ) : technicians.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={6} className="py-8 text-center text-xs text-[var(--text-muted)]">
                       No technicians match the selected filters.
                     </td>
                   </tr>
@@ -352,48 +352,48 @@ export const TechnicianRoster: FC = () => {
                     return (
                       <tr key={tech.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
                         {/* 1. Technician Name & ID */}
-                        <td className="py-3 px-3.5">
-                          <div className="flex items-center gap-2.5">
-                            <span className="w-7 h-7 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-bold flex items-center justify-center shrink-0">
+                        <td className="py-2 px-3">
+                          <div className="flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0">
                               {tech.name.substring(0, 2).toUpperCase()}
                             </span>
-                            <div>
-                              <div className="font-semibold text-[var(--text-primary)]">{tech.name}</div>
-                              <div className="text-[11px] text-[var(--text-muted)] font-mono">{tech.employeeId}</div>
-                            </div>
+                            <span className="font-semibold text-[var(--text-primary)] truncate max-w-[130px]" title={tech.name}>
+                              {tech.name}
+                            </span>
+                            <span className="text-[10px] text-[var(--text-muted)] font-mono">({tech.employeeId})</span>
                           </div>
                         </td>
 
                         {/* 2. Primary Trade */}
-                        <td className="py-3 px-3.5">
-                          <div className="font-medium text-[var(--text-primary)]">{primaryTrade}</div>
-                          <div className="text-[11px] text-[var(--text-muted)] truncate max-w-xs">{tech.designation}</div>
+                        <td className="py-2 px-3">
+                          <div className="font-medium text-[var(--text-primary)] truncate max-w-[150px]" title={`${primaryTrade} · ${tech.designation}`}>
+                            {primaryTrade}
+                          </div>
                         </td>
 
                         {/* 3. Credential Status */}
-                        <td className="py-3 px-3.5">
+                        <td className="py-2 px-3 whitespace-nowrap">
                           {hasVerifiedActive ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
                               <BadgeCheckIcon size={11} className="text-emerald-500" />
-                              Verified License
+                              Verified
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
                               <AlertTriangleIcon size={11} className="text-amber-500" />
-                              Pending / Expired
+                              Unverified
                             </span>
                           )}
                         </td>
 
                         {/* 4. Branch */}
-                        <td className="py-3 px-3.5">
-                          <div className="font-medium text-[var(--text-primary)]">{tech.branch}</div>
-                          <div className="text-[11px] text-[var(--text-muted)] truncate max-w-xs">{tech.currentArea || "At Depot"}</div>
+                        <td className="py-2 px-3 whitespace-nowrap">
+                          <span className="font-medium text-[var(--text-primary)]">{tech.branch}</span>
                         </td>
 
                         {/* 5. Availability */}
-                        <td className="py-3 px-3.5">
-                          <div className="flex items-center gap-2">
+                        <td className="py-2 px-3 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
                             {getStatusBadge(tech.status)}
                             {tech.activeJobCount > 0 && (
                               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
@@ -408,11 +408,11 @@ export const TechnicianRoster: FC = () => {
                         </td>
 
                         {/* 6. Action */}
-                        <td className="py-3 px-3.5 text-right whitespace-nowrap">
+                        <td className="py-2 px-3 text-right whitespace-nowrap">
                           <button
                             type="button"
                             onClick={(e) => handleOpenInspect(tech, e)}
-                            className="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                            className="px-2 py-0.5 rounded text-[11px] font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
                           >
                             Passport
                           </button>
