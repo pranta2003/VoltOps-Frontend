@@ -414,8 +414,8 @@ export function UserManagement() {
         {/* ── Users Table ───────────────────────────────────────────────── */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
           <div className="overflow-x-auto w-full">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] uppercase tracking-wider text-[11px] font-semibold border-b border-[var(--border)]">
+            <table className="w-full text-left text-xs sm:text-[13px]">
+              <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] uppercase tracking-wider text-xs font-semibold border-b border-[var(--border)]">
                 <tr>
                   <th className="py-2.5 px-4">User</th>
                   <th className="py-2.5 px-4">Role</th>
@@ -496,11 +496,11 @@ export function UserManagement() {
                         {/* User Identity */}
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-[var(--bg-surface-2)] border border-[var(--border)] flex items-center justify-center font-bold text-[11px] text-[var(--text-secondary)] shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-[var(--bg-surface-2)] border border-[var(--border)] flex items-center justify-center font-bold text-xs text-[var(--text-secondary)] shrink-0">
                               {initials}
                             </div>
                             <div className="min-w-0">
-                              <div className="font-medium text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                              <div className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] flex items-center gap-1.5 truncate">
                                 <span>{u.name}</span>
                                 {isSelf && (
                                   <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-700 dark:text-purple-300 font-semibold border border-purple-500/20">
@@ -508,7 +508,7 @@ export function UserManagement() {
                                   </span>
                                 )}
                               </div>
-                              <div className="text-[11px] text-[var(--text-muted)] font-mono truncate">
+                              <div className="text-xs text-[var(--text-secondary)] font-mono truncate">
                                 {u.email}
                               </div>
                             </div>
@@ -516,9 +516,9 @@ export function UserManagement() {
                         </td>
 
                         {/* Role */}
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold border ${getRoleBadge(
+                            className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium border ${getRoleBadge(
                               u.role
                             )}`}
                           >
@@ -528,25 +528,25 @@ export function UserManagement() {
 
                         {/* Branch / Dept */}
                         <td className="py-3 px-4">
-                          <div className="font-medium text-[var(--text-primary)]">
+                          <div className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)]">
                             {u.branch || "—"}
                           </div>
                           {u.department && (
-                            <div className="text-[11px] text-[var(--text-muted)]">
+                            <div className="text-xs text-[var(--text-muted)]">
                               {u.department} {u.designation && `· ${u.designation}`}
                             </div>
                           )}
                         </td>
 
                         {/* Status (Compact dot badge) */}
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 whitespace-nowrap">
                           {u.isActive ? (
-                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                               Active
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-500/20">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-500/20">
                               <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                               Inactive
                             </span>
@@ -554,7 +554,7 @@ export function UserManagement() {
                         </td>
 
                         {/* Created Date */}
-                        <td className="py-3 px-4 text-[var(--text-muted)] whitespace-nowrap">
+                        <td className="py-3 px-4 text-xs text-[var(--text-muted)] font-mono whitespace-nowrap">
                           {u.createdAt}
                         </td>
 

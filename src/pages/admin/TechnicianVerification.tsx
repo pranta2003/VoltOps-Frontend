@@ -339,8 +339,8 @@ export function TechnicianVerification() {
         {/* ── Technicians Table ─────────────────────────────────────────── */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden w-full max-w-full">
           <div className="overflow-x-auto w-full">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] uppercase tracking-wider text-[11px] font-semibold border-b border-[var(--border)]">
+            <table className="w-full text-left text-xs sm:text-[13px]">
+              <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] uppercase tracking-wider text-xs font-semibold border-b border-[var(--border)]">
                 <tr>
                   <th className="py-2.5 px-4">Technician</th>
                   <th className="py-2.5 px-4">Primary Trade</th>
@@ -415,14 +415,14 @@ export function TechnicianVerification() {
                         {/* Technician: Avatar, Name, Employee ID */}
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-[var(--bg-surface-2)] border border-[var(--border)] flex items-center justify-center font-bold text-[11px] text-[var(--text-secondary)] shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-[var(--bg-surface-2)] border border-[var(--border)] flex items-center justify-center font-bold text-xs text-[var(--text-secondary)] shrink-0">
                               {initials}
                             </div>
                             <div className="min-w-0">
-                              <div className="font-medium text-[var(--text-primary)] truncate">
+                              <div className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] truncate">
                                 {t.technicianName}
                               </div>
-                              <div className="font-mono text-[11px] text-[var(--text-muted)]">
+                              <div className="font-mono text-xs text-[var(--text-muted)]">
                                 {t.employeeId}
                               </div>
                             </div>
@@ -431,11 +431,11 @@ export function TechnicianVerification() {
 
                         {/* Trade: Primary + Secondary badge */}
                         <td className="py-3 px-4">
-                          <div className="font-medium text-[var(--text-primary)] truncate max-w-[160px]">
+                          <div className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)] truncate max-w-[160px]">
                             {t.primaryTrade}
                           </div>
                           {t.secondaryTrades.length > 0 && (
-                            <div className="text-[10px] text-[var(--text-muted)] truncate max-w-[160px]">
+                            <div className="text-xs text-[var(--text-muted)] truncate max-w-[160px]">
                               +{t.secondaryTrades.length} additional
                             </div>
                           )}
@@ -444,7 +444,7 @@ export function TechnicianVerification() {
                         {/* License / Credential */}
                         <td className="py-3 px-4">
                           <div
-                            className="font-mono text-[11px] text-[var(--text-primary)] truncate max-w-[180px]"
+                            className="font-mono text-xs text-[var(--text-primary)] truncate max-w-[180px]"
                             title={t.licenseName}
                           >
                             {t.licenseNumber}

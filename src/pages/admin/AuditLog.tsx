@@ -328,8 +328,8 @@ export function AuditLog() {
         {/* ── Audit Ledger Table ─────────────────────────────────────────── */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
           <div className="overflow-x-auto w-full">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] uppercase tracking-wider text-[11px] font-semibold border-b border-[var(--border)]">
+            <table className="w-full text-left text-xs sm:text-[13px]">
+              <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] uppercase tracking-wider text-xs font-semibold border-b border-[var(--border)]">
                 <tr>
                   <th className="py-2.5 px-4">Timestamp</th>
                   <th className="py-2.5 px-4">Actor</th>
@@ -402,41 +402,41 @@ export function AuditLog() {
                       >
                         {/* Timestamp & ID */}
                         <td className="py-3 px-4">
-                          <div className="font-medium text-[var(--text-primary)] whitespace-nowrap">
+                          <div className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] whitespace-nowrap">
                             {evt.timestamp}
                           </div>
-                          <div className="text-[11px] text-[var(--text-muted)] font-mono">
+                          <div className="text-xs text-[var(--text-secondary)] font-mono">
                             {evt.id}
                           </div>
                         </td>
 
                         {/* Actor */}
                         <td className="py-3 px-4">
-                          <div className="font-medium text-[var(--text-primary)]">
+                          <div className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)]">
                             {evt.actorName}
                           </div>
-                          <div className="text-[11px] text-[var(--text-muted)] font-mono">
+                          <div className="text-xs text-[var(--text-muted)] font-mono">
                             {evt.actorRole} · {evt.actorIp}
                           </div>
                         </td>
 
                         {/* Action Description & Target */}
                         <td className="py-3 px-4">
-                          <div className="font-medium text-[var(--text-primary)] max-w-sm truncate" title={evt.action}>
+                          <div className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)] max-w-sm truncate" title={evt.action}>
                             {evt.action}
                           </div>
-                          <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 mt-0.5">
-                            <span>Target:</span>
-                            <span className="font-mono text-emerald-600 dark:text-emerald-400 font-medium">
+                          <div className="text-xs text-[var(--text-secondary)] flex items-center gap-1 mt-0.5">
+                            <span className="text-[var(--text-muted)]">Target:</span>
+                            <span className="font-mono text-emerald-700 dark:text-emerald-300 font-medium">
                               {evt.targetEntity}
                             </span>
                           </div>
                         </td>
 
                         {/* Category */}
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold border ${getCategoryBadge(
+                            className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium border ${getCategoryBadge(
                               evt.category
                             )}`}
                           >
@@ -445,9 +445,9 @@ export function AuditLog() {
                         </td>
 
                         {/* Severity */}
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border ${sevStyle.container}`}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${sevStyle.container}`}
                           >
                             <span className={`w-1.5 h-1.5 rounded-full ${sevStyle.dot}`} />
                             {evt.severity}
@@ -455,16 +455,16 @@ export function AuditLog() {
                         </td>
 
                         {/* Details Action */}
-                        <td className="py-3 px-4 text-right">
+                        <td className="py-3 px-4 text-right whitespace-nowrap">
                           <button
                             type="button"
                             onClick={(e) => {
                               lastFocusedTriggerRef.current = e.currentTarget;
                               setSelectedEvent(evt);
                             }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all btn-press"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all btn-press"
                           >
-                            <EyeIcon size={12} className="text-[var(--text-muted)]" />
+                            <EyeIcon size={13} className="text-[var(--text-muted)]" />
                             <span>Inspect</span>
                           </button>
                         </td>
