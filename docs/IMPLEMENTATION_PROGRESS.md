@@ -65,6 +65,53 @@ This document tracks all completed implementation milestones, verified files, co
   53. `007a6fe` — `refactor(admin): remove redundant subtitles and tighten governance dashboard`
   54. `f697e68` — `refactor(technician): remove paragraph subtitles and compact field jobs table`
   55. `fbade8e` — `docs(visual-audit): capture before-and-after screenshots of simplified dashboards`
+  56. `e10179a` — `docs(progress): record Milestone 3.2.1 visual simplification and layout fixes`
+  57. `3d0dfd8` — `style(theme): enhance light-mode contrast tokens to satisfy WCAG AA`
+  58. `6ace113` — `fix(charts): improve DonutChart geometry, responsiveness, and legend layout`
+  59. `9c58489` — `fix(charts): enhance bar and volume chart contrast and typography`
+  60. `c7cb806` — `refactor(dispatcher): balance dashboard chart geometry and eliminate blank regions`
+  61. `4367b82` — `refactor(dispatcher): improve service requests table spacing, typography, and readability`
+  62. `4c415bc` — `refactor(dispatcher): improve work orders table proportions and text hierarchy`
+  63. `ac72c9f` — `refactor(dispatcher): refine technician roster table breathing room and contrast`
+  64. `b2ec5e7` — `refactor(technician): balance technician dashboard typography, cards, and job table`
+  65. `a373f4f` — `fix(admin): resolve light-mode contrast deficiencies across audit log and user management`
+  66. `65e49e3` — `refactor(layout): polish shared dashboard shell typography and mobile navigation`
+  67. `baa5917` — `docs(visual-audit): capture comprehensive visual evidence for milestone 3.2.2`
+
+---
+
+## Milestone 3.2.2: Visual Refinement — Dispatcher & Technician Layout, Chart Geometry & Light-Mode Contrast ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Scope**: Systematic visual refinement across Dispatcher, Technician, and Admin interfaces. Eliminated cramped tables and over-truncations, resolved awkward vertical blank space in the Dispatcher Work Orders chart area, elevated light-mode text and border contrast tokens to strictly satisfy WCAG 2.2 AA (>= 4.5:1), refined typography hierarchy (titles 20–22px, headers 14–16px, cards 13–14px, table rows 13–14px, secondary metadata 12–13px, functional minimum 12px), and verified cross-device responsiveness (1440x900, 1024x768, 768x1024, 390x844, 360x800).
+- **Accomplishments**:
+  1. **Light-Mode Contrast Token Hardening (`src/index.css`)**:
+     - Upgraded `--text-muted` from `#64748b` (Slate 500, ~4.0:1) to `#475569` (Slate 600, 7.0:1 contrast ratio against white `#ffffff` and 5.9:1 against surface-2 `#f1f5f9`), fully passing WCAG 2.2 AA.
+     - Upgraded `--text-secondary` from `#334155` (Slate 700) to `#1e293b` (Slate 800, 11.6:1 contrast ratio).
+     - Upgraded `--border` from `#e2e8f0` (Slate 200) to `#cbd5e1` (Slate 300) for sharp component and card boundaries.
+  2. **Work Orders Chart Geometry & Vertical Balance (`DonutChart.tsx`, `DispatcherDashboard.tsx`)**:
+     - Resized donut radius from 105px to 125px with 14px stroke width and 20px center readout.
+     - Implemented responsive DonutChart flex layout: stacks centered on mobile (<640px) with 2-column legend grid; sits side-by-side with generous gap on desktop.
+     - Eliminated the 150px vertical blank space in `DispatcherDashboard.tsx` by adding a 3-metric operational telemetry strip (`In Field`, `SLA Target`, `Avg Transit`), perfectly balancing the height of the Trade Capacity horizontal bar chart.
+  3. **Dispatcher Table Proportion & Spacing Elevation**:
+     - `ServiceRequests.tsx`: Expanded row paddings to `py-2.5 px-3.5 sm:px-4`, upgraded text to `text-xs sm:text-[13px]`, removed aggressive string truncations on Customer/Facility, Asset, and Problem columns.
+     - `WorkOrders.tsx`: Widened column proportions, balanced row breathing room, restored high-contrast technician pills and arrival target indicators.
+     - `TechnicianRoster.tsx`: Expanded row paddings, upgraded badge contrast, and provided clear credential status indicators without horizontal blowout.
+  4. **Technician Portal Balance & Polish (`TechnicianDashboard.tsx`)**:
+     - Refined shift route progression cards with comfortable `p-3` spacing, balanced status pills, and prominent address/contact rows.
+     - Elevated Competency & Certification Passport card layout with high-contrast badge styling.
+     - Upgraded assigned field jobs table with `py-2.5 px-3.5 sm:px-4` padding, clear trade tags, and legible arrival timers.
+  5. **Admin Portal Contrast & Consistency (`AuditLog.tsx`, `UserManagement.tsx`, `TechnicianVerification.tsx`)**:
+     - Upgraded table column headers to `text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]`.
+     - Standardized timestamps and system identifiers to `text-xs font-mono text-[var(--text-secondary)]`.
+     - Refined action buttons and category badges with high-contrast borders and backgrounds in light mode.
+  6. **Shared Layout Polish (`Layout.tsx`)**:
+     - Upgraded page titles to `text-base sm:text-lg lg:text-xl font-heading font-bold text-[var(--text-primary)]`.
+     - Standardized role badge typography and mobile header padding.
+  7. **Testing & Quality Assurance**:
+     - Automated Test Suite: 35/35 tests passing (100% pass rate).
+     - Production Build: `npm run build` (`tsc && vite build`) passed cleanly with 0 errors.
+     - Genuine Browser Visual Evidence: 12 comprehensive screenshots captured and committed under `docs/visual-audit/milestone-3.2.2/`.
 
 ---
 
