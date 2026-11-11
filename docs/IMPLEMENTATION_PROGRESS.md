@@ -651,6 +651,39 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
+### Milestone 3.5 — Landing Page Visual Quality Correction & Framer Motion Implementation
+- **Date**: 11 November 2026
+- **Branch**: `pranta`
+- **Commit**: `2334f36` (`feat(landing): implement industrial hero image, continuous ambient motion, framer motion interactions, and centered 7-trade grid`)
+- **Summary of Accomplishments**:
+  1. **Commercial Industrial Hero Photograph**:
+     - Replaced portrait-style hero photograph with an authentic, realistic commercial industrial maintenance photograph (`public/images/hero-technician.jpg`, 1376×768 px).
+     - Depicts a certified technician in navy workwear with a heavy-duty tool belt inspecting industrial switchgear and electrical distribution cabinets with a digital multimeter.
+     - Positioned on the right third of the frame, providing generous, clean negative space on the left and center for high-contrast headline readability across Light and Dark themes.
+  2. **Continuous Ambient Background Motion**:
+     - Implemented 3 drifting radial glow sources (`#10b981`, `#0ea5e9`, `#f59e0b`) running smooth, infinite looped trajectories (18s-22s duration) with `easeInOut` motion.
+     - Embedded 6 floating ambient light specks/particles with staggered float delays and subtle pulse transitions.
+     - Automatically disabled for accessibility when `useReducedMotion()` is active.
+  3. **Framer Motion Integration**:
+     - Installed and verified `framer-motion` (`^14.12.0`).
+     - Hero headline, subtext, and CTA buttons enter with staggered spring physics (`staggerChildren: 0.09s`, cubic bezier `[0.16, 1, 0.3, 1] as const`).
+     - Interactive CTAs use `whileHover={{ scale: 1.03 }}` and `whileTap={{ scale: 0.97 }}` with glowing borders.
+     - Brand logo mark in navbar features subtle rotation on hover.
+  4. **Symmetrical 7-Service-Card Grid**:
+     - Replaced rigid 4-column CSS grid with flexible centering layout (`flex flex-wrap justify-center gap-6 items-stretch`, `w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)]`).
+     - Row 1 neatly holds 4 uniform cards; Row 2 holds 3 uniform cards centered horizontally, completely eliminating the awkward right-side empty void.
+  5. **Text Reduction & Card Content Density**:
+     - Simplified all 7 service trade cards to: Trade Icon + Title + 1 concise descriptive sentence + 3 capability tags + SLA badge + Direct CTA.
+     - Streamlined 5 workflow step cards (10-14 words each) and 4 role workspace cards (1-2 sentences).
+     - Preserved canonical SLA definitions across Plan A, Plan B, Plan C, and Plan D.
+  6. **Verification & Quality Gate**:
+     - `npx tsc --noEmit`: 0 errors.
+     - Vitest test suite (`npm test -- --run`): 35 / 35 tests passing.
+     - Production build (`npm run build`): Completed in 6.35s with 0 errors.
+     - In-browser visual inspection on Chrome DevTools (`http://localhost:5173/`): Desktop (1440×900), Laptop (1366×768), Tablet (768×1024), Mobile (390×844). Zero console errors.
+
+---
+
 ## Role Portals & Core Screens Status (Verified in Code)
 
 | Screen | Route | Role | Figma Reference | Backend Status | Status |
