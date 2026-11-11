@@ -223,14 +223,11 @@ export function AdminDashboard() {
         {/* ── Governance Visualizations: Workforce Distribution & Verification Status ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Donut Chart: Role Composition */}
-          <div className="lg:col-span-5 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-3">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Workforce Composition
-                </h3>
-                <p className="text-[11px] text-[var(--text-muted)]">Active system accounts by security role</p>
-              </div>
+          <div className="lg:col-span-5 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                Workforce Composition
+              </h3>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
                 Directory
               </span>
@@ -248,16 +245,11 @@ export function AdminDashboard() {
           </div>
 
           {/* Horizontal Bar Chart: Verification & Compliance Health */}
-          <div className="lg:col-span-7 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-2">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Compliance & Passport Status
-                </h3>
-                <p className="text-[11px] text-[var(--text-muted)]">
-                  Verified credentials, pending licenses, and branch allocations
-                </p>
-              </div>
+          <div className="lg:col-span-7 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                Compliance & Passport Status
+              </h3>
               <Link to="/admin/technicians" className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
                 Passports →
               </Link>
@@ -280,20 +272,20 @@ export function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           <Link
             to="/admin/users"
-            className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[#10b981] transition-all shadow-sm group flex flex-col justify-between btn-press"
+            className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[#10b981] transition-all shadow-sm group flex flex-col justify-between btn-press"
           >
             <div>
-              <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold mb-2.5">
-                <BuildingIcon size={16} />
+              <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold mb-2">
+                <BuildingIcon size={15} />
               </div>
               <h4 className="font-heading font-semibold text-sm text-[var(--text-primary)] group-hover:text-[#10b981] transition-colors">
                 Users & Workforce
               </h4>
-              <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
-                Staff accounts, roles, access permissions, and account activation.
+              <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">
+                Staff directory, roles & access permissions
               </p>
             </div>
-            <div className="pt-3 text-xs font-semibold text-[#10b981] flex items-center gap-1">
+            <div className="pt-2 text-xs font-semibold text-[#10b981] flex items-center gap-1">
               <span>Manage directory</span>
               <ArrowRightIcon size={11} />
             </div>
@@ -301,20 +293,20 @@ export function AdminDashboard() {
 
           <Link
             to="/admin/technicians"
-            className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[#10b981] transition-all shadow-sm group flex flex-col justify-between btn-press"
+            className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[#10b981] transition-all shadow-sm group flex flex-col justify-between btn-press"
           >
             <div>
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold mb-2.5">
-                <ShieldCheckIcon size={16} />
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold mb-2">
+                <ShieldCheckIcon size={15} />
               </div>
               <h4 className="font-heading font-semibold text-sm text-[var(--text-primary)] group-hover:text-[#10b981] transition-colors">
                 Technician Verification
               </h4>
-              <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
-                7-trade skill passports, licensing audits, and dispatch eligibility.
+              <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">
+                7-trade skill passports & licensing audits
               </p>
             </div>
-            <div className="pt-3 text-xs font-semibold text-[#10b981] flex items-center gap-1">
+            <div className="pt-2 text-xs font-semibold text-[#10b981] flex items-center gap-1">
               <span>Review passports</span>
               <ArrowRightIcon size={11} />
             </div>
@@ -322,20 +314,20 @@ export function AdminDashboard() {
 
           <Link
             to="/admin/audit"
-            className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[#10b981] transition-all shadow-sm group flex flex-col justify-between btn-press"
+            className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[#10b981] transition-all shadow-sm group flex flex-col justify-between btn-press"
           >
             <div>
-              <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold mb-2.5">
-                <ClockIcon size={16} />
+              <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold mb-2">
+                <ClockIcon size={15} />
               </div>
               <h4 className="font-heading font-semibold text-sm text-[var(--text-primary)] group-hover:text-[#10b981] transition-colors">
                 Audit Log
               </h4>
-              <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
-                Immutable security events, administrative decisions, and compliance export.
+              <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">
+                Immutable security events & governance ledger
               </p>
             </div>
-            <div className="pt-3 text-xs font-semibold text-[#10b981] flex items-center gap-1">
+            <div className="pt-2 text-xs font-semibold text-[#10b981] flex items-center gap-1">
               <span>View ledger</span>
               <ArrowRightIcon size={11} />
             </div>
