@@ -316,15 +316,15 @@ export const TechnicianRoster: FC = () => {
         {/* ── High-Density Technicians Table ──────────────────────────────── */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
           <div className="w-full max-w-full overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs sm:text-[13px]">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
-                  <th className="py-2 px-3">Technician</th>
-                  <th className="py-2 px-3">Primary Trade</th>
-                  <th className="py-2 px-3">Credential Status</th>
-                  <th className="py-2 px-3">Branch</th>
-                  <th className="py-2 px-3">Availability</th>
-                  <th className="py-2 px-3 text-right">Action</th>
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
+                  <th className="py-2.5 px-3.5 sm:px-4">Technician</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Primary Trade</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Credential Status</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Branch</th>
+                  <th className="py-2.5 px-3.5 sm:px-4">Availability</th>
+                  <th className="py-2.5 px-3.5 sm:px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -352,51 +352,56 @@ export const TechnicianRoster: FC = () => {
                     return (
                       <tr key={tech.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
                         {/* 1. Technician Name & ID */}
-                        <td className="py-2 px-3">
-                          <div className="flex items-center gap-2">
-                            <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0">
+                        <td className="py-2.5 px-3.5 sm:px-4">
+                          <div className="flex items-center gap-2.5">
+                            <span className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-xs font-bold flex items-center justify-center shrink-0">
                               {tech.name.substring(0, 2).toUpperCase()}
                             </span>
-                            <span className="font-semibold text-[var(--text-primary)] truncate max-w-[130px]" title={tech.name}>
-                              {tech.name}
-                            </span>
-                            <span className="text-[10px] text-[var(--text-muted)] font-mono">({tech.employeeId})</span>
+                            <div>
+                              <span className="font-semibold text-[var(--text-primary)] text-xs sm:text-[13px] block truncate max-w-[160px]" title={tech.name}>
+                                {tech.name}
+                              </span>
+                              <span className="text-xs text-[var(--text-muted)] font-mono">{tech.employeeId}</span>
+                            </div>
                           </div>
                         </td>
 
                         {/* 2. Primary Trade */}
-                        <td className="py-2 px-3">
-                          <div className="font-medium text-[var(--text-primary)] truncate max-w-[150px]" title={`${primaryTrade} · ${tech.designation}`}>
+                        <td className="py-2.5 px-3.5 sm:px-4">
+                          <div className="font-medium text-[var(--text-primary)] text-xs sm:text-[13px] truncate max-w-[170px]" title={`${primaryTrade} · ${tech.designation}`}>
                             {primaryTrade}
+                          </div>
+                          <div className="text-xs text-[var(--text-muted)] truncate max-w-[170px]">
+                            {tech.designation}
                           </div>
                         </td>
 
                         {/* 3. Credential Status */}
-                        <td className="py-2 px-3 whitespace-nowrap">
+                        <td className="py-2.5 px-3.5 sm:px-4 whitespace-nowrap">
                           {hasVerifiedActive ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                              <BadgeCheckIcon size={11} className="text-emerald-500" />
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                              <BadgeCheckIcon size={13} className="text-emerald-500" />
                               Verified
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
-                              <AlertTriangleIcon size={11} className="text-amber-500" />
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                              <AlertTriangleIcon size={13} className="text-amber-500" />
                               Unverified
                             </span>
                           )}
                         </td>
 
                         {/* 4. Branch */}
-                        <td className="py-2 px-3 whitespace-nowrap">
-                          <span className="font-medium text-[var(--text-primary)]">{tech.branch}</span>
+                        <td className="py-2.5 px-3.5 sm:px-4 whitespace-nowrap">
+                          <span className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)]">{tech.branch}</span>
                         </td>
 
                         {/* 5. Availability */}
-                        <td className="py-2 px-3 whitespace-nowrap">
-                          <div className="flex items-center gap-1.5">
+                        <td className="py-2.5 px-3.5 sm:px-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
                             {getStatusBadge(tech.status)}
                             {tech.activeJobCount > 0 && (
-                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                              <span className={`text-xs font-bold px-2 py-0.5 rounded-md border ${
                                 tech.activeJobCount >= 3
                                   ? "bg-rose-500/10 text-rose-600 border-rose-500/20"
                                   : "bg-sky-500/10 text-sky-600 border-sky-500/20"
@@ -408,11 +413,11 @@ export const TechnicianRoster: FC = () => {
                         </td>
 
                         {/* 6. Action */}
-                        <td className="py-2 px-3 text-right whitespace-nowrap">
+                        <td className="py-2.5 px-3.5 sm:px-4 text-right whitespace-nowrap">
                           <button
                             type="button"
                             onClick={(e) => handleOpenInspect(tech, e)}
-                            className="px-2 py-0.5 rounded text-[11px] font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                            className="px-3 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
                           >
                             Passport
                           </button>
