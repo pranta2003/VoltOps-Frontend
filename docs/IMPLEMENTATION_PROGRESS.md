@@ -618,6 +618,39 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
+## Milestone 3.4: Landing Page Visual Refinement, Commercial Technician Visual & Single Light/Dark Toggle ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta`
+- **Commits on Branch `pranta`**:
+  - `32f4a0b` — `feat(landing): refine landing page with commercial technician hero visual, single light/dark toggle, 7 trades, and premium motion`
+- **Accomplishments**:
+  1. **Commercial Field-Service Hero Visual**:
+     - Replaced generic skyscraper building photograph with authentic commercial maintenance technician photograph (`/images/hero-technician.jpg`, 1376×768) inspecting facility switchgear equipment.
+     - Preserved dual-layer background architecture: fixed persistent background container + hero overlay with fine-tuned radial dark/light vignettes ensuring high text contrast.
+  2. **Single Light/Dark Icon Toggle**:
+     - Removed 3-pill inline button group; integrated reusable `<ThemeToggle />` component matching authenticated internal pages.
+     - Pure 2-state cycle between Light and Dark mode with Sun and Moon icons, accessible labels, and persistent `localStorage` storage.
+  3. **7 Canonical Technical Service Trades**:
+     - Standardized service catalog across all 7 canonical trades: Electrical & Power, AC/HVAC & Cooling, CCTV & Security, Networking & Hardware, IT & Software Support, Plumbing & Water Systems, and Facility Maintenance.
+     - Interactive trade spotlight in hero centerpiece updated to support all 7 trades with custom accent colors and common breakdown scenarios.
+     - Clean, balanced responsive grid displaying all 7 trade cards with arrival SLA badges and capability tags.
+  4. **Content Reduction & Truthful Copy**:
+     - Removed all fabricated claims (e.g., "4.9 / 5.0 Rating", "Trusted across 120+ facilities", "Live Status: Ready", mock customer testimonials).
+     - Replaced fake reviews with truthful **Operational Deployment & Regional Coverage Hubs** section highlighting Dhaka Central Hub, EPZ Industrial Core, and Chittagong Port Hub.
+     - Maintained strict SLA definitions across Plan A (8-Hour Daily Window, no physical SLA), Plan B (24/7 Standard, 40-min arrival SLA), Plan C (24/7 Priority, 20-min rapid arrival SLA), and Plan D (Custom Enterprise, negotiated terms with no invented SLA).
+  5. **Premium Motion & Interaction System**:
+     - Implemented dynamic top-edge scroll progress indicator (`h-[3px] bg-gradient-to-r from-[#10b981] via-[#34d399] to-[#38bdf8]`).
+     - Staggered entrance animations for hero elements, service cards, and regional hubs using `IntersectionObserver`.
+     - Preserved gentle floating levitation (`card-slow-float-0` through `4`) and interactive hover lift (`premium-card-motion`).
+     - Strictly enforced `prefers-reduced-motion` compliance.
+- **Verification**:
+  - `npx tsc --noEmit`: 0 errors.
+  - `npm test -- --run`: 35 / 35 tests passed.
+  - `npm run build` (`tsc && vite build`): 128 modules transformed in 4.31s with 0 errors.
+  - In-browser visual verification on Chrome DevTools (`http://localhost:5173/`): Desktop Light (1440×900), Desktop Dark (1440×900), Laptop (1366×768), Tablet (768×1024), Mobile (390×844), Small Mobile (360×800), and Full Page inspection. Zero console errors.
+
+---
+
 ## Role Portals & Core Screens Status (Verified in Code)
 
 | Screen | Route | Role | Figma Reference | Backend Status | Status |
