@@ -112,6 +112,16 @@ All forms, work orders, technician skill passports, schedules, matching rules, a
    - Personal branches are permanent team branches and must **never be deleted** after merge.
 7. **No Destructive Commands**: Never run `git push --force`, `git reset --hard`, or `git clean -fd` without explicit authorization.
 
+### Permanent Git Commit & Workflow Expectation (All Agents & Contributors)
+- **Daily Commit Target**: For every full productive coding day, target a minimum of **30 meaningful commits** (preferred target: **40 meaningful commits**).
+- **Incremental Commit Rhythm**: Commits must be made progressively throughout development—never saved up into a massive batch at the end of the session.
+- **Genuine Units of Work**: Every commit must represent an atomic, coherent, verifiable unit of work (e.g. table simplification, chart layout fix, token definition, test addition).
+- **Conventional Commits**: Strictly use standard conventional commit prefixes: `feat:`, `fix:`, `refactor:`, `style:`, `test:`, `docs:`, `chore:`.
+- **Integrity First — No Artificial Inflation**:
+  - Empty commits, duplicate commits, artificial file touches, splitting one trivial edit across multiple commits, or revert loops are strictly prohibited.
+  - If a specific small task genuinely contains only a few independent steps, commit honestly and explain the count; never compromise code quality or commit history to chase a number.
+- **Documentation Accounting**: Maintain daily accounting and commit hash ledgers in `docs/IMPLEMENTATION_PROGRESS.md`.
+
 ---
 
 ## 7. Design & Engineering Standards
