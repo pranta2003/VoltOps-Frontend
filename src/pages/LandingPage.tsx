@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, FormEvent, CSSProperties, FC } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useTheme, ThemePreference } from "../context/ThemeContext";
+import { useTheme } from "../context/ThemeContext";
+import { ThemeToggle } from "../components/ThemeToggle";
 import {
   IconProps,
   ZapIcon,
@@ -18,15 +19,13 @@ import {
   FileTextIcon,
   AlertTriangleIcon,
   RadioIcon,
-  SunIcon,
-  MoonIcon,
-  LaptopIcon,
   MailIcon,
   PhoneIcon,
   SettingsIcon,
+  LaptopIcon,
 } from "../components/Icons";
 
-// ── Viewport Scroll Reveal Hook for Pop-Up & Slow Motion Animations ───────
+// ── Viewport Scroll Reveal Hook for Entrance Animations ───────────────────
 function useSectionReveal() {
   const ref = useRef<HTMLDivElement | null>(null);
   const [revealed, setRevealed] = useState(false);
@@ -38,9 +37,8 @@ function useSectionReveal() {
       return;
     }
     const el = ref.current;
-    // Check if element is already within viewport on initial render
     const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight + 150) {
+    if (rect.top < window.innerHeight + 120) {
       setRevealed(true);
     }
 
@@ -53,7 +51,7 @@ function useSectionReveal() {
           }
         });
       },
-      { threshold: 0.05, rootMargin: "0px 0px 100px 0px" }
+      { threshold: 0.05, rootMargin: "0px 0px 80px 0px" }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -65,10 +63,11 @@ function useSectionReveal() {
 // ── Coverage Plan IDs ────────────────────────────────────────────────────
 export type PlanId = "8hr" | "247-standard" | "247-priority" | "custom";
 
-// ── 5 Core Commercial Service Trades (Simple, Non-AI, Plain English) ─────
+// ── 7 Canonical Commercial Service Trades ─────────────────────────────────
 interface ServiceTrade {
   id: string;
   title: string;
+  canonicalName: string;
   icon: FC<IconProps>;
   accentColor: string;
   glowClass: string;
@@ -81,116 +80,131 @@ interface ServiceTrade {
 
 const CORE_SERVICES: ServiceTrade[] = [
   {
-    id: "hvac",
-    title: "AC & Cooling",
-    icon: SnowflakeIcon,
-    accentColor: "#38bdf8",
-    glowClass: "glow-card-cyan",
-    badge: "AC / HVAC",
-    simpleIssue: "Chiller trips, split ACs, or gas leaks",
-    slaBadge: "20–40 Min",
-    simpleDesc: "Central chillers, cooling plants, and HVAC systems.",
-    simplePoints: ["Central ACs & Chillers", "Gas Leaks & Cooling", "Fast Part Replacement"],
-  },
-  {
     id: "electrical",
     title: "Electrical & Power",
+    canonicalName: "Electrical and power systems",
     icon: ZapIcon,
     accentColor: "#f59e0b",
     glowClass: "glow-card-amber",
     badge: "Electrical",
-    simpleIssue: "Breaker trips, outages, or generator fault",
+    simpleIssue: "Main switchgear trips, transformer faults, or ATS transfer failure",
     slaBadge: "20–40 Min",
-    simpleDesc: "Power restoration, backup generators, and electrical panels.",
+    simpleDesc: "Power restoration, backup generators, and distribution panels.",
     simplePoints: ["Backup Generators", "Main Breaker Trips", "Short Circuits & Wiring"],
+  },
+  {
+    id: "hvac",
+    title: "AC, HVAC & Cooling",
+    canonicalName: "AC, HVAC, and cooling",
+    icon: SnowflakeIcon,
+    accentColor: "#38bdf8",
+    glowClass: "glow-card-cyan",
+    badge: "AC / HVAC",
+    simpleIssue: "Chiller compressor trips, refrigerant leaks, or split AC faults",
+    slaBadge: "20–40 Min",
+    simpleDesc: "Central chillers, cooling plants, and air distribution systems.",
+    simplePoints: ["Central ACs & Chillers", "Refrigerant & Compressors", "Duct & Coil Maintenance"],
   },
   {
     id: "security",
     title: "CCTV & Security",
+    canonicalName: "CCTV and security",
     icon: ShieldCheckIcon,
     accentColor: "#a855f7",
     glowClass: "glow-card-purple",
     badge: "Security",
-    simpleIssue: "Cameras offline or door access stuck",
+    simpleIssue: "Surveillance feed dropouts, biometric door locks stuck, or NVR errors",
     slaBadge: "20–40 Min",
-    simpleDesc: "Surveillance cameras, biometric locks, and access control.",
-    simplePoints: ["Offline CCTV Cameras", "Biometric Door Access", "Gates & Security Alarms"],
+    simpleDesc: "Surveillance networks, biometric access control, and alarms.",
+    simplePoints: ["Offline CCTV Cameras", "Biometric Access Control", "Perimeter & Gate Sensors"],
   },
   {
-    id: "it",
-    title: "Internet & Network",
+    id: "networking",
+    title: "Networking & Hardware",
+    canonicalName: "Internet, networking, and hardware",
     icon: ServerIcon,
     accentColor: "#10b981",
     glowClass: "glow-card-emerald",
-    badge: "Network & IT",
-    simpleIssue: "Wi-Fi outage, router fault, or POS line down",
+    badge: "Networking",
+    simpleIssue: "Core switch outages, rack router failures, or fiber line issues",
     slaBadge: "20–40 Min",
-    simpleDesc: "Office networks, server rack switches, and line connectivity.",
-    simplePoints: ["Office Wi-Fi & Routers", "Server Racks & Switches", "Billing & POS Lines"],
+    simpleDesc: "Switch racks, server cabling, and enterprise network links.",
+    simplePoints: ["Managed Core Switches", "Server Rack Cabling", "POS & Enterprise Routers"],
+  },
+  {
+    id: "software",
+    title: "IT & Software Support",
+    canonicalName: "IT and software support",
+    icon: LaptopIcon,
+    accentColor: "#6366f1",
+    glowClass: "glow-card-indigo",
+    badge: "IT Support",
+    simpleIssue: "Workstation network lockouts, server backup failures, or OS crashes",
+    slaBadge: "20–40 Min",
+    simpleDesc: "On-site tech support, endpoint diagnostics, and server restores.",
+    simplePoints: ["On-Site System Recovery", "POS & Terminal Hardware", "Firewall & LAN Config"],
+  },
+  {
+    id: "plumbing",
+    title: "Plumbing & Water Systems",
+    canonicalName: "Plumbing and water systems",
+    icon: WrenchIcon,
+    accentColor: "#06b6d4",
+    glowClass: "glow-card-cyan",
+    badge: "Plumbing",
+    simpleIssue: "Riser pipe bursts, booster pump failures, or drainage backups",
+    slaBadge: "20–40 Min",
+    simpleDesc: "Water supply lines, booster pumps, and industrial piping.",
+    simplePoints: ["Water Pipe Bursts", "Booster Pump Repairs", "Drainage & Valve Systems"],
   },
   {
     id: "facility",
-    title: "Plumbing & Repairs",
-    icon: WrenchIcon,
+    title: "Facility Maintenance",
+    canonicalName: "Facility maintenance",
+    icon: BuildingIcon,
     accentColor: "#f43f5e",
-    glowClass: "glow-card-indigo",
-    badge: "Plumbing & Fixes",
-    simpleIssue: "Pipe bursts, jammed doors, or water leaks",
+    glowClass: "glow-card-amber",
+    badge: "Facility",
+    simpleIssue: "Automatic entrance doors jammed, roll-up shutter failure, or roof leaks",
     slaBadge: "20–40 Min",
-    simpleDesc: "Water supply lines, glass doors, and facility upkeep.",
-    simplePoints: ["Water Pipe Bursts", "Glass & Auto Doors", "General Building Upkeep"],
+    simpleDesc: "Automatic glass doors, structural fixtures, and general plant repairs.",
+    simplePoints: ["Auto & Roll-Up Doors", "Structural Repairs", "Preventative Inspections"],
   },
 ];
 
-// ── Workflow Steps ───────────────────────────────────────────────────────
+// ── 5 Operational Workflow Steps ──────────────────────────────────────────
 const WORKFLOW_STEPS = [
-  { step: 1, icon: FileTextIcon, title: "Choose a Plan", body: "Pick the coverage schedule and arrival time that fits your building." },
-  { step: 2, icon: AlertTriangleIcon, title: "Report Problem", body: "Select what is broken and tap submit from your phone or laptop." },
-  { step: 3, icon: CompassIcon, title: "Quick Review", body: "Our operations desk assigns the closest licensed expert in minutes." },
-  { step: 4, icon: ZapIcon, title: "Expert Arrives", body: "Your qualified technician physically arrives within 20 to 40 minutes." },
-  { step: 5, icon: CheckCircleIcon, title: "Job Done & Sign-off", body: "Approve the completed work and get a clear digital repair receipt." },
+  { step: 1, icon: FileTextIcon, title: "Select Coverage", body: "Choose a daily window and physical arrival SLA commitment for your facility." },
+  { step: 2, icon: AlertTriangleIcon, title: "Submit Request", body: "Select the breakdown trade and dispatch immediately from your phone or portal." },
+  { step: 3, icon: CompassIcon, title: "Verified Matching", body: "Dispatcher reviews candidate match scores across trade competency and proximity." },
+  { step: 4, icon: ZapIcon, title: "Technician Arrives", body: "Licensed technician physically arrives at your facility within 20 to 40 minutes." },
+  { step: 5, icon: CheckCircleIcon, title: "Digital Sign-Off", body: "Inspect work on site, approve completion, and receive deterministic billing." },
 ];
 
-// ── Theme Selector Component ─────────────────────────────────────────────
-function ThemeToggle() {
-  const { preference, setPreference } = useTheme();
-
-  const options: { value: ThemePreference; label: string; icon: FC<IconProps> }[] = [
-    { value: "light", label: "Light", icon: SunIcon },
-    { value: "dark", label: "Dark", icon: MoonIcon },
-    { value: "system", label: "System", icon: LaptopIcon },
-  ];
-
-  return (
-    <div
-      role="group"
-      aria-label="Theme"
-      className="flex items-center gap-0.5 rounded-full border border-[var(--border)] bg-[var(--bg-surface-2)] p-1 backdrop-blur-xl"
-    >
-      {options.map((o) => {
-        const Icon = o.icon;
-        const isActive = preference === o.value;
-        return (
-          <button
-            key={o.value}
-            type="button"
-            title={o.label}
-            aria-pressed={isActive}
-            onClick={() => setPreference(o.value)}
-            className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
-              isActive
-                ? "bg-[#10b981] text-[#06090e] dark:bg-[#10b981] dark:text-[#06090e] shadow-sm font-bold"
-                : "text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)]"
-            }`}
-          >
-            <Icon size={12} className="shrink-0" />
-            <span className="hidden sm:inline">{o.label}</span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+// ── 3 Regional Coverage Hubs ─────────────────────────────────────────────
+const REGIONAL_HUBS = [
+  {
+    name: "Dhaka Central Hub",
+    coverage: "Motijheel · Tejgaon · Gulshan · Banani · Dhanmondi",
+    description: "Rapid commercial complex response across Dhaka's corporate and banking corridors.",
+    sla: "20–40 Min SLA",
+    status: "Operational",
+  },
+  {
+    name: "EPZ Industrial Core",
+    coverage: "Savar · Ashulia · Gazipur Industrial Clusters",
+    description: "Heavy-duty power, HVAC, and facility maintenance for industrial plants and export zones.",
+    sla: "20–40 Min SLA",
+    status: "Operational",
+  },
+  {
+    name: "Chittagong Port Hub",
+    coverage: "Agrabad Commercial Area · Port Zone · Halishahar",
+    description: "Critical maritime logistics, refrigeration, and warehouse maintenance coordination.",
+    sla: "20–40 Min SLA",
+    status: "Operational",
+  },
+];
 
 // ── Logo Mark with Live Pulsing Energy ────────────────────────────────────
 function LogoMark({ size = 34 }: { size?: number }) {
@@ -200,12 +214,8 @@ function LogoMark({ size = 34 }: { size?: number }) {
       style={{ width: size, height: size }}
       aria-hidden="true"
     >
-      {/* Dynamic scanline shimmer effect on hover */}
       <span className="absolute -inset-full bg-gradient-to-r from-transparent via-white/30 to-transparent rotate-45 transform -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-      
-      {/* Live ambient pulse ring */}
       <span className="absolute inset-0 rounded-2xl border border-white/30 opacity-75 animate-pulse" />
-
       <ZapIcon size={Math.round(size * 0.52)} className="relative text-white drop-shadow transition-transform duration-300 group-hover:scale-110" />
     </div>
   );
@@ -241,14 +251,28 @@ export function LandingPage() {
   const { resolved } = useTheme();
   const isDark = resolved === "dark";
 
-  // Viewport scroll reveal hooks for dynamic pop-up & slow motion animations
+  // Viewport scroll reveal hooks
   const [servicesRef, servicesRevealed] = useSectionReveal();
   const [packagesRef, packagesRevealed] = useSectionReveal();
   const [workspacesRef, workspacesRevealed] = useSectionReveal();
+  const [hubsRef, hubsRevealed] = useSectionReveal();
 
   // Page title
   useEffect(() => {
-    document.title = "VoltOps | Field Service Coordination Platform";
+    document.title = "VoltOps | Field Service & Emergency Technician Coordination";
+  }, []);
+
+  // Top-edge scroll progress indicator
+  const [scrollProgress, setScrollProgress] = useState(0);
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        setScrollProgress(Math.min(100, Math.max(0, (window.scrollY / totalHeight) * 100)));
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Sticky nav shadow
@@ -263,17 +287,17 @@ export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Active Trade Spotlight in Hero Centerpiece
-  const [heroActiveTrade, setHeroActiveTrade] = useState<string>("hvac");
+  const [heroActiveTrade, setHeroActiveTrade] = useState<string>("electrical");
   const selectedTrade = CORE_SERVICES.find((s) => s.id === heroActiveTrade) || CORE_SERVICES[0];
   const SelectedIcon = selectedTrade.icon;
 
-  // Workflow step hover (hover-only)
+  // Workflow step hover
   const [hoveredStep, setHoveredStep] = useState<number | null>(null);
 
   // Plan comparison expand
   const [showMatrix, setShowMatrix] = useState(false);
 
-  // Contact form
+  // Contact form state
   const [contactDone, setContactDone] = useState(false);
   const [cName, setCName] = useState("");
   const [cEmail, setCEmail] = useState("");
@@ -305,18 +329,24 @@ export function LandingPage() {
       className="relative min-h-screen font-sans selection:bg-[#10b981] selection:text-[#06090e]"
       style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}
     >
-      {/* ── Fixed Persistent Page Background (Matching Hero Commercial Architecture) ── */}
+      {/* ── Scroll Progress Line ──────────────────────────────────────── */}
+      <div
+        className="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-[#10b981] via-[#34d399] to-[#38bdf8] z-[100] transition-all duration-75 ease-out"
+        style={{ width: `${scrollProgress}%` }}
+        aria-hidden="true"
+      />
+
+      {/* ── Persistent Background with Commercial Technician Visual ── */}
       <div
         className="fixed inset-0 pointer-events-none -z-10 bg-cover bg-center transition-opacity duration-700"
         style={{
-          backgroundImage: "url('/images/hero-building.jpg')",
+          backgroundImage: "url('/images/hero-technician.jpg')",
           backgroundAttachment: "fixed",
-          backgroundPosition: "center top",
+          backgroundPosition: "center 30%",
         }}
         aria-hidden="true"
       >
-        {/* Tint overlay ensuring cards glide cleanly while architectural towers remain visible */}
-        <div className="absolute inset-0 bg-[#f7f6f0]/65 dark:bg-[#06090e]/88 backdrop-blur-[2px] dark:backdrop-blur-[8px]" />
+        <div className="absolute inset-0 bg-[#f7f6f0]/80 dark:bg-[#06090e]/90 backdrop-blur-[2px] dark:backdrop-blur-[6px]" />
       </div>
 
       {/* ── Floating Pill Navigation ──────────────────────────────────── */}
@@ -329,14 +359,13 @@ export function LandingPage() {
           }`}
         >
           <div className="flex items-center justify-between">
-            {/* Logo + Brand with Live Status Indicator */}
+            {/* Logo + Brand with Live Pulse */}
             <a href="#" className="flex items-center gap-2.5 group shrink-0 focus-visible:outline-none">
               <LogoMark size={32} />
               <div className="flex items-center gap-1.5">
                 <span className="font-heading font-extrabold text-[17px] tracking-tight text-[var(--text-primary)] group-hover:text-emerald-500 transition-colors">
                   VoltOps
                 </span>
-                {/* Live pulsing online beacon */}
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -351,6 +380,7 @@ export function LandingPage() {
                 ["#dispatch", "Operations"],
                 ["#how", "How It Works"],
                 ["#packages", "Plans"],
+                ["#hubs", "Coverage Hubs"],
                 ["#about", "About"],
                 ["#contact", "Contact"],
               ].map(([href, label]) => (
@@ -364,7 +394,7 @@ export function LandingPage() {
               ))}
             </div>
 
-            {/* Desktop Right Actions */}
+            {/* Desktop Right Actions with Simple Light/Dark Toggle */}
             <div className="hidden lg:flex items-center gap-2.5">
               <ThemeToggle />
               <Link
@@ -383,34 +413,35 @@ export function LandingPage() {
             </div>
 
             {/* Mobile Toggle */}
-            <button
-              type="button"
-              onClick={() => setMenuOpen(!menuOpen)}
-              className={`lg:hidden p-2 rounded-full border ${borderColor} text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)]`}
-              aria-label="Toggle navigation"
-              aria-expanded={menuOpen}
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {menuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
+            <div className="lg:hidden flex items-center gap-2">
+              <ThemeToggle />
+              <button
+                type="button"
+                onClick={() => setMenuOpen(!menuOpen)}
+                className={`p-2 rounded-full border ${borderColor} text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)]`}
+                aria-label="Toggle navigation"
+                aria-expanded={menuOpen}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {menuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Mobile dropdown */}
           {menuOpen && (
             <div className={`lg:hidden pt-4 pb-2 border-t mt-3 ${borderColor} space-y-2`}>
-              <div className="pb-2 mb-2 flex justify-center">
-                <ThemeToggle />
-              </div>
               {[
                 ["#services", "Services"],
                 ["#dispatch", "Operations"],
                 ["#how", "How It Works"],
                 ["#packages", "Plans"],
+                ["#hubs", "Coverage Hubs"],
                 ["#about", "About"],
                 ["#contact", "Contact"],
               ].map(([href, label]) => (
@@ -444,16 +475,16 @@ export function LandingPage() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* ── HERO SECTION (PROJECT-RELEVANT COMMERCIAL ARCHITECTURE) ─────── */}
+      {/* ── HERO SECTION: COMMERCIAL FIELD-SERVICE PHOTOGRAPHY ─────────── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <header className="relative overflow-hidden pt-12 pb-24 lg:pt-16 lg:pb-32 text-center">
-        {/* Commercial Building Background — Rich, vivid, project relevant */}
+      <header className="relative overflow-hidden pt-12 pb-20 lg:pt-16 lg:pb-28 text-center">
+        {/* Commercial Technician Background Layer */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden -z-1">
           <div
-            className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 opacity-90 dark:opacity-65"
+            className="absolute inset-0 bg-cover bg-center transition-opacity duration-700 opacity-80 dark:opacity-55"
             style={{
-              backgroundImage: "url('/images/hero-building.jpg')",
-              backgroundPosition: "center 25%",
+              backgroundImage: "url('/images/hero-technician.jpg')",
+              backgroundPosition: "center 30%",
             }}
           />
           {/* Radial dark vignette around headline for razor-sharp readability */}
@@ -461,22 +492,21 @@ export function LandingPage() {
             className="absolute inset-0"
             style={{
               background: isDark
-                ? "radial-gradient(ellipse 85% 70% at 50% 35%, rgba(6,9,14,0.40) 0%, rgba(6,9,14,0.85) 60%, var(--bg-base) 100%)"
-                : "radial-gradient(ellipse 90% 75% at 50% 32%, rgba(247,246,240,0.85) 0%, rgba(247,246,240,0.60) 40%, rgba(247,246,240,0.25) 72%, var(--bg-base) 100%)",
+                ? "radial-gradient(ellipse 85% 70% at 50% 35%, rgba(6,9,14,0.45) 0%, rgba(6,9,14,0.85) 60%, var(--bg-base) 100%)"
+                : "radial-gradient(ellipse 90% 75% at 50% 32%, rgba(247,246,240,0.82) 0%, rgba(247,246,240,0.60) 40%, rgba(247,246,240,0.25) 72%, var(--bg-base) 100%)",
             }}
           />
-          {/* Bottom fade into page */}
-          <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-b from-transparent to-[var(--bg-base)]" />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-[var(--bg-base)]" />
         </div>
 
-        {/* Atmospheric ambient bokeh & glow (Emerald + Mint + Warm Amber) */}
-        <div className="hero-glow-blob-1 absolute top-0 left-1/2 -translate-x-1/2 w-[48rem] h-[34rem] rounded-full blur-[140px] pointer-events-none animate-ambient-drift" />
-        <div className="hero-glow-blob-2 absolute top-1/4 left-1/4 w-[36rem] h-[28rem] rounded-full blur-[120px] pointer-events-none animate-ambient-drift-rev" />
-        <div className="hero-glow-blob-3 absolute top-1/3 right-1/4 w-[32rem] h-[24rem] rounded-full blur-[110px] pointer-events-none animate-pulse-subtle" />
+        {/* Ambient glow blobs */}
+        <div className="hero-glow-blob-1 absolute top-0 left-1/2 -translate-x-1/2 w-[48rem] h-[32rem] rounded-full blur-[140px] pointer-events-none animate-ambient-drift" />
+        <div className="hero-glow-blob-2 absolute top-1/4 left-1/4 w-[36rem] h-[26rem] rounded-full blur-[120px] pointer-events-none animate-ambient-drift-rev" />
+        <div className="hero-glow-blob-3 absolute top-1/3 right-1/4 w-[30rem] h-[22rem] rounded-full blur-[110px] pointer-events-none animate-pulse-subtle" />
 
         <div className="relative max-w-6xl mx-auto px-5">
-          {/* Centered Editorial Headline with Italic Serif */}
-          <h1 className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[68px] tracking-tight leading-[1.08] text-[var(--text-primary)] max-w-4xl mx-auto drop-shadow-sm">
+          {/* Editorial Headline */}
+          <h1 className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[66px] tracking-tight leading-[1.08] text-[var(--text-primary)] max-w-4xl mx-auto drop-shadow-sm">
             Our platform simplifies your{" "}
             <span className="font-serif-italic font-normal">
               facility operations
@@ -484,15 +514,15 @@ export function LandingPage() {
           </h1>
 
           {/* Luminous, clean, refined subtitle */}
-          <p className="text-base sm:text-lg lg:text-xl font-heading font-medium text-slate-950 dark:text-slate-100 max-w-2xl mx-auto leading-relaxed mt-5 tracking-tight drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] dark:drop-shadow-none">
-            One unified subscription for building repairs — verified licensed technicians at your door in{" "}
+          <p className="text-base sm:text-lg lg:text-xl font-heading font-medium text-slate-950 dark:text-slate-100 max-w-2xl mx-auto leading-relaxed mt-4 tracking-tight drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)] dark:drop-shadow-none">
+            One unified subscription for commercial facility maintenance — certified technicians dispatched with guaranteed arrival in{" "}
             <span className="font-bold text-emerald-700 dark:text-[#34d399] underline decoration-emerald-500/50 underline-offset-4">
               20 to 40 minutes
             </span>.
           </p>
 
-          {/* Pill CTA Bar */}
-          <div className="flex flex-wrap items-center justify-center gap-3.5 pt-7">
+          {/* CTA Button Group */}
+          <div className="flex flex-wrap items-center justify-center gap-3.5 pt-6">
             <a
               href="#packages"
               className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-[#10b981] text-[#06090e] shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-[#34d399] hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all transform hover:-translate-y-0.5"
@@ -509,43 +539,46 @@ export function LandingPage() {
             </a>
           </div>
 
-          {/* ── 3-Element Elevated Centerpiece (Customer-Facing) ─────────── */}
-          <div className="mt-14 relative grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          {/* ── 3-Card Centerpiece Spotlight ────────────────────────────── */}
+          <div className="mt-12 relative grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
 
-            {/* Left Flanking Proof Card */}
+            {/* Left Card: Service Standards */}
             <div className="hidden lg:flex lg:col-span-3 flex-col justify-between text-left p-6 rounded-[28px] glass-panel glow-card-emerald">
               <div className="space-y-3">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                  Guaranteed Standards
+                  Service Standards
                 </span>
                 <div className="space-y-2.5">
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
-                    <span>5 Core Service Trades</span>
+                    <span>7 Canonical Trades</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
-                    <span>20 & 40-Min Physical Arrival</span>
+                    <span>20 & 40-Min Physical SLAs</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
-                    <span>Licensed & Verified Staff</span>
+                    <span>Verified Skill Passports</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
+                    <span>Human Dispatcher Review</span>
                   </div>
                 </div>
               </div>
 
               <div className="border-t border-[var(--border)] pt-4 mt-4 space-y-1">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
-                  <span className="text-amber-500">★★★★★</span>
-                  <span>4.9 / 5.0 Rating</span>
+                <div className="text-xs font-bold text-emerald-700 dark:text-[#34d399]">
+                  Verified Workforce Roster
                 </div>
                 <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
-                  Trusted across 120+ facilities
+                  Trade licenses and safety credentials checked before dispatch.
                 </p>
               </div>
             </div>
 
-            {/* Center Focal Card: Immediate Trade Readiness */}
+            {/* Center Card: Interactive Breakdown Trade Selector */}
             <div className="lg:col-span-6">
               <div
                 className="rounded-[32px] border border-[var(--border-strong)] p-6 sm:p-7 text-left relative glass-panel glow-card-emerald shadow-[var(--shadow-float)] flex flex-col justify-between h-full"
@@ -560,28 +593,28 @@ export function LandingPage() {
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse" />
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                      24/7 Rapid Response Desk
+                      Commercial Dispatch Center
                     </span>
                   </div>
                   <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#10b981]/20 text-[#10b981] dark:text-[#34d399] border border-[#10b981]/30">
-                    Live Status: Ready
+                    Active Operations
                   </span>
                 </div>
 
                 {/* Main Card Title */}
-                <div className="space-y-1.5 mb-5">
+                <div className="space-y-1 mb-4">
                   <h3 className="text-2xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white leading-tight">
                     Immediate help for{" "}
                     <span className="font-serif-italic font-normal">
-                      building repairs
+                      facility breakdowns
                     </span>
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-                    Select a service sector below to see how fast we arrive:
+                  <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                    Select a trade to view response times:
                   </p>
                 </div>
 
-                {/* Trade Selector Tabs */}
+                {/* 7-Trade Selector Tabs */}
                 <div className="flex gap-1.5 overflow-x-auto pb-2 mb-4 border-b border-[var(--border)] no-scrollbar">
                   {CORE_SERVICES.map((s) => {
                     const isActive = s.id === heroActiveTrade;
@@ -604,8 +637,8 @@ export function LandingPage() {
                   })}
                 </div>
 
-                {/* Selected Trade Preview Box (Simple, clear, easy to understand) */}
-                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-3 mb-5">
+                {/* Selected Trade Preview Box */}
+                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-3 mb-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2.5">
                       <div
@@ -640,15 +673,15 @@ export function LandingPage() {
                     </div>
                     <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-semibold">
                       <CheckCircleIcon size={14} className="shrink-0" />
-                      <span>Fast On-Site Arrival</span>
+                      <span>Guaranteed Physical Arrival</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Bottom Assurance Bar */}
-                <div className="flex items-center justify-between text-xs pt-3 border-t border-[var(--border)]">
+                <div className="flex items-center justify-between text-xs pt-2 border-t border-[var(--border)]">
                   <span className="font-semibold text-slate-700 dark:text-slate-300">
-                    Need emergency repair right now?
+                    Need emergency repair coverage?
                   </span>
                   <a
                     href="#packages"
@@ -661,17 +694,17 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Right Flanking Value Card */}
+            {/* Right Card: Arrival SLA Commitment */}
             <div className="hidden lg:flex lg:col-span-3 flex-col justify-between text-left p-6 rounded-[28px] glass-panel glow-card-amber">
               <div className="space-y-3">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                  Arrival Guarantee
+                  Arrival SLA Commitment
                 </span>
                 <h4 className="text-base font-bold font-heading text-slate-900 dark:text-white">
                   Physical presence on site.
                 </h4>
                 <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
-                  Our licensed technicians physically reach your facility within 20 or 40 minutes when an emergency strikes.
+                  Arrival SLA guarantees a certified technician is physically at your facility door, not an email acknowledgment.
                 </p>
               </div>
 
@@ -683,6 +716,10 @@ export function LandingPage() {
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-600 dark:text-slate-400">Plan B (Standard)</span>
                   <span className="font-bold text-slate-900 dark:text-white">40 Minutes</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-600 dark:text-slate-400">Plan A (Daily)</span>
+                  <span className="font-medium text-slate-500">8h Daily Window</span>
                 </div>
                 <a
                   href="#packages"
@@ -699,56 +736,56 @@ export function LandingPage() {
       </header>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
-      {/* ── Section 3: The 5 Core Service Sectors (Simple, Easy Names) ─── */}
+      {/* ── Section: The 7 Canonical Commercial Service Trades ─────────── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <section id="services" className="py-24 max-w-6xl mx-auto px-5">
-        <div className="text-center max-w-2xl mx-auto space-y-3 mb-16">
+      <section id="services" className="py-20 max-w-6xl mx-auto px-5">
+        <div className="text-center max-w-2xl mx-auto space-y-2.5 mb-14">
           <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
-            Our 5 Services
+            7 Supported Trades
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
-            What we fix for your{" "}
+            What we maintain for your{" "}
             <span className="font-serif-italic font-normal">
               facility
             </span>
           </h2>
-          <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300">
-            Simple, honest commercial trade coverage. Licensed technicians arrive in 20 to 40 minutes.
+          <p className="text-sm text-slate-700 dark:text-slate-300">
+            Standardized commercial coverage across 7 technical trades with 20–40 minute physical arrival targets.
           </p>
         </div>
 
-        {/* 5 Core Service Cards (Centered, Refined Typography, Pop-Up & Slow Motion) */}
-        <div ref={servicesRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 items-stretch">
+        {/* 7 Core Service Cards Grid */}
+        <div ref={servicesRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
           {CORE_SERVICES.map((trade, idx) => {
             const TradeIcon = trade.icon;
-            const isWide = idx >= 3;
+            const isLast = idx === 6;
             return (
               <div
                 key={trade.id}
-                className={`${isWide ? "lg:col-span-3" : "lg:col-span-2"} flex flex-col transition-all duration-700 ease-out ${
+                className={`${isLast ? "md:col-span-2 lg:col-span-3 xl:col-span-1" : ""} flex flex-col transition-all duration-700 ease-out ${
                   servicesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.97]"
                 }`}
-                style={{ transitionDelay: `${idx * 110}ms` }}
+                style={{ transitionDelay: `${idx * 80}ms` }}
               >
                 <div
-                  className={`h-full p-7 sm:p-8 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion ${trade.glowClass} flex flex-col items-center justify-between text-center shadow-[var(--shadow-sm)] group card-slow-float-${idx % 5}`}
+                  className={`h-full p-6 sm:p-7 rounded-[30px] border border-[var(--border)] glass-panel premium-card-motion ${trade.glowClass} flex flex-col items-center justify-between text-center shadow-[var(--shadow-sm)] group card-slow-float-${idx % 5}`}
                 >
-                  <div className="flex flex-col items-center text-center w-full space-y-4">
-                    {/* Centered Trade Icon with accent color glow */}
+                  <div className="flex flex-col items-center text-center w-full space-y-3.5">
+                    {/* Trade Icon */}
                     <div
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto transition-transform duration-500 group-hover:scale-110 shadow-sm"
+                      className="w-13 h-13 rounded-2xl flex items-center justify-center mx-auto transition-transform duration-500 group-hover:scale-110 shadow-sm p-3"
                       style={{
                         backgroundColor: `${trade.accentColor}18`,
                         color: trade.accentColor,
                         border: `1px solid ${trade.accentColor}35`,
                       }}
                     >
-                      <TradeIcon size={26} />
+                      <TradeIcon size={24} />
                     </div>
 
-                    {/* Centered SLA Badge */}
+                    {/* SLA Badge */}
                     <span
-                      className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider border mx-auto"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider border mx-auto"
                       style={{
                         borderColor: `${trade.accentColor}40`,
                         color: trade.accentColor,
@@ -758,37 +795,37 @@ export function LandingPage() {
                       <span>Arrival SLA · {trade.slaBadge}</span>
                     </span>
 
-                    {/* Centered Title & Minimal Description (Refined Modern Geometric Letterforms) */}
-                    <div className="space-y-1.5 pt-1">
-                      <h3 className="text-xl sm:text-[22px] font-bold font-service-title text-[var(--text-primary)] text-center">
+                    {/* Title & Description */}
+                    <div className="space-y-1 pt-1">
+                      <h3 className="text-lg sm:text-xl font-bold font-service-title text-[var(--text-primary)] text-center">
                         {trade.title}
                       </h3>
-                      <p className="text-[13px] text-slate-600 dark:text-slate-300 text-center leading-relaxed max-w-xs mx-auto font-normal">
+                      <p className="text-xs text-slate-600 dark:text-slate-300 text-center leading-relaxed font-normal">
                         {trade.simpleDesc}
                       </p>
                     </div>
 
-                    {/* Centered Example Scenario */}
-                    <div className="w-full py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-slate-700 dark:text-slate-300 text-center font-medium">
+                    {/* Example Scenario */}
+                    <div className="w-full py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[11px] text-slate-700 dark:text-slate-300 text-center font-medium">
                       "{trade.simpleIssue}"
                     </div>
 
-                    {/* Centered 3 Bullet Points */}
-                    <div className="w-full space-y-2 pt-3 border-t border-[var(--border)]">
+                    {/* Key Capability Points */}
+                    <div className="w-full space-y-1.5 pt-2 border-t border-[var(--border)]">
                       {trade.simplePoints.map((pt) => (
-                        <div key={pt} className="flex items-center justify-center gap-2 text-xs font-medium text-slate-800 dark:text-slate-200">
-                          <CheckCircleIcon size={14} className="text-emerald-500 shrink-0" />
+                        <div key={pt} className="flex items-center justify-center gap-1.5 text-xs font-medium text-slate-800 dark:text-slate-200">
+                          <CheckCircleIcon size={13} className="text-emerald-500 shrink-0" />
                           <span>{pt}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  {/* Centered Action Link / Button */}
-                  <div className="pt-5 border-t border-[var(--border)] mt-5 w-full">
+                  {/* Action Link */}
+                  <div className="pt-4 border-t border-[var(--border)] mt-4 w-full">
                     <a
                       href="#packages"
-                      className="w-full py-2.5 rounded-full text-xs font-semibold text-center border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#06090e] hover:bg-[#10b981] transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                      className="w-full py-2 rounded-full text-xs font-semibold text-center border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#06090e] hover:bg-[#10b981] transition-all flex items-center justify-center gap-1.5 shadow-sm"
                     >
                       <span>View Plans & SLAs</span>
                       <ArrowRightIcon size={12} />
@@ -801,47 +838,47 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Section 5: Operations Analytics & Audit Trail ──────────────── */}
-      <section id="dispatch" className="py-24 max-w-6xl mx-auto px-5">
-        <div className="text-center max-w-xl mx-auto space-y-3 mb-16">
+      {/* ── Section: Operations & Matching Engine Audit Trail ──────────── */}
+      <section id="dispatch" className="py-20 max-w-6xl mx-auto px-5">
+        <div className="text-center max-w-xl mx-auto space-y-2.5 mb-14">
           <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
-            Accountability
+            Dispatch Coordination
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
-            Transparent tracking{" "}
+            Transparent matching{" "}
             <span className="font-serif-italic font-normal">
-              for your peace of mind
+              & audit trail
             </span>
           </h2>
           <p className="text-sm text-slate-700 dark:text-slate-300">
-            Monitor real-time arrival progress and verified technician credentials for every job.
+            Deterministic matching based on trade skills, certifications, and proximity. Final dispatch confirmed by human operations desk.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
 
-          {/* Left Bento: Operations Summary */}
-          <div className="lg:col-span-6 p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
+          {/* Left Bento: Operations Dispatch Architecture */}
+          <div className="lg:col-span-6 p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald space-y-5">
+            <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border)]">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Facility Health</span>
-                <div className="text-2xl font-extrabold font-heading text-slate-900 dark:text-white mt-1">99.8% Uptime</div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Dispatch Architecture</span>
+                <div className="text-2xl font-extrabold font-heading text-slate-900 dark:text-white mt-0.5">Deterministic Matching</div>
               </div>
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#10b981]/20 text-[#10b981] dark:text-[#34d399]">
-                Active Cycle
+                Advisory AI + Human
               </span>
             </div>
 
             <div className="space-y-3">
               {[
-                { label: "Preventative Maintenance", val: "100% on schedule", progress: 100, color: "#10b981" },
-                { label: "Arrival SLA Compliance", val: "0 Breaches across 42 jobs", progress: 100, color: "#34d399" },
-                { label: "Licensed Technician Coverage", val: "100% verified credentials", progress: 100, color: "#38bdf8" },
+                { label: "Trade Skill & License Verification", val: "Hard eligibility gate", progress: 100, color: "#10b981" },
+                { label: "Proximity & Hub Routing", val: "Branch hub proximity score", progress: 85, color: "#34d399" },
+                { label: "Active Workload Balancing", val: "Max 2 active jobs per tech", progress: 75, color: "#38bdf8" },
               ].map(({ label, val, progress, color }) => (
                 <div key={label} className="p-3.5 rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1.5">
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-slate-900 dark:text-white">{label}</span>
-                    <span className="text-slate-600 dark:text-slate-400">{val}</span>
+                    <span className="text-slate-600 dark:text-slate-400 text-[11px]">{val}</span>
                   </div>
                   <div className="w-full bg-[var(--border)] h-1.5 rounded-full overflow-hidden">
                     <div className="h-full rounded-full" style={{ width: `${progress}%`, background: color }} />
@@ -849,17 +886,21 @@ export function LandingPage() {
                 </div>
               ))}
             </div>
+
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed pt-2 border-t border-[var(--border)]">
+              VoltOps strictly requires human dispatcher confirmation for all job assignments. Automated engines provide transparent scoring and candidate explanations only.
+            </p>
           </div>
 
-          {/* Right Bento: Transparent Candidate Evaluation */}
+          {/* Right Bento: Candidate Audit Evaluation */}
           <div className="lg:col-span-6 p-7 rounded-[32px] border border-[var(--border)] glass-panel space-y-4">
-            <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
+            <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border)]">
               <div>
-                <h3 className="font-bold font-heading text-base text-slate-900 dark:text-white">Candidate Audit Trail</h3>
-                <span className="text-xs text-slate-600 dark:text-slate-400">Live match review — Work Order Dispatch</span>
+                <h3 className="font-bold font-heading text-base text-slate-900 dark:text-white">Matching Engine Audit</h3>
+                <span className="text-xs text-slate-600 dark:text-slate-400">Live candidate ranking preview</span>
               </div>
               <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-[var(--bg-surface-2)] text-[#10b981] dark:text-[#34d399] border border-[var(--border)]">
-                Verified Matching
+                Verified Roster
               </span>
             </div>
 
@@ -871,12 +912,12 @@ export function LandingPage() {
                   <span className="font-bold text-sm text-slate-900 dark:text-white">Tanvir Hasan</span>
                 </div>
                 <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
-                  91% Match
+                  91% Match Score
                 </span>
               </div>
-              <p className="text-xs text-slate-700 dark:text-slate-300">Certified CCTV & NVR Specialist · Tejgaon · 0 active jobs</p>
+              <p className="text-xs text-slate-700 dark:text-slate-300">Certified CCTV & NVR Specialist · Tejgaon Hub · 0 active jobs</p>
               <div className="flex gap-3 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
-                <span>✓ Safety Cert</span><span>✓ Free Now</span><span>✓ 2.1 km away</span>
+                <span>✓ Active License</span><span>✓ Standby Available</span><span>✓ 2.1 km away</span>
               </div>
             </div>
 
@@ -885,7 +926,7 @@ export function LandingPage() {
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm text-slate-800 dark:text-slate-200">Mehedi Zaman</span>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
-                  78% Match
+                  78% Match Score
                 </span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Security Tech · 1 active job in Banani</p>
@@ -896,22 +937,22 @@ export function LandingPage() {
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm text-slate-600 dark:text-slate-400">Nayeem Islam</span>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400">
-                  Ineligible
+                  Disqualified
                 </span>
               </div>
-              <p className="text-xs text-red-600 dark:text-red-400 mt-1">✕ Certification expired (filtered automatically)</p>
+              <p className="text-xs text-red-600 dark:text-red-400 mt-1">✕ Trade license expired (filtered by hard rule)</p>
             </div>
           </div>
 
         </div>
       </section>
 
-      {/* ── Section 6: How It Works (High Contrast Light & Dark) ────────── */}
-      <section id="how" className="py-24 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+      {/* ── Section: How It Works ─────────────────────────────────────── */}
+      <section id="how" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
         <div className="max-w-6xl mx-auto px-5">
-          <div className="text-center max-w-xl mx-auto space-y-3 mb-16">
+          <div className="text-center max-w-xl mx-auto space-y-2.5 mb-14">
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
-              Simple Steps
+              Coordination Workflow
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
               How VoltOps resolves{" "}
@@ -940,7 +981,7 @@ export function LandingPage() {
                   }`}
                 >
                   <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-all shadow-sm"
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-all shadow-sm"
                     style={{
                       background: isHov ? "#10b981" : "var(--bg-surface-2)",
                       color: isHov ? "#06090e" : "var(--text-primary)",
@@ -951,7 +992,7 @@ export function LandingPage() {
                   <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-[#34d399] mb-1">
                     Step 0{step}
                   </div>
-                  <h3 className="font-bold font-heading text-sm text-[var(--text-primary)] mb-2">{title}</h3>
+                  <h3 className="font-bold font-heading text-sm text-[var(--text-primary)] mb-1.5">{title}</h3>
                   <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-normal">{body}</p>
                 </div>
               );
@@ -960,9 +1001,9 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Section 7: Subscription Plans ──────────────────────────────── */}
-      <section id="packages" className="py-24 max-w-6xl mx-auto px-5">
-        <div className="text-center max-w-2xl mx-auto space-y-3 mb-8">
+      {/* ── Section: Subscription Coverage Plans ──────────────────────── */}
+      <section id="packages" className="py-20 max-w-6xl mx-auto px-5">
+        <div className="text-center max-w-2xl mx-auto space-y-2.5 mb-8">
           <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
             Coverage Plans
           </span>
@@ -973,23 +1014,23 @@ export function LandingPage() {
             </span>
           </h2>
           <p className="text-sm text-slate-700 dark:text-slate-300">
-            All plans include qualified coordination across all five service trades.
+            All plans include qualified coordination across all seven service trades.
           </p>
         </div>
 
-        {/* SLA clarification */}
+        {/* SLA Clarification Banner */}
         <div
-          className="max-w-2xl mx-auto mb-12 p-4 rounded-2xl border text-xs sm:text-sm flex items-start gap-3 glass-panel"
+          className="max-w-2xl mx-auto mb-10 p-4 rounded-2xl border text-xs sm:text-sm flex items-start gap-3 glass-panel"
           style={{ borderColor: "var(--border-strong)" }}
         >
           <ClockIcon size={18} className="shrink-0 text-[#10b981] mt-0.5" />
           <div className="text-slate-800 dark:text-slate-200">
-            <strong className="text-slate-900 dark:text-white">What does "arrival SLA" mean?</strong>{" "}
-            The assigned technician physically arrives at your facility within the stated window — not merely an email acknowledgement.
+            <strong className="text-slate-900 dark:text-white">Physical Arrival SLA:</strong>{" "}
+            Guarantees certified technician presence physically on site at your facility within the stated window — not email acknowledgment and not repair completion.
           </div>
         </div>
 
-        {/* 4 Plan Cards (Pop-Up & Slow Motion) */}
+        {/* 4 Plan Cards */}
         <div ref={packagesRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch">
 
           {/* Plan A: 8-Hour Daily */}
@@ -999,29 +1040,33 @@ export function LandingPage() {
             }`}
             style={{ transitionDelay: "0ms" }}
           >
-            <div className="h-full p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] card-slow-float-0">
-              <div className="space-y-4">
+            <div className="h-full p-6 sm:p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] card-slow-float-0">
+              <div className="space-y-3.5">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">8-Hour Daily</h3>
                   <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-slate-600 dark:text-slate-400">
                     Plan A
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400">Defined daily operational window</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Standard business operational window</p>
 
-                <div className="py-4 border-y border-[var(--border)]">
-                  <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing to be announced</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">8 hours per day coverage</div>
+                <div className="py-3.5 border-y border-[var(--border)]">
+                  <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing upon request</div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">08:00 – 16:00 operational window</div>
                 </div>
 
                 <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                  <span className="text-xs text-slate-600 dark:text-slate-400 block">Coverage window:</span>
-                  <span className="text-base font-bold text-slate-900 dark:text-white">8 hours per day</span>
+                  <span className="text-xs text-slate-600 dark:text-slate-400 block">Arrival SLA commitment:</span>
+                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">No physical arrival SLA</span>
                 </div>
 
-                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                  For businesses that operate during standard daily hours. Contact us for custom shift arrangements.
-                </p>
+                <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
+                  {["All 7 technical trades covered", "Scheduled daytime repairs", "Human dispatcher assignment"].map((b) => (
+                    <li key={b} className="flex items-center gap-2">
+                      <CheckIcon className="w-3.5 h-3.5 text-emerald-500" />{b}
+                    </li>
+                  ))}
+                </ul>
               </div>
 
               <button
@@ -1039,20 +1084,20 @@ export function LandingPage() {
             className={`flex flex-col transition-all duration-700 ease-out ${
               packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.97]"
             }`}
-            style={{ transitionDelay: "130ms" }}
+            style={{ transitionDelay: "120ms" }}
           >
-            <div className="h-full p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] card-slow-float-1">
-              <div className="space-y-4">
+            <div className="h-full p-6 sm:p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] card-slow-float-1">
+              <div className="space-y-3.5">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">24/7 Standard</h3>
                   <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
                     Plan B
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400">Round-the-clock reliable coverage</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Round-the-clock facility coverage</p>
 
-                <div className="py-4 border-y border-[var(--border)]">
-                  <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing to be announced</div>
+                <div className="py-3.5 border-y border-[var(--border)]">
+                  <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing upon request</div>
                   <div className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">★ 24 hours · 7 days a week</div>
                 </div>
 
@@ -1061,8 +1106,8 @@ export function LandingPage() {
                   <span className="text-base font-bold text-emerald-700 dark:text-emerald-400">Within 40 minutes on site</span>
                 </div>
 
-                <ul className="space-y-2 text-xs text-slate-800 dark:text-slate-200 font-medium">
-                  {["All 5 service trades covered", "Human dispatcher verification every job", "Digital job history & itemised invoices"].map((b) => (
+                <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
+                  {["All 7 technical trades covered", "40-min physical arrival SLA", "Digital repair logs & receipts"].map((b) => (
                     <li key={b} className="flex items-center gap-2">
                       <CheckIcon className="w-3.5 h-3.5 text-emerald-500" />{b}
                     </li>
@@ -1080,31 +1125,31 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Plan C: 24/7 Priority — FEATURED WITH EMERALD GLOW */}
+          {/* Plan C: 24/7 Priority */}
           <div
             className={`flex flex-col transition-all duration-700 ease-out ${
               packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.97]"
             }`}
-            style={{ transitionDelay: "260ms" }}
+            style={{ transitionDelay: "240ms" }}
           >
-            <div className="h-full p-7 rounded-[32px] border-2 border-[#10b981] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between relative shadow-[0_0_32px_rgba(16,185,129,0.22)] card-slow-float-2">
+            <div className="h-full p-6 sm:p-7 rounded-[32px] border-2 border-[#10b981] glass-panel glow-card-emerald premium-card-motion flex flex-col justify-between relative shadow-[0_0_32px_rgba(16,185,129,0.22)] card-slow-float-2">
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#10b981] text-[#06090e] text-xs font-bold uppercase tracking-wider shadow flex items-center gap-1">
                 <ZapIcon size={12} />
                 <span>Fastest Response</span>
               </div>
 
-              <div className="space-y-4 mt-2">
+              <div className="space-y-3.5 mt-2">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">24/7 Priority</h3>
                   <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-[#10b981]/20 text-[#10b981] dark:text-[#34d399] border border-[#10b981]/40">
                     Plan C
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400">For time-critical facilities</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Time-critical commercial complexes</p>
 
-                <div className="py-4 border-y border-[var(--border)]">
-                  <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing to be announced</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">24/7 · 2× faster arrival SLA</div>
+                <div className="py-3.5 border-y border-[var(--border)]">
+                  <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing upon request</div>
+                  <div className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">24/7 · 2× faster arrival SLA</div>
                 </div>
 
                 <div className="p-3.5 rounded-2xl border border-[#10b981]/40 bg-[#10b981]/10">
@@ -1112,8 +1157,8 @@ export function LandingPage() {
                   <span className="text-xl font-extrabold font-heading text-slate-900 dark:text-white">Within 20 minutes on site</span>
                 </div>
 
-                <ul className="space-y-2 text-xs">
-                  {["20-min rapid arrival (2× faster)", "Top-tier emergency dispatcher priority", "Full asset service history & alerts"].map((b, i) => (
+                <ul className="space-y-1.5 text-xs">
+                  {["20-min rapid arrival (2× faster)", "Top emergency dispatch priority", "All 7 service trades covered"].map((b, i) => (
                     <li key={b} className={`flex items-center gap-2 ${i === 0 ? "font-bold text-slate-900 dark:text-white" : "text-slate-800 dark:text-slate-200"}`}>
                       <CheckIcon className="w-3.5 h-3.5 text-[#10b981]" />{b}
                     </li>
@@ -1137,30 +1182,30 @@ export function LandingPage() {
             className={`flex flex-col transition-all duration-700 ease-out ${
               packagesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.97]"
             }`}
-            style={{ transitionDelay: "390ms" }}
+            style={{ transitionDelay: "360ms" }}
           >
-            <div className="h-full p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] card-slow-float-3">
-              <div className="space-y-4">
+            <div className="h-full p-6 sm:p-7 rounded-[32px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)] card-slow-float-3">
+              <div className="space-y-3.5">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold font-card-title text-slate-900 dark:text-white">Custom Coverage</h3>
                   <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-slate-600 dark:text-slate-400">
                     Plan D
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400">Tailored to your requirements</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400">Tailored enterprise shift schedules</p>
 
-                <div className="py-4 border-y border-[var(--border)]">
-                  <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Pricing upon review</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Discussed after review</div>
+                <div className="py-3.5 border-y border-[var(--border)]">
+                  <div className="text-lg font-extrabold font-heading text-slate-900 dark:text-white">Negotiated Terms</div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Bespoke shifts & SLA window</div>
                 </div>
 
                 <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                  <span className="text-xs text-slate-600 dark:text-slate-400 block">Example schedules:</span>
-                  <span className="text-sm font-bold text-slate-900 dark:text-white">6, 8, or 16 hours/day</span>
+                  <span className="text-xs text-slate-600 dark:text-slate-400 block">Example shifts:</span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">6, 8, 12, or 16 hours/day</span>
                 </div>
 
                 <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                  Request a tailored schedule matching your facility shift hours. SLAs confirmed after requirements review.
+                  Tailored schedule matching multi-facility shifts. SLAs and pricing confirmed after requirements review.
                 </p>
               </div>
 
@@ -1177,7 +1222,7 @@ export function LandingPage() {
         </div>
 
         {/* Expandable Comparison Matrix */}
-        <div className="mt-12 text-center">
+        <div className="mt-10 text-center">
           <button
             type="button"
             onClick={() => setShowMatrix(!showMatrix)}
@@ -1193,27 +1238,27 @@ export function LandingPage() {
               <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)]">
-                    <th className="py-4 px-5 font-semibold text-slate-900 dark:text-white">Feature</th>
+                    <th className="py-4 px-5 font-semibold text-slate-900 dark:text-white">Coverage Dimension</th>
                     <th className="py-4 px-5 font-semibold text-slate-700 dark:text-slate-300">Plan A · 8-Hour</th>
-                    <th className="py-4 px-5 font-semibold text-slate-700 dark:text-slate-300">Plan B · 24/7 Std</th>
+                    <th className="py-4 px-5 font-semibold text-slate-700 dark:text-slate-300">Plan B · 24/7 Standard</th>
                     <th className="py-4 px-5 font-bold text-[#10b981] dark:text-[#34d399]">Plan C · 24/7 Priority</th>
                     <th className="py-4 px-5 font-semibold text-slate-700 dark:text-slate-300">Plan D · Custom</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
                   {[
-                    ["Coverage Window", "8 hours / day", "24/7", "24/7", "Tailored schedule"],
-                    ["Arrival SLA", "Not specified", "40 minutes", "20 minutes (2×)", "To be confirmed"],
-                    ["Service Trades", "All 5", "All 5", "All 5", "All 5"],
-                    ["Dispatcher Type", "Human dispatcher", "Human dispatcher", "Emergency priority", "Human dispatcher"],
-                    ["Pricing", "To be announced", "To be announced", "To be announced", "Upon review"],
+                    ["Operational Window", "08:00 – 16:00 Daily", "24/7 Round-the-clock", "24/7 Priority", "Bespoke shift window"],
+                    ["Physical Arrival SLA", "No physical arrival SLA", "40-minute arrival", "20-minute rapid arrival (2×)", "Negotiated terms"],
+                    ["Technical Trades", "All 7 canonical trades", "All 7 canonical trades", "All 7 canonical trades", "All 7 canonical trades"],
+                    ["Dispatcher Assignment", "Human dispatcher", "Human dispatcher", "Priority emergency queue", "Dedicated enterprise desk"],
+                    ["Contract Pricing", "Pricing upon request", "Pricing upon request", "Pricing upon request", "Quoted after facility review"],
                   ].map(([feat, a, b, c, d]) => (
                     <tr key={feat as string}>
-                      <td className="py-3.5 px-5 font-medium text-slate-900 dark:text-white">{feat}</td>
-                      <td className="py-3.5 px-5 text-slate-600 dark:text-slate-400">{a}</td>
-                      <td className="py-3.5 px-5 text-slate-600 dark:text-slate-400">{b}</td>
-                      <td className="py-3.5 px-5 font-bold text-[#10b981] dark:text-[#34d399]">{c}</td>
-                      <td className="py-3.5 px-5 text-slate-600 dark:text-slate-400">{d}</td>
+                      <td className="py-3 px-5 font-medium text-slate-900 dark:text-white">{feat}</td>
+                      <td className="py-3 px-5 text-slate-600 dark:text-slate-400">{a}</td>
+                      <td className="py-3 px-5 text-slate-600 dark:text-slate-400">{b}</td>
+                      <td className="py-3 px-5 font-bold text-[#10b981] dark:text-[#34d399]">{c}</td>
+                      <td className="py-3 px-5 text-slate-600 dark:text-slate-400">{d}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1223,10 +1268,60 @@ export function LandingPage() {
         )}
       </section>
 
-      {/* ── Section 8: Role Workspaces (High Contrast Light & Dark) ──────── */}
-      <section className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+      {/* ── Section: Regional Coverage Hubs (Replacing Unsupported Reviews) ── */}
+      <section id="hubs" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
         <div className="max-w-6xl mx-auto px-5">
-          <div className="text-center max-w-xl mx-auto mb-14 space-y-3">
+          <div className="text-center max-w-xl mx-auto mb-12 space-y-2.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
+              Regional Hubs
+            </span>
+            <h2 className="text-3xl font-extrabold font-heading text-[var(--text-primary)]">
+              Operational coverage deployment
+            </h2>
+            <p className="text-sm text-slate-700 dark:text-slate-300">
+              Stationed regional dispatch teams maintaining 20–40 minute physical arrival targets across major commercial corridors.
+            </p>
+          </div>
+
+          <div ref={hubsRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {REGIONAL_HUBS.map((hub, idx) => (
+              <div
+                key={hub.name}
+                className={`transition-all duration-700 ease-out flex flex-col ${
+                  hubsRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.97]"
+                }`}
+                style={{ transitionDelay: `${idx * 110}ms` }}
+              >
+                <div className="h-full p-6 sm:p-7 rounded-[28px] border border-[var(--border)] glass-panel premium-card-motion flex flex-col justify-between shadow-[var(--shadow-sm)]">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#10b981] dark:text-[#34d399]">
+                        <MapPinIcon size={20} />
+                      </div>
+                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                        {hub.sla}
+                      </span>
+                    </div>
+                    <h3 className="font-bold font-card-title text-lg text-[var(--text-primary)]">{hub.name}</h3>
+                    <div className="text-xs font-semibold text-emerald-700 dark:text-[#34d399]">{hub.coverage}</div>
+                    <p className="text-xs leading-relaxed text-[var(--text-secondary)]">{hub.description}</p>
+                  </div>
+
+                  <div className="pt-4 border-t border-[var(--border)] mt-4 flex items-center justify-between text-xs">
+                    <span className="text-slate-600 dark:text-slate-400">Status</span>
+                    <span className="font-bold text-[#10b981] dark:text-[#34d399]">Active Standby Roster</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section: Role Workspaces ────────────────────────────────────── */}
+      <section className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface)]">
+        <div className="max-w-6xl mx-auto px-5">
+          <div className="text-center max-w-xl mx-auto mb-12 space-y-2.5">
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
               Role Workspaces
             </span>
@@ -1236,7 +1331,7 @@ export function LandingPage() {
           </div>
           <div ref={workspacesRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
-              { icon: BuildingIcon, title: "Business Customer", body: "Submit problems, monitor arrival countdowns, review equipment history, and approve digital invoices.", glow: "glow-card-emerald" },
+              { icon: BuildingIcon, title: "Commercial Customer", body: "Submit problems, monitor arrival countdowns, review equipment history, and approve digital invoices.", glow: "glow-card-emerald" },
               { icon: RadioIcon, title: "Dispatcher Console", body: "Review incoming requests, compare candidates with transparent scores, enforce SLAs, and confirm assignments.", glow: "glow-card-amber" },
               { icon: WrenchIcon, title: "Field Technician", body: "Access today's job roster, update travel and on-site progress, manage certifications, and report completion.", glow: "glow-card-cyan" },
               { icon: SettingsIcon, title: "Administrator", body: "Oversee workforce accounts, review audit trails, monitor SLA breach reports, and configure service boundaries.", glow: "glow-card-indigo" },
@@ -1246,7 +1341,7 @@ export function LandingPage() {
                 className={`transition-all duration-700 ease-out flex flex-col ${
                   workspacesRevealed ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[0.97]"
                 }`}
-                style={{ transitionDelay: `${idx * 110}ms` }}
+                style={{ transitionDelay: `${idx * 90}ms` }}
               >
                 <div
                   className={`h-full p-6 rounded-[28px] border border-[var(--border)] glass-panel premium-card-motion ${glow} shadow-[var(--shadow-sm)] card-slow-float-${idx}`}
@@ -1263,8 +1358,8 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Section 9: About VoltOps ─────────────────────────────────────── */}
-      <section id="about" className="py-24 max-w-6xl mx-auto px-5">
+      {/* ── Section: About VoltOps ───────────────────────────────────────── */}
+      <section id="about" className="py-20 max-w-6xl mx-auto px-5">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-6 space-y-3 text-left">
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
@@ -1273,15 +1368,18 @@ export function LandingPage() {
             <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)] leading-tight">
               Built for commercial{" "}
               <span className="font-serif-italic font-normal">
-                field service coordination
+                facility coordination
               </span>
             </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              We bridge commercial facility managers with verified multi-trade technicians, eliminating the frustration of unverified independent contractors and unpredictable arrival delays.
+            </p>
           </div>
           <div className="lg:col-span-6 space-y-3.5">
             {[
               { title: "No uncertified technicians", body: "Trade licenses and safety credentials are confirmed before assignment." },
-              { title: "No double bookings", body: "Live location and route matching prevent delayed arrivals." },
-              { title: "Real accountability", body: "Transparent arrival tracking and digital itemized repair logs." },
+              { title: "No double bookings", body: "Active jobs and proximity matching prevent overlapping assignments." },
+              { title: "Real accountability", body: "Transparent physical arrival tracking and digital itemized repair logs." },
             ].map(({ title, body }) => (
               <div key={title} className="p-5 rounded-2xl border border-[var(--border)] glass-panel space-y-1 shadow-[var(--shadow-sm)]">
                 <div className="flex items-center gap-2 font-bold text-sm text-[var(--text-primary)]">
@@ -1295,81 +1393,19 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Customer Feedback / Testimonials (Relocated right before Contact) ── */}
-      <section className="py-24 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
-        <div className="max-w-6xl mx-auto px-5">
-          <div className="text-center max-w-xl mx-auto space-y-3 mb-16">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
-              Customer Feedback
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
-              What facilities say{" "}
-              <span className="font-serif-italic font-normal">
-                about VoltOps
-              </span>
-            </h2>
-            <p className="text-sm text-slate-700 dark:text-slate-300">
-              Real results from managers who rely on our guaranteed arrival SLAs.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[
-              {
-                quote: "When our AC chiller stopped at 2 PM, VoltOps had an engineer on site in 18 minutes. It saved our ground floor stores.",
-                author: "Tarek Mansoor",
-                role: "Operations Director · Apex Retail",
-                glow: "glow-card-cyan",
-              },
-              {
-                quote: "No more calling 10 contractors. One ticket, and a licensed electrician is on site in 20 minutes.",
-                author: "Sadia Rahman",
-                role: "Plant Head · ABC Manufacturing",
-                glow: "glow-card-emerald",
-              },
-              {
-                quote: "Having digital service logs and verified technician licenses has made our safety audits completely stress-free.",
-                author: "Kabir Hossain",
-                role: "Security Director · Northstar Logistics",
-                glow: "glow-card-amber",
-              },
-              {
-                quote: "Our billing switches failed on a busy Friday. VoltOps arrived in 9 mins with the exact replacement switch.",
-                author: "Farhan Ali",
-                role: "IT Lead · Metro Mart",
-                glow: "glow-card-indigo",
-              },
-            ].map(({ quote, author, role, glow }, idx) => (
-              <div
-                key={idx}
-                className={`p-6 rounded-[28px] border border-[var(--border)] glass-panel ${glow} flex flex-col justify-between hover:-translate-y-1 transition-all shadow-[var(--shadow-sm)]`}
-              >
-                <p className="text-xs leading-relaxed text-slate-800 dark:text-slate-200 italic font-medium">
-                  "{quote}"
-                </p>
-                <div className="pt-4 border-t border-[var(--border)] mt-4">
-                  <div className="font-bold text-xs text-slate-900 dark:text-white">{author}</div>
-                  <div className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5">{role}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Section 10: Contact & Direct Inquiries ───────────────────────── */}
-      <section id="contact" className="py-24 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+      {/* ── Section: Contact & Inquiries ─────────────────────────────────── */}
+      <section id="contact" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
         <div className="max-w-6xl mx-auto px-5">
           {/* Banner */}
           <div
-            className="p-8 sm:p-12 rounded-[32px] flex flex-col md:flex-row items-center justify-between gap-6 glass-panel glow-card-emerald mb-16 border border-[#10b981]/40"
+            className="p-8 sm:p-10 rounded-[32px] flex flex-col md:flex-row items-center justify-between gap-6 glass-panel glow-card-emerald mb-14 border border-[#10b981]/40"
           >
             <div className="space-y-2 text-center md:text-left">
               <h2 className="text-2xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white">
                 Ready to safeguard your facility operations?
               </h2>
               <p className="text-sm text-slate-700 dark:text-slate-300">
-                Select a coverage plan or discuss a custom schedule with our team.
+                Select a coverage plan or discuss bespoke multi-site requirements.
               </p>
             </div>
             <a
@@ -1381,25 +1417,25 @@ export function LandingPage() {
             </a>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 text-left">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 text-left">
             {/* Contact info */}
-            <div className="lg:col-span-5 space-y-5">
+            <div className="lg:col-span-5 space-y-4">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
                   Direct Inquiries
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-bold font-heading mt-2 text-slate-900 dark:text-white">
+                <h2 className="text-2xl sm:text-3xl font-bold font-heading mt-1.5 text-slate-900 dark:text-white">
                   Talk with our team
                 </h2>
-                <p className="text-sm mt-2 text-slate-600 dark:text-slate-400">
-                  Enterprise facility questions or multiple sites? Send our coordination desk a message.
+                <p className="text-sm mt-1.5 text-slate-600 dark:text-slate-400">
+                  Enterprise inquiries or multi-facility complex coordination? Send our operations team a message.
                 </p>
               </div>
               <div className="space-y-3">
                 {[
                   { icon: MailIcon, label: "Email", value: "support@voltops.example" },
                   { icon: PhoneIcon, label: "Phone", value: "+880 1XXX-XXXXXX" },
-                  { icon: MapPinIcon, label: "Coordination Center", value: "Dhaka, Bangladesh" },
+                  { icon: MapPinIcon, label: "Operations Desk", value: "Dhaka Central & Regional Hubs, Bangladesh" },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-[var(--border)] glass-panel shadow-[var(--shadow-sm)]">
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#10b981] dark:text-[#34d399] shrink-0">
@@ -1418,66 +1454,74 @@ export function LandingPage() {
             <div className="lg:col-span-7">
               <div className="p-7 rounded-[32px] border border-[var(--border)] glass-panel shadow-[var(--shadow-sm)]">
                 <h3 className="text-lg font-bold font-heading mb-1 text-slate-900 dark:text-white">Send an inquiry</h3>
-                <p className="text-xs mb-5 text-slate-600 dark:text-slate-400">
-                  For sales and facility scheduling inquiries. For emergency repairs, subscribe and log in to dispatch.
+                <p className="text-xs mb-4 text-slate-600 dark:text-slate-400">
+                  For sales and custom schedule inquiries. For active emergencies, subscribe and log in to dispatch.
                 </p>
                 {contactDone ? (
                   <div className="p-4 rounded-2xl text-sm border flex items-center gap-2 border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                     <CheckCircleIcon size={18} />
-                    <span>Thank you! Your inquiry has been noted. Our team will reply within one working day.</span>
+                    <span>Inquiry submitted. Our coordination desk will reply within one business day.</span>
                   </div>
                 ) : (
                   <form onSubmit={handleContact} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">Your Name</label>
+                        <label htmlFor="landing-contact-name" className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">Your Name</label>
                         <input
+                          id="landing-contact-name"
+                          name="name"
                           type="text"
                           required
                           value={cName}
                           onChange={(e) => setCName(e.target.value)}
-                          placeholder="Karim Rahman"
+                          placeholder="Facility Manager"
                           className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">Business Email</label>
+                        <label htmlFor="landing-contact-email" className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">Business Email</label>
                         <input
+                          id="landing-contact-email"
+                          name="email"
                           type="email"
                           required
                           value={cEmail}
                           onChange={(e) => setCEmail(e.target.value)}
-                          placeholder="you@company.com"
+                          placeholder="manager@company.com"
                           className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">Company / Facility Name</label>
+                      <label htmlFor="landing-contact-company" className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">Company / Facility Name</label>
                       <input
+                        id="landing-contact-company"
+                        name="company"
                         type="text"
                         value={cCompany}
                         onChange={(e) => setCCompany(e.target.value)}
-                        placeholder="Apex Galleria Ltd."
+                        placeholder="Apex Galleria Complex"
                         className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">Message</label>
+                      <label htmlFor="landing-contact-message" className="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">Message</label>
                       <textarea
-                        rows={4}
+                        id="landing-contact-message"
+                        name="message"
+                        rows={3}
                         required
                         value={cMsg}
                         onChange={(e) => setCMsg(e.target.value)}
-                        placeholder="Tell us about your facility locations and coverage requirements..."
+                        placeholder="Describe your facility locations, equipment types, and coverage requirements..."
                         className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#10b981] resize-none"
                       />
                     </div>
                     <button
                       type="submit"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-md"
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-md"
                     >
-                      <span>Send Message</span>
+                      <span>Send Inquiry</span>
                       <ArrowRightIcon size={14} />
                     </button>
                   </form>
@@ -1494,7 +1538,7 @@ export function LandingPage() {
           <div className="flex items-center gap-2.5">
             <LogoMark size={26} />
             <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-              © 2026 VoltOps · Technician service & management coordination
+              © 2026 VoltOps · Commercial field-service coordination platform
             </span>
           </div>
           <div className="text-xs text-slate-600 dark:text-slate-400">Team Pranta</div>
