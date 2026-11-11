@@ -596,6 +596,28 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
+## Milestone 3.3.1: Historical Restoration of Original Landing Page ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta`
+- **Commits on Branch `pranta`**:
+  - `fc7b0a0` — `revert(landing): restore original landing page, motion system, and assets from git history`
+- **Accomplishments**:
+  1. **Historical Restoration Source**:
+     - Verified baseline state at commit `c61c686` (identical to `34f4a08`).
+     - Executed a clean, history-preserving Git revert of offending commit `079274b` without history rewriting, reset, or force push.
+  2. **Restored Original Assets & Motion System**:
+     - Recovered original corporate-building hero background visual (`/images/hero-building.jpg`, 1800×1200) with fixed background attachment and dual-layer overlay.
+     - Recovered original hero section composition, typography ("Our platform simplifies your facility operations"), and layout.
+     - Restored original motion and animation system: `useSectionReveal` viewport pop-up, 13 staggered floating cards (`card-slow-float-0` through `4`), and interactive levitation hover effect (`premium-card-motion`).
+     - Restored original 3-pill inline theme toggle (`Light`, `Dark`, `System`), atmospheric radial glow blobs (`hero-glow-blob-1`, `2`, `3`), and jewel-tone card glows.
+     - Preserved all unrelated Admin chart fixes, Dispatcher table layout alignments, and Technician/Dispatcher portal deduplication (`MyJobs`, `DispatchAuditLog`, `DispatcherSchedule`).
+- **Verification**:
+  - `npm test -- --run`: 35 / 35 tests passed.
+  - `npm run build` (`tsc && vite build`): 128 modules transformed in 4.65s with 0 errors.
+  - In-browser visual verification on Chrome DevTools (`http://localhost:5173/`): Desktop Light, Desktop Dark, Mobile 390px, Full-page inspection.
+
+---
+
 ## Role Portals & Core Screens Status (Verified in Code)
 
 | Screen | Route | Role | Figma Reference | Backend Status | Status |
