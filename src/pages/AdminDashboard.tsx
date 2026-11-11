@@ -224,24 +224,42 @@ export function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Donut Chart: Role Composition */}
           <div className="lg:col-span-5 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2.5">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2">
               <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
                 Workforce Composition
               </h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-medium">
                 Directory
               </span>
             </div>
 
-            <DonutChart
-              data={[
-                { label: "Technicians", value: 11, color: "#10b981" },
-                { label: "Dispatchers", value: 2, color: "#38bdf8" },
-                { label: "Admins", value: 1, color: "#a855f7" },
-                { label: "Customers", value: 5, color: "#f59e0b" },
-              ]}
-              totalLabel="Members"
-            />
+            <div className="flex-1 flex items-center justify-center py-2">
+              <DonutChart
+                data={[
+                  { label: "Technicians", value: 11, color: "#10b981" },
+                  { label: "Dispatchers", value: 2, color: "#38bdf8" },
+                  { label: "Admins", value: 1, color: "#a855f7" },
+                  { label: "Customers", value: 5, color: "#f59e0b" },
+                ]}
+                totalLabel="Members"
+              />
+            </div>
+
+            {/* Operational Workforce Telemetry Strip */}
+            <div className="pt-2 mt-1 border-t border-[var(--border)] grid grid-cols-3 gap-2 text-center text-xs">
+              <div>
+                <span className="block text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Staff</span>
+                <span className="font-mono font-bold text-[var(--text-primary)]">14</span>
+              </div>
+              <div className="border-x border-[var(--border)]">
+                <span className="block text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Clients</span>
+                <span className="font-mono font-bold text-[var(--text-primary)]">5</span>
+              </div>
+              <div>
+                <span className="block text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Roles Active</span>
+                <span className="font-mono font-bold text-[var(--text-primary)]">4 / 4</span>
+              </div>
+            </div>
           </div>
 
           {/* Horizontal Bar Chart: Verification & Compliance Health */}
