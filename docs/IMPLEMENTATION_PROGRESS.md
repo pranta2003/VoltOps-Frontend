@@ -565,6 +565,37 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
+## Milestone 3.3: UI Defect Fixes, Portal Deduplication & Landing Page Redesign ✅
+- **Date Completed**: 11 November 2026
+- **Branch**: `pranta`
+- **Commits on Branch `pranta`**:
+  - `a86e2fd` — `fix(admin): balance workforce composition chart layout and eliminate vertical blank void`
+  - `2b1c1b1` — `fix(dispatcher): enforce strict column-width strategy, eliminate table overflow, and align headers`
+  - `c61c686` — `feat(portals): deduplicate technician and dispatcher pages with dedicated MyJobs, DispatchAuditLog, and ShiftSchedule`
+  - `079274b` — `feat(landing): redesign landing page with commercial technician visual, 3-state theme toggle, 7 canonical trades, and honest content`
+- **Accomplishments**:
+  1. **Admin Dashboard Chart Layout Fix**:
+     - Diagnosed CSS Grid root cause where `lg:col-span-5` card had 140px vertical dead space under donut chart.
+     - Centered `DonutChart` inside `flex-1 flex items-center justify-center py-2`.
+     - Added operational staff telemetry footer strip (`Staff: 14`, `Clients: 5`, `Roles Active: 4 / 4`) balancing height with sibling `HorizontalBarChart`.
+  2. **Dispatcher Table Layout & Spacing**:
+     - Fixed table overflow and header misalignment across Work Orders (`WorkOrders.tsx`), Service Requests (`ServiceRequests.tsx`), and Technician Roster (`TechnicianRoster.tsx`).
+     - Enforced `table-fixed` column-width strategy using explicit `<colgroup>` summing to 990px on standard desktop viewports (zero unwanted horizontal scroll), while providing clean `scrollbar-thin` horizontal scroll on smaller screens.
+  3. **Portal Page Deduplication**:
+     - *Technician Portal*: Differentiated Technician Dashboard (`/technician`) as an executive shift overview (shift status, route progression, urgent priority spotlight, 3-job preview) and created dedicated My Jobs page (`src/pages/technician/MyJobs.tsx`, `/technician/jobs`) as the full job roster with search, 4 status tabs, trade filters, permitted status transitions (`TRAVELLING` → `ON_SITE` → `COMPLETED`), and work notes.
+     - *Dispatcher Portal*: Replaced duplicate schedule route with dedicated Dispatch Audit Log (`src/pages/dispatcher/DispatchAuditLog.tsx`, `/dispatcher/audit`) and dedicated Shift Schedule (`src/pages/dispatcher/DispatcherSchedule.tsx`, `/dispatcher/schedule`) covering 3 daily shift windows across 3 regional hubs.
+  4. **Landing Page Redesign & Motion System**:
+     - Replaced generic corporate skyscraper background with authentic commercial technician visual (`public/images/hero-technician.jpg`) with accessible light/dark overlay.
+     - Upgraded `ThemeContext.tsx` and `ThemeToggle.tsx` to 3-state toggle (`light` / `dark` / `system`) with OS preference synchronization and persistent `localStorage` storage.
+     - Removed all fabricated claims (customer counts, uptime stats, fake corporate quotes). Emphasized 7 canonical service trades, 4 honest coverage plans (Plan A 8h no arrival SLA, Plan B 24/7 40m arrival SLA, Plan C 24/7 Priority 20m rapid arrival SLA, Plan D Custom negotiated no invented SLA), 3 regional hubs, and honest contact demo inquiry.
+     - Added smooth top-edge scroll progress bar and accessible micro-interactions adhering to `prefers-reduced-motion`.
+- **Verification**:
+  - `npm test -- --run`: 35 unit/integration tests passed in 198ms (0 failures).
+  - `npm run build` (`tsc && vite build`): 128 modules transformed in 4.87s with 0 errors.
+  - In-browser visual verification on Chrome DevTools (`http://localhost:5173/`): Desktop Light, Desktop Dark, Mobile 390px, Admin Console, Dispatcher Work Orders, Dispatcher Audit Log, Dispatcher Schedule, Technician Dashboard, Technician My Jobs.
+
+---
+
 ## Role Portals & Core Screens Status (Verified in Code)
 
 | Screen | Route | Role | Figma Reference | Backend Status | Status |
@@ -577,10 +608,16 @@ This document tracks all completed implementation milestones, verified files, co
 | **Admin Technicians** | `/admin/technicians` | `ADMIN` | Admin Spec | Connected to `GET /api/technicians` | Completed |
 | **Admin Audit Log** | `/admin/audit` | `ADMIN` | Audit Spec | Seeded baseline (Missing `/api/admin/audit`) | Completed |
 | **Dispatcher Board** | `/dispatcher` | `DISPATCHER`, `ADMIN` | Frame 1 (`10:162`) | Seeded baseline | Completed |
+| **Dispatcher Requests** | `/dispatcher/requests` | `DISPATCHER`, `ADMIN` | Frame 2 | Seeded baseline | Completed |
+| **Dispatcher Work Orders** | `/dispatcher/work-orders` | `DISPATCHER`, `ADMIN` | Frame 4 | Seeded baseline | Completed |
+| **Dispatcher Technicians** | `/dispatcher/technicians` | `DISPATCHER`, `ADMIN` | Frame 5 | Seeded baseline | Completed |
+| **Dispatcher Schedule** | `/dispatcher/schedule` | `DISPATCHER`, `ADMIN` | Shift spec | Seeded baseline | Completed |
+| **Dispatcher Audit Log** | `/dispatcher/audit` | `DISPATCHER`, `ADMIN` | Audit spec | Seeded baseline | Completed |
 | **Customer Requests** | `/customer` | `CUSTOMER` | Embed `27:658` | Seeded baseline | Completed |
 | **New Service Request** | `/customer/new-request` | `CUSTOMER` | Frame 10 | Seeded baseline | Completed |
 | **Customer Invoices** | `/customer/invoices` | `CUSTOMER`, `ADMIN` | Frame 12 | Deterministic billing preview | Completed |
-| **Technician Jobs** | `/technician` | `TECHNICIAN` | Frame 11 | Seeded baseline | Completed |
+| **Technician Dashboard** | `/technician` | `TECHNICIAN` | Executive spec | Seeded baseline | Completed |
+| **Technician My Jobs** | `/technician/jobs` | `TECHNICIAN` | Frame 11 | Seeded baseline | Completed |
 
 ---
 
