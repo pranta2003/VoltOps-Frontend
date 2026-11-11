@@ -334,14 +334,14 @@ export const DispatcherDashboard: FC = () => {
         </div>
 
         {/* ── 2. Operational Overview: Work Order Distribution & Trade Capacity ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
           {/* Donut Chart: Lifecycle State Distribution */}
-          <div className="lg:col-span-5 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2">
+          <div className="lg:col-span-5 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-2">
               <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
                 Work Orders
               </h3>
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
+              <span className="text-xs font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
                 Status
               </span>
             </div>
@@ -355,14 +355,30 @@ export const DispatcherDashboard: FC = () => {
                 { label: "Completed", value: 1, color: "#64748b" },
               ]}
               totalLabel="Orders"
-              size={105}
-              strokeWidth={13}
+              size={125}
+              strokeWidth={14}
             />
+
+            {/* Quick Operational Telemetry Strip */}
+            <div className="pt-2.5 mt-2 border-t border-[var(--border)] grid grid-cols-3 gap-2 text-center">
+              <div className="p-1.5 rounded-lg bg-[var(--bg-surface-2)]">
+                <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">In Field</div>
+                <div className="font-mono text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400">2 Active</div>
+              </div>
+              <div className="p-1.5 rounded-lg bg-[var(--bg-surface-2)]">
+                <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">SLA Target</div>
+                <div className="font-mono text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400">100% Met</div>
+              </div>
+              <div className="p-1.5 rounded-lg bg-[var(--bg-surface-2)]">
+                <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Avg Transit</div>
+                <div className="font-mono text-xs sm:text-sm font-bold text-[var(--text-primary)]">18 min</div>
+              </div>
+            </div>
           </div>
 
           {/* Horizontal Bar Chart: 7 Canonical Service Trades Capacity */}
-          <div className="lg:col-span-7 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-1.5">
+          <div className="lg:col-span-7 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-2">
               <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
                 Trade Capacity
               </h3>
@@ -455,9 +471,9 @@ export const DispatcherDashboard: FC = () => {
           </div>
 
           <div className="w-full max-w-full overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs sm:text-[13px]">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
                   <th className="py-2.5 px-3.5">Order ID</th>
                   <th className="py-2.5 px-3.5">Customer & Facility</th>
                   <th className="py-2.5 px-3.5">Trade & Asset</th>
@@ -480,15 +496,15 @@ export const DispatcherDashboard: FC = () => {
                       <td className="py-3 px-3.5 font-mono font-bold text-[var(--text-primary)]">{wo.id}</td>
                       <td className="py-3 px-3.5">
                         <div className="font-semibold text-[var(--text-primary)]">{wo.customerName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)] truncate max-w-xs">{wo.facilityAddress}</div>
+                        <div className="text-xs text-[var(--text-muted)] truncate max-w-xs">{wo.facilityAddress}</div>
                       </td>
                       <td className="py-3 px-3.5">
                         <div className="font-medium text-[var(--text-primary)]">{wo.assetName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)]">{wo.category}</div>
+                        <div className="text-xs text-[var(--text-muted)]">{wo.category}</div>
                       </td>
                       <td className="py-3 px-3.5">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border ${getPriorityBadge(
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${getPriorityBadge(
                             wo.priority
                           )}`}
                         >
@@ -498,7 +514,12 @@ export const DispatcherDashboard: FC = () => {
                       <td className="py-3 px-3.5">{getStatusBadge(wo.status)}</td>
                       <td className="py-3 px-3.5">
                         {wo.assignedTechnicianName ? (
-                          <span className="font-medium text-[var(--text-primary)]">{wo.assignedTechnicianName}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0">
+                              {wo.assignedTechnicianName.substring(0, 2).toUpperCase()}
+                            </span>
+                            <span className="font-medium text-[var(--text-primary)]">{wo.assignedTechnicianName}</span>
+                          </div>
                         ) : (
                           <span className="text-rose-600 dark:text-rose-400 font-semibold italic">Unassigned</span>
                         )}
@@ -508,14 +529,14 @@ export const DispatcherDashboard: FC = () => {
                           <button
                             type="button"
                             onClick={() => handleOpenAssignModal(wo)}
-                            className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
+                            className="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
                           >
                             Assign Tech
                           </button>
                         ) : (
                           <Link
                             to="/dispatcher/work-orders"
-                            className="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                            className="px-3 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
                           >
                             Inspect
                           </Link>
