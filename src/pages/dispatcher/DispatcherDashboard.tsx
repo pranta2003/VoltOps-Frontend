@@ -333,19 +333,16 @@ export const DispatcherDashboard: FC = () => {
           />
         </div>
 
-        {/* ── 2. Data Visualizations Grid (Work Order Distribution & Trade Capacity) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* ── 2. Operational Overview: Work Order Distribution & Trade Capacity ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
           {/* Donut Chart: Lifecycle State Distribution */}
-          <div className="lg:col-span-5 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-3">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Work Order Distribution
-                </h3>
-                <p className="text-[11px] text-[var(--text-muted)]">Live operational lifecycle breakdown</p>
-              </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
-                Local Telemetry
+          <div className="lg:col-span-5 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                Work Orders
+              </h3>
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
+                Status
               </span>
             </div>
 
@@ -358,20 +355,17 @@ export const DispatcherDashboard: FC = () => {
                 { label: "Completed", value: 1, color: "#64748b" },
               ]}
               totalLabel="Orders"
+              size={105}
+              strokeWidth={13}
             />
           </div>
 
           {/* Horizontal Bar Chart: 7 Canonical Service Trades Capacity */}
-          <div className="lg:col-span-7 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-2">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Trade Capacity & Duty Matrix
-                </h3>
-                <p className="text-[11px] text-[var(--text-muted)]">
-                  Available (Green) vs On Job (Amber) across 7 canonical trades
-                </p>
-              </div>
+          <div className="lg:col-span-7 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-1.5">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                Trade Capacity
+              </h3>
               <Link to="/dispatcher/technicians" className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
                 Roster →
               </Link>
@@ -383,7 +377,7 @@ export const DispatcherDashboard: FC = () => {
                   label: trade.category,
                   value: trade.availableCount,
                   secondaryValue: trade.activeCount,
-                  secondaryLabel: "on job",
+                  secondaryLabel: "busy",
                   color: "#10b981",
                   badge: trade.availableCount > 0 ? "Ready" : "Busy",
                 })) || []
@@ -535,19 +529,16 @@ export const DispatcherDashboard: FC = () => {
           </div>
         </div>
 
-        {/* ── 4. Two-Column Grid: Activity Volume History & Shift Operational Log ─ */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* ── 4. Two-Column Grid: Activity Velocity & Operational Log ─ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
           {/* Dispatch Activity Volume Timeline */}
-          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] space-y-3">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Shift Dispatch Velocity
-                </h3>
-                <p className="text-[11px] text-[var(--text-muted)]">Hourly coordination events across all branches</p>
-              </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
-                Today
+          <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] space-y-2.5">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                Dispatch Velocity
+              </h3>
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
+                Hourly
               </span>
             </div>
 
@@ -561,36 +552,33 @@ export const DispatcherDashboard: FC = () => {
                 { key: "h-14", label: "14:00", timestamp: "02:00 PM", volume: 8 },
                 { key: "h-15", label: "15:00", timestamp: "03:00 PM", volume: 7 },
               ]}
-              height={110}
+              height={90}
               primaryLabel="dispatches"
             />
           </div>
 
           {/* Recent Dispatch Ledger */}
-          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] space-y-3">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Live Dispatch Ledger
-                </h3>
-                <p className="text-[11px] text-[var(--text-muted)]">Verified actions by dispatch staff and field techs</p>
-              </div>
-              <span className="text-[10px] font-mono text-[var(--text-muted)]">Shift Telemetry</span>
+          <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] space-y-2.5">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                Operational Log
+              </h3>
+              <span className="text-[10px] font-mono text-[var(--text-muted)]">Live</span>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-1.5">
               {recentEvents.length === 0 ? (
-                <div className="py-6 text-center text-xs text-[var(--text-muted)]">No recent dispatch activity.</div>
+                <div className="py-4 text-center text-xs text-[var(--text-muted)]">No recent activity.</div>
               ) : (
-                recentEvents.map((evt) => (
-                  <div key={evt.id} className="p-2.5 rounded-lg border border-[var(--border)] text-xs space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-[var(--text-primary)]">{evt.actorName}</span>
-                      <span className="text-[10px] text-[var(--text-muted)] font-mono">
-                        {new Date(evt.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                      </span>
+                recentEvents.slice(0, 3).map((evt) => (
+                  <div key={evt.id} className="p-2 rounded-lg border border-[var(--border)] text-xs flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-semibold text-[var(--text-primary)] truncate text-[11px]">{evt.summary}</div>
+                      <div className="text-[10px] text-[var(--text-muted)] truncate">{evt.actorName}</div>
                     </div>
-                    <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">{evt.summary}</p>
+                    <span className="text-[10px] text-[var(--text-muted)] font-mono shrink-0">
+                      {new Date(evt.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
                   </div>
                 ))
               )}
