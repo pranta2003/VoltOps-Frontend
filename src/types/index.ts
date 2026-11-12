@@ -32,15 +32,19 @@ export const CANONICAL_SERVICE_CATEGORIES = [
 
 export type ServiceCategory = (typeof CANONICAL_SERVICE_CATEGORIES)[number];
 
-// ── 3. Priorities & SLA Thresholds ────────────────────────────────────────
+// ── 3. Priorities & Urgency Levels ───────────────────────────────────────
+// Request urgency describes operational impact and failure severity.
+// Guaranteed physical technician arrival times are strictly governed by Coverage Plans.
 export type PriorityLevel = "URGENT" | "HIGH" | "MEDIUM" | "LOW";
 
 export interface PriorityInfo {
   level: PriorityLevel;
   label: string;
-  slaTargetMinutes: number; // e.g. Urgent = 20-40 min, High = 120 min, etc.
+  impactDescription: string;
   badgeColorClass: string;
 }
+
+export * from "./coverage";
 
 // ── 4. Service Requests (Customer -> Dispatcher) ──────────────────────────
 export type RequestStatus = "NEW" | "REVIEWING" | "CONVERTED" | "CANCELLED";
@@ -145,7 +149,8 @@ export interface CustomerProfile {
 }
 
 // ── 8. Invoices & Billing ─────────────────────────────────────────────────
-export type InvoiceStatus = "PAYMENT_DUE" | "PAID" | "UNPAID" | "CANCELLED";
+// Payment confirmation requires external payment gateway webhook or banking settlement.
+export type InvoiceStatus = "PAYMENT_DUE" | "PAYMENT_PENDING" | "PAID" | "UNPAID" | "CANCELLED";
 
 export interface InvoiceLineItem {
   id: string;

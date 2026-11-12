@@ -62,8 +62,9 @@ export function MyJobs() {
       .then((res) => {
         const mapped: TechnicianJobItem[] = res.data.map((w: WorkOrder) => {
           let arrivalSlaRemainingMinutes: number | undefined = undefined;
-          if (w.status === "TRAVELLING" || w.status === "ASSIGNED") {
-            arrivalSlaRemainingMinutes = w.priority === "URGENT" ? 18 : 35;
+          if ((w.status === "TRAVELLING" || w.status === "ASSIGNED") && w.slaDeadline) {
+            const diffMinutes = Math.round((new Date(w.slaDeadline).getTime() - Date.now()) / 60000);
+            arrivalSlaRemainingMinutes = Math.max(0, diffMinutes);
           }
 
           return {

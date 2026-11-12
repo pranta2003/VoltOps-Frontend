@@ -21,7 +21,7 @@ import {
   INITIAL_FIELD_TECHNICIANS,
   INITIAL_DISPATCH_EVENTS,
 } from "./mockDispatcherData";
-import { operationalStore } from "./operationalStore";
+import { operationalStore, reconcileTechnicianOperationalStatus } from "./operationalStore";
 
 /**
  * Custom error class for Dispatcher API operations with explicit classification flags.
@@ -719,9 +719,8 @@ export const dispatcherService = {
       order.workNotes = order.workNotes ? `${order.workNotes} | Dispatch: ${dto.dispatcherNotes}` : dto.dispatcherNotes;
     }
 
-    // Update technician status
-    tech.status = "ON_JOB";
-    tech.activeJobCount += 1;
+    // Reconcile technician workload and operational status
+    reconcileTechnicianOperationalStatus(tech, localWorkOrders);
 
     setLocalWorkOrders(localWorkOrders);
     setLocalTechnicians(localTechnicians);

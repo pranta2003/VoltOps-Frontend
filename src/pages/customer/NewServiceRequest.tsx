@@ -2,7 +2,13 @@ import { useState, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { useAuth } from "../../context/AuthContext";
-import { CANONICAL_SERVICE_CATEGORIES, ServiceCategory, PriorityLevel } from "../../types";
+import {
+  CANONICAL_SERVICE_CATEGORIES,
+  ServiceCategory,
+  PriorityLevel,
+  CoveragePlanId,
+  APPROVED_COVERAGE_PLANS,
+} from "../../types";
 import { customerService } from "../../services/customerService";
 import {
   AlertTriangleIcon,
@@ -10,6 +16,7 @@ import {
   ClockIcon,
   WrenchIcon,
   ArrowRightIcon,
+  ShieldCheckIcon,
 } from "../../components/Icons";
 
 const CUSTOMER_ASSETS = [
@@ -32,6 +39,7 @@ export function NewServiceRequest() {
   const [selectedAsset, setSelectedAsset] = useState<string>(CUSTOMER_ASSETS[0]);
   const [problemTitle, setProblemTitle] = useState("");
   const [problemDescription, setProblemDescription] = useState("");
+  const [coveragePlan, setCoveragePlan] = useState<CoveragePlanId>("247-standard");
   const [priority, setPriority] = useState<PriorityLevel>("URGENT");
   const [preferredDate, setPreferredDate] = useState("2026-11-12");
   const [preferredTime, setPreferredTime] = useState("Immediate / ASAP");
@@ -65,12 +73,13 @@ export function NewServiceRequest() {
           problemDescription: problemDescription.trim(),
           priority,
           preferredDateTime: `${preferredDate} ${preferredTime}`,
-          coveragePlan: "247-standard",
+          coveragePlan,
         },
         {
           id: user?.id,
           name: user?.name,
           address: user?.company || "Apex Spinning & Weaving Mills, Savar",
+          coveragePlan,
         }
       );
 
@@ -86,6 +95,8 @@ export function NewServiceRequest() {
       setErrorMessage(err.message || "Failed to submit service request. Please check inputs and retry.");
     }
   };
+
+  const planInfo = APPROVED_COVERAGE_PLANS[coveragePlan];
 
   return (
     <Layout
@@ -105,7 +116,11 @@ export function NewServiceRequest() {
               Assigned Tracking ID: {createdRequestId || "SR-NEW"}
             </div>
             <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
-              Your request has been routed to the active Dispatcher queue. Dispatchers and the candidate matching engine have received your notification under the 24/7 Standard 40-minute arrival SLA.
+              Your request has been routed to the active Dispatcher queue under{" "}
+              <strong className="text-[var(--text-primary)] font-semibold">{planInfo.name}</strong>.{" "}
+              {planInfo.isGuaranteedSla
+                ? `Guaranteed ${planInfo.physicalArrivalSlaMinutes}-minute physical arrival SLA is active.`
+                : "Scheduled during standard daily operating hours (no physical arrival guarantee)."}
             </p>
             <div className="pt-2 text-xs font-semibold text-[#10b981]">
               Redirecting to request tracker...
@@ -128,6 +143,7 @@ export function NewServiceRequest() {
                 </button>
               </div>
             )}
+
             {/* ── 1. Canonical Service Trade Selection (Strict 7 Trades) ── */}
             <div className="space-y-3">
               <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
@@ -204,17 +220,64 @@ export function NewServiceRequest() {
               </div>
             </div>
 
-            {/* ── 4. Priority Radio Options (Figma: Selected radio tinted) ─ */}
+            {/* ── 4. Coverage Plan Selector (Governs Guaranteed Arrival SLA) ─ */}
             <div className="space-y-3">
-              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                4. Urgency Level & SLA Target <span className="text-red-500">*</span>
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  4. Applicable Facility Coverage Plan <span className="text-red-500">*</span>
+                </label>
+                <span className="text-[11px] text-[var(--text-muted)]">Arrival SLA is governed by plan</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {(Object.keys(APPROVED_COVERAGE_PLANS) as CoveragePlanId[]).map((planKey) => {
+                  const plan = APPROVED_COVERAGE_PLANS[planKey];
+                  const isChecked = coveragePlan === planKey;
+                  return (
+                    <label
+                      key={planKey}
+                      className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
+                        isChecked
+                          ? "border-[#10b981] bg-[#10b981]/10 text-[var(--text-primary)] ring-1 ring-[#10b981] shadow-sm font-bold"
+                          : "border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:border-[var(--border-strong)]"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold">{plan.name}</span>
+                        <input
+                          type="radio"
+                          name="coveragePlan"
+                          value={planKey}
+                          checked={isChecked}
+                          onChange={() => setCoveragePlan(planKey)}
+                          className="accent-[#10b981]"
+                        />
+                      </div>
+                      <div className="text-[11px] text-[#10b981] font-semibold mt-1">
+                        {plan.slaLabel}
+                      </div>
+                      <div className="text-[10px] text-[var(--text-muted)] mt-1 line-clamp-2">
+                        {plan.description}
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── 5. Urgency / Failure Impact (Decoupled from SLA Guarantee) ─ */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  5. Urgency & Operational Impact <span className="text-red-500">*</span>
+                </label>
+                <span className="text-[11px] text-[var(--text-muted)]">Describes operational severity</span>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                 {[
-                  { level: "URGENT", label: "Urgent", sub: "20–40m Arrival SLA", color: "border-red-500 bg-red-500/10 text-red-700 dark:text-red-300" },
-                  { level: "HIGH", label: "High", sub: "Within 2 hours", color: "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300" },
-                  { level: "MEDIUM", label: "Medium", sub: "Same day shift", color: "border-blue-500 bg-blue-500/10 text-blue-700 dark:text-blue-300" },
-                  { level: "LOW", label: "Low", sub: "Scheduled upkeep", color: "border-slate-500 bg-slate-500/10 text-slate-700 dark:text-slate-300" },
+                  { level: "URGENT", label: "Urgent", sub: "Critical failure / production halted", color: "border-red-500 bg-red-500/10 text-red-700 dark:text-red-300" },
+                  { level: "HIGH", label: "High", sub: "Serious fault / impending shutdown", color: "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300" },
+                  { level: "MEDIUM", label: "Medium", sub: "Operational disruption / needs fix", color: "border-blue-500 bg-blue-500/10 text-blue-700 dark:text-blue-300" },
+                  { level: "LOW", label: "Low", sub: "Routine servicing / non-urgent check", color: "border-slate-500 bg-slate-500/10 text-slate-700 dark:text-slate-300" },
                 ].map(({ level, label, sub, color }) => {
                   const isChecked = priority === level;
                   return (
@@ -244,7 +307,7 @@ export function NewServiceRequest() {
               </div>
             </div>
 
-            {/* ── 5. Preferred Timing ───────────────────────────────────── */}
+            {/* ── 6. Preferred Timing ───────────────────────────────────── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">

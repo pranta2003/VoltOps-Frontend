@@ -1,8 +1,20 @@
-// Centralized Customer Service & Breakdown Request Service
-// Handles service breakdown request creation, tracking, itemized invoicing, and payment.
+// ============================================================================
+// VoltOps Customer Service Layer & Integration Boundary
+// ============================================================================
+// Encapsulates all Customer portal business logic, request creation, itemized
+// billing retrieval, and payment gateway integration boundaries.
+//
+// INTEGRATION CONTRACTS (Future Backend):
+// - GET   /api/customer/requests                -> Breakdown requests for customer
+// - POST  /api/customer/requests                -> Submit breakdown request
+// - GET   /api/customer/invoices                -> Itemized billing statements
+// - POST  /api/customer/invoices/:id/initiate-payment -> Create gateway payment intent
+// - POST  /api/webhooks/payment                 -> Backend gateway webhook confirming PAID
+// ============================================================================
 
 import api from "../api/axios";
-import { ServiceRequest, Invoice, ServiceCategory, PriorityLevel } from "../types";
+import { ServiceRequest, Invoice, ServiceCategory, PriorityLevel, CoveragePlanId } from "../types";
+import { getPhysicalArrivalSlaMinutes } from "../types/coverage";
 import { operationalStore } from "./operationalStore";
 
 export interface CreateServiceRequestDTO {
@@ -14,7 +26,7 @@ export interface CreateServiceRequestDTO {
   facilityAddress?: string;
   contactPhone?: string;
   preferredDateTime?: string;
-  coveragePlan?: "8hr" | "247-standard" | "247-priority" | "custom";
+  coveragePlan?: CoveragePlanId;
 }
 
 export interface CustomerApiResponse<T> {
@@ -33,6 +45,16 @@ export class CustomerApiError extends Error {
     this.name = "CustomerApiError";
     this.status = options?.status;
     this.code = options?.code;
+  }
+}
+
+export class PaymentGatewayPendingError extends CustomerApiError {
+  constructor(invoiceId: string) {
+    super(
+      `Payment processing for Invoice ${invoiceId} requires external payment gateway integration. Invoices cannot be marked PAID in offline/demo mode without backend confirmation.`,
+      { status: 501, code: "GATEWAY_INTEGRATION_PENDING" }
+    );
+    this.name = "PaymentGatewayPendingError";
   }
 }
 
@@ -70,11 +92,13 @@ export const customerService = {
   },
 
   /**
-   * Submit a new commercial facility service request
+   * Submit a new commercial facility service request.
+   * SLA RULE: Physical arrival SLA is determined strictly by the customer's coverage plan,
+   * NOT by the urgency level. Urgency describes failure impact, not arrival guarantees.
    */
   async createRequest(
     dto: CreateServiceRequestDTO,
-    customer?: { id?: string; name?: string; address?: string; phone?: string }
+    customer?: { id?: string; name?: string; address?: string; phone?: string; coveragePlan?: CoveragePlanId }
   ): Promise<CustomerApiResponse<ServiceRequest>> {
     // Client-side validation
     if (!dto.problemTitle?.trim()) {
@@ -103,16 +127,12 @@ export const customerService = {
 
     const currentRequests = operationalStore.getRequests();
     const newId = `SR-${1000 + currentRequests.length + 1}`;
-    const plan = dto.coveragePlan || "247-standard";
+    
+    // Coverage plan hierarchy: explicit DTO plan -> customer profile plan -> default standard plan
+    const plan: CoveragePlanId = dto.coveragePlan || customer?.coveragePlan || "247-standard";
 
-    let slaRemainingMinutes: number | null = null;
-    if (plan === "247-priority") {
-      slaRemainingMinutes = 20;
-    } else if (plan === "247-standard") {
-      slaRemainingMinutes = 40;
-    } else {
-      slaRemainingMinutes = null;
-    }
+    // SLA Deadline calculation: strictly governed by Coverage Plan, NEVER by priority urgency
+    const slaRemainingMinutes = getPhysicalArrivalSlaMinutes(plan);
 
     const newRequest: ServiceRequest = {
       id: newId,
@@ -144,7 +164,7 @@ export const customerService = {
         action: "REQUEST_REVIEWED",
         actorName: customer?.name || "Commercial Customer",
         targetId: newId,
-        summary: `New service request submitted: ${newId} (${dto.category} - ${dto.assetName}).`,
+        summary: `New service request submitted: ${newId} (${dto.category} - ${dto.assetName}). Plan: ${plan}.`,
         severity: dto.priority === "URGENT" ? "CRITICAL" : "INFO",
       },
       ...events,
@@ -192,11 +212,16 @@ export const customerService = {
   },
 
   /**
-   * Pay a customer invoice
+   * Initiate invoice payment.
+   * PAYMENT BOUNDARY ENFORCEMENT:
+   * Frontend cannot confirm financial settlement without backend payment gateway webhook.
+   * Calling initiatePayment separates payment initiation from confirmation.
+   * If offline or in demo mode, status transitions to PAYMENT_PENDING with an explicit integration notice.
+   * Invoices are NEVER marked PAID by frontend actions alone.
    */
-  async payInvoice(invoiceId: string): Promise<CustomerApiResponse<Invoice>> {
+  async initiatePayment(invoiceId: string): Promise<CustomerApiResponse<Invoice>> {
     try {
-      const res = await api.post(`/customer/invoices/${invoiceId}/pay`);
+      const res = await api.post(`/customer/invoices/${invoiceId}/initiate-payment`);
       if (res.data?.success && res.data.data) {
         return {
           success: true,
@@ -215,15 +240,24 @@ export const customerService = {
       throw new CustomerApiError(`Invoice ${invoiceId} not found.`, { status: 404 });
     }
 
-    inv.status = "PAID";
+    // Do NOT mark as PAID. Advance to PAYMENT_PENDING indicating payment gateway session active.
+    inv.status = "PAYMENT_PENDING";
+    inv.paymentNotice = "Payment initiated: Awaiting payment gateway webhook confirmation. Invoices cannot be marked PAID in frontend demo mode.";
     operationalStore.setInvoices([...invoices]);
 
     return {
       success: true,
       data: inv,
       isOffline: true,
-      message: `[Local Preview] Invoice ${invoiceId} marked as PAID.`,
+      message: `[Payment Boundary] Payment intent created for ${invoiceId}. Invoices require backend financial confirmation before transition to PAID.`,
       timestamp: new Date().toISOString(),
     };
+  },
+
+  /**
+   * Legacy alias for initiatePayment to preserve backwards compatibility while strictly enforcing semantics.
+   */
+  async payInvoice(invoiceId: string): Promise<CustomerApiResponse<Invoice>> {
+    return this.initiatePayment(invoiceId);
   },
 };

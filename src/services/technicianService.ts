@@ -1,10 +1,17 @@
-// Centralized Technician Job Progression & Field Service Execution Service
+// ============================================================================
+// VoltOps Technician Service Layer & Execution Boundary
+// ============================================================================
 // Manages daily job rosters, en-route progress, arrival milestones, and completion sign-off.
+//
+// INTEGRATION CONTRACTS (Future Backend):
+// - GET   /api/technician/jobs           -> Assigned work orders for technician
+// - PATCH /api/technician/jobs/:id/status -> Advance job status (linear lifecycle)
+// ============================================================================
 
 import api from "../api/axios";
 import { WorkOrder, WorkOrderStatus, Invoice } from "../types";
 import { VALID_WORK_ORDER_TRANSITIONS } from "./dispatcherService";
-import { operationalStore } from "./operationalStore";
+import { operationalStore, reconcileTechnicianOperationalStatus } from "./operationalStore";
 
 export interface TechnicianApiResponse<T> {
   success: boolean;
@@ -75,6 +82,11 @@ export const technicianService = {
   /**
    * Advance job status along the strict linear progression:
    * ASSIGNED -> TRAVELLING -> ON_SITE -> COMPLETED
+   *
+   * AVAILABILITY RULE:
+   * A technician does NOT automatically become AVAILABLE simply because one job completes.
+   * Other active assignments, existing workload, and off-duty states (e.g. ON_LEAVE)
+   * are strictly verified.
    */
   async updateJobStatus(
     workOrderId: string,
@@ -128,23 +140,22 @@ export const technicianService = {
     if (newStatus === "TRAVELLING" && !order.startedAt) {
       order.startedAt = new Date().toISOString();
     } else if (newStatus === "ON_SITE") {
-      // Technician physically present on site: SLA is met!
+      // Physical technician arrival milestone reached: Arrival SLA met
       order.startedAt = order.startedAt || new Date().toISOString();
     } else if (newStatus === "COMPLETED") {
       order.completedAt = new Date().toISOString();
 
-      // 1. Release technician back to AVAILABLE
-      const techs = operationalStore.getTechnicians();
-      const assignedTech = techs.find((t) => t.id === order.assignedTechnicianId);
-      if (assignedTech) {
-        assignedTech.activeJobCount = Math.max(0, (assignedTech.activeJobCount || 1) - 1);
-        if (assignedTech.activeJobCount === 0 && assignedTech.status === "ON_JOB") {
-          assignedTech.status = "AVAILABLE";
+      // 1. Reconcile technician availability safely against ALL remaining active assignments
+      if (order.assignedTechnicianId) {
+        const techs = operationalStore.getTechnicians();
+        const assignedTech = techs.find((t) => t.id === order.assignedTechnicianId);
+        if (assignedTech) {
+          reconcileTechnicianOperationalStatus(assignedTech, workOrders);
+          operationalStore.setTechnicians([...techs]);
         }
-        operationalStore.setTechnicians([...techs]);
       }
 
-      // 2. Automatically generate itemized Customer Invoice
+      // 2. Automatically generate itemized Customer Invoice (Demonstration Draft)
       const invoices = operationalStore.getInvoices();
       const invoiceId = `INV-${4100 + invoices.length + 1}`;
       const newInvoice: Invoice = {
@@ -176,7 +187,7 @@ export const technicianService = {
         taxRate: 0.05,
         taxAmount: 20,
         totalAmount: 420,
-        paymentNotice: "Payment is a UI preview only. No real banking transaction will be processed.",
+        paymentNotice: "Demonstration Statement: Official billing and settlement require backend financial gateway integration.",
       };
       operationalStore.setInvoices([newInvoice, ...invoices]);
     }

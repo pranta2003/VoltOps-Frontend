@@ -56,13 +56,13 @@ export function CustomerInvoices() {
     setIsPaying(true);
 
     try {
-      const res = await customerService.payInvoice(selectedInvoice.id);
+      const res = await customerService.initiatePayment(selectedInvoice.id);
       setSelectedInvoice(res.data);
       setPaySuccess(true);
       setTimeout(() => {
         setPaySuccess(false);
         setIsPaying(false);
-      }, 2000);
+      }, 3000);
     } catch (err: any) {
       setIsPaying(false);
       alert(err.message || "Payment transaction failed.");
@@ -132,10 +132,12 @@ export function CustomerInvoices() {
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                         inv.status === "PAID"
                           ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
+                          : inv.status === "PAYMENT_PENDING"
+                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
                           : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
                       }`}
                     >
-                      {inv.status === "PAID" ? "PAID" : "PAYMENT DUE"}
+                      {inv.status === "PAID" ? "PAID" : inv.status === "PAYMENT_PENDING" ? "GATEWAY PENDING" : "PAYMENT DUE"}
                     </span>
                   </div>
                   <div className="mt-2 text-xs font-medium text-[var(--text-primary)]">
@@ -170,28 +172,39 @@ export function CustomerInvoices() {
                       className={`px-3 py-1 rounded-full text-xs font-bold border ${
                         selectedInvoice.status === "PAID"
                           ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
+                          : selectedInvoice.status === "PAYMENT_PENDING"
+                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
                           : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
                       }`}
                     >
-                      {selectedInvoice.status === "PAID" ? "Paid in Full" : "Payment Due"}
+                      {selectedInvoice.status === "PAID"
+                        ? "Paid in Full"
+                        : selectedInvoice.status === "PAYMENT_PENDING"
+                        ? "Gateway Settlement Pending"
+                        : "Payment Due"}
                     </span>
-                    {selectedInvoice.status !== "PAID" && (
+                    {selectedInvoice.status === "PAYMENT_DUE" && (
                       <button
                         type="button"
                         onClick={handlePayNow}
                         disabled={isPaying}
                         className="px-5 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm disabled:opacity-50"
                       >
-                        {isPaying ? "Processing..." : "Pay Now"}
+                        {isPaying ? "Connecting Gateway..." : "Initiate Payment"}
                       </button>
+                    )}
+                    {selectedInvoice.status === "PAYMENT_PENDING" && (
+                      <span className="text-[11px] text-amber-700 dark:text-amber-400 font-semibold italic">
+                        Awaiting Webhook Confirmation
+                      </span>
                     )}
                   </div>
                 </div>
 
                 {paySuccess && (
-                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-fade-in">
+                  <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-semibold flex items-center gap-2 animate-fade-in">
                     <CheckCircleIcon size={16} />
-                    <span>Payment recorded successfully! Invoice status updated to PAID.</span>
+                    <span>Payment intent created. Invoices require external payment gateway confirmation (Stripe / Bank ACH) before status can transition to PAID.</span>
                   </div>
                 )}
 

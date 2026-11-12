@@ -40,18 +40,26 @@ export function TechnicianDashboard() {
     technicianService
       .getJobs(user?.id)
       .then((res) => {
-        const mapped: TechnicianJobItem[] = res.data.map((w: WorkOrder) => ({
-          id: w.id,
-          customerName: w.customerName,
-          facilityAddress: w.facilityAddress,
-          category: w.category,
-          assetName: w.assetName,
-          problemSummary: w.problemSummary,
-          priority: w.priority,
-          status: (w.status === "UNASSIGNED" ? "ASSIGNED" : w.status) as any,
-          arrivalSlaRemainingMinutes: w.status === "TRAVELLING" || w.status === "ASSIGNED" ? (w.priority === "URGENT" ? 18 : 35) : undefined,
-          scheduledTime: w.status === "COMPLETED" ? "Completed Today" : "Immediate Dispatch",
-        }));
+        const mapped: TechnicianJobItem[] = res.data.map((w: WorkOrder) => {
+          let arrivalSlaRemainingMinutes: number | undefined = undefined;
+          if ((w.status === "TRAVELLING" || w.status === "ASSIGNED") && w.slaDeadline) {
+            const diffMinutes = Math.round((new Date(w.slaDeadline).getTime() - Date.now()) / 60000);
+            arrivalSlaRemainingMinutes = Math.max(0, diffMinutes);
+          }
+
+          return {
+            id: w.id,
+            customerName: w.customerName,
+            facilityAddress: w.facilityAddress,
+            category: w.category,
+            assetName: w.assetName,
+            problemSummary: w.problemSummary,
+            priority: w.priority,
+            status: (w.status === "UNASSIGNED" ? "ASSIGNED" : w.status) as any,
+            arrivalSlaRemainingMinutes,
+            scheduledTime: w.status === "COMPLETED" ? "Completed Today" : "Immediate Dispatch",
+          };
+        });
         setJobs(mapped);
       })
       .catch(() => {
@@ -143,7 +151,7 @@ export function TechnicianDashboard() {
                 <div className="flex items-center gap-2">
                   <span className="font-mono font-bold text-xs text-rose-700 dark:text-rose-400">{enRouteJob.id}</span>
                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20">
-                    {enRouteJob.priority} SLA
+                    {enRouteJob.priority} Priority
                   </span>
                   {enRouteJob.arrivalSlaRemainingMinutes && (
                     <span className="text-xs text-[var(--text-muted)] font-mono">{enRouteJob.arrivalSlaRemainingMinutes}m remaining</span>

@@ -2,7 +2,14 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
-import { ServiceRequest, PriorityLevel, ServiceCategory } from "../types";
+import {
+  ServiceRequest,
+  PriorityLevel,
+  ServiceCategory,
+  CoveragePlanId,
+  APPROVED_COVERAGE_PLANS,
+  getCoveragePlanSlaLabel,
+} from "../types";
 import { customerService } from "../services/customerService";
 import { operationalStore } from "../services/operationalStore";
 import {
@@ -20,6 +27,7 @@ interface CustomerViewRequest {
   problem: string;
   description: string;
   priority: PriorityLevel;
+  coveragePlan?: CoveragePlanId;
   displayStatus: "NEW" | "REVIEWING" | "ASSIGNED" | "TRAVELLING" | "ON_SITE" | "COMPLETED" | "CANCELLED";
   submittedDate: string;
   arrivalSlaWindow?: string;
@@ -67,7 +75,17 @@ export function CustomerDashboard() {
                 arrivalSlaWindow = "Technician Assigned · Standby Departure";
                 break;
               case "TRAVELLING":
-                arrivalSlaWindow = "En Route (Physical Arrival Guaranteed)";
+                if (r.coveragePlan === "247-priority") {
+                  arrivalSlaWindow = "En Route (20-Min Physical Arrival SLA)";
+                } else if (r.coveragePlan === "247-standard") {
+                  arrivalSlaWindow = "En Route (40-Min Physical Arrival SLA)";
+                } else if (r.coveragePlan === "8hr") {
+                  arrivalSlaWindow = "En Route (Scheduled Business Hours 08:00–16:00)";
+                } else if (r.coveragePlan === "custom") {
+                  arrivalSlaWindow = "En Route (Custom Negotiated Terms)";
+                } else {
+                  arrivalSlaWindow = "En Route";
+                }
                 break;
               case "ON_SITE":
                 arrivalSlaWindow = "Technician Present On-Site";
@@ -85,7 +103,17 @@ export function CustomerDashboard() {
               arrivalSlaWindow = "Dispatcher Evaluating Candidates";
             } else if (r.status === "NEW") {
               displayStatus = "NEW";
-              arrivalSlaWindow = r.coveragePlan === "247-priority" ? "20-Min SLA Priority Window" : "Pending Review";
+              if (r.coveragePlan === "247-priority") {
+                arrivalSlaWindow = "20-Min Arrival SLA (Pending Review)";
+              } else if (r.coveragePlan === "247-standard") {
+                arrivalSlaWindow = "40-Min Arrival SLA (Pending Review)";
+              } else if (r.coveragePlan === "8hr") {
+                arrivalSlaWindow = "Business Hours Schedule (No Arrival SLA)";
+              } else if (r.coveragePlan === "custom") {
+                arrivalSlaWindow = "Custom Terms (Pending Review)";
+              } else {
+                arrivalSlaWindow = "Pending Dispatcher Review";
+              }
             }
           }
 
@@ -109,6 +137,7 @@ export function CustomerDashboard() {
             problem: r.problemTitle,
             description: r.problemDescription,
             priority: r.priority,
+            coveragePlan: r.coveragePlan,
             displayStatus,
             submittedDate: formattedDate,
             arrivalSlaWindow,
@@ -404,8 +433,12 @@ export function CustomerDashboard() {
                     <span className="font-semibold text-[var(--text-primary)]">{selectedRequest.category}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Priority SLA</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Urgency / Severity</span>
                     <span className="font-bold text-red-600 dark:text-red-400">{selectedRequest.priority}</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Coverage Plan SLA</span>
+                    <span className="font-bold text-[#10b981]">{getCoveragePlanSlaLabel(selectedRequest.coveragePlan)}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
                     <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Current Lifecycle</span>

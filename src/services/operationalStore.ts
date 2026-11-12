@@ -1,6 +1,20 @@
-// Centralized Reactive Operational Data Store for VoltOps
-// Provides a unified, single source of truth for all four roles (Customer, Dispatcher, Technician, Admin)
-// when running in local demonstration / offline mode, ensuring 100% end-to-end workflow coherence.
+// ============================================================================
+// VoltOps Frontend — Client-Side Prototype Operational Store
+// ============================================================================
+// ARCHITECTURAL BOUNDARY & LIMITATIONS NOTICE:
+// 1. SCOPE: This is a TEMPORARY, CLIENT-SIDE DEMONSTRATION STATE ENGINE.
+//    It is NOT a persistent database and does not replace backend persistence.
+// 2. LIFECYCLE: Persists strictly to browser `sessionStorage` (cleared on tab close).
+//    In Node.js, test harnesses, and SSR environments, it falls back to in-memory state.
+// 3. SECURITY & DATA ISOLATION:
+//    - Operational state is strictly isolated from authentication credentials.
+//    - NEVER store user passwords, JWT tokens, session cookies, or payment card details here.
+//    - Authentication secrets remain exclusively within secure httpOnly cookies / AuthContext.
+// 4. MALFORMED / CORRUPTED STORAGE PROTECTION:
+//    - All incoming raw storage payloads are parsed within guarded try/catch blocks.
+//    - Validated by structural type guards before acceptance.
+//    - Corrupted or unparseable states are safely discarded, resetting to clean baselines.
+// ============================================================================
 
 import { ServiceRequest, WorkOrder, TechnicianProfile, Invoice } from "../types";
 import { DispatchEventLog } from "../types/dispatcher";
@@ -51,11 +65,11 @@ export const INITIAL_INVOICES: Invoice[] = [
     taxRate: 0.05,
     taxAmount: 32.5,
     totalAmount: 682.5,
-    paymentNotice: "Payment is a UI preview only. No real banking transaction will be processed.",
+    paymentNotice: "Demonstration Billing Statement: Payment gateway integration (Stripe / Bank ACH) pending backend milestone.",
   },
 ];
 
-interface OperationalState {
+export interface OperationalState {
   requests: ServiceRequest[];
   workOrders: WorkOrder[];
   technicians: TechnicianProfile[];
@@ -63,14 +77,17 @@ interface OperationalState {
   events: DispatchEventLog[];
 }
 
-// In-memory fallback for SSR / test environments
-let memoryState: OperationalState = {
-  requests: JSON.parse(JSON.stringify(INITIAL_SERVICE_REQUESTS)),
-  workOrders: JSON.parse(JSON.stringify(INITIAL_WORK_ORDERS)),
-  technicians: JSON.parse(JSON.stringify(INITIAL_FIELD_TECHNICIANS)),
-  invoices: JSON.parse(JSON.stringify(INITIAL_INVOICES)),
-  events: JSON.parse(JSON.stringify(INITIAL_DISPATCH_EVENTS)),
-};
+function createPristineBaseline(): OperationalState {
+  return {
+    requests: JSON.parse(JSON.stringify(INITIAL_SERVICE_REQUESTS)),
+    workOrders: JSON.parse(JSON.stringify(INITIAL_WORK_ORDERS)),
+    technicians: JSON.parse(JSON.stringify(INITIAL_FIELD_TECHNICIANS)),
+    invoices: JSON.parse(JSON.stringify(INITIAL_INVOICES)),
+    events: JSON.parse(JSON.stringify(INITIAL_DISPATCH_EVENTS)),
+  };
+}
+
+let memoryState: OperationalState = createPristineBaseline();
 
 function hasSessionStorage(): boolean {
   try {
@@ -80,24 +97,47 @@ function hasSessionStorage(): boolean {
   }
 }
 
+/**
+ * Structural Type Guard: Validates that an untrusted object meets OperationalState integrity.
+ * Prevents corrupted or malicious storage structures from crashing UI components.
+ */
+export function validateOperationalState(candidate: unknown): OperationalState | null {
+  if (!candidate || typeof candidate !== "object") return null;
+  const c = candidate as Partial<OperationalState>;
+
+  const isArrayOfObjectsWithId = (arr: unknown): boolean =>
+    Array.isArray(arr) && arr.every((item) => item && typeof item === "object" && typeof (item as any).id === "string");
+
+  if (!isArrayOfObjectsWithId(c.requests)) return null;
+  if (!isArrayOfObjectsWithId(c.workOrders)) return null;
+  if (!isArrayOfObjectsWithId(c.technicians)) return null;
+  if (!isArrayOfObjectsWithId(c.invoices)) return null;
+  if (!isArrayOfObjectsWithId(c.events)) return null;
+
+  return candidate as OperationalState;
+}
+
 function loadState(): OperationalState {
   if (hasSessionStorage()) {
     try {
       const raw = window.sessionStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (
-          Array.isArray(parsed.requests) &&
-          Array.isArray(parsed.workOrders) &&
-          Array.isArray(parsed.technicians) &&
-          Array.isArray(parsed.invoices) &&
-          Array.isArray(parsed.events)
-        ) {
-          return parsed;
+        const validated = validateOperationalState(parsed);
+        if (validated) {
+          return validated;
         }
+        // Malformed structure detected: discard corrupted state safely
+        console.warn("[VoltOps Demo Store] Malformed session storage structure discarded. Reverting to baseline.");
+        window.sessionStorage.removeItem(STORAGE_KEY);
       }
-    } catch {
-      // Fall through to memory
+    } catch (err) {
+      console.warn("[VoltOps Demo Store] Corrupted session storage JSON discarded:", err);
+      try {
+        window.sessionStorage.removeItem(STORAGE_KEY);
+      } catch {
+        // Ignore removal error
+      }
     }
   }
   return memoryState;
@@ -109,7 +149,7 @@ function saveState(state: OperationalState): void {
     try {
       window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
-      // Storage quota or restriction
+      // Storage quota exceeded or disabled in strict security mode
     }
   }
   notifySubscribers();
@@ -120,9 +160,51 @@ function notifySubscribers(): void {
     try {
       window.dispatchEvent(new CustomEvent(EVENT_NAME));
     } catch {
-      // Event dispatch fallback
+      // CustomEvent dispatch fallback
     }
   }
+}
+
+/**
+ * Reconciles technician availability status strictly against active non-completed assignments.
+ * Ensures consistent availability rules across Dispatcher and Technician portals:
+ * - A technician with remaining active jobs (ASSIGNED, TRAVELLING, ON_SITE) remains ON_JOB / TRAVELLING.
+ * - A technician with 0 remaining jobs returns to AVAILABLE only if their prior status was active duty.
+ * - Technicians on leave (ON_LEAVE, OFF_DUTY, UNAVAILABLE) are NEVER forced to AVAILABLE.
+ */
+export function reconcileTechnicianOperationalStatus(
+  tech: TechnicianProfile,
+  allWorkOrders: WorkOrder[]
+): TechnicianProfile {
+  const activeAssignments = allWorkOrders.filter(
+    (w) =>
+      w.assignedTechnicianId === tech.id &&
+      w.status !== "COMPLETED" &&
+      w.status !== "CANCELLED"
+  );
+
+  tech.activeJobCount = activeAssignments.length;
+
+  if (activeAssignments.length > 0) {
+    const hasOnSite = activeAssignments.some((w) => w.status === "ON_SITE");
+    const hasTravelling = activeAssignments.some((w) => w.status === "TRAVELLING");
+
+    if (hasOnSite) {
+      tech.status = "ON_JOB";
+    } else if (hasTravelling) {
+      tech.status = "TRAVELLING";
+    } else {
+      tech.status = "ON_JOB";
+    }
+  } else {
+    // 0 active jobs: return to AVAILABLE only if previously in an active duty state
+    if (tech.status === "ON_JOB" || tech.status === "TRAVELLING") {
+      tech.status = "AVAILABLE";
+    }
+    // If ON_LEAVE, OFF_DUTY, UNAVAILABLE, or BREAK, preserve their existing off-duty status
+  }
+
+  return tech;
 }
 
 export const operationalStore = {
@@ -172,16 +254,10 @@ export const operationalStore = {
   },
 
   /**
-   * Reset store to pristine initial state (useful in testing)
+   * Reset store to pristine initial state (for test isolation and clean teardown)
    */
   reset(): void {
-    const pristine: OperationalState = {
-      requests: JSON.parse(JSON.stringify(INITIAL_SERVICE_REQUESTS)),
-      workOrders: JSON.parse(JSON.stringify(INITIAL_WORK_ORDERS)),
-      technicians: JSON.parse(JSON.stringify(INITIAL_FIELD_TECHNICIANS)),
-      invoices: JSON.parse(JSON.stringify(INITIAL_INVOICES)),
-      events: JSON.parse(JSON.stringify(INITIAL_DISPATCH_EVENTS)),
-    };
+    const pristine = createPristineBaseline();
     saveState(pristine);
   },
 

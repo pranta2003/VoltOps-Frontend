@@ -80,6 +80,49 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
+## Milestone 4.1: Business Logic Integrity, Data Safety & Integration Boundaries ✅
+- **Date Completed**: 12 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Scope**: Rigorous business logic audit and correction across all four portals. Decoupled request urgency from physical arrival SLA guarantees; enforced the four approved canonical VoltOps coverage plans (8-Hour Daily Window, 24/7 Standard 40m, 24/7 Priority 20m, Custom Enterprise). Corrected invoice payment semantics by strictly separating payment initiation (`PAYMENT_PENDING`) from confirmation, prohibiting frontend simulation of PAID status without backend gateway webhooks. Hardened technician availability logic to account for remaining active assignments, multi-job capacity, and off-duty statuses (`ON_LEAVE`). Fortified the client-side operational store against corrupted or malformed `sessionStorage` structures with runtime type guards. Implemented route-level code splitting across all dashboards reducing initial JS bundle by ~40% (785 kB down to 471 kB).
+- **Accomplishments**:
+  1. **Canonical Coverage Plans & SLA Business Rules (`src/types/coverage.ts`)**:
+     - Defined approved VoltOps plans:
+       - **Plan A (8-Hour Daily Coverage)**: 08:00 – 16:00 business hours operating window. Guaranteed physical arrival SLA: `null` (no physical SLA).
+       - **Plan B (24/7 Standard Coverage)**: 24/7 facility support with guaranteed 40-minute physical arrival SLA.
+       - **Plan C (24/7 Priority Coverage)**: 24/7 mission-critical support with guaranteed 20-minute physical arrival SLA.
+       - **Plan D (Custom Enterprise Coverage)**: Negotiated terms and schedule. Guaranteed physical arrival SLA: `null` (no default invented SLA).
+     - Decoupled `PriorityLevel` (failure severity / urgency) from arrival SLAs across `customerService`, `dispatcherService`, `CustomerDashboard`, and `NewServiceRequest`.
+  2. **Payment Gateway Boundary & Invoice Semantics (`customerService.ts`, `CustomerInvoices.tsx`)**:
+     - Separated payment initiation from payment confirmation.
+     - Prohibited marking invoices `PAID` by frontend button clicks.
+     - `customerService.initiatePayment` transitions invoices to `PAYMENT_PENDING` with explicit disclaimers: "Awaiting payment gateway webhook confirmation."
+     - Clearly distinguished demonstration billing statements from authoritative backend-generated financial invoices.
+  3. **Technician Availability Logic & Workload Safeguards (`technicianService.ts`, `operationalStore.ts`)**:
+     - Reconciled technician availability strictly against all remaining active assignments in `operationalStore`.
+     - Completing one job leaves the technician in `ON_JOB` if they hold other active assignments.
+     - Technicians with status `ON_LEAVE`, `OFF_DUTY`, or `UNAVAILABLE` are never forced to `AVAILABLE` upon completing a historical job.
+     - Exported `reconcileTechnicianOperationalStatus` for unified consistency across Dispatcher and Technician portals.
+  4. **Operational Store Limitations & Corrupted Storage Protection (`operationalStore.ts`)**:
+     - Clearly documented that `sessionStorage` is a temporary client-side demonstration engine and not a persistent database.
+     - Added structural runtime type guard `validateOperationalState` verifying array shapes and object IDs.
+     - Safely catches and discards corrupted or unparseable session storage payloads, gracefully resetting to pristine baselines.
+     - Verified strict isolation of operational data from authentication tokens and user secrets.
+  5. **Portal UI Consistency & Deception Elimination**:
+     - `CustomerDashboard.tsx`: Dynamic arrival SLA labels determined strictly by coverage plan; replaced "Priority SLA" with "Urgency / Severity" and added "Coverage Plan SLA".
+     - `NewServiceRequest.tsx`: Added Coverage Plan selector for all 4 approved plans; refactored Urgency to describe operational impact rather than arrival times.
+     - `CustomerInvoices.tsx`: Disabled fake instant payments; added `PAYMENT_PENDING` gateway settlement states and demonstration bill notices.
+     - `TechnicianDashboard.tsx` & `MyJobs.tsx`: Calculated remaining transit minutes strictly from `w.slaDeadline`; eliminated fabricated `18m / 35m` priority-based estimates.
+  6. **Performance & Route-Level Code Splitting (`App.tsx`)**:
+     - Implemented `React.lazy` and `Suspense` across all role dashboards and sub-views.
+     - Slashed initial bundle size from **784.8 kB to 471.1 kB** (147.2 kB gzip).
+     - Eliminated Vite large chunk warnings completely.
+  7. **Comprehensive Automated Verification (`tests/workflowIntegration.test.mjs`)**:
+     - Automated Test Suite: **45/45 tests passing** (35 unit + 10 integration) in 218ms.
+     - Production Build: `npm run build` (`tsc && vite build`) passed cleanly in 5.93s with **0 TypeScript and 0 Vite errors**.
+     - Absolute Frontend Scope: 0 backend files modified, 0 Prisma edits, 0 backend commits.
+
+---
+
 ## Milestone 4.0: End-to-End Workflow, Data Reliability & Backend Integration Readiness ✅
 - **Date Completed**: 12 November 2026
 - **Branch**: `pranta` (frontend only)
