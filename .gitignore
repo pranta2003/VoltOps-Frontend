@@ -15,3 +15,6 @@ build/
 
 # Logs
 npm-debug.log*
+
+# Local video backups
+public/videos/backup/

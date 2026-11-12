@@ -132,11 +132,11 @@ const CORE_SERVICES: ServiceTrade[] = [
 
 // ── 5 Operational Workflow Steps (Concise, 10-14 words each) ──────────────
 const WORKFLOW_STEPS = [
-  { step: 1, icon: FileTextIcon, title: "Select Coverage", desc: "Choose a daily coverage window and physical arrival SLA commitment for your facility." },
-  { step: 2, icon: AlertTriangleIcon, title: "Submit Request", desc: "Report the facility breakdown from your phone or portal for immediate dispatcher intake." },
-  { step: 3, icon: CompassIcon, title: "Verified Matching", desc: "Dispatcher verifies candidate trade competency, license validity, and proximity score." },
-  { step: 4, icon: ZapIcon, title: "Technician Arrives", desc: "Certified technician physically arrives at your facility within the guaranteed 20–40 minute window." },
-  { step: 5, icon: CheckCircleIcon, title: "Digital Sign-Off", desc: "Inspect completed work on site, approve sign-off, and receive deterministic billing receipts." },
+  { step: 1, icon: FileTextIcon, title: "Select Coverage", desc: "Select your coverage window and arrival SLA." },
+  { step: 2, icon: AlertTriangleIcon, title: "Submit Request", desc: "Report breakdowns instantly via mobile or web." },
+  { step: 3, icon: CompassIcon, title: "Verified Matching", desc: "Automated verification of license, skills, and proximity." },
+  { step: 4, icon: ZapIcon, title: "Technician Arrives", desc: "Certified tech arrives within your guaranteed window." },
+  { step: 5, icon: CheckCircleIcon, title: "Digital Sign-Off", desc: "On-site inspection, approval, and digital billing." },
 ];
 
 // ── 4 Role Workspaces (Concise, 1-2 lines each) ───────────────────────────
@@ -183,9 +183,13 @@ const AMBIENT_PARTICLES = [
 function LogoMark({ size = 34 }: { size?: number }) {
   return (
     <motion.div
+      animate={{ y: [0, -3, 0], scale: [1, 1.02, 1] }}
       whileHover={{ scale: 1.08, rotate: 2 }}
       whileTap={{ scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      transition={{
+        y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+        scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+      }}
       className="relative flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#10b981] via-[#059669] to-[#047857] shadow-[0_0_20px_rgba(16,185,129,0.45)] cursor-pointer overflow-hidden group shrink-0"
       style={{ width: size, height: size }}
       aria-hidden="true"
@@ -299,7 +303,7 @@ export function LandingPage() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.08,
+        staggerChildren: shouldReduceMotion ? 0 : 0.1,
       },
     },
   };
@@ -556,13 +560,12 @@ export function LandingPage() {
             loop
             muted
             playsInline
-            poster="/images/hero-technician.jpg"
+            poster="/images/hero-video-poster.jpg"
             className="absolute inset-0 w-full h-full object-cover object-center"
           >
             <source src="/videos/hero-background.mp4" type="video/mp4" />
-            <source src="/videos/hero-background.webm" type="video/webm" />
             <img
-              src="/images/hero-technician.jpg"
+              src="/images/hero-video-poster.jpg"
               alt="Commercial Field Service Operations"
               className="w-full h-full object-cover object-center"
             />
@@ -986,9 +989,9 @@ export function LandingPage() {
           {/* Left Bento: Operations Dispatch Architecture */}
           <motion.div
             variants={cardItemVariants}
-            whileHover={{ y: -4 }}
+            whileHover={{ y: -5, scale: 1.01 }}
             transition={{ duration: 0.2 }}
-            className="lg:col-span-6 p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald space-y-5"
+            className="lg:col-span-6 p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald space-y-5 transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.22)]"
           >
             <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border)]">
               <div>
@@ -1019,16 +1022,16 @@ export function LandingPage() {
             </div>
 
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed pt-2 border-t border-[var(--border)]">
-              VoltOps strictly requires human dispatcher confirmation for all job assignments. Automated engines provide transparent scoring and candidate explanations only.
+              Human-verified dispatch. Transparent AI scoring.
             </p>
           </motion.div>
 
           {/* Right Bento: Candidate Audit Evaluation */}
           <motion.div
             variants={cardItemVariants}
-            whileHover={{ y: -4 }}
+            whileHover={{ y: -5, scale: 1.01 }}
             transition={{ duration: 0.2 }}
-            className="lg:col-span-6 p-7 rounded-[32px] border border-[var(--border)] glass-panel space-y-4"
+            className="lg:col-span-6 p-7 rounded-[32px] border border-[var(--border)] glass-panel space-y-4 transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.22)]"
           >
             <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border)]">
               <div>
@@ -1051,7 +1054,7 @@ export function LandingPage() {
                   91% Match Score
                 </span>
               </div>
-              <p className="text-xs text-slate-700 dark:text-slate-300">Certified CCTV & NVR Specialist · Tejgaon Hub · 0 active jobs</p>
+              <p className="text-xs text-slate-700 dark:text-slate-300">CCTV Specialist | Tejgaon Hub | Available</p>
               <div className="flex gap-3 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
                 <span>✓ Active License</span><span>✓ Standby Available</span><span>✓ 2.1 km away</span>
               </div>
@@ -1065,7 +1068,7 @@ export function LandingPage() {
                   78% Match Score
                 </span>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Security Tech · 1 active job in Banani</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Security Tech | Banani | 1 Active Job</p>
             </div>
 
             {/* Ineligible */}
@@ -1119,14 +1122,14 @@ export function LandingPage() {
                 <motion.div
                   key={step}
                   variants={cardItemVariants}
-                  whileHover={{ y: -5 }}
+                  whileHover={{ y: -5, scale: 1.01 }}
                   transition={{ duration: 0.2 }}
                   tabIndex={0}
                   onMouseEnter={() => setHoveredStep(step)}
                   onMouseLeave={() => setHoveredStep(null)}
                   onFocus={() => setHoveredStep(step)}
                   onBlur={() => setHoveredStep(null)}
-                  className={`p-5 rounded-[26px] border border-[var(--border)] glass-panel transition-all duration-200 cursor-default ${
+                  className={`p-5 rounded-[26px] border border-[var(--border)] glass-panel transition-all duration-200 cursor-default hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.22)] ${
                     isHov ? "border-[#10b981] shadow-[var(--shadow-md)]" : ""
                   }`}
                 >
@@ -1197,9 +1200,9 @@ export function LandingPage() {
           {/* Plan A: 8-Hour Daily */}
           <motion.div
             variants={cardItemVariants}
-            whileHover={{ y: -6 }}
-            transition={{ duration: 0.22 }}
-            className="flex flex-col"
+            whileHover={{ y: -5, scale: 1.01 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.25)] rounded-[30px]"
           >
             <div className="h-full p-6 sm:p-7 rounded-[30px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)]">
               <div className="space-y-3">
@@ -1222,7 +1225,7 @@ export function LandingPage() {
                 </div>
 
                 <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
-                  {["All 7 technical trades covered", "Scheduled daytime repairs", "Human dispatcher assignment"].map((b) => (
+                  {["Business Hours (08:00 - 16:00)", "Scheduled daytime repairs", "All 7 trades covered"].map((b) => (
                     <li key={b} className="flex items-center gap-2">
                       <CheckIcon className="text-emerald-500" />{b}
                     </li>
@@ -1245,9 +1248,9 @@ export function LandingPage() {
           {/* Plan B: 24/7 Standard */}
           <motion.div
             variants={cardItemVariants}
-            whileHover={{ y: -6 }}
-            transition={{ duration: 0.22 }}
-            className="flex flex-col"
+            whileHover={{ y: -5, scale: 1.01 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.25)] rounded-[30px]"
           >
             <div className="h-full p-6 sm:p-7 rounded-[30px] border border-[var(--border)] glass-panel glow-card-emerald flex flex-col justify-between shadow-[var(--shadow-sm)]">
               <div className="space-y-3">
@@ -1270,7 +1273,7 @@ export function LandingPage() {
                 </div>
 
                 <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
-                  {["All 7 technical trades covered", "40-min physical arrival SLA", "Digital repair logs & receipts"].map((b) => (
+                  {["Round-the-clock coverage", "40-min physical arrival SLA", "Digital repair logs"].map((b) => (
                     <li key={b} className="flex items-center gap-2">
                       <CheckIcon className="text-emerald-500" />{b}
                     </li>
@@ -1293,9 +1296,9 @@ export function LandingPage() {
           {/* Plan C: 24/7 Priority */}
           <motion.div
             variants={cardItemVariants}
-            whileHover={{ y: -6 }}
-            transition={{ duration: 0.22 }}
-            className="flex flex-col"
+            whileHover={{ y: -5, scale: 1.01 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.3)] rounded-[30px]"
           >
             <div className="h-full p-6 sm:p-7 rounded-[30px] border-2 border-[#10b981] glass-panel glow-card-emerald flex flex-col justify-between relative shadow-[0_0_32px_rgba(16,185,129,0.22)]">
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-0.5 rounded-full bg-[#10b981] text-[#06090e] text-[11px] font-bold uppercase tracking-wider shadow flex items-center gap-1">
@@ -1323,7 +1326,7 @@ export function LandingPage() {
                 </div>
 
                 <ul className="space-y-1.5 text-xs">
-                  {["20-min rapid arrival (2× faster)", "Top emergency dispatch priority", "All 7 service trades covered"].map((b, i) => (
+                  {["Critical commercial coverage", "20-min rapid arrival (2x faster)", "Top emergency priority"].map((b, i) => (
                     <li key={b} className={`flex items-center gap-2 ${i === 0 ? "font-bold text-slate-900 dark:text-white" : "text-slate-800 dark:text-slate-200"}`}>
                       <CheckIcon className="text-[#10b981]" />{b}
                     </li>
@@ -1347,9 +1350,9 @@ export function LandingPage() {
           {/* Plan D: Custom Coverage */}
           <motion.div
             variants={cardItemVariants}
-            whileHover={{ y: -6 }}
-            transition={{ duration: 0.22 }}
-            className="flex flex-col"
+            whileHover={{ y: -5, scale: 1.01 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.25)] rounded-[30px]"
           >
             <div className="h-full p-6 sm:p-7 rounded-[30px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)]">
               <div className="space-y-3">
@@ -1371,9 +1374,13 @@ export function LandingPage() {
                   <span className="text-xs font-bold text-slate-900 dark:text-white">6, 8, 12, or 16 hours/day</span>
                 </div>
 
-                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                  Tailored schedule matching multi-facility shifts. SLAs and pricing confirmed after requirements review.
-                </p>
+                <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
+                  {["Tailored enterprise shifts", "Negotiated SLAs", "Multi-facility scaling"].map((b) => (
+                    <li key={b} className="flex items-center gap-2">
+                      <CheckIcon className="text-emerald-500" />{b}
+                    </li>
+                  ))}
+                </ul>
               </div>
 
               <motion.button
