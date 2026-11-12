@@ -255,7 +255,6 @@ export const WorkOrders: FC = () => {
   return (
     <Layout
       title="Work Orders"
-      subtitle="Operational Execution Ledger & Dispatch Control"
       action={
         <div className="flex items-center gap-2">
           <span
@@ -302,7 +301,7 @@ export const WorkOrders: FC = () => {
         </div>
       }
     >
-      <div className="space-y-3.5">
+      <div className="space-y-3">
         {/* Error notification banner if request failed */}
         {errorMessage && (
           <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
@@ -320,19 +319,15 @@ export const WorkOrders: FC = () => {
           </div>
         )}
 
-        {/* ── Compact Lifecycle Status Strip ──────────────────────────────── */}
-        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] flex flex-wrap items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[var(--text-primary)]">
-              {workOrders.length} Operational Orders
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">· Field Execution</span>
-          </div>
-
+        {/* ── Compact Filter & Status Grouping Strip ───────────────────────── */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          {/* Status Tabs */}
           <div className="flex items-center gap-1.5 flex-wrap">
             {[
-              { id: "ALL", label: "All Orders", count: workOrders.length, dot: "bg-slate-400" },
-              { id: "UNASSIGNED", label: "Unassigned", count: lifecycleCounts.UNASSIGNED, dot: "bg-rose-500 animate-pulse" },
+              { id: "ALL", label: "All", count: workOrders.length },
+              ...(lifecycleCounts.UNASSIGNED > 0
+                ? [{ id: "UNASSIGNED", label: "Unassigned", count: lifecycleCounts.UNASSIGNED, dot: "bg-rose-500" }]
+                : []),
               { id: "ASSIGNED", label: "Assigned", count: lifecycleCounts.ASSIGNED, dot: "bg-indigo-500" },
               { id: "TRAVELLING", label: "In Transit", count: lifecycleCounts.TRAVELLING, dot: "bg-amber-500" },
               { id: "ON_SITE", label: "On Site", count: lifecycleCounts.ON_SITE, dot: "bg-blue-500" },
@@ -344,226 +339,215 @@ export const WorkOrders: FC = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setSelectedStatus(tab.id)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${
                     isSelected
                       ? "border border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs"
-                      : "border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                      : "border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]"
                   }`}
                 >
-                  <span className={`w-2 h-2 rounded-full ${tab.dot}`} />
-                  <span className="font-medium">{tab.label}</span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded font-bold bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)]">
-                    {tab.count}
-                  </span>
+                  {tab.dot && <span className={`w-1.5 h-1.5 rounded-full ${tab.dot}`} />}
+                  <span>{tab.label}</span>
+                  <span className="text-[10px] font-mono opacity-80">({tab.count})</span>
                 </button>
               );
             })}
           </div>
-        </div>
 
-        {/* ── Filter Toolbar ─────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Search Input */}
-          <div className="relative flex-1 min-w-[220px]">
-            <SearchIcon
-              size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
-            />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by ID, customer, asset, technician..."
-              aria-label="Search work orders"
-              className="w-full text-xs pl-9 pr-8 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                aria-label="Clear search"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5"
+          {/* Right: Search and Trade filter */}
+          <div className="flex items-center gap-2 flex-1 min-w-[260px] justify-end">
+            <div className="relative flex-1 max-w-xs">
+              <SearchIcon
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search work orders"
+                aria-label="Search work orders"
+                className="w-full text-xs pl-9 pr-8 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  aria-label="Clear search"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5"
+                >
+                  <XIcon size={13} />
+                </button>
+              )}
+            </div>
+
+            <div className="relative">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                aria-label="Filter by trade category"
+                className="text-xs py-1.5 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
-                <XIcon size={13} />
-              </button>
-            )}
-          </div>
-
-          {/* Trade Category Filter */}
-          <div className="relative">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              aria-label="Filter by trade category"
-              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="ALL">All Trades (7 Canonical)</option>
-              {CANONICAL_SERVICE_CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-            <ChevronDownIcon
-              size={13}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
-            />
-          </div>
-
-          {/* Priority Dropdown */}
-          <div className="relative">
-            <select
-              value={selectedPriority}
-              onChange={(e) => setSelectedPriority(e.target.value)}
-              aria-label="Filter by priority"
-              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="ALL">All Priorities</option>
-              <option value="URGENT">Urgent Priority</option>
-              <option value="HIGH">High Priority</option>
-              <option value="MEDIUM">Medium Priority</option>
-              <option value="LOW">Low Priority</option>
-            </select>
-            <ChevronDownIcon
-              size={13}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
-            />
+                <option value="ALL">All trades</option>
+                {CANONICAL_SERVICE_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+              <ChevronDownIcon
+                size={13}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+              />
+            </div>
           </div>
         </div>
 
-        {/* ── High-Density Work Orders Operations Table ──────────────────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-xs">
-          <div className="w-full max-w-full overflow-x-auto scrollbar-thin">
-            <table className="w-full min-w-[960px] text-left text-xs border-collapse table-fixed">
-              <colgroup>
-                <col className="w-[85px]" />
-                <col className="w-[185px]" />
-                <col className="w-[175px]" />
-                <col className="w-[85px]" />
-                <col className="w-[110px]" />
-                <col className="w-[140px]" />
-                <col className="w-[105px]" />
-                <col className="w-[115px]" />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
-                  <th className="py-2.5 px-3">Order ID</th>
-                  <th className="py-2.5 px-3">Customer & Location</th>
-                  <th className="py-2.5 px-3">Trade & Asset</th>
-                  <th className="py-2.5 px-3">Priority</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3">Technician</th>
-                  <th className="py-2.5 px-3">Arrival Target</th>
-                  <th className="py-2.5 px-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={8} className="py-8 text-center text-xs text-[var(--text-muted)]">
-                      Loading work orders...
-                    </td>
-                  </tr>
-                ) : workOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="py-8 text-center text-xs text-[var(--text-muted)]">
-                      No work orders match the selected filters.
-                    </td>
-                  </tr>
-                ) : (
-                  workOrders.map((wo) => (
-                    <tr
-                      key={wo.id}
-                      onClick={(e) => handleOpenInspect(wo, e as any)}
-                      className="hover:bg-[var(--bg-surface-2)] transition-colors cursor-pointer group"
-                    >
-                      <td className="py-2.5 px-3 font-mono font-bold text-xs text-[var(--text-primary)] whitespace-nowrap truncate">
-                        {wo.id}
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <div
-                          className="font-semibold text-[var(--text-primary)] truncate text-xs"
-                          title={`${wo.customerName} - ${wo.facilityAddress}`}
-                        >
-                          {wo.customerName}
+        {/* ── Grouped Execution Board ──────────────────────────────────────── */}
+        {isLoading ? (
+          <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
+            Loading work orders...
+          </div>
+        ) : workOrders.length === 0 ? (
+          <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
+            No work orders match the selected filters.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3.5">
+            {[
+              ...(selectedStatus === "ALL" || selectedStatus === "UNASSIGNED"
+                ? (lifecycleCounts.UNASSIGNED > 0 || selectedStatus === "UNASSIGNED"
+                  ? [{
+                      statusKey: "UNASSIGNED",
+                      title: "Unassigned",
+                      dot: "bg-rose-500",
+                      badge: "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20",
+                      orders: workOrders.filter((w) => w.status === "UNASSIGNED"),
+                    }]
+                  : [])
+                : []),
+              ...(selectedStatus === "ALL" || selectedStatus === "ASSIGNED"
+                ? [{
+                    statusKey: "ASSIGNED",
+                    title: "Assigned",
+                    dot: "bg-indigo-500",
+                    badge: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
+                    orders: workOrders.filter((w) => w.status === "ASSIGNED"),
+                  }]
+                : []),
+              ...(selectedStatus === "ALL" || selectedStatus === "TRAVELLING"
+                ? [{
+                    statusKey: "TRAVELLING",
+                    title: "In Transit",
+                    dot: "bg-amber-500",
+                    badge: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
+                    orders: workOrders.filter((w) => w.status === "TRAVELLING"),
+                  }]
+                : []),
+              ...(selectedStatus === "ALL" || selectedStatus === "ON_SITE"
+                ? [{
+                    statusKey: "ON_SITE",
+                    title: "On Site",
+                    dot: "bg-blue-500",
+                    badge: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
+                    orders: workOrders.filter((w) => w.status === "ON_SITE"),
+                  }]
+                : []),
+              ...(selectedStatus === "ALL" || selectedStatus === "COMPLETED"
+                ? [{
+                    statusKey: "COMPLETED",
+                    title: "Completed",
+                    dot: "bg-emerald-500",
+                    badge: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+                    orders: workOrders.filter((w) => w.status === "COMPLETED"),
+                  }]
+                : []),
+            ].map((column) => (
+              <div
+                key={column.statusKey}
+                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]/60 flex flex-col p-3 space-y-2.5 min-h-[160px]"
+              >
+                {/* Column Header */}
+                <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${column.dot}`} />
+                    <h3 className="text-xs font-bold text-[var(--text-primary)]">
+                      {column.title}
+                    </h3>
+                  </div>
+                  <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border)]">
+                    {column.orders.length}
+                  </span>
+                </div>
+
+                {/* Column Cards */}
+                <div className="space-y-2 flex-1">
+                  {column.orders.length === 0 ? (
+                    <div className="h-24 flex items-center justify-center text-[11px] text-[var(--text-muted)] italic">
+                      No orders
+                    </div>
+                  ) : (
+                    column.orders.map((wo) => (
+                      <div
+                        key={wo.id}
+                        onClick={(e) => handleOpenInspect(wo, e as any)}
+                        className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--border-strong)] hover:shadow-xs transition-all cursor-pointer space-y-2 group"
+                      >
+                        {/* Top: ID & Status */}
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="font-mono font-bold text-xs text-[var(--text-primary)]">
+                            {wo.id}
+                          </span>
+                          <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                            {renderArrivalSla(wo)}
+                          </span>
                         </div>
-                        <div className="text-[11px] text-[var(--text-muted)] truncate" title={wo.facilityAddress}>
-                          {wo.facilityAddress}
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <div
-                          className="font-medium text-xs text-[var(--text-primary)] truncate"
-                          title={`${wo.assetName} (${wo.category})`}
-                        >
-                          {wo.assetName}
-                        </div>
-                        <div className="text-[11px] text-[var(--text-muted)] truncate" title={wo.category}>
-                          {wo.category}
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-3 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getPriorityBadge(
-                            wo.priority
-                          )}`}
-                        >
-                          {wo.priority}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 whitespace-nowrap">{getStatusBadge(wo.status)}</td>
-                      <td className="py-2.5 px-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        {wo.assignedTechnicianName ? (
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0">
-                              {wo.assignedTechnicianName.substring(0, 2).toUpperCase()}
-                            </span>
-                            <span
-                              className="font-medium text-xs text-[var(--text-primary)] truncate max-w-[95px]"
-                              title={wo.assignedTechnicianName}
-                            >
-                              {wo.assignedTechnicianName}
-                            </span>
+
+                        {/* Customer & Asset */}
+                        <div className="space-y-0.5">
+                          <div className="font-semibold text-xs text-[var(--text-primary)] truncate" title={wo.customerName}>
+                            {wo.customerName}
                           </div>
-                        ) : (
+                          <div className="text-[11px] text-[var(--text-muted)] truncate" title={wo.assetName}>
+                            {wo.assetName}
+                          </div>
+                        </div>
+
+                        {/* Bottom: Assigned Technician */}
+                        <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+                          {wo.assignedTechnicianName ? (
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+                                {wo.assignedTechnicianName.substring(0, 2).toUpperCase()}
+                              </span>
+                              <span className="text-[11px] text-[var(--text-secondary)] font-medium truncate" title={wo.assignedTechnicianName}>
+                                {wo.assignedTechnicianName}
+                              </span>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={(e) => handleOpenAssign(wo, e)}
+                              className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                            >
+                              + Assign technician
+                            </button>
+                          )}
                           <button
                             type="button"
-                            onClick={(e) => handleOpenAssign(wo, e)}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition-all"
+                            onClick={(e) => handleOpenInspect(wo, e as any)}
+                            className="text-[10px] text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
                           >
-                            + Assign Tech
+                            Details →
                           </button>
-                        )}
-                      </td>
-                      <td className="py-2.5 px-3 whitespace-nowrap text-xs">
-                        {renderArrivalSla(wo)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right whitespace-nowrap space-x-1" onClick={(e) => e.stopPropagation()}>
-                        {wo.status === "UNASSIGNED" && (
-                          <button
-                            type="button"
-                            onClick={(e) => handleOpenAssign(wo, e)}
-                            className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-xs"
-                          >
-                            Assign
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={(e) => handleOpenInspect(wo, e)}
-                          title="Inspect Order"
-                          className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all inline-flex items-center"
-                        >
-                          <EyeIcon size={13} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── Slide-Over Operations Inspection Drawer ─────────────────────── */}
@@ -579,7 +563,7 @@ export const WorkOrders: FC = () => {
             <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                  Work Order Inspection Drawer
+                  Order Details
                 </span>
                 <h3 id={inspectModalHeadingId} className="text-sm font-bold text-[var(--text-primary)]">
                   {inspectOrder.id} — {inspectOrder.customerName}
@@ -602,7 +586,7 @@ export const WorkOrders: FC = () => {
               {/* Operational Lifecycle Stepper */}
               <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
-                  Operational Lifecycle Progression
+                  Lifecycle Status
                 </div>
                 <div className="grid grid-cols-4 gap-1.5 text-center text-[10px]">
                   <div

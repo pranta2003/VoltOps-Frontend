@@ -110,17 +110,17 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
 
   return (
     <div className="flex h-screen w-full max-w-full overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)]">
-      {/* ── Desktop Sidebar (Linear / Vercel Neutral Slate: 240px wide) ──── */}
-      <aside className="hidden lg:flex w-60 shrink-0 flex-col justify-between border-r border-slate-800/80 bg-[#0b1117] text-slate-300 select-none">
+      {/* ── Desktop Sidebar (Linear / Vercel Neutral Slate: 256px wide) ──── */}
+      <aside className="hidden lg:flex w-64 shrink-0 flex-col justify-between border-r border-slate-800/80 bg-[#0b1117] text-slate-300 select-none">
         <div>
           {/* Brand header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
             <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-7 h-7 rounded-lg bg-[#10b981] flex items-center justify-center font-extrabold shadow-sm">
+              <div className="w-7 h-7 rounded-lg bg-[#10b981] flex items-center justify-center font-extrabold shadow-sm shrink-0">
                 <ZapIcon size={15} className="text-[#06090e]" />
               </div>
-              <div>
-                <span className="font-heading font-extrabold text-base tracking-tight text-white group-hover:text-[#10b981] transition-colors">
+              <div className="min-w-0">
+                <span className="font-heading font-extrabold text-base tracking-tight text-white group-hover:text-[#10b981] transition-colors block">
                   VoltOps
                 </span>
                 <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">
@@ -131,7 +131,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
           </div>
 
           {/* Navigation Links */}
-          <nav className="p-2.5 space-y-0.5">
+          <nav className="p-3 space-y-1">
             {navLinks.map((item) => {
               const isActive = location.pathname === item.path;
               const Icon = item.icon;
@@ -139,14 +139,14 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                     isActive
                       ? "bg-white/[0.12] text-white font-semibold shadow-sm"
                       : "text-slate-400 hover:text-white hover:bg-white/[0.06]"
                   }`}
                 >
-                  <Icon size={16} className={isActive ? "text-[#10b981]" : "text-slate-400"} />
-                  <span>{item.label}</span>
+                  <Icon size={16} className={`shrink-0 ${isActive ? "text-[#10b981]" : "text-slate-400"}`} />
+                  <span className="truncate">{item.label}</span>
                 </Link>
               );
             })}

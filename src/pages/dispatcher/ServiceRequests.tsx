@@ -214,7 +214,6 @@ export const ServiceRequests: FC = () => {
   return (
     <Layout
       title="Service Requests"
-      subtitle="Inbound Breakdown Intake & Triage Workspace"
       action={
         <div className="flex items-center gap-2">
           <span
@@ -261,7 +260,7 @@ export const ServiceRequests: FC = () => {
         </div>
       }
     >
-      <div className="space-y-3.5">
+      <div className="space-y-3">
         {/* Error notification banner if request failed */}
         {errorMessage && (
           <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
@@ -279,58 +278,49 @@ export const ServiceRequests: FC = () => {
           </div>
         )}
 
-        {/* ── Priority Distribution Bar ──────────────────────────────────── */}
-        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] flex flex-wrap items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[var(--text-primary)]">
-              {requests.length} Active Breakdown Inquiries
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">· Intake Triage</span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            {[
-              { key: "URGENT", label: "Urgent", count: priorityCounts.URGENT, badgeClass: "bg-rose-500 text-white dark:bg-rose-600" },
-              { key: "HIGH", label: "High", count: priorityCounts.HIGH, badgeClass: "bg-amber-500 text-white dark:bg-amber-600" },
-              { key: "MEDIUM", label: "Medium", count: priorityCounts.MEDIUM, badgeClass: "bg-sky-500 text-white dark:bg-sky-600" },
-              { key: "LOW", label: "Low", count: priorityCounts.LOW, badgeClass: "bg-slate-500 text-white dark:bg-slate-600" },
-            ].map((p) => {
-              const isSelected = selectedPriority === p.key;
-              return (
-                <button
-                  key={p.key}
-                  type="button"
-                  onClick={() => setSelectedPriority(selectedPriority === p.key ? "ALL" : p.key)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${
-                    isSelected
-                      ? "border border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs"
-                      : "border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]"
-                  }`}
-                >
-                  <span className={`w-2 h-2 rounded-full ${p.badgeClass}`} />
-                  <span className="font-medium">{p.label}</span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded font-bold bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)]">
-                    {p.count}
-                  </span>
-                </button>
-              );
-            })}
-            {selectedPriority !== "ALL" && (
+        {/* ── Compact Priority Filter Row ──────────────────────────────────── */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setSelectedPriority("ALL")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+              selectedPriority === "ALL"
+                ? "bg-[var(--bg-surface-2)] text-[var(--text-primary)] border border-[var(--border-strong)] font-semibold shadow-xs"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] border border-transparent"
+            }`}
+          >
+            All <span className="font-mono text-[10px] ml-1 opacity-70">({requests.length})</span>
+          </button>
+          {[
+            { key: "URGENT", label: "Urgent", count: priorityCounts.URGENT, dot: "bg-rose-500" },
+            { key: "HIGH", label: "High", count: priorityCounts.HIGH, dot: "bg-amber-500" },
+            { key: "MEDIUM", label: "Medium", count: priorityCounts.MEDIUM, dot: "bg-sky-500" },
+            { key: "LOW", label: "Low", count: priorityCounts.LOW, dot: "bg-slate-400" },
+          ].map((p) => {
+            const isSelected = selectedPriority === p.key;
+            return (
               <button
+                key={p.key}
                 type="button"
-                onClick={() => setSelectedPriority("ALL")}
-                className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] underline px-1"
+                onClick={() => setSelectedPriority(selectedPriority === p.key ? "ALL" : p.key)}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${
+                  isSelected
+                    ? "border border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs"
+                    : "border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                }`}
               >
-                Reset
+                <span className={`w-1.5 h-1.5 rounded-full ${p.dot}`} />
+                <span>{p.label}</span>
+                <span className="text-[10px] font-mono opacity-80">({p.count})</span>
               </button>
-            )}
-          </div>
+            );
+          })}
         </div>
 
-        {/* ── Filter Toolbar ─────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        {/* ── Compact Search & Filter Row ─────────────────────────────────── */}
+        <div className="flex flex-wrap items-center gap-2">
           {/* Search Input */}
-          <div className="relative flex-1 min-w-[220px]">
+          <div className="relative flex-1 min-w-[200px]">
             <SearchIcon
               size={14}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
@@ -339,9 +329,9 @@ export const ServiceRequests: FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by ID, customer, asset, problem..."
+              placeholder="Search requests"
               aria-label="Search service requests"
-              className="w-full text-xs pl-9 pr-8 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full text-xs pl-9 pr-8 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
             {searchQuery && (
               <button
@@ -361,9 +351,9 @@ export const ServiceRequests: FC = () => {
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               aria-label="Filter by trade category"
-              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="text-xs py-1.5 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
-              <option value="ALL">All Trades (7 Canonical)</option>
+              <option value="ALL">All trades</option>
               {CANONICAL_SERVICE_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
@@ -388,7 +378,7 @@ export const ServiceRequests: FC = () => {
                 key={tab.id}
                 type="button"
                 onClick={() => setSelectedStatus(tab.id)}
-                className={`px-3 py-1 rounded-md font-medium transition-all ${
+                className={`px-2.5 py-1 rounded-md font-medium transition-all ${
                   selectedStatus === tab.id
                     ? "bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-xs"
                     : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
@@ -400,42 +390,40 @@ export const ServiceRequests: FC = () => {
           </div>
         </div>
 
-        {/* ── High-Density Triage Workspace Table ─────────────────────────── */}
+        {/* ── Clean Request List Table ───────────────────────────────────── */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-xs">
           <div className="w-full max-w-full overflow-x-auto scrollbar-thin">
-            <table className="w-full min-w-[940px] text-left text-xs border-collapse table-fixed">
+            <table className="w-full min-w-[780px] text-left text-xs border-collapse table-fixed">
               <colgroup>
-                <col className="w-[80px]" />
-                <col className="w-[190px]" />
-                <col className="w-[180px]" />
-                <col className="w-[180px]" />
                 <col className="w-[85px]" />
+                <col className="w-[180px]" />
+                <col className="w-[230px]" />
+                <col className="w-[90px]" />
                 <col className="w-[95px]" />
-                <col className="w-[80px]" />
-                <col className="w-[110px]" />
+                <col className="w-[75px]" />
+                <col className="w-[85px]" />
               </colgroup>
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-2.5 px-3">Request ID</th>
-                  <th className="py-2.5 px-3">Customer & Facility</th>
-                  <th className="py-2.5 px-3">Trade & Asset</th>
-                  <th className="py-2.5 px-3">Problem Summary</th>
+                  <th className="py-2.5 px-3">Customer</th>
+                  <th className="py-2.5 px-3">Asset / Trade</th>
                   <th className="py-2.5 px-3">Priority</th>
                   <th className="py-2.5 px-3">Status</th>
                   <th className="py-2.5 px-3">Time</th>
-                  <th className="py-2.5 px-3 text-right">Actions</th>
+                  <th className="py-2.5 px-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={7} className="py-8 text-center text-xs text-[var(--text-muted)]">
                       Loading service requests...
                     </td>
                   </tr>
                 ) : requests.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={7} className="py-8 text-center text-xs text-[var(--text-muted)]">
                       No service requests match filters.
                     </td>
                   </tr>
@@ -461,16 +449,8 @@ export const ServiceRequests: FC = () => {
                         <div className="font-medium text-[var(--text-primary)] truncate text-xs" title={req.assetName}>
                           {req.assetName}
                         </div>
-                        <div className="text-[11px] text-[var(--text-muted)] truncate" title={req.category}>
-                          {req.category}
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <div
-                          className="font-medium text-[var(--text-secondary)] truncate text-xs"
-                          title={req.problemTitle}
-                        >
-                          {req.problemTitle}
+                        <div className="text-[11px] text-[var(--text-muted)] truncate" title={`${req.category} · ${req.problemTitle}`}>
+                          {req.category} · {req.problemTitle}
                         </div>
                       </td>
                       <td className="py-2.5 px-3 whitespace-nowrap">
@@ -486,11 +466,11 @@ export const ServiceRequests: FC = () => {
                       <td className="py-2.5 px-3 text-[11px] text-[var(--text-muted)] font-mono whitespace-nowrap">
                         {new Date(req.submittedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </td>
-                      <td className="py-2.5 px-3 text-right whitespace-nowrap space-x-1" onClick={(e) => e.stopPropagation()}>
+                      <td className="py-2.5 px-3 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         {req.status === "CONVERTED" ? (
                           <Link
                             to="/dispatcher/work-orders"
-                            className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                            className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
                           >
                             Order
                           </Link>
@@ -498,19 +478,11 @@ export const ServiceRequests: FC = () => {
                           <button
                             type="button"
                             onClick={(e) => handleOpenTriage(req, e)}
-                            className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-xs"
+                            className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-xs"
                           >
                             Triage
                           </button>
                         )}
-                        <button
-                          type="button"
-                          onClick={() => setSelectedDetailRequest(req)}
-                          title="Inspect Request"
-                          className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all inline-flex items-center"
-                        >
-                          <EyeIcon size={13} />
-                        </button>
                       </td>
                     </tr>
                   ))
@@ -534,7 +506,7 @@ export const ServiceRequests: FC = () => {
             <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                  Request Detail Drawer
+                  Request Details
                 </span>
                 <h3 id={drawerHeadingId} className="text-sm font-bold text-[var(--text-primary)]">
                   {selectedDetailRequest.id}
@@ -620,7 +592,7 @@ export const ServiceRequests: FC = () => {
                   to="/dispatcher/work-orders"
                   className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
                 >
-                  View Dispatched Work Order
+                  View Work Order
                 </Link>
               ) : (
                 <button

@@ -9,6 +9,7 @@ import {
   MapPinIcon,
   RadioIcon,
   ChevronRightIcon,
+  XIcon,
 } from "../../components/Icons";
 
 interface ShiftRosterItem {
@@ -193,7 +194,7 @@ export function DispatcherSchedule() {
 
   return (
     <Layout
-      title="Technician Schedule"
+      title="Schedule"
       action={
         <div className="flex items-center gap-1.5">
           <button
@@ -227,47 +228,11 @@ export function DispatcherSchedule() {
         </div>
       }
     >
-      <div className="space-y-3.5">
-        {/* ── Operational Summary & Hub Strip ────────────────────────────── */}
-        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] flex flex-wrap items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-semibold text-[var(--text-primary)]">
-              Shift Roster: 9 Technicians Assigned
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">·</span>
-            <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
-              3 On Duty
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">·</span>
-            <span className="text-[11px] text-blue-700 dark:text-blue-400 font-medium">
-              5 Standby
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">·</span>
-            <span className="text-[11px] text-purple-700 dark:text-purple-400 font-medium">
-              1 On Leave
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 text-[11px]">
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              EPZ Core (3)
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Gazipur Zone (3)
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Tejgaon Hub (3)
-            </span>
-          </div>
-        </div>
-
-        {/* ── Filter Toolbar ─────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center gap-2.5">
+      <div className="space-y-3">
+        {/* ── Compact Filter Toolbar ──────────────────────────────────────── */}
+        <div className="flex flex-wrap items-center gap-2">
           {/* Search Input */}
-          <div className="relative flex-1 min-w-[220px]">
+          <div className="relative flex-1 min-w-[200px]">
             <SearchIcon
               size={14}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
@@ -276,24 +241,34 @@ export function DispatcherSchedule() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by technician name, ID, trade or hub..."
+              placeholder="Search schedule"
               aria-label="Search schedule"
-              className="w-full text-xs pl-9 pr-8 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full text-xs pl-9 pr-8 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                aria-label="Clear search"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5"
+              >
+                <XIcon size={13} />
+              </button>
+            )}
           </div>
 
-          {/* Branch Filter */}
+          {/* Hub Filter */}
           <div className="relative">
             <select
               value={selectedBranch}
               onChange={(e) => setSelectedBranch(e.target.value)}
               aria-label="Filter by branch hub"
-              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="text-xs py-1.5 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
-              <option value="ALL">All Hubs (3)</option>
-              <option value="EPZ">EPZ Industrial Core</option>
-              <option value="Gazipur">Gazipur Zone</option>
-              <option value="Tejgaon">Tejgaon Core</option>
+              <option value="ALL">All hubs</option>
+              <option value="EPZ">EPZ Hub</option>
+              <option value="Gazipur">Gazipur Hub</option>
+              <option value="Tejgaon">Tejgaon Hub</option>
             </select>
             <ChevronDownIcon
               size={13}
@@ -307,12 +282,12 @@ export function DispatcherSchedule() {
               value={selectedShift}
               onChange={(e) => setSelectedShift(e.target.value)}
               aria-label="Filter by shift window"
-              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="text-xs py-1.5 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
-              <option value="ALL">All Shifts (3)</option>
-              <option value="Morning">Morning (08:00 - 16:00)</option>
-              <option value="Evening">Evening (16:00 - 00:00)</option>
-              <option value="Night">Night Standby (00:00 - 08:00)</option>
+              <option value="ALL">All shifts</option>
+              <option value="Morning">Morning</option>
+              <option value="Evening">Evening</option>
+              <option value="Night">Night</option>
             </select>
             <ChevronDownIcon
               size={13}
@@ -321,8 +296,8 @@ export function DispatcherSchedule() {
           </div>
         </div>
 
-        {/* ── Shift Lanes Timeline View ──────────────────────────────────── */}
-        <div className="space-y-3.5">
+        {/* ── Shift Sections ─────────────────────────────────────────────── */}
+        <div className="space-y-3">
           {shiftLanes.map((lane) => {
             if (selectedShift !== "ALL" && !lane.id.includes(selectedShift)) {
               return null;
@@ -334,79 +309,62 @@ export function DispatcherSchedule() {
                 className={`rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-xs ${lane.accent}`}
               >
                 {/* Lane Header */}
-                <div className="px-4 py-2.5 bg-[var(--bg-surface-2)] border-b border-[var(--border)] flex items-center justify-between">
+                <div className="px-4 py-2 bg-[var(--bg-surface-2)] border-b border-[var(--border)] flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-xs text-[var(--text-primary)]">{lane.label}</span>
-                    <span className="font-mono text-[11px] text-[var(--text-muted)]">({lane.window})</span>
+                    <span className="font-semibold text-xs text-[var(--text-primary)]">{lane.id}</span>
+                    <span className="text-[11px] text-[var(--text-muted)]">({lane.window})</span>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${lane.badge}`}>
-                    {lane.items.length} Techs
+                  <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border)]">
+                    {lane.items.length} {lane.items.length === 1 ? "technician" : "technicians"}
                   </span>
                 </div>
 
                 {/* Technician Shift Rows */}
                 {lane.items.length === 0 ? (
                   <div className="p-4 text-center text-xs text-[var(--text-muted)]">
-                    No technicians scheduled in this shift matching filters.
+                    No technicians scheduled.
                   </div>
                 ) : (
                   <div className="divide-y divide-[var(--border)]">
                     {lane.items.map((item) => (
                       <div
                         key={item.id}
-                        className="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 hover:bg-[var(--bg-surface-2)] transition-colors text-xs"
+                        className="px-4 py-2 flex flex-wrap items-center justify-between gap-2.5 hover:bg-[var(--bg-surface-2)] transition-colors text-xs"
                       >
-                        {/* Technician ID & Name */}
-                        <div className="flex items-center gap-2.5 min-w-[200px]">
-                          <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 text-xs font-bold flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+                        {/* Technician */}
+                        <div className="flex items-center gap-2.5 min-w-[180px]">
+                          <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0 text-[var(--text-primary)]">
                             {item.technicianName.substring(0, 2).toUpperCase()}
                           </div>
-                          <div>
-                            <span className="font-semibold text-xs text-[var(--text-primary)] block">
-                              {item.technicianName}
-                            </span>
-                            <span className="text-[10px] text-[var(--text-muted)] font-mono">
-                              {item.technicianId} · {item.branch}
-                            </span>
-                          </div>
+                          <span className="font-medium text-xs text-[var(--text-primary)]">
+                            {item.technicianName}
+                          </span>
                         </div>
 
-                        {/* Trade Competencies */}
-                        <div className="min-w-[180px]">
-                          <span className="font-medium text-xs text-[var(--text-primary)] block truncate" title={item.primaryTrade}>
-                            {item.primaryTrade}
-                          </span>
-                          {item.secondaryTrade && (
-                            <span className="text-[10px] text-[var(--text-muted)] block truncate">
-                              + {item.secondaryTrade}
-                            </span>
-                          )}
+                        {/* Trade */}
+                        <div className="min-w-[160px] text-[var(--text-secondary)]">
+                          {item.primaryTrade}
                         </div>
 
                         {/* Status */}
                         <div>
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getStatusBadge(
+                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${getStatusBadge(
                               item.status
                             )}`}
                           >
-                            {item.status.replace("_", " ")}
+                            {item.status === "ON_DUTY" ? "On duty" : item.status === "STANDBY" ? "Standby" : "On leave"}
                           </span>
                         </div>
 
-                        {/* Current Assignment / Dispatch Task */}
-                        <div className="min-w-[190px] text-right">
+                        {/* Current Assignment */}
+                        <div className="min-w-[180px] text-right font-mono text-xs">
                           {item.activeJob ? (
-                            <span
-                              className="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 block truncate"
-                              title={item.activeJob}
-                            >
+                            <span className="font-semibold text-emerald-600 dark:text-emerald-400 truncate block" title={item.activeJob}>
                               {item.activeJob}
                             </span>
                           ) : (
-                            <span className="text-[11px] text-[var(--text-muted)] font-mono">
-                              {item.status === "ON_LEAVE" ? "Off Duty (Leave)" : "Ready / Standby"}
-                            </span>
+                            <span className="text-[var(--text-muted)]">None</span>
                           )}
                         </div>
                       </div>

@@ -130,8 +130,7 @@ export function DispatchAuditLog() {
 
   return (
     <Layout
-      title="Dispatch Audit"
-      subtitle="Chronological Operations Ledger & Field Event Log"
+      title="Audit Log"
       action={
         <div className="flex items-center gap-2">
           {/* Status indicator */}
@@ -173,7 +172,7 @@ export function DispatchAuditLog() {
         </div>
       }
     >
-      <div className="space-y-3.5">
+      <div className="space-y-3">
         {/* Error notification banner if request failed */}
         {errorMessage && (
           <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
@@ -191,24 +190,10 @@ export function DispatchAuditLog() {
           </div>
         )}
 
-        {/* ── Subheader Bar ──────────────────────────────────────────────── */}
-        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] flex flex-wrap items-center justify-between gap-3 shadow-xs">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[var(--text-primary)]">
-              {filteredEvents.length} Recorded Operational Events
-            </span>
-            <span className="text-[11px] text-[var(--text-muted)]">· Event Ledger</span>
-          </div>
-
-          <span className="text-[11px] text-[var(--text-muted)] font-mono">
-            {isOffline ? "Simulated local store records" : "Connected backend audit log"}
-          </span>
-        </div>
-
-        {/* ── Filter Toolbar ─────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        {/* ── Compact Filter Toolbar ──────────────────────────────────────── */}
+        <div className="flex flex-wrap items-center gap-2">
           {/* Search Input */}
-          <div className="relative flex-1 min-w-[220px]">
+          <div className="relative flex-1 min-w-[200px]">
             <SearchIcon
               size={14}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
@@ -217,9 +202,9 @@ export function DispatchAuditLog() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by event ID, actor, target ID, or action..."
+              placeholder="Search audit log"
               aria-label="Search audit events"
-              className="w-full text-xs pl-9 pr-8 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full text-xs pl-9 pr-8 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
             {searchQuery && (
               <button
@@ -239,13 +224,13 @@ export function DispatchAuditLog() {
               value={selectedAction}
               onChange={(e) => setSelectedAction(e.target.value)}
               aria-label="Filter by event action"
-              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="text-xs py-1.5 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
-              <option value="ALL">All Actions</option>
-              <option value="ORDER_CREATED">Order Created</option>
-              <option value="TECH_DISPATCHED">Technician Dispatched</option>
-              <option value="STATUS_CHANGED">Status Changed</option>
-              <option value="REQUEST_REVIEWED">Request Reviewed</option>
+              <option value="ALL">All actions</option>
+              <option value="ORDER_CREATED">Order created</option>
+              <option value="TECH_DISPATCHED">Technician dispatched</option>
+              <option value="STATUS_CHANGED">Status changed</option>
+              <option value="REQUEST_REVIEWED">Request reviewed</option>
               <option value="CANCELLED">Cancelled</option>
             </select>
             <ChevronDownIcon
@@ -260,9 +245,9 @@ export function DispatchAuditLog() {
               value={selectedSeverity}
               onChange={(e) => setSelectedSeverity(e.target.value)}
               aria-label="Filter by severity"
-              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="text-xs py-1.5 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
-              <option value="ALL">All Severities</option>
+              <option value="ALL">All severities</option>
               <option value="CRITICAL">Critical</option>
               <option value="WARNING">Warning</option>
               <option value="INFO">Info</option>
@@ -277,21 +262,25 @@ export function DispatchAuditLog() {
         {/* ── Chronological Event Timeline & Ledger ───────────────────────── */}
         {isLoading ? (
           <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
-            Loading dispatch audit events...
+            Loading audit events...
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
-            No dispatch audit events match current filters.
+            No audit events match current filters.
           </div>
         ) : (
           <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-xs divide-y divide-[var(--border)]">
             {filteredEvents.map((ev) => {
               const isExpanded = expandedEventId === ev.id;
               return (
-                <div key={ev.id} className="p-3.5 hover:bg-[var(--bg-surface-2)] transition-colors text-xs">
-                  <div className="flex flex-wrap items-center justify-between gap-2.5">
-                    {/* Left: Time and Action badge */}
-                    <div className="flex items-center gap-2.5 min-w-[240px]">
+                <div
+                  key={ev.id}
+                  onClick={() => setExpandedEventId(isExpanded ? null : ev.id)}
+                  className="p-3 hover:bg-[var(--bg-surface-2)] transition-colors cursor-pointer text-xs"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    {/* Left: Time, Action, Severity */}
+                    <div className="flex items-center gap-2">
                       <span className="font-mono text-[11px] text-[var(--text-muted)] shrink-0">
                         {new Date(ev.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                       </span>
@@ -304,7 +293,7 @@ export function DispatchAuditLog() {
                     </div>
 
                     {/* Middle: Actor & Target */}
-                    <div className="flex items-center gap-2 min-w-[200px]">
+                    <div className="flex items-center gap-2">
                       <span className="font-semibold text-[var(--text-primary)]">{ev.actorName}</span>
                       <span className="text-[11px] text-[var(--text-muted)] font-mono">
                         → target: <span className="text-[var(--text-primary)] font-bold">{ev.targetId}</span>
@@ -312,11 +301,11 @@ export function DispatchAuditLog() {
                     </div>
 
                     {/* Right: Expand / Inspect affordance */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
                         onClick={() => setExpandedEventId(isExpanded ? null : ev.id)}
-                        className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline flex items-center gap-1"
+                        className="text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1"
                       >
                         <span>{isExpanded ? "Hide" : "Details"}</span>
                         <ChevronDownIcon size={12} className={`transition-transform ${isExpanded ? "rotate-180" : ""}`} />
@@ -324,7 +313,7 @@ export function DispatchAuditLog() {
                       <button
                         type="button"
                         onClick={() => setInspectEvent(ev)}
-                        title="View Full Record"
+                        title="View Record"
                         className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all"
                       >
                         <EyeIcon size={13} />
@@ -332,23 +321,13 @@ export function DispatchAuditLog() {
                     </div>
                   </div>
 
-                  {/* Summary preview */}
-                  <div className="mt-1.5 text-xs text-[var(--text-secondary)] pl-0 sm:pl-[75px]">
-                    {ev.summary}
-                  </div>
-
                   {/* Expandable Details Pane */}
                   {isExpanded && (
-                    <div className="mt-3 pt-3 border-t border-[var(--border)] pl-0 sm:pl-[75px] space-y-2 animate-fade-in">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                        <div>
-                          <span className="text-[var(--text-muted)] block">Event ID</span>
-                          <span className="font-mono text-[var(--text-primary)] font-semibold">{ev.id}</span>
-                        </div>
-                        <div>
-                          <span className="text-[var(--text-muted)] block">Full Timestamp</span>
-                          <span className="font-mono text-[var(--text-primary)]">{ev.timestamp}</span>
-                        </div>
+                    <div className="mt-2.5 pt-2.5 border-t border-[var(--border)] text-xs space-y-2 animate-fade-in">
+                      <p className="text-[var(--text-secondary)] leading-relaxed">{ev.summary}</p>
+                      <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)] font-mono">
+                        <span>Event ID: {ev.id}</span>
+                        <span>{ev.timestamp}</span>
                       </div>
                     </div>
                   )}
