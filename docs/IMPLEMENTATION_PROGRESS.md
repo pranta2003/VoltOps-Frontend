@@ -858,9 +858,44 @@ This document tracks all completed implementation milestones, verified files, co
 | **Dispatcher Audit Log** | `/dispatcher/audit` | `DISPATCHER`, `ADMIN` | Audit spec | Seeded baseline | Completed |
 | **Customer Requests** | `/customer` | `CUSTOMER` | Embed `27:658` | Seeded baseline | Completed |
 | **New Service Request** | `/customer/new-request` | `CUSTOMER` | Frame 10 | Seeded baseline | Completed |
+| **Request History** | `/customer/history` | `CUSTOMER` | Customer Log | Synchronized operational requests | Completed |
+| **Facility Assets** | `/customer/assets` | `CUSTOMER` | Asset Registry | Synchronized facility inventory | Completed |
 | **Customer Invoices** | `/customer/invoices` | `CUSTOMER`, `ADMIN` | Frame 12 | Deterministic billing preview | Completed |
 | **Technician Dashboard** | `/technician` | `TECHNICIAN` | Executive spec | Seeded baseline | Completed |
 | **Technician My Jobs** | `/technician/jobs` | `TECHNICIAN` | Frame 11 | Seeded baseline | Completed |
+
+---
+
+## Step 1 — Customer Portal Route Repair (Request History & Facility Assets)
+- **Date**: 12 November 2026
+- **Branch**: `pranta`
+- **Summary of Accomplishments**:
+  1. **Root Cause Diagnosis**:
+     - `src/App.tsx` lacked route definitions for `/customer/history` and `/customer/assets`, directing users to the wildcard `<Route path="*" element={<NotFound />} />` 404 page.
+     - Dedicated page components (`RequestHistory.tsx` and `FacilityAssets.tsx`) were missing from `src/pages/customer/`.
+  2. **Request History Implementation (`/customer/history`)**:
+     - Created `src/pages/customer/RequestHistory.tsx` reusing `customerService.getRequests(user?.id)` and `operationalStore`.
+     - Displays customer breakdown requests with request ID, target asset, service trade category, problem scope, priority, and lifecycle status.
+     - Enforces strict SLA visibility: Plan A displays "Scheduled Business Hours (No Physical Arrival SLA)", Plan B displays "40-Min Physical Arrival SLA", Plan C displays "20-Min Physical Arrival SLA", and Plan D displays "Custom Negotiated Terms".
+     - Implemented search by ID/asset/problem, trade filter, priority filter, and status filter with reset affordance.
+     - Added inspection modal with scope details, linked work order ID, assigned technician, and sign-off notes.
+     - Includes loading skeleton, informative empty states (matching criteria vs no recorded requests), and error boundary with retry.
+  3. **Facility Assets Implementation (`/customer/assets`)**:
+     - Created `src/pages/customer/FacilityAssets.tsx` and connected `customerService.getAssets()`.
+     - Added `INITIAL_CUSTOMER_ASSETS` to `src/services/operationalStore.ts` with equipment tags, commissioning dates, locations, categories, and operational statuses.
+     - Dynamically correlates open breakdown tickets with equipment inventory (e.g. `SR-1001` linked to Substation Transformer TR-02).
+     - Added summary KPI cards (Registered Assets, Operational Baseline, Attention Required).
+     - Provides equipment specifications modal and direct "+ Report Breakdown" action navigating to `/customer/new-request`.
+     - Includes filter by trade category, filter by operational status, search box, and empty states.
+  4. **Routing & Navigation Integration**:
+     - Registered lazy-loaded routes in `src/App.tsx` wrapped in `<ProtectedRoute allowedRoles={["CUSTOMER"]}>`.
+     - Verified active sidebar highlighting in `src/components/Layout.tsx` across both desktop and mobile drawer navigation.
+     - Verified direct URL access and page refresh cleanly render without 404.
+  5. **Automated Testing & Build**:
+     - Added Tests 13, 14, 15 to `tests/workflowIntegration.test.mjs` verifying history queries, asset inventory retrieval, and payload validation.
+     - Test suite: **50 / 50 passing tests** (35 unit + 15 integration).
+     - `tsc && vite build`: Completed in 5.67s with 0 errors and 0 warnings.
+
 
 ---
 

@@ -35,6 +35,7 @@ function validateOperationalState(candidate) {
   if (!isArrayOfObjectsWithId(candidate.technicians)) return null;
   if (!isArrayOfObjectsWithId(candidate.invoices)) return null;
   if (!isArrayOfObjectsWithId(candidate.events)) return null;
+  if (candidate.assets !== undefined && !isArrayOfObjectsWithId(candidate.assets)) return null;
 
   return candidate;
 }
@@ -121,6 +122,36 @@ class WorkflowHarness {
 
     this.invoices = [];
     this.events = [];
+    this.assets = [
+      {
+        id: "AST-GEN-01",
+        name: "Standby Generator G-01 (Cummins 250kVA)",
+        tagNumber: "EQ-PWR-2021-01",
+        category: "Electrical and power systems",
+        location: "Generator House Ground Floor",
+        installedDate: "2021-03-15",
+        lastServiceDate: "2026-11-12",
+        status: "OPERATIONAL",
+      },
+      {
+        id: "AST-TRF-02",
+        name: "Substation Transformer TR-02 (1000 kVA)",
+        tagNumber: "EQ-PWR-2018-02",
+        category: "Electrical and power systems",
+        location: "High Voltage Substation Yard Bay 2",
+        installedDate: "2018-09-12",
+        lastServiceDate: "2026-11-11",
+        status: "NEEDS_SERVICE",
+      },
+    ];
+  }
+
+  getCustomerRequests(customerId = "cust-epz-01") {
+    return this.requests.filter((r) => r.customerId === customerId);
+  }
+
+  getCustomerAssets() {
+    return [...this.assets];
   }
 
   // 1. Customer create request
@@ -718,4 +749,58 @@ test("Test 12: Customer request submission strictly validates required fields", 
     },
     { message: /Asset name is required/ }
   );
+});
+
+test("Test 13: Customer request history retrieves customer-specific requests with accurate SLA windows", () => {
+  const harness = new WorkflowHarness();
+
+  // 1. Apex customer requests retrieved
+  const apexRequests = harness.getCustomerRequests("cust-epz-01");
+  assert.ok(apexRequests.length > 0);
+  assert.equal(apexRequests[0].customerId, "cust-epz-01");
+  assert.equal(apexRequests[0].assetName, "Substation Transformer TR-02");
+  assert.equal(apexRequests[0].slaRemainingMinutes, 20); // Plan C: 247-priority
+
+  // 2. Dispatcher converts to WO and assigns technician
+  const wo = harness.convertRequestToWorkOrder({ requestId: apexRequests[0].id, priority: "URGENT", coveragePlan: "247-priority" });
+  harness.assignTechnician({ workOrderId: wo.id, technicianId: "tech-01" }); // Kamrul Islam
+
+  // Verify status progression is reflected in history query
+  const updated = harness.getCustomerRequests("cust-epz-01");
+  assert.equal(updated[0].status, "CONVERTED");
+  assert.equal(updated[0].workOrderId, wo.id);
+});
+
+test("Test 14: Customer facility assets returns equipment inventory with tags and status", () => {
+  const harness = new WorkflowHarness();
+  const assets = harness.getCustomerAssets();
+
+  assert.ok(Array.isArray(assets));
+  assert.equal(assets.length, 2);
+  assert.equal(assets[0].tagNumber, "EQ-PWR-2021-01");
+  assert.equal(assets[0].category, "Electrical and power systems");
+  assert.equal(assets[0].status, "OPERATIONAL");
+
+  // Filter by category
+  const electrical = assets.filter((a) => a.category === "Electrical and power systems");
+  assert.equal(electrical.length, 2);
+});
+
+test("Test 15: Structural validation accepts operational payloads containing customer assets inventory", () => {
+  const validPayloadWithAssets = {
+    requests: [{ id: "SR-1" }],
+    workOrders: [{ id: "WO-1" }],
+    technicians: [{ id: "T-1" }],
+    invoices: [{ id: "INV-1" }],
+    events: [{ id: "EVT-1" }],
+    assets: [{ id: "AST-1" }],
+  };
+  assert.deepEqual(validateOperationalState(validPayloadWithAssets), validPayloadWithAssets);
+
+  // Rejects corrupted asset objects
+  const invalidAssetPayload = {
+    ...validPayloadWithAssets,
+    assets: "not-an-array",
+  };
+  assert.equal(validateOperationalState(invalidAssetPayload), null);
 });

@@ -13,7 +13,7 @@
 // ============================================================================
 
 import api from "../api/axios";
-import { ServiceRequest, Invoice, ServiceCategory, PriorityLevel, CoveragePlanId } from "../types";
+import { ServiceRequest, Invoice, ServiceCategory, PriorityLevel, CoveragePlanId, CustomerAsset } from "../types";
 import { getPhysicalArrivalSlaMinutes } from "../types/coverage";
 import { operationalStore } from "./operationalStore";
 
@@ -175,6 +175,34 @@ export const customerService = {
       data: newRequest,
       isOffline: true,
       message: `[Local Demonstration] Service Request ${newId} logged to active dispatcher queue.`,
+      timestamp: new Date().toISOString(),
+    };
+  },
+
+  /**
+   * Fetch commercial facility assets for customer
+   */
+  async getAssets(_customerId?: string): Promise<CustomerApiResponse<CustomerAsset[]>> {
+    try {
+      const res = await api.get("/customer/assets");
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        return {
+          success: true,
+          data: res.data.data,
+          isOffline: false,
+          timestamp: new Date().toISOString(),
+        };
+      }
+    } catch {
+      // Fall through to local operational store
+    }
+
+    const assets = operationalStore.getAssets();
+    return {
+      success: true,
+      data: assets,
+      isOffline: true,
+      message: "[Local Preview] Operating on synchronized customer facility assets.",
       timestamp: new Date().toISOString(),
     };
   },

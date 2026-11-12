@@ -27,6 +27,8 @@ const MyJobs = lazy(() => import("./pages/technician/MyJobs").then((m) => ({ def
 
 const CustomerDashboard = lazy(() => import("./pages/CustomerDashboard").then((m) => ({ default: m.CustomerDashboard })));
 const NewServiceRequest = lazy(() => import("./pages/customer/NewServiceRequest").then((m) => ({ default: m.NewServiceRequest })));
+const RequestHistory = lazy(() => import("./pages/customer/RequestHistory").then((m) => ({ default: m.RequestHistory })));
+const FacilityAssets = lazy(() => import("./pages/customer/FacilityAssets").then((m) => ({ default: m.FacilityAssets })));
 const CustomerInvoices = lazy(() => import("./pages/customer/CustomerInvoices").then((m) => ({ default: m.CustomerInvoices })));
 
 const RouteLoadingFallback = () => (
@@ -183,6 +185,22 @@ export default function App() {
                 element={
                   <ProtectedRoute allowedRoles={["CUSTOMER"]}>
                     <NewServiceRequest />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/customer/history"
+                element={
+                  <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+                    <RequestHistory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/customer/assets"
+                element={
+                  <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+                    <FacilityAssets />
                   </ProtectedRoute>
                 }
               />

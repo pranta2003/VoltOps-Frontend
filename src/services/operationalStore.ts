@@ -20,7 +20,7 @@
 //    - Corrupted or unparseable states are safely discarded, resetting to clean baselines.
 // ============================================================================
 
-import { ServiceRequest, WorkOrder, TechnicianProfile, Invoice } from "../types";
+import { ServiceRequest, WorkOrder, TechnicianProfile, Invoice, CustomerAsset } from "../types";
 import { DispatchEventLog } from "../types/dispatcher";
 import {
   INITIAL_SERVICE_REQUESTS,
@@ -74,12 +74,106 @@ export const INITIAL_INVOICES: Invoice[] = [
   },
 ];
 
+export const INITIAL_CUSTOMER_ASSETS: CustomerAsset[] = [
+  {
+    id: "AST-GEN-01",
+    name: "Standby Generator G-01 (Cummins 250kVA)",
+    tagNumber: "EQ-PWR-2021-01",
+    category: "Electrical and power systems",
+    location: "Generator House Ground Floor",
+    installedDate: "2021-03-15",
+    lastServiceDate: "2026-11-12",
+    status: "OPERATIONAL",
+  },
+  {
+    id: "AST-TRF-02",
+    name: "Substation Transformer TR-02 (1000 kVA)",
+    tagNumber: "EQ-PWR-2018-02",
+    category: "Electrical and power systems",
+    location: "High Voltage Substation Yard Bay 2",
+    installedDate: "2018-09-12",
+    lastServiceDate: "2026-11-11",
+    status: "NEEDS_SERVICE",
+  },
+  {
+    id: "AST-TRF-04",
+    name: "Main Substation Transformer T-04 (500kVA)",
+    tagNumber: "EQ-PWR-2019-04",
+    category: "Electrical and power systems",
+    location: "Substation Yard South Bay",
+    installedDate: "2019-08-10",
+    lastServiceDate: "2026-09-20",
+    status: "OPERATIONAL",
+  },
+  {
+    id: "AST-CHL-02",
+    name: "Central Chiller Unit #2 (Carrier 120TR)",
+    tagNumber: "EQ-HVAC-2020-02",
+    category: "AC, HVAC, and cooling",
+    location: "Utility Plant Room Roof Level",
+    installedDate: "2020-05-12",
+    lastServiceDate: "2026-10-04",
+    status: "OPERATIONAL",
+  },
+  {
+    id: "AST-PAC-01",
+    name: "Server Room Precision AC Unit PAC-01",
+    tagNumber: "EQ-HVAC-2022-01",
+    category: "AC, HVAC, and cooling",
+    location: "Server Room 2B, Admin Block",
+    installedDate: "2022-06-30",
+    lastServiceDate: "2026-07-12",
+    status: "OPERATIONAL",
+  },
+  {
+    id: "AST-NET-01",
+    name: "Core Network Switch Rack SW-01",
+    tagNumber: "EQ-NET-2022-01",
+    category: "Internet, networking, and hardware",
+    location: "Server Room 2B, Admin Block",
+    installedDate: "2022-01-18",
+    lastServiceDate: "2026-08-15",
+    status: "OPERATIONAL",
+  },
+  {
+    id: "AST-SEC-08",
+    name: "Perimeter CCTV Optical Node 08",
+    tagNumber: "EQ-SEC-2023-08",
+    category: "CCTV and security",
+    location: "Gate 4 Security Perimeter Pole",
+    installedDate: "2023-04-22",
+    lastServiceDate: "2026-10-18",
+    status: "OPERATIONAL",
+  },
+  {
+    id: "AST-PMP-03",
+    name: "Water Booster Pump P-03",
+    tagNumber: "EQ-PLM-2021-03",
+    category: "Plumbing and water systems",
+    location: "Pump House Station East",
+    installedDate: "2021-11-05",
+    lastServiceDate: "2026-11-01",
+    status: "NEEDS_SERVICE",
+  },
+  {
+    id: "AST-SCA-02",
+    name: "SCADA Control Terminal ST-02",
+    tagNumber: "EQ-IT-2023-02",
+    category: "IT and software support",
+    location: "Production Control Room Floor 1",
+    installedDate: "2023-02-14",
+    lastServiceDate: "2026-10-25",
+    status: "OPERATIONAL",
+  },
+];
+
 export interface OperationalState {
   requests: ServiceRequest[];
   workOrders: WorkOrder[];
   technicians: TechnicianProfile[];
   invoices: Invoice[];
   events: DispatchEventLog[];
+  assets?: CustomerAsset[];
 }
 
 function createPristineBaseline(): OperationalState {
@@ -89,6 +183,7 @@ function createPristineBaseline(): OperationalState {
     technicians: JSON.parse(JSON.stringify(INITIAL_FIELD_TECHNICIANS)),
     invoices: JSON.parse(JSON.stringify(INITIAL_INVOICES)),
     events: JSON.parse(JSON.stringify(INITIAL_DISPATCH_EVENTS)),
+    assets: JSON.parse(JSON.stringify(INITIAL_CUSTOMER_ASSETS)),
   };
 }
 
@@ -146,6 +241,7 @@ export function validateOperationalState(candidate: unknown): OperationalState |
   if (!isArrayOfObjectsWithId(c.technicians)) return null;
   if (!isArrayOfObjectsWithId(c.invoices)) return null;
   if (!isArrayOfObjectsWithId(c.events)) return null;
+  if (c.assets !== undefined && !isArrayOfObjectsWithId(c.assets)) return null;
 
   return candidate as OperationalState;
 }
@@ -158,6 +254,9 @@ function loadState(): OperationalState {
         const parsed = JSON.parse(raw);
         const validated = validateOperationalState(parsed);
         if (validated) {
+          if (!validated.assets || !Array.isArray(validated.assets)) {
+            validated.assets = JSON.parse(JSON.stringify(INITIAL_CUSTOMER_ASSETS));
+          }
           return validated;
         }
         // Malformed structure detected: discard corrupted state safely
@@ -298,6 +397,18 @@ export const operationalStore = {
   setEvents(events: DispatchEventLog[]): void {
     const state = loadState();
     saveState({ ...state, events });
+  },
+
+  getAssets(): CustomerAsset[] {
+    const state = loadState();
+    return state.assets && Array.isArray(state.assets)
+      ? [...state.assets]
+      : JSON.parse(JSON.stringify(INITIAL_CUSTOMER_ASSETS));
+  },
+
+  setAssets(assets: CustomerAsset[]): void {
+    const state = loadState();
+    saveState({ ...state, assets });
   },
 
   /**
