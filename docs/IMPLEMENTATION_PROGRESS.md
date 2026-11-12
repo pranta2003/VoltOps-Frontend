@@ -972,6 +972,46 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
+## Step 4 — Role Separation & Customer/Admin UI Refinement
+- **Date**: 13 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Scope & Key Deliverables**:
+  1. **Step 1: Simplified Customer Breakdown Report Modal (`src/pages/customer/FacilityAssets.tsx`)**:
+     - Modernized into a compact, professional modal titled `"Report a Breakdown"`.
+     - Replaced marketing headings ("ONE-CLICK INCIDENT REPORT") and redundant equipment panels with a single compact identification row: `Asset name • Tag • Location`.
+     - Streamlined form fields to 4 clear inputs:
+       * `What's wrong?` (required problem summary).
+       * `Additional details` (optional multiline description).
+       * `Priority` (Urgent, High, Medium, Low).
+       * `Preferred technician` (optional, filtered to technicians matching the asset's trade category).
+     - Replaced verbose dispatcher explanations with a concise notice: *"Technician assignment is confirmed by the dispatcher."*
+     - Replaced misleading dispatch claims with truthful confirmation: *"Breakdown Reported — Request submitted and awaiting dispatcher review. Tracking ID: SR-xxxx. Local preview: Asset marked as Needs Service."*
+  2. **Step 2: Admin Dashboard Governance Redesign (`src/pages/AdminDashboard.tsx`)**:
+     - Stripped operational and duplicative elements: removed DonutChart (Workforce Composition), HorizontalBarChart (Compliance & Passport Status), large shortcut navigation cards, and recent activity feed duplicating Audit Log.
+     - Reduced bundle footprint from 13.06 kB to 11.06 kB.
+     - Implemented clean, restrained enterprise governance console:
+       * Platform status indicator with verified data source provenance (Live vs Local baseline).
+       * 4 compact indicators: Platform Status (Operational), Pending Approvals (Skill Passports In Queue), System Accounts (Directory Count), and Security & Governance (Enforced / 0 Alerts).
+       * Concise Administrative Attention section displaying actual pending technician passport verifications with direct "Audit" action.
+       * Platform Governance Posture panel detailing RBAC enforcement, immutable audit logging, and visit-credit validation.
+  3. **Step 3: Portal & Route Separation for Admin vs Dispatcher**:
+     - Updated `src/components/Layout.tsx`: Removed `"Dispatcher Board"` from Admin navigation. Admin Portal sidebar now cleanly contains only 4 items: `Admin Console`, `User Management`, `Technicians`, and `Audit Log`.
+     - Updated `src/App.tsx`: Protected all `/dispatcher/*` routes (`/dispatcher`, `/dispatcher/requests`, `/dispatcher/work-orders`, `/dispatcher/technicians`, `/dispatcher/schedule`, `/dispatcher/audit`) strictly with `allowedRoles={["DISPATCHER"]}`.
+     - Route Guard Verification: Accessing `/dispatcher` as Admin is immediately blocked and redirected to `/unauthorized`. Authorized Dispatchers retain full access.
+  4. **Step 4: Plan D Negotiated Service Allowance Correction**:
+     - Corrected `src/services/subscriptionService.ts`: Plan D no longer defaults to 20 or unlimited.
+     - Canonical rule: Plan A = 5, Plan B = 10, Plan C = 15, Plan D = Negotiated (explicitly configured per account).
+     - When unconfigured, Plan D sets `includedVisits = null`, `remainingVisits = null`, `needsConfiguration = true`, and `statusMessage = "Allowance to be confirmed"`.
+     - Standard included requests are blocked until negotiated allowance is configured.
+     - Updated `src/pages/CustomerDashboard.tsx` and `src/pages/customer/NewServiceRequest.tsx` to display `"Allowance to be confirmed"` and guide customers to quotation mode or account manager contact without inventing numbers.
+  5. **Step 5: Quality Gate & Test Verification**:
+     - Updated integration tests in `tests/workflowIntegration.test.mjs` verifying Plan D unconfigured state, quotation allowance, and configured allowance calculations.
+     - Test Suite: **55 / 55 tests passing** (100% pass rate).
+     - Production Build: `tsc && vite build` completed cleanly in 6.10s with 0 TypeScript and 0 bundling errors.
+     - Full live browser testing verified modal reporting, admin governance view, route authorization blockage, and responsive viewports.
+
+---
+
 ## Next Recommended Milestone: Milestone 3 — Dispatcher Operations & Work Orders
 - Build dedicated Service Requests Queue list (`/dispatcher/requests`, Figma Frame 2).
 - Build Service Request Detail & Work Order Conversion screen (`/dispatcher/requests/:id`, Figma Frame 3).

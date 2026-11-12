@@ -59,7 +59,6 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
       case "ADMIN":
         return [
           { label: "Admin Console", path: "/admin", icon: SettingsIcon },
-          { label: "Dispatcher Board", path: "/dispatcher", icon: RadioIcon },
           { label: "User Management", path: "/admin/users", icon: BuildingIcon },
           { label: "Technicians", path: "/admin/technicians", icon: ShieldCheckIcon },
           { label: "Audit Log", path: "/admin/audit", icon: CheckCircleIcon },

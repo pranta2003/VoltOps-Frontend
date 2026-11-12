@@ -367,21 +367,38 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)]">
               <span>Service Visit Credits</span>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                subscription.isExhausted
+                subscription.needsConfiguration
+                  ? "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20"
+                  : subscription.isExhausted
                   ? "bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/30"
                   : "bg-emerald-500/10 text-[#10b981] border-emerald-500/20"
               }`}>
-                {subscription.isExhausted ? "ALLOWANCE USED" : "ACTIVE CYCLE"}
+                {subscription.needsConfiguration
+                  ? "NEGOTIATED"
+                  : subscription.isExhausted
+                  ? "ALLOWANCE USED"
+                  : "ACTIVE CYCLE"}
               </span>
             </div>
 
             <div className="mt-2 flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-heading text-[var(--text-primary)]">
-                {subscription.remainingVisits}
-                <span className="text-xs font-normal text-[var(--text-muted)] ml-1">
-                  of {subscription.includedVisits} left
+              {subscription.needsConfiguration ? (
+                <div>
+                  <span className="text-base font-bold font-heading text-[var(--text-primary)]">
+                    Allowance to be confirmed
+                  </span>
+                  <span className="block text-[11px] text-[var(--text-muted)] mt-0.5">
+                    Configured per enterprise contract
+                  </span>
+                </div>
+              ) : (
+                <span className="text-2xl font-bold font-heading text-[var(--text-primary)]">
+                  {subscription.remainingVisits}
+                  <span className="text-xs font-normal text-[var(--text-muted)] ml-1">
+                    of {subscription.includedVisits} left
+                  </span>
                 </span>
-              </span>
+              )}
               <span className="text-[11px] font-mono text-[var(--text-muted)]">
                 {subscription.usedVisits} used
               </span>
@@ -391,19 +408,31 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             <div className="mt-2.5 h-1.5 w-full bg-[var(--bg-surface-2)] rounded-full overflow-hidden">
               <div
                 className={`h-full transition-all duration-300 rounded-full ${
-                  subscription.isExhausted
+                  subscription.needsConfiguration
+                    ? "bg-slate-400"
+                    : subscription.isExhausted
                     ? "bg-amber-500"
                     : "bg-[#10b981]"
                 }`}
                 style={{
-                  width: `${Math.min(100, (subscription.usedVisits / subscription.includedVisits) * 100)}%`,
+                  width: subscription.needsConfiguration
+                    ? "0%"
+                    : `${Math.min(100, (subscription.usedVisits / (subscription.includedVisits || 1)) * 100)}%`,
                 }}
               />
             </div>
 
             <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--text-muted)]">
               <span>Resets {subscription.billingCycleResetDate}</span>
-              {subscription.isExhausted ? (
+              {subscription.needsConfiguration ? (
+                <button
+                  type="button"
+                  onClick={() => setShowQuotationModal(true)}
+                  className="font-bold text-[#10b981] hover:underline"
+                >
+                  Request Pack +
+                </button>
+              ) : subscription.isExhausted ? (
                 <button
                   type="button"
                   onClick={() => setShowQuotationModal(true)}
@@ -418,8 +447,27 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
         </div>
 
-        {/* ── Exhausted Allowance Warning Banner ──────────────────────────── */}
-        {subscription.isExhausted && (
+        {/* ── Exhausted or Unconfigured Allowance Warning Banner ──────────────────────────── */}
+        {subscription.needsConfiguration ? (
+          <div className="p-4 rounded-2xl bg-slate-500/10 border border-slate-500/20 text-slate-800 dark:text-slate-300 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fade-in">
+            <div className="flex items-start gap-2.5">
+              <AlertTriangleIcon size={16} className="text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <strong className="font-bold">Negotiated Visit Allowance Awaiting Confirmation:</strong>{" "}
+                <span>
+                  Your commercial plan uses a negotiated visit allowance that is awaiting confirmation. Included usage cannot be calculated until your negotiated allowance is configured. Standard requests are submitted as additional quotation packs.
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowQuotationModal(true)}
+              className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-[#10b981] hover:bg-[#059669] text-[#06090e] transition-all shrink-0 shadow-sm"
+            >
+              Request Service Pack
+            </button>
+          </div>
+        ) : subscription.isExhausted ? (
           <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fade-in">
             <div className="flex items-start gap-2.5">
               <AlertTriangleIcon size={16} className="text-amber-500 shrink-0 mt-0.5" />
@@ -439,7 +487,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               Request Additional Pack
             </button>
           </div>
-        )}
+        ) : null}
 
         {/* ── Central Service Requests & History Section ───────────────────── */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm space-y-0">

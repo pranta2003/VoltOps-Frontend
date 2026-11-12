@@ -56,6 +56,13 @@ export function NewServiceRequest() {
     e.preventDefault();
     if (isSubmitting) return;
 
+    if (subscription.needsConfiguration && !requestAsQuotation) {
+      setErrorMessage(
+        "Your enterprise account uses a negotiated visit allowance awaiting confirmation. Please select 'Request Additional Service Pack' to submit as a quotation, or contact your account manager."
+      );
+      return;
+    }
+
     if (subscription.isExhausted && !requestAsQuotation) {
       setErrorMessage(
         `Monthly service visit allowance exhausted (${subscription.includedVisits} of ${subscription.includedVisits} used). Please select 'Request Additional Service Pack' to submit as a quotation.`
@@ -157,7 +164,34 @@ export function NewServiceRequest() {
             )}
 
             {/* ── Subscription Service-Credit Policy Banner ─────────────── */}
-            {subscription.isExhausted && (
+            {subscription.needsConfiguration && (
+              <div className="p-4 rounded-2xl border border-slate-500/30 bg-slate-500/10 text-xs space-y-2">
+                <div className="flex items-start gap-2 text-slate-800 dark:text-slate-300 font-bold">
+                  <AlertTriangleIcon size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                  <span>Negotiated Visit Allowance Awaiting Confirmation</span>
+                </div>
+                <p className="text-slate-700 dark:text-slate-300">
+                  Your commercial plan uses a negotiated visit allowance that is awaiting confirmation. Included usage cannot be calculated until your negotiated allowance is configured. Standard submissions are held, but you can proceed immediately by submitting an additional on-demand service quotation pack.
+                </p>
+                <div className="pt-1">
+                  {requestAsQuotation ? (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/40">
+                      <span>✓ Additional Service Pack Quotation Mode Active</span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setRequestAsQuotation(true)}
+                      className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-[#10b981] hover:bg-[#059669] text-[#06090e] transition-all shadow-sm"
+                    >
+                      Request Additional Service Pack (Quotation Mode)
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {subscription.isExhausted && !subscription.needsConfiguration && (
               <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-xs space-y-2">
                 <div className="flex items-start gap-2 text-amber-800 dark:text-amber-300 font-bold">
                   <AlertTriangleIcon size={16} className="text-amber-500 shrink-0 mt-0.5" />
@@ -392,14 +426,14 @@ export function NewServiceRequest() {
               </Link>
               <button
                 type="submit"
-                disabled={isSubmitting || (subscription.isExhausted && !requestAsQuotation)}
+                disabled={isSubmitting || ((subscription.isExhausted || subscription.needsConfiguration) && !requestAsQuotation)}
                 className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
               >
                 <span>
                   {isSubmitting
                     ? "Dispatching..."
-                    : subscription.isExhausted && !requestAsQuotation
-                    ? "Allowance Exhausted"
+                    : (subscription.isExhausted || subscription.needsConfiguration) && !requestAsQuotation
+                    ? (subscription.needsConfiguration ? "Allowance Unconfigured" : "Allowance Exhausted")
                     : requestAsQuotation
                     ? "Submit Quotation Request"
                     : "Submit Service Request"}

@@ -149,6 +149,19 @@ export function FacilityAssets() {
   // Check subscription entitlement
   const subscription = customerService.getSubscription(user?.id);
 
+  // Relevant technicians matching the reporting asset's category
+  const relevantTechnicians = useMemo(() => {
+    if (!reportingAsset) return [];
+    const cat = reportingAsset.category.toLowerCase();
+    const matched = technicians.filter(
+      (t) =>
+        t.skills?.some((s) => s.category === reportingAsset.category) ||
+        t.designation?.toLowerCase().includes(cat.split(",")[0].trim()) ||
+        t.designation?.toLowerCase().includes(cat.split(" ")[0].trim())
+    );
+    return matched.length > 0 ? matched : technicians.filter((t) => t.status === "AVAILABLE" || t.status === "ON_JOB");
+  }, [reportingAsset, technicians]);
+
   // Open asset report breakdown modal
   const openReportModal = (asset: CustomerAsset) => {
     setReportingAsset(asset);
@@ -176,11 +189,7 @@ export function FacilityAssets() {
     if (!reportingAsset || isSubmittingReport) return;
 
     if (!reportTitle.trim()) {
-      setReportError("Please enter a short problem summary.");
-      return;
-    }
-    if (!reportDescription.trim()) {
-      setReportError("Please enter a concise description of symptoms.");
+      setReportError("Please specify what's wrong.");
       return;
     }
 
@@ -202,7 +211,7 @@ export function FacilityAssets() {
           category: reportingAsset.category,
           assetName: reportingAsset.name,
           problemTitle: reportTitle.trim(),
-          problemDescription: reportDescription.trim(),
+          problemDescription: reportDescription.trim() || reportTitle.trim(),
           priority: reportPriority,
           preferredTechnicianId: reportPreferredTechId || undefined,
           preferredTechnicianName: preferredTech ? `${preferredTech.name} (${preferredTech.designation})` : undefined,
@@ -621,31 +630,20 @@ export function FacilityAssets() {
           </div>
         )}
 
-        {/* ── STEP 3: Focused Asset Report Breakdown Modal ────────────────── */}
+        {/* ── STEP 1: Compact, Professional Breakdown Report Modal ────────────────── */}
         {reportingAsset && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-lg rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 sm:p-7 shadow-2xl space-y-5">
+            <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-xl space-y-4">
               {/* Modal Header */}
-              <div className="flex items-start justify-between pb-3 border-b border-[var(--border)]">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-mono font-bold text-[#10b981] uppercase tracking-wider">
-                      One-Click Incident Report
-                    </span>
-                  </div>
-                  <h3 className="font-heading font-bold text-xl text-[var(--text-primary)] mt-0.5">
-                    {reportingAsset.name}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-1 text-xs text-[var(--text-muted)] font-mono">
-                    <span>Tag: {reportingAsset.tagNumber}</span>
-                    <span>•</span>
-                    <span>{reportingAsset.category}</span>
-                  </div>
-                </div>
+              <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+                <h3 className="font-heading font-bold text-lg text-[var(--text-primary)]">
+                  Report a Breakdown
+                </h3>
                 <button
                   type="button"
                   onClick={closeReportModal}
-                  className="w-8 h-8 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="w-7 h-7 rounded-lg border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  title="Close modal"
                 >
                   <XIcon size={14} />
                 </button>
@@ -653,32 +651,32 @@ export function FacilityAssets() {
 
               {reportSuccessId ? (
                 /* Success Confirmation State */
-                <div className="py-6 text-center space-y-4 animate-fade-in">
-                  <div className="w-14 h-14 rounded-2xl bg-[#10b981] text-[#06090e] font-extrabold text-2xl mx-auto flex items-center justify-center shadow-lg">
+                <div className="py-4 text-center space-y-3 animate-fade-in">
+                  <div className="w-12 h-12 rounded-xl bg-[#10b981] text-[#06090e] font-extrabold text-xl mx-auto flex items-center justify-center shadow-md">
                     ✓
                   </div>
                   <div>
-                    <h4 className="font-heading font-bold text-xl text-[var(--text-primary)]">
-                      Breakdown Ticket Dispatched
+                    <h4 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                      Breakdown Reported
                     </h4>
                     <p className="text-xs text-[var(--text-muted)] mt-1">
-                      Incident queued for dispatcher review under 24/7 Standard 40-Minute Arrival SLA.
+                      Request submitted and awaiting dispatcher review.
                     </p>
                   </div>
 
-                  <div className="p-3 rounded-2xl border border-[#10b981]/30 bg-[#10b981]/10 inline-block font-mono font-bold text-xs text-[#10b981]">
+                  <div className="p-2.5 rounded-xl border border-[#10b981]/30 bg-[#10b981]/10 inline-block font-mono font-bold text-xs text-[#10b981]">
                     Tracking ID: {reportSuccessId}
                   </div>
 
-                  <p className="text-[11px] text-[var(--text-muted)] italic">
-                    Local demonstration: Asset state updated to Needs Service. Dispatcher retains final technician assignment authority.
+                  <p className="text-[11px] text-[var(--text-muted)]">
+                    Local preview: Asset marked as Needs Service. Final technician assignment is confirmed by the dispatcher.
                   </p>
 
                   <div className="pt-2">
                     <button
                       type="button"
                       onClick={closeReportModal}
-                      className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all"
+                      className="px-5 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all"
                     >
                       Done
                     </button>
@@ -686,95 +684,73 @@ export function FacilityAssets() {
                 </div>
               ) : (
                 /* Report Breakdown Form */
-                <form onSubmit={handleReportSubmit} className="space-y-4 text-xs">
+                <form onSubmit={handleReportSubmit} className="space-y-3.5 text-xs">
                   {reportError && (
-                    <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 flex items-center justify-between">
+                    <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 flex items-center justify-between">
                       <span>{reportError}</span>
                       <button
                         type="button"
                         onClick={() => setReportError(null)}
-                        className="font-bold underline"
+                        className="font-bold underline ml-2"
                       >
                         Dismiss
                       </button>
                     </div>
                   )}
 
-                  {/* Subscription Warning if exhausted */}
-                  {subscription.isExhausted && (
-                    <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-300 space-y-1.5">
-                      <div className="flex items-center gap-1.5 font-bold">
-                        <AlertTriangleIcon size={14} className="text-amber-500" />
-                        <span>Included Service Visits Exhausted ({subscription.includedVisits} of {subscription.includedVisits} used)</span>
-                      </div>
-                      <p className="text-[11px]">
-                        Submitting this breakdown will request an additional on-demand service quotation pack.
-                      </p>
-                      <label className="flex items-center gap-2 pt-1 cursor-pointer font-bold text-[11px] text-amber-900 dark:text-amber-200">
-                        <input
-                          type="checkbox"
-                          checked={reportAsQuotation}
-                          onChange={(e) => setReportAsQuotation(e.target.checked)}
-                          className="accent-[#10b981]"
-                        />
-                        <span>Proceed with Additional Quotation Pack (Demo)</span>
-                      </label>
-                    </div>
-                  )}
-
-                  {/* Preselected Asset Summary Strip */}
-                  <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-[var(--text-muted)] block uppercase font-bold">Target Equipment</span>
-                      <span className="font-semibold text-[var(--text-primary)]">{reportingAsset.name}</span>
-                    </div>
-                    <span className="text-[11px] font-mono text-[var(--text-muted)] bg-[var(--bg-surface)] px-2 py-0.5 rounded border border-[var(--border)]">
-                      {reportingAsset.location}
-                    </span>
+                  {/* Compact Selected Asset Identification Row */}
+                  <div className="px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                    <span className="font-semibold text-[var(--text-primary)]">{reportingAsset.name}</span>
+                    <span className="text-[var(--text-muted)]">•</span>
+                    <span className="font-mono text-[var(--text-muted)]">{reportingAsset.tagNumber}</span>
+                    <span className="text-[var(--text-muted)]">•</span>
+                    <span className="text-[var(--text-muted)]">{reportingAsset.location}</span>
                   </div>
 
-                  {/* Problem Summary */}
+                  {/* 1. What's wrong? */}
                   <div className="space-y-1">
-                    <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                      Problem Summary <span className="text-red-500">*</span>
+                    <label className="block text-xs font-semibold text-[var(--text-primary)]">
+                      What's wrong? <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Critical high temperature alarm / tripping breaker"
+                      placeholder="e.g. Unusual noise, power trip, or sensor alarm"
                       value={reportTitle}
                       onChange={(e) => setReportTitle(e.target.value)}
-                      className="w-full px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-xs focus:ring-1 focus:ring-[#10b981] outline-none"
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-xs focus:ring-1 focus:ring-[#10b981] outline-none"
                     />
                   </div>
 
-                  {/* Description & Symptoms */}
+                  {/* 2. Additional details (optional) */}
                   <div className="space-y-1">
-                    <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                      Symptoms & Observations <span className="text-red-500">*</span>
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-semibold text-[var(--text-primary)]">
+                        Additional details
+                      </label>
+                      <span className="text-[10px] text-[var(--text-muted)]">Optional</span>
+                    </div>
                     <textarea
-                      required
                       rows={2}
-                      placeholder="Describe visible alarms, abnormal vibrations, smells, or operational impact..."
+                      placeholder="Describe symptoms, visible alarms, or operational impact..."
                       value={reportDescription}
                       onChange={(e) => setReportDescription(e.target.value)}
-                      className="w-full px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-xs focus:ring-1 focus:ring-[#10b981] outline-none"
+                      className="w-full px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-xs focus:ring-1 focus:ring-[#10b981] outline-none"
                     />
                   </div>
 
-                  {/* Urgency Selection */}
-                  <div className="space-y-1.5">
-                    <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                      Urgency Level
+                  {/* 3. Priority */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-semibold text-[var(--text-primary)]">
+                      Priority
                     </label>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 gap-1.5">
                       {(["URGENT", "HIGH", "MEDIUM", "LOW"] as PriorityLevel[]).map((p) => (
                         <button
                           key={p}
                           type="button"
                           onClick={() => setReportPriority(p)}
-                          className={`py-1.5 px-2 rounded-xl border text-center font-bold text-[11px] transition-all ${
+                          className={`py-1.5 px-2 rounded-lg border text-center font-bold text-[11px] transition-all ${
                             reportPriority === p
                               ? p === "URGENT"
                                 ? "bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/40 ring-1 ring-red-500"
@@ -788,52 +764,56 @@ export function FacilityAssets() {
                     </div>
                   </div>
 
-                  {/* Optional Preferred Technician */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                        Preferred Technician (Optional)
-                      </label>
-                      <span className="text-[10px] text-[var(--text-muted)]">Preference only</span>
+                  {/* 4. Preferred technician (optional, only if relevant technicians are available) */}
+                  {relevantTechnicians.length > 0 && (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-semibold text-[var(--text-primary)]">
+                          Preferred technician
+                        </label>
+                        <span className="text-[10px] text-[var(--text-muted)]">Optional</span>
+                      </div>
+                      <select
+                        value={reportPreferredTechId}
+                        onChange={(e) => setReportPreferredTechId(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-xs focus:ring-1 focus:ring-[#10b981] outline-none"
+                      >
+                        <option value="">No preference</option>
+                        {relevantTechnicians.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.name} — {t.designation} ({t.branch})
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    <select
-                      value={reportPreferredTechId}
-                      onChange={(e) => setReportPreferredTechId(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-xs focus:ring-1 focus:ring-[#10b981] outline-none"
-                    >
-                      <option value="">No preference (Dispatcher assigns closest certified technician)</option>
-                      {technicians.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.name} — {t.designation} ({t.branch})
-                        </option>
-                      ))}
-                    </select>
-                    <p className="text-[10px] text-[var(--text-muted)] italic pt-0.5">
-                      Preference does not bypass dispatcher review. Certified tech assignment is confirmed upon review.
-                    </p>
-                  </div>
+                  )}
+
+                  {/* Short Note */}
+                  <p className="text-[11px] text-[var(--text-muted)]">
+                    Technician assignment is confirmed by the dispatcher.
+                  </p>
 
                   {/* Modal Actions */}
-                  <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border)]">
+                  <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
                     <button
                       type="button"
                       onClick={closeReportModal}
                       disabled={isSubmittingReport}
-                      className="px-4 py-2 rounded-xl text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmittingReport || (subscription.isExhausted && !reportAsQuotation)}
-                      className="px-5 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                      className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
                     >
                       <span>
                         {isSubmittingReport
-                          ? "Routing..."
+                          ? "Submitting..."
                           : subscription.isExhausted && !reportAsQuotation
                           ? "Allowance Exhausted"
-                          : "Submit Breakdown Report"}
+                          : "Submit Report"}
                       </span>
                       <ArrowRightIcon size={12} />
                     </button>

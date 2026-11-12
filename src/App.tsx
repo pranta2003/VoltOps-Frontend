@@ -111,7 +111,7 @@ export default function App() {
               <Route
                 path="/dispatcher"
                 element={
-                  <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
+                  <ProtectedRoute allowedRoles={["DISPATCHER"]}>
                     <DispatcherDashboard />
                   </ProtectedRoute>
                 }
@@ -119,7 +119,7 @@ export default function App() {
               <Route
                 path="/dispatcher/requests"
                 element={
-                  <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
+                  <ProtectedRoute allowedRoles={["DISPATCHER"]}>
                     <ServiceRequests />
                   </ProtectedRoute>
                 }
@@ -127,7 +127,7 @@ export default function App() {
               <Route
                 path="/dispatcher/work-orders"
                 element={
-                  <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
+                  <ProtectedRoute allowedRoles={["DISPATCHER"]}>
                     <WorkOrders />
                   </ProtectedRoute>
                 }
@@ -135,7 +135,7 @@ export default function App() {
               <Route
                 path="/dispatcher/technicians"
                 element={
-                  <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
+                  <ProtectedRoute allowedRoles={["DISPATCHER"]}>
                     <TechnicianRoster />
                   </ProtectedRoute>
                 }
@@ -143,7 +143,7 @@ export default function App() {
               <Route
                 path="/dispatcher/schedule"
                 element={
-                  <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
+                  <ProtectedRoute allowedRoles={["DISPATCHER"]}>
                     <DispatcherSchedule />
                   </ProtectedRoute>
                 }
@@ -151,7 +151,7 @@ export default function App() {
               <Route
                 path="/dispatcher/audit"
                 element={
-                  <ProtectedRoute allowedRoles={["DISPATCHER", "ADMIN"]}>
+                  <ProtectedRoute allowedRoles={["DISPATCHER"]}>
                     <DispatchAuditLog />
                   </ProtectedRoute>
                 }

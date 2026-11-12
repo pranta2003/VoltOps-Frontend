@@ -159,10 +159,15 @@ class WorkflowHarness {
       "8hr": 5,
       "247-standard": 10,
       "247-priority": 15,
-      custom: 20,
+      custom: null, // Negotiated value; strictly configured per account
     };
+    const isNegotiated = planId === "custom";
     const included =
-      planId === "custom" && customAllowance !== undefined ? customAllowance : PLAN_ALLOWANCES[planId] || 10;
+      isNegotiated && typeof customAllowance === "number"
+        ? customAllowance
+        : isNegotiated
+        ? null
+        : PLAN_ALLOWANCES[planId] || 10;
 
     const consumedWorkOrderIds = new Set();
     const customerRequests = this.requests.filter(
@@ -181,25 +186,34 @@ class WorkflowHarness {
     }
 
     const used = consumedWorkOrderIds.size;
-    const remaining = Math.max(0, included - used);
+    const needsConfiguration = isNegotiated && included === null;
+    const remaining = needsConfiguration ? null : Math.max(0, included - used);
+    const isExhausted = !needsConfiguration && remaining === 0;
+
     return {
       planId,
       includedVisits: included,
       usedVisits: used,
       remainingVisits: remaining,
-      isExhausted: remaining === 0,
+      isExhausted,
+      needsConfiguration,
+      statusMessage: needsConfiguration
+        ? "Allowance to be confirmed"
+        : isExhausted
+        ? "Allowance Exhausted"
+        : `${remaining} visits left`,
       eligibleWorkOrderIds: Array.from(consumedWorkOrderIds),
     };
   }
 
   reportAssetBreakdown(dto, customer = { id: "cust-epz-01", name: "Apex Spinning Mills" }) {
     if (!dto.problemTitle?.trim()) throw new Error("Validation Error: Problem title is required.");
-    if (!dto.problemDescription?.trim()) throw new Error("Validation Error: Problem description is required.");
     if (!dto.assetName?.trim()) throw new Error("Validation Error: Asset name is required.");
 
+    const rawDesc = dto.problemDescription?.trim() || dto.problemTitle.trim();
     const desc = dto.preferredTechnicianName
-      ? `${dto.problemDescription.trim()}\n[Customer Preferred Technician: ${dto.preferredTechnicianName} — subject to dispatcher confirmation]`
-      : dto.problemDescription.trim();
+      ? `${rawDesc}\n[Customer Preferred Technician: ${dto.preferredTechnicianName} — subject to dispatcher confirmation]`
+      : rawDesc;
 
     const req = this.createCustomerRequest(
       {
@@ -240,6 +254,13 @@ class WorkflowHarness {
     // Subscription visit allowance check
     if (!dto.isAdditionalPaidQuotation) {
       const sub = this.getSubscriptionEntitlement(customer.id, plan, dto.customAllowance);
+      if (sub.needsConfiguration) {
+        const err = new Error(
+          "Negotiated visit allowance awaiting confirmation. Included usage cannot be calculated until configured. Please request an additional service pack or quotation."
+        );
+        err.code = "ALLOWANCE_NOT_CONFIGURED";
+        throw err;
+      }
       if (sub.isExhausted) {
         const err = new Error(
           `Service visit allowance exhausted (${sub.includedVisits} of ${sub.includedVisits} used). Please request an additional service pack or quotation.`
@@ -540,6 +561,7 @@ test("Test 4: Plan D (Custom Enterprise) enforces NULL arrival SLA without defau
     problemDescription: "Intermittent error.",
     priority: "HIGH",
     coveragePlan: "custom",
+    customAllowance: 20, // Explicitly configured negotiated allowance per enterprise contract
   });
 
   assert.equal(req.coveragePlan, "custom");
@@ -886,27 +908,63 @@ test("Test 15: Structural validation accepts operational payloads containing cus
   assert.equal(validateOperationalState(invalidAssetPayload), null);
 });
 
-test("Test 16: Subscription visit allowances assign correct included visits across all plans", () => {
+test("Test 16: Subscription visit allowances assign correct included visits across all plans and enforces negotiated Plan D rule", () => {
   const harness = new WorkflowHarness();
 
   // Plan A: 8-Hour Daily Coverage has 5 included visits
   const subA = harness.getSubscriptionEntitlement("cust-epz-01", "8hr");
   assert.equal(subA.includedVisits, 5);
+  assert.equal(subA.remainingVisits, 5);
 
   // Plan B: 24/7 Standard Coverage has 10 included visits
   const subB = harness.getSubscriptionEntitlement("cust-epz-01", "247-standard");
   assert.equal(subB.includedVisits, 10);
+  assert.equal(subB.remainingVisits, 10);
 
   // Plan C: 24/7 Priority Coverage has 15 included visits
   const subC = harness.getSubscriptionEntitlement("cust-epz-01", "247-priority");
   assert.equal(subC.includedVisits, 15);
+  assert.equal(subC.remainingVisits, 15);
 
-  // Plan D: Custom Enterprise Coverage uses negotiated allowance (default 20, or custom configured)
-  const subDDefault = harness.getSubscriptionEntitlement("cust-epz-01", "custom");
-  assert.equal(subDDefault.includedVisits, 20);
+  // Plan D: Custom Enterprise Coverage does NOT default to 20 or unlimited
+  const subDUnconfigured = harness.getSubscriptionEntitlement("cust-epz-01", "custom");
+  assert.equal(subDUnconfigured.includedVisits, null);
+  assert.equal(subDUnconfigured.remainingVisits, null);
+  assert.equal(subDUnconfigured.needsConfiguration, true);
+  assert.equal(subDUnconfigured.statusMessage, "Allowance to be confirmed");
 
+  // Plan D: When explicitly configured with a negotiated value (e.g. 25), usage is calculated accurately
   const subDCustom = harness.getSubscriptionEntitlement("cust-epz-01", "custom", 25);
   assert.equal(subDCustom.includedVisits, 25);
+  assert.equal(subDCustom.remainingVisits, 25);
+  assert.equal(subDCustom.needsConfiguration, false);
+
+  // Unconfigured Plan D blocks standard included request submission
+  assert.throws(
+    () => {
+      harness.createCustomerRequest({
+        category: "Electrical and power systems",
+        assetName: "Substation Transformer TR-02",
+        problemTitle: "Relay trip",
+        problemDescription: "Investigate trip",
+        priority: "HIGH",
+        coveragePlan: "custom",
+      });
+    },
+    { message: /Negotiated visit allowance awaiting confirmation/ }
+  );
+
+  // Unconfigured Plan D allows quotation pack submission
+  const customQuotation = harness.createCustomerRequest({
+    category: "Electrical and power systems",
+    assetName: "Substation Transformer TR-02",
+    problemTitle: "Relay trip quotation",
+    problemDescription: "Investigate trip under emergency quote",
+    priority: "HIGH",
+    coveragePlan: "custom",
+    isAdditionalPaidQuotation: true,
+  });
+  assert.ok(customQuotation.id);
 });
 
 test("Test 17: Service-credit calculation deducts 1 credit per work order, ignores cancellations, and prevents duplicate deductions", () => {

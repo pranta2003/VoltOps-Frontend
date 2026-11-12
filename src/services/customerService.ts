@@ -135,14 +135,15 @@ export const customerService = {
 
     // Coverage plan hierarchy: explicit DTO plan -> customer profile plan -> default standard plan
     const plan: CoveragePlanId = dto.coveragePlan || customer?.coveragePlan || "247-standard";
+    const customNegotiatedAllowance = (customer as any)?.negotiatedAllowance ?? (dto as any)?.negotiatedAllowance;
 
     // Subscription Service-Credit Policy Validation:
-    // If included allowance is exhausted and request is not flagged as an additional paid quote, block submission.
+    // If included allowance is exhausted or needs configuration, and request is not flagged as an additional paid quote, block submission.
     if (!dto.isAdditionalPaidQuotation) {
-      const eligibility = checkCreditEligibility(customerId, currentRequests, currentWorkOrders, plan);
+      const eligibility = checkCreditEligibility(customerId, currentRequests, currentWorkOrders, plan, customNegotiatedAllowance);
       if (!eligibility.canSubmit) {
         throw new CustomerApiError(eligibility.reason || "Monthly service visit allowance exhausted.", {
-          code: "ALLOWANCE_EXHAUSTED",
+          code: eligibility.needsConfiguration ? "ALLOWANCE_NOT_CONFIGURED" : "ALLOWANCE_EXHAUSTED",
         });
       }
     }
@@ -318,9 +319,9 @@ export const customerService = {
   /**
    * Get subscription entitlement and service-credit usage for customer.
    */
-  getSubscription(customerId?: string, planId?: CoveragePlanId): SubscriptionEntitlement {
+  getSubscription(customerId?: string, planId?: CoveragePlanId, customNegotiatedAllowance?: number | null): SubscriptionEntitlement {
     const requests = operationalStore.getRequests();
     const workOrders = operationalStore.getWorkOrders();
-    return getSubscriptionEntitlement(customerId || "cust-epz-01", requests, workOrders, planId);
+    return getSubscriptionEntitlement(customerId || "cust-epz-01", requests, workOrders, planId, customNegotiatedAllowance);
   },
 };
