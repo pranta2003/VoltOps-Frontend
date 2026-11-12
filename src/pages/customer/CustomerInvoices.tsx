@@ -72,7 +72,7 @@ export function CustomerInvoices() {
   return (
     <Layout
       title="Invoices & Commercial Billing"
-      subtitle="Figma Source: Customer invoice (1440 × 1024px) · Itemized work orders, labor, and certified repair charges"
+      subtitle="Itemized work order billing and payment statements"
     >
       <div className="space-y-6 max-w-6xl mx-auto">
         {error && (
@@ -157,13 +157,13 @@ export function CustomerInvoices() {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-6">
                   <div>
                     <div className="text-xs font-bold uppercase tracking-wider text-[#10b981]">
-                      Official Commercial Invoice
+                      Commercial Invoice
                     </div>
                     <h2 className="font-heading font-extrabold text-2xl text-[var(--text-primary)]">
                       {selectedInvoice.id}
                     </h2>
                     <div className="text-xs text-[var(--text-muted)] mt-1">
-                      Linked Work Order: <span className="font-mono font-bold text-[var(--text-primary)]">{selectedInvoice.workOrderId}</span> · {selectedInvoice.assetName}
+                      Work Order: <span className="font-mono font-bold text-[var(--text-primary)]">{selectedInvoice.workOrderId}</span> · {selectedInvoice.assetName}
                     </div>
                   </div>
 
@@ -180,7 +180,7 @@ export function CustomerInvoices() {
                       {selectedInvoice.status === "PAID"
                         ? "Paid in Full"
                         : selectedInvoice.status === "PAYMENT_PENDING"
-                        ? "Gateway Settlement Pending"
+                        ? "Gateway Pending"
                         : "Payment Due"}
                     </span>
                     {selectedInvoice.status === "PAYMENT_DUE" && (
@@ -195,7 +195,7 @@ export function CustomerInvoices() {
                     )}
                     {selectedInvoice.status === "PAYMENT_PENDING" && (
                       <span className="text-[11px] text-amber-700 dark:text-amber-400 font-semibold italic">
-                        Awaiting Webhook Confirmation
+                        Webhook Pending
                       </span>
                     )}
                   </div>
@@ -204,7 +204,7 @@ export function CustomerInvoices() {
                 {paySuccess && (
                   <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-semibold flex items-center gap-2 animate-fade-in">
                     <CheckCircleIcon size={16} />
-                    <span>Demonstration payment intent registered in local prototype. No real banking session or monetary transaction occurred. Invoices remain unconfirmed until authoritative backend gateway webhook confirmation.</span>
+                    <span>Payment initiated (Demo Mode). Gateway webhook confirmation pending.</span>
                   </div>
                 )}
 
@@ -233,8 +233,8 @@ export function CustomerInvoices() {
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="text-[var(--text-muted)] border-b border-[var(--border)] uppercase tracking-wider text-[10px]">
-                        <th className="py-2.5">Line Item Description</th>
-                        <th className="py-2.5 text-center">Qty / Hrs</th>
+                        <th className="py-2.5">Description</th>
+                        <th className="py-2.5 text-center">Qty</th>
                         <th className="py-2.5 text-right">Unit Price</th>
                         <th className="py-2.5 text-right">Total</th>
                       </tr>

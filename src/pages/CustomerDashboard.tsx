@@ -68,51 +68,51 @@ export function CustomerDashboard() {
 
             switch (linkedOrder.status) {
               case "UNASSIGNED":
-                arrivalSlaWindow = "Work Order Created · Dispatcher Assigning Tech";
+                arrivalSlaWindow = "Assigning technician";
                 displayStatus = "REVIEWING";
                 break;
               case "ASSIGNED":
-                arrivalSlaWindow = "Technician Assigned · Standby Departure";
+                arrivalSlaWindow = "Assigned · Standby departure";
                 break;
               case "TRAVELLING":
                 if (r.coveragePlan === "247-priority") {
-                  arrivalSlaWindow = "En Route (20-Min Physical Arrival SLA)";
+                  arrivalSlaWindow = "En route · 20m SLA";
                 } else if (r.coveragePlan === "247-standard") {
-                  arrivalSlaWindow = "En Route (40-Min Physical Arrival SLA)";
+                  arrivalSlaWindow = "En route · 40m SLA";
                 } else if (r.coveragePlan === "8hr") {
-                  arrivalSlaWindow = "En Route (Scheduled Business Hours 08:00–16:00)";
+                  arrivalSlaWindow = "En route · Business hours";
                 } else if (r.coveragePlan === "custom") {
-                  arrivalSlaWindow = "En Route (Custom Negotiated Terms)";
+                  arrivalSlaWindow = "En route · Custom terms";
                 } else {
-                  arrivalSlaWindow = "En Route";
+                  arrivalSlaWindow = "En route";
                 }
                 break;
               case "ON_SITE":
-                arrivalSlaWindow = "Technician Present On-Site";
+                arrivalSlaWindow = "Technician on site";
                 break;
               case "COMPLETED":
-                arrivalSlaWindow = "Service Completed & Signed Off";
+                arrivalSlaWindow = "Completed & signed off";
                 break;
               case "CANCELLED":
-                arrivalSlaWindow = "Service Cancelled";
+                arrivalSlaWindow = "Cancelled";
                 break;
             }
           } else {
             if (r.status === "REVIEWING") {
               displayStatus = "REVIEWING";
-              arrivalSlaWindow = "Dispatcher Evaluating Candidates";
+              arrivalSlaWindow = "Dispatcher reviewing";
             } else if (r.status === "NEW") {
               displayStatus = "NEW";
               if (r.coveragePlan === "247-priority") {
-                arrivalSlaWindow = "20-Min Arrival SLA (Pending Review)";
+                arrivalSlaWindow = "20m SLA (Pending review)";
               } else if (r.coveragePlan === "247-standard") {
-                arrivalSlaWindow = "40-Min Arrival SLA (Pending Review)";
+                arrivalSlaWindow = "40m SLA (Pending review)";
               } else if (r.coveragePlan === "8hr") {
-                arrivalSlaWindow = "Business Hours Schedule (No Arrival SLA)";
+                arrivalSlaWindow = "Business hours (No SLA)";
               } else if (r.coveragePlan === "custom") {
-                arrivalSlaWindow = "Custom Terms (Pending Review)";
+                arrivalSlaWindow = "Custom terms (Pending review)";
               } else {
-                arrivalSlaWindow = "Pending Dispatcher Review";
+                arrivalSlaWindow = "Pending review";
               }
             }
           }
@@ -206,7 +206,7 @@ export function CustomerDashboard() {
   return (
     <Layout
       title="Commercial Facility Portal"
-      subtitle={`Logged in as ${user?.name || "Facility Customer"} · ${user?.company || "Apex Spinning & Weaving Mills"}`}
+      subtitle={`${user?.company || "Apex Spinning & Weaving Mills"} · Savar Facility`}
       action={
         <Link
           to="/customer/new-request"
@@ -217,11 +217,11 @@ export function CustomerDashboard() {
       }
     >
       <div className="space-y-6">
-        {/* ── Summary Stats Row (Figma: Embedded 27:658 layout) ────────────── */}
+        {/* ── Summary Stats Row ───────────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-              <span>Active Breakdown Requests</span>
+            <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)]">
+              <span>Active Requests</span>
               <AlertTriangleIcon size={16} className="text-amber-500" />
             </div>
             <div className="mt-2 text-3xl font-bold font-heading text-[var(--text-primary)]">
@@ -231,37 +231,37 @@ export function CustomerDashboard() {
           </div>
 
           <div className="p-5 rounded-2xl border border-blue-500/20 bg-blue-500/5 shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-              <span>Dispatched Field Technicians</span>
+            <div className="flex items-center justify-between text-xs font-semibold text-blue-600 dark:text-blue-400">
+              <span>Field Dispatched</span>
               <ClockIcon size={16} className="text-blue-500" />
             </div>
             <div className="mt-2 text-3xl font-bold font-heading text-blue-600 dark:text-blue-400">
               {isLoading ? "—" : inProgressCount}
             </div>
-            <div className="mt-1 text-xs text-blue-600/80 font-medium">Physical arrival SLA active</div>
+            <div className="mt-1 text-xs text-blue-600/80 font-medium">Technician en route or on site</div>
           </div>
 
           <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-              <span>Active Coverage Plan</span>
+            <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)]">
+              <span>Coverage Plan</span>
               <CheckCircleIcon size={16} className="text-[#10b981]" />
             </div>
             <div className="mt-2 text-xl font-bold font-heading text-[#10b981]">
-              24/7 Standard (Plan B)
+              24/7 Standard
             </div>
             <div className="mt-1 text-xs text-[var(--text-muted)]">40-minute arrival SLA guaranteed</div>
           </div>
         </div>
 
-        {/* ── Request History Table (Figma Embedded 27:658) ─────────────────── */}
+        {/* ── Request Table ─────────────────────────────────────────────────── */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
           <div className="p-4 sm:p-5 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-3">
             <div>
               <h2 className="font-heading font-bold text-base text-[var(--text-primary)]">
-                Facility Breakdown Requests
+                Recent Service Requests
               </h2>
               <p className="text-xs text-[var(--text-muted)]">
-                Real-time dispatch milestones, assigned staff, and on-site repair progress
+                Real-time dispatch status and on-site repair progress
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -277,7 +277,7 @@ export function CustomerDashboard() {
                 to="/customer/new-request"
                 className="text-xs font-bold text-[#10b981] hover:underline flex items-center gap-1"
               >
-                <span>Submit new issue</span>
+                <span>Report issue</span>
                 <ArrowRightIcon size={12} />
               </Link>
             </div>
@@ -301,12 +301,12 @@ export function CustomerDashboard() {
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-3 px-4">Request ID</th>
-                  <th className="py-3 px-4">Service Category & Asset</th>
-                  <th className="py-3 px-4">Problem Description</th>
+                  <th className="py-3 px-4">Asset & Category</th>
+                  <th className="py-3 px-4">Problem Summary</th>
                   <th className="py-3 px-4">Priority</th>
-                  <th className="py-3 px-4">Lifecycle Status</th>
-                  <th className="py-3 px-4">Arrival SLA & Technician</th>
-                  <th className="py-3 px-4 text-right">Details</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">SLA & Technician</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -404,11 +404,11 @@ export function CustomerDashboard() {
             <div className="w-full max-w-xl rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-5">
               <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
                 <div>
-                  <span className="text-[11px] font-mono font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                    Breakdown Audit & Tracking
+                  <span className="text-[11px] font-mono font-bold text-[var(--text-muted)]">
+                    Service Request Details
                   </span>
                   <h3 className="font-heading font-bold text-xl text-[var(--text-primary)]">
-                    {selectedRequest.id} — {selectedRequest.asset}
+                    {selectedRequest.id} · {selectedRequest.asset}
                   </h3>
                 </div>
                 <button
@@ -422,7 +422,7 @@ export function CustomerDashboard() {
 
               <div className="space-y-3 text-xs">
                 <div className="p-3.5 rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1">
-                  <div className="text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[10px]">Problem Title & Scope</div>
+                  <div className="text-[var(--text-muted)] font-semibold text-[10px]">Problem Summary</div>
                   <div className="font-bold text-sm text-[var(--text-primary)]">{selectedRequest.problem}</div>
                   <p className="text-slate-600 dark:text-slate-300 leading-relaxed pt-1">{selectedRequest.description}</p>
                 </div>
@@ -433,26 +433,30 @@ export function CustomerDashboard() {
                     <span className="font-semibold text-[var(--text-primary)]">{selectedRequest.category}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Urgency / Severity</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Urgency</span>
                     <span className="font-bold text-red-600 dark:text-red-400">{selectedRequest.priority}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Coverage Plan SLA</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Coverage SLA</span>
                     <span className="font-bold text-[#10b981]">{getCoveragePlanSlaLabel(selectedRequest.coveragePlan)}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Current Lifecycle</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Status</span>
                     <span className="font-bold text-[#10b981]">{selectedRequest.displayStatus.replace("_", " ")}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Linked Work Order</span>
-                    <span className="font-mono font-bold text-[var(--text-primary)]">{selectedRequest.workOrderId || "Pending Triage"}</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Work Order</span>
+                    <span className="font-mono font-bold text-[var(--text-primary)]">{selectedRequest.workOrderId || "Pending"}</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Submitted</span>
+                    <span className="font-semibold text-[var(--text-primary)]">{selectedRequest.submittedDate}</span>
                   </div>
                 </div>
 
                 {selectedRequest.assignedTech && (
                   <div className="p-3.5 rounded-2xl border border-blue-500/30 bg-blue-500/10 space-y-1">
-                    <div className="font-bold text-blue-700 dark:text-blue-300">Assigned Field Technician:</div>
+                    <div className="font-bold text-blue-700 dark:text-blue-300">Assigned Technician:</div>
                     <div className="font-semibold text-[var(--text-primary)]">{selectedRequest.assignedTech}</div>
                     <div className="text-[11px] text-blue-600 dark:text-blue-400">{selectedRequest.arrivalSlaWindow}</div>
                   </div>
@@ -460,7 +464,7 @@ export function CustomerDashboard() {
 
                 {selectedRequest.workNotes && (
                   <div className="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 space-y-1">
-                    <div className="font-bold text-emerald-800 dark:text-emerald-300">Technician Completion Notes:</div>
+                    <div className="font-bold text-emerald-800 dark:text-emerald-300">Technician Sign-Off Notes:</div>
                     <p className="text-slate-800 dark:text-slate-200">{selectedRequest.workNotes}</p>
                   </div>
                 )}
@@ -472,7 +476,7 @@ export function CustomerDashboard() {
                   onClick={() => setSelectedRequest(null)}
                   className="px-5 py-2 rounded-xl text-xs font-bold bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-colors"
                 >
-                  Close Inspection
+                  Close
                 </button>
               </div>
             </div>

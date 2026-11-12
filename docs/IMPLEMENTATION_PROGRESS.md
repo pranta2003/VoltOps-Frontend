@@ -896,6 +896,33 @@ This document tracks all completed implementation milestones, verified files, co
      - Test suite: **50 / 50 passing tests** (35 unit + 15 integration).
      - `tsc && vite build`: Completed in 5.67s with 0 errors and 0 warnings.
 
+---
+
+## Step 2 — Customer Portal Content & Visual Refinement
+- **Date**: 12 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Scope**: Rigorous simplification and visual refinement pass across all 5 Customer Portal screens:
+  1. Customer Dashboard (`src/pages/CustomerDashboard.tsx`)
+  2. New Service Request (`src/pages/customer/NewServiceRequest.tsx`)
+  3. Request History (`src/pages/customer/RequestHistory.tsx`)
+  4. Facility Assets (`src/pages/customer/FacilityAssets.tsx`)
+  5. Invoices & Billing (`src/pages/customer/CustomerInvoices.tsx`)
+- **Key Refinements**:
+  1. **Text Reduction & Concise Copy**:
+     - Stripped internal development copy ("Figma Source: Customer invoice (1440 × 1024px)", "Figma Source: Customer new request").
+     - Replaced verbose paragraphs with scannable SaaS microcopy across headers, KPI cards, badges, and empty states.
+     - Standardized SLA badge labels: `En route · 20m SLA`, `En route · 40m SLA`, `En route · Business hours`, `On site`, `Completed & signed off`, `20m SLA (Pending review)`, `40m SLA (Pending review)`.
+     - Streamlined payment notification: `Payment initiated (Demo Mode). Gateway webhook confirmation pending.`
+  2. **Table & Column Structure Standardization**:
+     - Standardized request table column headers across Dashboard and History: `Request ID | Asset & Trade | Problem Summary | Priority | Status | SLA & Technician | Action`.
+     - Standardized asset table headers: `Asset & Tag | Category | Location | Status | Last Service | Active Incident | Action`.
+     - Standardized invoice table headers: `Description | Qty | Unit Price | Total`.
+  3. **Modal & Detail Panel Streamlining**:
+     - Cleaned inspection and specification modal headers and key-value pairs (Problem Summary, Trade Category, Urgency, Status, Work Order, Submitted, Assigned Technician).
+  4. **Quality Gates & Verification**:
+     - Test suite: **50 / 50 passing tests** (35 unit + 15 integration).
+     - Production Build: `tsc && vite build` built cleanly in 5.75s with 0 errors.
+     - Real browser testing completed across desktop (1440x900) and mobile (375x667).
 
 ---
 

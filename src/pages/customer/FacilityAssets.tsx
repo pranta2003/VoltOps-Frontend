@@ -129,7 +129,7 @@ export function FacilityAssets() {
   return (
     <Layout
       title="Facility Assets"
-      subtitle={`Commercial equipment registry for ${user?.company || "Apex Spinning & Weaving Mills, Savar"}`}
+      subtitle="Registered equipment inventory and maintenance history"
       action={
         <div className="flex items-center gap-2">
           <button
@@ -157,38 +157,38 @@ export function FacilityAssets() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
             <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-              <span>Registered Assets</span>
+              <span>Total Assets</span>
               <BuildingIcon size={16} className="text-[#10b981]" />
             </div>
             <div className="mt-2 text-3xl font-bold font-heading text-[var(--text-primary)]">
               {isLoading ? "—" : totalCount}
             </div>
-            <div className="mt-1 text-xs text-[var(--text-muted)]">Commercial facility equipment inventory</div>
+            <div className="mt-1 text-xs text-[var(--text-muted)]">Registered equipment items</div>
           </div>
 
           <div className="p-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 shadow-sm">
             <div className="flex items-center justify-between text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
-              <span>Operational Baseline</span>
+              <span>Operational</span>
               <CheckCircleIcon size={16} className="text-emerald-500" />
             </div>
             <div className="mt-2 text-3xl font-bold font-heading text-emerald-700 dark:text-emerald-400">
               {isLoading ? "—" : operationalCount}
             </div>
             <div className="mt-1 text-xs text-emerald-700/80 dark:text-emerald-400/80 font-medium">
-              Verified normal operating parameters
+              Normal operating parameters
             </div>
           </div>
 
           <div className="p-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 shadow-sm">
             <div className="flex items-center justify-between text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
-              <span>Attention Required</span>
+              <span>Service Required</span>
               <AlertTriangleIcon size={16} className="text-amber-500" />
             </div>
             <div className="mt-2 text-3xl font-bold font-heading text-amber-700 dark:text-amber-400">
               {isLoading ? "—" : attentionCount}
             </div>
             <div className="mt-1 text-xs text-amber-700/80 dark:text-amber-400/80 font-medium">
-              Needs inspection, calibration, or repair
+              Needs inspection or repair
             </div>
           </div>
         </div>
@@ -299,12 +299,12 @@ export function FacilityAssets() {
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-3 px-4">Asset & Tag</th>
-                  <th className="py-3 px-4">Service Category</th>
-                  <th className="py-3 px-4">Facility Location</th>
-                  <th className="py-3 px-4">Operational Status</th>
-                  <th className="py-3 px-4">Service Chronology</th>
-                  <th className="py-3 px-4">Active Breakdown</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4">Category</th>
+                  <th className="py-3 px-4">Location</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Last Service</th>
+                  <th className="py-3 px-4">Active Incident</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -430,7 +430,7 @@ export function FacilityAssets() {
               <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
                 <div>
                   <span className="text-[11px] font-mono font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                    Asset Passport & Specifications
+                    Asset Specifications
                   </span>
                   <h3 className="font-heading font-bold text-xl text-[var(--text-primary)]">
                     {selectedAsset.name}
@@ -448,7 +448,7 @@ export function FacilityAssets() {
               <div className="space-y-3 text-xs">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Asset ID & Tag</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Asset Tag</span>
                     <span className="font-mono font-bold text-[var(--text-primary)]">{selectedAsset.tagNumber}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
@@ -460,7 +460,7 @@ export function FacilityAssets() {
                     <span className="font-semibold text-[var(--text-primary)]">{selectedAsset.location}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Operational Status</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Status</span>
                     <span
                       className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] border font-bold ${getStatusBadge(
                         selectedAsset.status
@@ -470,25 +470,25 @@ export function FacilityAssets() {
                     </span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Commissioning Date</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Installed Date</span>
                     <span className="font-semibold text-[var(--text-primary)]">{selectedAsset.installedDate || "Not recorded"}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Latest Service Milestone</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Last Service</span>
                     <span className="font-semibold text-[var(--text-primary)]">{selectedAsset.lastServiceDate || "None"}</span>
                   </div>
                 </div>
 
                 {getLinkedRequest(selectedAsset.name) ? (
                   <div className="p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 space-y-1">
-                    <div className="font-bold text-amber-700 dark:text-amber-300">Active Incident Associated:</div>
+                    <div className="font-bold text-amber-700 dark:text-amber-300">Active Incident:</div>
                     <div className="text-[11px] text-[var(--text-primary)]">
                       {getLinkedRequest(selectedAsset.name)?.id} — {getLinkedRequest(selectedAsset.name)?.problemTitle}
                     </div>
                   </div>
                 ) : (
                   <div className="p-3.5 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 text-xs">
-                    No active breakdown tickets currently open for this asset.
+                    No active breakdown tickets open for this asset.
                   </div>
                 )}
               </div>

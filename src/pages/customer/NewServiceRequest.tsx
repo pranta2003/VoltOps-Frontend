@@ -101,7 +101,7 @@ export function NewServiceRequest() {
   return (
     <Layout
       title="Submit Service Request"
-      subtitle="Figma Source: Customer new request (1440 × 1024px) · Log a commercial breakdown across any of our 7 trades"
+      subtitle="Log a commercial equipment breakdown across our 7 certified trades"
     >
       <div className="max-w-4xl mx-auto">
         {submittedSuccess ? (
@@ -110,17 +110,17 @@ export function NewServiceRequest() {
               ✓
             </div>
             <h2 className="font-heading font-bold text-2xl text-[var(--text-primary)]">
-              Service Request Logged Successfully!
+              Service Request Logged Successfully
             </h2>
             <div className="inline-block px-4 py-1.5 rounded-full font-mono font-bold text-sm bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/30">
               Assigned Tracking ID: {createdRequestId || "SR-NEW"}
             </div>
             <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
-              Your request has been routed to the active Dispatcher queue under{" "}
+              Routed to active dispatcher queue under{" "}
               <strong className="text-[var(--text-primary)] font-semibold">{planInfo.name}</strong>.{" "}
               {planInfo.isGuaranteedSla
-                ? `Guaranteed ${planInfo.physicalArrivalSlaMinutes}-minute physical arrival SLA is active.`
-                : "Scheduled during standard daily operating hours (no physical arrival guarantee)."}
+                ? `Guaranteed ${planInfo.physicalArrivalSlaMinutes}-minute arrival SLA is active.`
+                : "Scheduled during standard business hours (08:00–16:00)."}
             </p>
             <div className="pt-2 text-xs font-semibold text-[#10b981]">
               Redirecting to request tracker...
@@ -144,10 +144,10 @@ export function NewServiceRequest() {
               </div>
             )}
 
-            {/* ── 1. Canonical Service Trade Selection (Strict 7 Trades) ── */}
+            {/* ── 1. Canonical Service Trade Selection ─────────────────── */}
             <div className="space-y-3">
-              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                1. Select Service Trade <span className="text-red-500">*</span>
+              <label className="block text-xs font-bold text-[var(--text-muted)]">
+                1. Service Trade <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 {CANONICAL_SERVICE_CATEGORIES.map((cat) => {
@@ -173,8 +173,8 @@ export function NewServiceRequest() {
 
             {/* ── 2. Facility Asset Selector ────────────────────────────── */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                2. Affected Facility Equipment / Asset <span className="text-red-500">*</span>
+              <label className="block text-xs font-bold text-[var(--text-muted)]">
+                2. Facility Asset <span className="text-red-500">*</span>
               </label>
               <select
                 value={selectedAsset}
@@ -189,11 +189,11 @@ export function NewServiceRequest() {
               </select>
             </div>
 
-            {/* ── 3. Problem Title & Symptoms Breakdown ─────────────────── */}
+            {/* ── 3. Problem Summary & Description ──────────────────────── */}
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  3. Problem Summary / Title <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-[var(--text-muted)]">
+                  3. Problem Summary <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -206,8 +206,8 @@ export function NewServiceRequest() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Detailed Symptoms & Emergency Context <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-[var(--text-muted)]">
+                  Description & Symptoms <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   rows={4}
@@ -220,13 +220,13 @@ export function NewServiceRequest() {
               </div>
             </div>
 
-            {/* ── 4. Coverage Plan Selector (Governs Guaranteed Arrival SLA) ─ */}
+            {/* ── 4. Coverage Plan Selector ─────────────────────────────── */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  4. Applicable Facility Coverage Plan <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-[var(--text-muted)]">
+                  4. Coverage Plan <span className="text-red-500">*</span>
                 </label>
-                <span className="text-[11px] text-[var(--text-muted)]">Arrival SLA is governed by plan</span>
+                <span className="text-[11px] text-[var(--text-muted)]">Governs guaranteed arrival SLA</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {(Object.keys(APPROVED_COVERAGE_PLANS) as CoveragePlanId[]).map((planKey) => {
@@ -256,7 +256,13 @@ export function NewServiceRequest() {
                         {plan.slaLabel}
                       </div>
                       <div className="text-[10px] text-[var(--text-muted)] mt-1 line-clamp-2">
-                        {plan.description}
+                        {planKey === "8hr"
+                          ? "Business hours (08:00–16:00)"
+                          : planKey === "247-standard"
+                          ? "Guaranteed 40-min arrival 24/7"
+                          : planKey === "247-priority"
+                          ? "Guaranteed 20-min rapid arrival 24/7"
+                          : "Custom negotiated SLA terms"}
                       </div>
                     </label>
                   );
@@ -264,20 +270,20 @@ export function NewServiceRequest() {
               </div>
             </div>
 
-            {/* ── 5. Urgency / Failure Impact (Decoupled from SLA Guarantee) ─ */}
+            {/* ── 5. Urgency Level ──────────────────────────────────────── */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  5. Urgency & Operational Impact <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-[var(--text-muted)]">
+                  5. Urgency Level <span className="text-red-500">*</span>
                 </label>
-                <span className="text-[11px] text-[var(--text-muted)]">Describes operational severity</span>
+                <span className="text-[11px] text-[var(--text-muted)]">Operational severity</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                 {[
-                  { level: "URGENT", label: "Urgent", sub: "Critical failure / production halted", color: "border-red-500 bg-red-500/10 text-red-700 dark:text-red-300" },
-                  { level: "HIGH", label: "High", sub: "Serious fault / impending shutdown", color: "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300" },
-                  { level: "MEDIUM", label: "Medium", sub: "Operational disruption / needs fix", color: "border-blue-500 bg-blue-500/10 text-blue-700 dark:text-blue-300" },
-                  { level: "LOW", label: "Low", sub: "Routine servicing / non-urgent check", color: "border-slate-500 bg-slate-500/10 text-slate-700 dark:text-slate-300" },
+                  { level: "URGENT", label: "Urgent", sub: "Critical outage / halted", color: "border-red-500 bg-red-500/10 text-red-700 dark:text-red-300" },
+                  { level: "HIGH", label: "High", sub: "Impending shutdown risk", color: "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300" },
+                  { level: "MEDIUM", label: "Medium", sub: "Operational disruption", color: "border-blue-500 bg-blue-500/10 text-blue-700 dark:text-blue-300" },
+                  { level: "LOW", label: "Low", sub: "Routine check / non-urgent", color: "border-slate-500 bg-slate-500/10 text-slate-700 dark:text-slate-300" },
                 ].map(({ level, label, sub, color }) => {
                   const isChecked = priority === level;
                   return (
@@ -310,7 +316,7 @@ export function NewServiceRequest() {
             {/* ── 6. Preferred Timing ───────────────────────────────────── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                <label className="block text-xs font-bold text-[var(--text-muted)]">
                   Preferred Date
                 </label>
                 <input
@@ -322,8 +328,8 @@ export function NewServiceRequest() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Target Service Window
+                <label className="block text-xs font-bold text-[var(--text-muted)]">
+                  Preferred Time Window
                 </label>
                 <input
                   type="text"

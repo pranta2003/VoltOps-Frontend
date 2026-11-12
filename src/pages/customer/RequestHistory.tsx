@@ -79,51 +79,51 @@ export function RequestHistory() {
 
             switch (linkedOrder.status) {
               case "UNASSIGNED":
-                arrivalSlaWindow = "Work Order Created · Dispatcher Assigning Tech";
+                arrivalSlaWindow = "Work order created · Dispatching tech";
                 displayStatus = "REVIEWING";
                 break;
               case "ASSIGNED":
-                arrivalSlaWindow = "Technician Assigned · Standby Departure";
+                arrivalSlaWindow = "Tech assigned · Standby";
                 break;
               case "TRAVELLING":
                 if (r.coveragePlan === "247-priority") {
-                  arrivalSlaWindow = "En Route (20-Min Physical Arrival SLA)";
+                  arrivalSlaWindow = "En route · 20m SLA";
                 } else if (r.coveragePlan === "247-standard") {
-                  arrivalSlaWindow = "En Route (40-Min Physical Arrival SLA)";
+                  arrivalSlaWindow = "En route · 40m SLA";
                 } else if (r.coveragePlan === "8hr") {
-                  arrivalSlaWindow = "En Route (Scheduled Business Hours 08:00–16:00)";
+                  arrivalSlaWindow = "En route · Business hours";
                 } else if (r.coveragePlan === "custom") {
-                  arrivalSlaWindow = "En Route (Custom Negotiated Terms)";
+                  arrivalSlaWindow = "En route · Custom SLA";
                 } else {
-                  arrivalSlaWindow = "En Route";
+                  arrivalSlaWindow = "En route";
                 }
                 break;
               case "ON_SITE":
-                arrivalSlaWindow = "Technician Present On-Site";
+                arrivalSlaWindow = "On site";
                 break;
               case "COMPLETED":
-                arrivalSlaWindow = "Service Completed & Signed Off";
+                arrivalSlaWindow = "Completed & signed off";
                 break;
               case "CANCELLED":
-                arrivalSlaWindow = "Service Cancelled";
+                arrivalSlaWindow = "Cancelled";
                 break;
             }
           } else {
             if (r.status === "REVIEWING") {
               displayStatus = "REVIEWING";
-              arrivalSlaWindow = "Dispatcher Evaluating Candidates";
+              arrivalSlaWindow = "Reviewing candidates";
             } else if (r.status === "NEW") {
               displayStatus = "NEW";
               if (r.coveragePlan === "247-priority") {
-                arrivalSlaWindow = "20-Min Arrival SLA (Pending Review)";
+                arrivalSlaWindow = "20m SLA (Pending review)";
               } else if (r.coveragePlan === "247-standard") {
-                arrivalSlaWindow = "40-Min Arrival SLA (Pending Review)";
+                arrivalSlaWindow = "40m SLA (Pending review)";
               } else if (r.coveragePlan === "8hr") {
-                arrivalSlaWindow = "Business Hours Schedule (No Arrival SLA)";
+                arrivalSlaWindow = "Business hours (Pending review)";
               } else if (r.coveragePlan === "custom") {
-                arrivalSlaWindow = "Custom Terms (Pending Review)";
+                arrivalSlaWindow = "Custom SLA (Pending review)";
               } else {
-                arrivalSlaWindow = "Pending Dispatcher Review";
+                arrivalSlaWindow = "Pending review";
               }
             }
           }
@@ -261,7 +261,7 @@ export function RequestHistory() {
   return (
     <Layout
       title="Request History"
-      subtitle={`Service log and lifecycle history for ${user?.company || "Apex Spinning & Weaving Mills"}`}
+      subtitle="Historical service requests and real-time dispatch milestones"
       action={
         <div className="flex items-center gap-2">
           <button
@@ -414,12 +414,12 @@ export function RequestHistory() {
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-3 px-4">Request ID</th>
-                  <th className="py-3 px-4">Target Asset & Trade</th>
-                  <th className="py-3 px-4">Problem Scope</th>
+                  <th className="py-3 px-4">Asset & Trade</th>
+                  <th className="py-3 px-4">Problem Summary</th>
                   <th className="py-3 px-4">Priority</th>
-                  <th className="py-3 px-4">Lifecycle Status</th>
-                  <th className="py-3 px-4">Arrival SLA & Staff</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">SLA & Technician</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -542,7 +542,7 @@ export function RequestHistory() {
               <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
                 <div>
                   <span className="text-[11px] font-mono font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                    Service Request Record
+                    Service Request Details
                   </span>
                   <h3 className="font-heading font-bold text-xl text-[var(--text-primary)]">
                     {selectedRequest.id} — {selectedRequest.asset}
@@ -559,7 +559,7 @@ export function RequestHistory() {
 
               <div className="space-y-3 text-xs">
                 <div className="p-3.5 rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1">
-                  <div className="text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[10px]">Problem Title & Scope</div>
+                  <div className="text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[10px]">Problem Summary</div>
                   <div className="font-bold text-sm text-[var(--text-primary)]">{selectedRequest.problem}</div>
                   <p className="text-slate-600 dark:text-slate-300 leading-relaxed pt-1">{selectedRequest.description}</p>
                 </div>
@@ -570,7 +570,7 @@ export function RequestHistory() {
                     <span className="font-semibold text-[var(--text-primary)]">{selectedRequest.category}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Urgency / Severity</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Urgency</span>
                     <span className="font-bold text-red-600 dark:text-red-400">{selectedRequest.priority}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
@@ -578,22 +578,22 @@ export function RequestHistory() {
                     <span className="font-bold text-[#10b981]">{getCoveragePlanSlaLabel(selectedRequest.coveragePlan)}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Current Lifecycle</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Status</span>
                     <span className="font-bold text-[#10b981]">{selectedRequest.displayStatus.replace("_", " ")}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Linked Work Order</span>
-                    <span className="font-mono font-bold text-[var(--text-primary)]">{selectedRequest.workOrderId || "Pending Triage"}</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Work Order</span>
+                    <span className="font-mono font-bold text-[var(--text-primary)]">{selectedRequest.workOrderId || "Pending"}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Submitted Timestamp</span>
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Submitted</span>
                     <span className="font-semibold text-[var(--text-primary)]">{selectedRequest.submittedDate}</span>
                   </div>
                 </div>
 
                 {selectedRequest.assignedTech && (
                   <div className="p-3.5 rounded-2xl border border-blue-500/30 bg-blue-500/10 space-y-1">
-                    <div className="font-bold text-blue-700 dark:text-blue-300">Assigned Field Technician:</div>
+                    <div className="font-bold text-blue-700 dark:text-blue-300">Assigned Technician:</div>
                     <div className="font-semibold text-[var(--text-primary)]">{selectedRequest.assignedTech}</div>
                     <div className="text-[11px] text-blue-600 dark:text-blue-400">{selectedRequest.arrivalSlaWindow}</div>
                   </div>
@@ -613,7 +613,7 @@ export function RequestHistory() {
                   onClick={() => setSelectedRequest(null)}
                   className="px-5 py-2 rounded-xl text-xs font-bold bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-colors"
                 >
-                  Close Inspection
+                  Close
                 </button>
               </div>
             </div>
