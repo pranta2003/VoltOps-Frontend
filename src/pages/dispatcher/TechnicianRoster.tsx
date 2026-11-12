@@ -2,7 +2,7 @@
 // Strictly adheres to VoltOps design contract: "Show information, not explanations."
 // Real-time roster: 7 canonical trades, verified certifications, current active jobs, and status.
 
-import { FC, useState, useEffect, useCallback, useId, useRef } from "react";
+import { FC, useState, useEffect, useCallback, useMemo, useId, useRef } from "react";
 import { Layout } from "../../components/Layout";
 import { TechnicianProfile, ServiceCategory, TechnicianStatus } from "../../types";
 import { CANONICAL_SERVICE_CATEGORIES } from "../../types";
@@ -15,6 +15,8 @@ import {
   ShieldCheckIcon,
   BadgeCheckIcon,
   AlertTriangleIcon,
+  MapPinIcon,
+  BriefcaseIcon,
 } from "../../components/Icons";
 
 export const TechnicianRoster: FC = () => {
@@ -96,6 +98,16 @@ export const TechnicianRoster: FC = () => {
     }
   };
 
+  const statusCounts = useMemo(() => {
+    return {
+      AVAILABLE: technicians.filter((t) => t.status === "AVAILABLE").length,
+      ON_JOB: technicians.filter((t) => t.status === "ON_JOB").length,
+      TRAVELLING: technicians.filter((t) => t.status === "TRAVELLING").length,
+      ON_LEAVE: technicians.filter((t) => t.status === "ON_LEAVE").length,
+      OFF_DUTY: technicians.filter((t) => t.status === "OFF_DUTY").length,
+    };
+  }, [technicians]);
+
   const getStatusBadge = (status: TechnicianStatus) => {
     switch (status) {
       case "AVAILABLE":
@@ -147,6 +159,7 @@ export const TechnicianRoster: FC = () => {
   return (
     <Layout
       title="Field Technicians"
+      subtitle="Workforce Availability, Capacity & Verified Skill Passports"
       action={
         <div className="flex items-center gap-2">
           <span
@@ -193,7 +206,7 @@ export const TechnicianRoster: FC = () => {
         </div>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3.5">
         {/* Error notification banner if request failed */}
         {errorMessage && (
           <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
@@ -210,12 +223,45 @@ export const TechnicianRoster: FC = () => {
             </button>
           </div>
         )}
-        {/* Subheader */}
-        <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pb-1 border-b border-[var(--border)]">
+
+        {/* ── Compact Availability Overview Counter ──────────────────────── */}
+        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] flex flex-wrap items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-[var(--text-primary)]">{technicians.length} Field Technicians</span>
-            <span>•</span>
-            <span>Availability & Skill Passports</span>
+            <span className="text-xs font-semibold text-[var(--text-primary)]">
+              {technicians.length} Field Technicians
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">· Capacity Roster</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {[
+              { id: "ALL", label: "All", count: technicians.length, dot: "bg-slate-400" },
+              { id: "AVAILABLE", label: "Available", count: statusCounts.AVAILABLE, dot: "bg-emerald-500" },
+              { id: "ON_JOB", label: "On Job", count: statusCounts.ON_JOB, dot: "bg-blue-500" },
+              { id: "TRAVELLING", label: "In Transit", count: statusCounts.TRAVELLING, dot: "bg-amber-500" },
+              { id: "ON_LEAVE", label: "On Leave", count: statusCounts.ON_LEAVE, dot: "bg-purple-500" },
+              { id: "OFF_DUTY", label: "Off Duty", count: statusCounts.OFF_DUTY, dot: "bg-slate-400" },
+            ].map((tab) => {
+              const isSelected = selectedStatus === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSelectedStatus(tab.id)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${
+                    isSelected
+                      ? "border border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs"
+                      : "border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${tab.dot}`} />
+                  <span className="font-medium">{tab.label}</span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded font-bold bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)]">
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -286,161 +332,110 @@ export const TechnicianRoster: FC = () => {
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
             />
           </div>
-
-          {/* Status Tabs */}
-          <div className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] p-0.5 text-xs">
-            {[
-              { id: "ALL", label: "All" },
-              { id: "AVAILABLE", label: "Available" },
-              { id: "ON_JOB", label: "On Job" },
-              { id: "TRAVELLING", label: "In Transit" },
-              { id: "ON_LEAVE", label: "On Leave" },
-              { id: "OFF_DUTY", label: "Off Duty" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setSelectedStatus(tab.id)}
-                className={`px-3 py-1 rounded-md font-medium transition-all ${
-                  selectedStatus === tab.id
-                    ? "bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-sm"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
         </div>
 
-        {/* ── High-Density Technicians Table ──────────────────────────────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
-          <div className="w-full max-w-full overflow-x-auto scrollbar-thin">
-            <table className="w-full min-w-[880px] text-left text-xs sm:text-[13px] border-collapse table-fixed">
-              <colgroup>
-                <col className="w-[220px]" />
-                <col className="w-[210px]" />
-                <col className="w-[140px]" />
-                <col className="w-[150px]" />
-                <col className="w-[150px]" />
-                <col className="w-[100px]" />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
-                  <th className="py-2.5 px-3">Technician</th>
-                  <th className="py-2.5 px-3">Primary Trade</th>
-                  <th className="py-2.5 px-3">Credential Status</th>
-                  <th className="py-2.5 px-3">Branch</th>
-                  <th className="py-2.5 px-3">Availability</th>
-                  <th className="py-2.5 px-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-xs text-[var(--text-muted)]">
-                      Loading technician roster...
-                    </td>
-                  </tr>
-                ) : technicians.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-xs text-[var(--text-muted)]">
-                      No technicians match the selected filters.
-                    </td>
-                  </tr>
-                ) : (
-                  technicians.map((tech) => {
-                    const primaryTrade = tech.skills[0]?.category || tech.designation;
-                    const hasVerifiedActive = tech.certifications.some((c) => {
-                      if (!c.verified) return false;
-                      if (!c.expiryDate) return true;
-                      return new Date(c.expiryDate) >= new Date();
-                    });
-
-                    return (
-                      <tr key={tech.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                        {/* 1. Technician Name & ID */}
-                        <td className="py-2.5 px-3">
-                          <div className="flex items-center gap-2.5">
-                            <span className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-xs font-bold flex items-center justify-center shrink-0">
-                              {tech.name.substring(0, 2).toUpperCase()}
-                            </span>
-                            <div className="min-w-0">
-                              <span className="font-semibold text-[var(--text-primary)] text-xs sm:text-[13px] block truncate" title={tech.name}>
-                                {tech.name}
-                              </span>
-                              <span className="text-xs text-[var(--text-muted)] font-mono">{tech.employeeId}</span>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* 2. Primary Trade */}
-                        <td className="py-2.5 px-3">
-                          <div className="font-medium text-[var(--text-primary)] text-xs sm:text-[13px] truncate" title={`${primaryTrade} · ${tech.designation}`}>
-                            {primaryTrade}
-                          </div>
-                          <div className="text-xs text-[var(--text-muted)] truncate">
-                            {tech.designation}
-                          </div>
-                        </td>
-
-                        {/* 3. Credential Status */}
-                        <td className="py-2.5 px-3 whitespace-nowrap">
-                          {hasVerifiedActive ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                              <BadgeCheckIcon size={13} className="text-emerald-500" />
-                              Verified
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
-                              <AlertTriangleIcon size={13} className="text-amber-500" />
-                              Unverified
-                            </span>
-                          )}
-                        </td>
-
-                        {/* 4. Branch */}
-                        <td className="py-2.5 px-3 whitespace-nowrap">
-                          <span className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)]">{tech.branch}</span>
-                        </td>
-
-                        {/* 5. Availability */}
-                        <td className="py-2.5 px-3 whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            {getStatusBadge(tech.status)}
-                            {tech.activeJobCount > 0 && (
-                              <span className={`text-xs font-bold px-2 py-0.5 rounded-md border ${
-                                tech.activeJobCount >= 3
-                                  ? "bg-rose-500/10 text-rose-600 border-rose-500/20"
-                                  : "bg-sky-500/10 text-sky-600 border-sky-500/20"
-                              }`}>
-                                {tech.activeJobCount} active
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* 6. Action */}
-                        <td className="py-2.5 px-3 text-right whitespace-nowrap">
-                          <button
-                            type="button"
-                            onClick={(e) => handleOpenInspect(tech, e)}
-                            className="px-2 py-0.5 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
-                          >
-                            Passport
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+        {/* ── Technician Capacity Cards Grid ─────────────────────────────── */}
+        {isLoading ? (
+          <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
+            Loading technician roster...
           </div>
-        </div>
+        ) : technicians.length === 0 ? (
+          <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
+            No technicians match the selected filters.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {technicians.map((tech) => {
+              const primaryTrade = tech.skills[0]?.category || tech.designation;
+              const hasVerifiedActive = tech.certifications.some((c) => {
+                if (!c.verified) return false;
+                if (!c.expiryDate) return true;
+                return new Date(c.expiryDate) >= new Date();
+              });
+
+              return (
+                <div
+                  key={tech.id}
+                  className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--border-strong)] transition-all flex flex-col justify-between shadow-xs space-y-3"
+                >
+                  {/* Top: Name, ID, Avatar & Availability */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-xs font-bold flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+                        {tech.name.substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="font-semibold text-xs text-[var(--text-primary)] truncate" title={tech.name}>
+                          {tech.name}
+                        </h4>
+                        <span className="text-[11px] text-[var(--text-muted)] font-mono block">
+                          {tech.employeeId}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="shrink-0">{getStatusBadge(tech.status)}</div>
+                  </div>
+
+                  {/* Middle: Trade & Hub */}
+                  <div className="space-y-1.5 text-xs">
+                    <div>
+                      <span className="font-medium text-[var(--text-primary)] block truncate" title={primaryTrade}>
+                        {primaryTrade}
+                      </span>
+                      <span className="text-[11px] text-[var(--text-muted)] block truncate">
+                        {tech.designation}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] pt-1 border-t border-[var(--border)] text-[var(--text-muted)]">
+                      <span className="truncate">{tech.branch}</span>
+                      {hasVerifiedActive ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                          <BadgeCheckIcon size={12} />
+                          Verified
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                          <AlertTriangleIcon size={12} />
+                          Unverified
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bottom: Active Work Orders & Passport Action */}
+                  <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
+                    <div>
+                      {tech.activeJobCount === 0 ? (
+                        <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                          Ready (0 Jobs)
+                        </span>
+                      ) : tech.activeJobCount >= 3 ? (
+                        <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400">
+                          At Capacity ({tech.activeJobCount} Jobs)
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-semibold text-sky-600 dark:text-sky-400">
+                          {tech.activeJobCount} Active Job{tech.activeJobCount > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => handleOpenInspect(tech, e)}
+                      className="px-2.5 py-1 rounded-md text-xs font-semibold border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                    >
+                      Passport
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* ── Skill Passport Inspection Modal ──────────────────────────────── */}
+      {/* ── Skill Passport Modal ─────────────────────────────────────────── */}
       {inspectTech && (
         <div
           role="dialog"

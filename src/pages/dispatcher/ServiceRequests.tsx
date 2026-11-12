@@ -2,7 +2,7 @@
 // Strictly adheres to VoltOps design contract: "Show information, not explanations."
 // Fast triage and conversion of inbound commercial breakdowns into dispatched Work Orders.
 
-import { FC, useState, useEffect, useCallback, useId, useRef } from "react";
+import { FC, useState, useEffect, useCallback, useMemo, useId, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { ServiceRequest, ServiceCategory, PriorityLevel, RequestStatus } from "../../types";
@@ -16,6 +16,7 @@ import {
   ArrowRightIcon,
   AlertTriangleIcon,
   CheckIcon,
+  EyeIcon,
 } from "../../components/Icons";
 
 export const ServiceRequests: FC = () => {
@@ -31,6 +32,9 @@ export const ServiceRequests: FC = () => {
   const [selectedPriority, setSelectedPriority] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
 
+  // Slide-over Detail Drawer State
+  const [selectedDetailRequest, setSelectedDetailRequest] = useState<ServiceRequest | null>(null);
+
   // Triage / Convert Modal State
   const [triageRequest, setTriageRequest] = useState<ServiceRequest | null>(null);
   const [targetPriority, setTargetPriority] = useState<PriorityLevel>("HIGH");
@@ -42,6 +46,7 @@ export const ServiceRequests: FC = () => {
   const [isStale, setIsStale] = useState(false);
 
   const modalHeadingId = useId();
+  const drawerHeadingId = useId();
   const lastFocusedTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   const fetchRequests = useCallback(async () => {
@@ -197,9 +202,19 @@ export const ServiceRequests: FC = () => {
     }
   };
 
+  const priorityCounts = useMemo(() => {
+    return {
+      URGENT: requests.filter((r) => r.priority === "URGENT").length,
+      HIGH: requests.filter((r) => r.priority === "HIGH").length,
+      MEDIUM: requests.filter((r) => r.priority === "MEDIUM").length,
+      LOW: requests.filter((r) => r.priority === "LOW").length,
+    };
+  }, [requests]);
+
   return (
     <Layout
       title="Service Requests"
+      subtitle="Inbound Breakdown Intake & Triage Workspace"
       action={
         <div className="flex items-center gap-2">
           <span
@@ -246,7 +261,7 @@ export const ServiceRequests: FC = () => {
         </div>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3.5">
         {/* Error notification banner if request failed */}
         {errorMessage && (
           <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
@@ -263,12 +278,52 @@ export const ServiceRequests: FC = () => {
             </button>
           </div>
         )}
-        {/* Subheader */}
-        <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pb-1 border-b border-[var(--border)]">
+
+        {/* ── Priority Distribution Bar ──────────────────────────────────── */}
+        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] flex flex-wrap items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-[var(--text-primary)]">{requests.length} Breakdown Requests</span>
-            <span>•</span>
-            <span>Intake & Triage</span>
+            <span className="text-xs font-semibold text-[var(--text-primary)]">
+              {requests.length} Active Breakdown Inquiries
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">· Intake Triage</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {[
+              { key: "URGENT", label: "Urgent", count: priorityCounts.URGENT, badgeClass: "bg-rose-500 text-white dark:bg-rose-600" },
+              { key: "HIGH", label: "High", count: priorityCounts.HIGH, badgeClass: "bg-amber-500 text-white dark:bg-amber-600" },
+              { key: "MEDIUM", label: "Medium", count: priorityCounts.MEDIUM, badgeClass: "bg-sky-500 text-white dark:bg-sky-600" },
+              { key: "LOW", label: "Low", count: priorityCounts.LOW, badgeClass: "bg-slate-500 text-white dark:bg-slate-600" },
+            ].map((p) => {
+              const isSelected = selectedPriority === p.key;
+              return (
+                <button
+                  key={p.key}
+                  type="button"
+                  onClick={() => setSelectedPriority(selectedPriority === p.key ? "ALL" : p.key)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${
+                    isSelected
+                      ? "border border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs"
+                      : "border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${p.badgeClass}`} />
+                  <span className="font-medium">{p.label}</span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded font-bold bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)]">
+                    {p.count}
+                  </span>
+                </button>
+              );
+            })}
+            {selectedPriority !== "ALL" && (
+              <button
+                type="button"
+                onClick={() => setSelectedPriority("ALL")}
+                className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] underline px-1"
+              >
+                Reset
+              </button>
+            )}
           </div>
         </div>
 
@@ -321,26 +376,6 @@ export const ServiceRequests: FC = () => {
             />
           </div>
 
-          {/* Priority Filter */}
-          <div className="relative">
-            <select
-              value={selectedPriority}
-              onChange={(e) => setSelectedPriority(e.target.value)}
-              aria-label="Filter by priority"
-              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="ALL">All Priorities</option>
-              <option value="URGENT">Urgent (20–40m SLA)</option>
-              <option value="HIGH">High Priority</option>
-              <option value="MEDIUM">Medium Priority</option>
-              <option value="LOW">Low Priority</option>
-            </select>
-            <ChevronDownIcon
-              size={13}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
-            />
-          </div>
-
           {/* Status Tabs */}
           <div className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] p-0.5 text-xs">
             {[
@@ -355,7 +390,7 @@ export const ServiceRequests: FC = () => {
                 onClick={() => setSelectedStatus(tab.id)}
                 className={`px-3 py-1 rounded-md font-medium transition-all ${
                   selectedStatus === tab.id
-                    ? "bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-sm"
+                    ? "bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-xs"
                     : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 }`}
               >
@@ -365,30 +400,30 @@ export const ServiceRequests: FC = () => {
           </div>
         </div>
 
-        {/* ── High-Density Requests Table ─────────────────────────────────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
+        {/* ── High-Density Triage Workspace Table ─────────────────────────── */}
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-xs">
           <div className="w-full max-w-full overflow-x-auto scrollbar-thin">
-            <table className="w-full min-w-[940px] text-left text-xs sm:text-[13px] border-collapse table-fixed">
+            <table className="w-full min-w-[940px] text-left text-xs border-collapse table-fixed">
               <colgroup>
-                <col className="w-[75px]" />
-                <col className="w-[185px]" />
-                <col className="w-[170px]" />
-                <col className="w-[190px]" />
-                <col className="w-[85px]" />
-                <col className="w-[100px]" />
                 <col className="w-[80px]" />
+                <col className="w-[190px]" />
+                <col className="w-[180px]" />
+                <col className="w-[180px]" />
+                <col className="w-[85px]" />
                 <col className="w-[95px]" />
+                <col className="w-[80px]" />
+                <col className="w-[110px]" />
               </colgroup>
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
-                  <th className="py-2.5 px-3">ID</th>
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
+                  <th className="py-2.5 px-3">Request ID</th>
                   <th className="py-2.5 px-3">Customer & Facility</th>
                   <th className="py-2.5 px-3">Trade & Asset</th>
-                  <th className="py-2.5 px-3">Problem</th>
+                  <th className="py-2.5 px-3">Problem Summary</th>
                   <th className="py-2.5 px-3">Priority</th>
                   <th className="py-2.5 px-3">Status</th>
                   <th className="py-2.5 px-3">Time</th>
-                  <th className="py-2.5 px-3 text-right">Action</th>
+                  <th className="py-2.5 px-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -406,22 +441,41 @@ export const ServiceRequests: FC = () => {
                   </tr>
                 ) : (
                   requests.map((req) => (
-                    <tr key={req.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-2.5 px-3 font-mono font-bold text-xs text-[var(--text-primary)] whitespace-nowrap truncate">{req.id}</td>
-                      <td className="py-2.5 px-3">
-                        <div className="font-semibold text-[var(--text-primary)] truncate" title={req.customerName}>{req.customerName}</div>
-                        <div className="text-xs text-[var(--text-muted)] truncate" title={req.facilityAddress}>{req.facilityAddress}</div>
+                    <tr
+                      key={req.id}
+                      onClick={() => setSelectedDetailRequest(req)}
+                      className="hover:bg-[var(--bg-surface-2)] transition-colors cursor-pointer group"
+                    >
+                      <td className="py-2.5 px-3 font-mono font-bold text-xs text-[var(--text-primary)] whitespace-nowrap truncate">
+                        {req.id}
                       </td>
                       <td className="py-2.5 px-3">
-                        <div className="font-medium text-[var(--text-primary)] truncate" title={req.assetName}>{req.assetName}</div>
-                        <div className="text-xs text-[var(--text-muted)] truncate" title={req.category}>{req.category}</div>
+                        <div className="font-semibold text-[var(--text-primary)] truncate text-xs" title={req.customerName}>
+                          {req.customerName}
+                        </div>
+                        <div className="text-[11px] text-[var(--text-muted)] truncate" title={req.facilityAddress}>
+                          {req.facilityAddress}
+                        </div>
                       </td>
                       <td className="py-2.5 px-3">
-                        <div className="font-medium text-[var(--text-secondary)] truncate text-xs sm:text-[13px]" title={req.problemTitle}>{req.problemTitle}</div>
+                        <div className="font-medium text-[var(--text-primary)] truncate text-xs" title={req.assetName}>
+                          {req.assetName}
+                        </div>
+                        <div className="text-[11px] text-[var(--text-muted)] truncate" title={req.category}>
+                          {req.category}
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <div
+                          className="font-medium text-[var(--text-secondary)] truncate text-xs"
+                          title={req.problemTitle}
+                        >
+                          {req.problemTitle}
+                        </div>
                       </td>
                       <td className="py-2.5 px-3 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${getPriorityBadge(
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getPriorityBadge(
                             req.priority
                           )}`}
                         >
@@ -429,14 +483,14 @@ export const ServiceRequests: FC = () => {
                         </span>
                       </td>
                       <td className="py-2.5 px-3 whitespace-nowrap">{getStatusBadge(req.status)}</td>
-                      <td className="py-2.5 px-3 text-xs text-[var(--text-muted)] font-mono whitespace-nowrap">
+                      <td className="py-2.5 px-3 text-[11px] text-[var(--text-muted)] font-mono whitespace-nowrap">
                         {new Date(req.submittedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </td>
-                      <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                      <td className="py-2.5 px-3 text-right whitespace-nowrap space-x-1" onClick={(e) => e.stopPropagation()}>
                         {req.status === "CONVERTED" ? (
                           <Link
                             to="/dispatcher/work-orders"
-                            className="px-2 py-0.5 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                            className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
                           >
                             Order
                           </Link>
@@ -444,11 +498,19 @@ export const ServiceRequests: FC = () => {
                           <button
                             type="button"
                             onClick={(e) => handleOpenTriage(req, e)}
-                            className="px-2 py-0.5 rounded-md text-xs font-bold bg-brand text-white hover:bg-brand-dark active:scale-95 transition-all shadow-sm"
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-xs"
                           >
                             Triage
                           </button>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedDetailRequest(req)}
+                          title="Inspect Request"
+                          className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all inline-flex items-center"
+                        >
+                          <EyeIcon size={13} />
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -458,6 +520,125 @@ export const ServiceRequests: FC = () => {
           </div>
         </div>
       </div>
+
+      {/* ── Slide-Over Request Detail Drawer ────────────────────────────── */}
+      {selectedDetailRequest && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={drawerHeadingId}
+          className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs animate-fade-in"
+        >
+          <div className="w-full max-w-md h-full bg-[var(--bg-surface)] border-l border-[var(--border)] shadow-2xl flex flex-col justify-between overflow-y-auto">
+            {/* Drawer Header */}
+            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                  Request Detail Drawer
+                </span>
+                <h3 id={drawerHeadingId} className="text-sm font-bold text-[var(--text-primary)]">
+                  {selectedDetailRequest.id}
+                </h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {getStatusBadge(selectedDetailRequest.status)}
+                <button
+                  type="button"
+                  onClick={() => setSelectedDetailRequest(null)}
+                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                >
+                  <XIcon size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Drawer Content */}
+            <div className="p-4 space-y-4 flex-1 text-xs">
+              {/* Facility & Customer */}
+              <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  Facility & Contract
+                </span>
+                <div className="font-semibold text-sm text-[var(--text-primary)]">
+                  {selectedDetailRequest.customerName}
+                </div>
+                <div className="text-[11px] text-[var(--text-muted)]">
+                  {selectedDetailRequest.facilityAddress}
+                </div>
+                <div className="pt-1.5 flex items-center justify-between text-[11px]">
+                  <span className="text-[var(--text-muted)]">Coverage Plan:</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                    {getPlanLabel(selectedDetailRequest.coveragePlan)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Asset & Trade */}
+              <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  Equipment Inventory
+                </span>
+                <div className="font-semibold text-[var(--text-primary)]">
+                  {selectedDetailRequest.assetName}
+                </div>
+                <div className="text-[11px] text-[var(--text-muted)]">
+                  Category: {selectedDetailRequest.category}
+                </div>
+              </div>
+
+              {/* Reported Problem */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  Reported Incident
+                </span>
+                <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2">
+                  <div className="font-semibold text-[var(--text-primary)]">
+                    {selectedDetailRequest.problemTitle}
+                  </div>
+                  <p className="text-[12px] text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">
+                    {selectedDetailRequest.problemDescription}
+                  </p>
+                  <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+                    <span>Priority: <strong className="text-[var(--text-primary)]">{selectedDetailRequest.priority}</strong></span>
+                    <span>Received: {new Date(selectedDetailRequest.submittedAt).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Drawer Actions */}
+            <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-surface)] flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedDetailRequest(null)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              >
+                Close
+              </button>
+              {selectedDetailRequest.status === "CONVERTED" ? (
+                <Link
+                  to="/dispatcher/work-orders"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                >
+                  View Dispatched Work Order
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    const req = selectedDetailRequest;
+                    setSelectedDetailRequest(null);
+                    handleOpenTriage(req, e as any);
+                  }}
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-xs"
+                >
+                  Open Triage & Dispatch
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Triage & Conversion Modal ────────────────────────────────────── */}
       {triageRequest && (

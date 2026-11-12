@@ -1,18 +1,15 @@
-import { useState, useEffect, useCallback, useId } from "react";
+import { useState, useEffect, useCallback, useId, useMemo } from "react";
 import { Layout } from "../../components/Layout";
 import { dispatcherService } from "../../services/dispatcherService";
 import { DispatchEventLog } from "../../types/dispatcher";
 import {
-  ClockIcon,
   SearchIcon,
   XIcon,
   RefreshCwIcon,
   DownloadIcon,
   AlertTriangleIcon,
-  CheckCircleIcon,
   ChevronDownIcon,
-  RadioIcon,
-  ShieldCheckIcon,
+  EyeIcon,
 } from "../../components/Icons";
 
 export function DispatchAuditLog() {
@@ -26,6 +23,7 @@ export function DispatchAuditLog() {
   const [selectedAction, setSelectedAction] = useState<string>("ALL");
   const [selectedSeverity, setSelectedSeverity] = useState<string>("ALL");
   const [inspectEvent, setInspectEvent] = useState<DispatchEventLog | null>(null);
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const inspectModalHeadingId = useId();
@@ -76,38 +74,40 @@ export function DispatchAuditLog() {
     URL.revokeObjectURL(url);
   };
 
-  const filteredEvents = events.filter((ev) => {
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const match =
-        ev.id.toLowerCase().includes(q) ||
-        ev.actorName.toLowerCase().includes(q) ||
-        ev.targetId.toLowerCase().includes(q) ||
-        ev.summary.toLowerCase().includes(q) ||
-        ev.action.toLowerCase().includes(q);
-      if (!match) return false;
-    }
+  const filteredEvents = useMemo(() => {
+    return events.filter((ev) => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const match =
+          ev.id.toLowerCase().includes(q) ||
+          ev.actorName.toLowerCase().includes(q) ||
+          ev.targetId.toLowerCase().includes(q) ||
+          ev.summary.toLowerCase().includes(q) ||
+          ev.action.toLowerCase().includes(q);
+        if (!match) return false;
+      }
 
-    if (selectedAction !== "ALL" && ev.action !== selectedAction) {
-      return false;
-    }
+      if (selectedAction !== "ALL" && ev.action !== selectedAction) {
+        return false;
+      }
 
-    if (selectedSeverity !== "ALL" && ev.severity !== selectedSeverity) {
-      return false;
-    }
+      if (selectedSeverity !== "ALL" && ev.severity !== selectedSeverity) {
+        return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
+  }, [events, searchQuery, selectedAction, selectedSeverity]);
 
   const getSeverityBadge = (severity: DispatchEventLog["severity"]) => {
     switch (severity) {
       case "CRITICAL":
-        return "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-900";
+        return "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20";
       case "WARNING":
-        return "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-900";
+        return "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20";
       case "INFO":
       default:
-        return "bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border-sky-200 dark:border-sky-900";
+        return "bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/20";
     }
   };
 
@@ -130,11 +130,11 @@ export function DispatchAuditLog() {
 
   return (
     <Layout
-      title="Dispatcher Audit Trail"
-      subtitle="Historical Operations Ledger & Technician Dispatch Events"
+      title="Dispatch Audit"
+      subtitle="Chronological Operations Ledger & Field Event Log"
       action={
         <div className="flex items-center gap-2">
-          {/* Real-time status indicator */}
+          {/* Status indicator */}
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
               isOffline
@@ -173,7 +173,7 @@ export function DispatchAuditLog() {
         </div>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3.5">
         {/* Error notification banner if request failed */}
         {errorMessage && (
           <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
@@ -191,13 +191,18 @@ export function DispatchAuditLog() {
           </div>
         )}
 
-        {/* Subheader */}
-        <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pb-1 border-b border-[var(--border)]">
+        {/* ── Subheader Bar ──────────────────────────────────────────────── */}
+        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] flex flex-wrap items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-[var(--text-primary)]">{filteredEvents.length} Dispatch Events</span>
-            <span>•</span>
-            <span>Immutable Administrative Chronology</span>
+            <span className="text-xs font-semibold text-[var(--text-primary)]">
+              {filteredEvents.length} Recorded Operational Events
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">· Event Ledger</span>
           </div>
+
+          <span className="text-[11px] text-[var(--text-muted)] font-mono">
+            {isOffline ? "Simulated local store records" : "Connected backend audit log"}
+          </span>
         </div>
 
         {/* ── Filter Toolbar ─────────────────────────────────────────────── */}
@@ -212,7 +217,7 @@ export function DispatchAuditLog() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by event ID, actor, order ID, or summary..."
+              placeholder="Search by event ID, actor, target ID, or action..."
               aria-label="Search audit events"
               className="w-full text-xs pl-9 pr-8 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
@@ -228,7 +233,7 @@ export function DispatchAuditLog() {
             )}
           </div>
 
-          {/* Action Category Filter */}
+          {/* Action Filter */}
           <div className="relative">
             <select
               value={selectedAction}
@@ -269,168 +274,184 @@ export function DispatchAuditLog() {
           </div>
         </div>
 
-        {/* ── High-Density Audit Ledger Table ────────────────────────────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
-          <div className="w-full max-w-full overflow-x-auto scrollbar-thin">
-            <table className="w-full min-w-[960px] text-left text-xs sm:text-[13px] border-collapse table-fixed">
-              <colgroup>
-                <col className="w-[110px]" />
-                <col className="w-[125px]" />
-                <col className="w-[130px]" />
-                <col className="w-[140px]" />
-                <col className="w-[100px]" />
-                <col className="w-[260px]" />
-                <col className="w-[85px]" />
-                <col className="w-[80px]" />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
-                  <th className="py-2.5 px-3">Event ID</th>
-                  <th className="py-2.5 px-3">Timestamp</th>
-                  <th className="py-2.5 px-3">Action</th>
-                  <th className="py-2.5 px-3">Actor</th>
-                  <th className="py-2.5 px-3">Target ID</th>
-                  <th className="py-2.5 px-3">Summary</th>
-                  <th className="py-2.5 px-3">Severity</th>
-                  <th className="py-2.5 px-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={8} className="py-8 text-center text-xs text-[var(--text-muted)]">
-                      Loading audit events...
-                    </td>
-                  </tr>
-                ) : filteredEvents.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="py-8 text-center text-xs text-[var(--text-muted)]">
-                      No dispatch audit events match the selected filters.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredEvents.map((ev) => (
-                    <tr key={ev.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-2.5 px-3 font-mono font-bold text-xs text-[var(--text-primary)] whitespace-nowrap truncate">
-                        {ev.id}
-                      </td>
-                      <td className="py-2.5 px-3 font-mono text-xs text-[var(--text-muted)] whitespace-nowrap">
-                        {new Date(ev.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                        <span className="block text-[10px] text-[var(--text-muted)]">{new Date(ev.timestamp).toLocaleDateString()}</span>
-                      </td>
-                      <td className="py-2.5 px-3 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getActionBadge(ev.action)}`}>
-                          {ev.action.replace("_", " ")}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 whitespace-nowrap truncate font-medium text-[var(--text-primary)]" title={ev.actorName}>
-                        {ev.actorName}
-                      </td>
-                      <td className="py-2.5 px-3 font-mono font-semibold text-xs text-[var(--text-secondary)] whitespace-nowrap">
-                        {ev.targetId}
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <div className="font-medium text-xs sm:text-[13px] text-[var(--text-secondary)] truncate" title={ev.summary}>
-                          {ev.summary}
-                        </div>
-                      </td>
-                      <td className="py-2.5 px-3 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${getSeverityBadge(ev.severity)}`}>
-                          {ev.severity}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 text-right whitespace-nowrap">
-                        <button
-                          type="button"
-                          onClick={() => setInspectEvent(ev)}
-                          className="px-2 py-0.5 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
-                        >
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+        {/* ── Chronological Event Timeline & Ledger ───────────────────────── */}
+        {isLoading ? (
+          <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
+            Loading dispatch audit events...
           </div>
-        </div>
+        ) : filteredEvents.length === 0 ? (
+          <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
+            No dispatch audit events match current filters.
+          </div>
+        ) : (
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-xs divide-y divide-[var(--border)]">
+            {filteredEvents.map((ev) => {
+              const isExpanded = expandedEventId === ev.id;
+              return (
+                <div key={ev.id} className="p-3.5 hover:bg-[var(--bg-surface-2)] transition-colors text-xs">
+                  <div className="flex flex-wrap items-center justify-between gap-2.5">
+                    {/* Left: Time and Action badge */}
+                    <div className="flex items-center gap-2.5 min-w-[240px]">
+                      <span className="font-mono text-[11px] text-[var(--text-muted)] shrink-0">
+                        {new Date(ev.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getActionBadge(ev.action)}`}>
+                        {ev.action.replace("_", " ")}
+                      </span>
+                      <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold border ${getSeverityBadge(ev.severity)}`}>
+                        {ev.severity}
+                      </span>
+                    </div>
+
+                    {/* Middle: Actor & Target */}
+                    <div className="flex items-center gap-2 min-w-[200px]">
+                      <span className="font-semibold text-[var(--text-primary)]">{ev.actorName}</span>
+                      <span className="text-[11px] text-[var(--text-muted)] font-mono">
+                        → target: <span className="text-[var(--text-primary)] font-bold">{ev.targetId}</span>
+                      </span>
+                    </div>
+
+                    {/* Right: Expand / Inspect affordance */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedEventId(isExpanded ? null : ev.id)}
+                        className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline flex items-center gap-1"
+                      >
+                        <span>{isExpanded ? "Hide" : "Details"}</span>
+                        <ChevronDownIcon size={12} className={`transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setInspectEvent(ev)}
+                        title="View Full Record"
+                        className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all"
+                      >
+                        <EyeIcon size={13} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Summary preview */}
+                  <div className="mt-1.5 text-xs text-[var(--text-secondary)] pl-0 sm:pl-[75px]">
+                    {ev.summary}
+                  </div>
+
+                  {/* Expandable Details Pane */}
+                  {isExpanded && (
+                    <div className="mt-3 pt-3 border-t border-[var(--border)] pl-0 sm:pl-[75px] space-y-2 animate-fade-in">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                        <div>
+                          <span className="text-[var(--text-muted)] block">Event ID</span>
+                          <span className="font-mono text-[var(--text-primary)] font-semibold">{ev.id}</span>
+                        </div>
+                        <div>
+                          <span className="text-[var(--text-muted)] block">Full Timestamp</span>
+                          <span className="font-mono text-[var(--text-primary)]">{ev.timestamp}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* ── Event Detail Inspection Modal ───────────────────────────────── */}
+      {/* ── Slide-Over Event Detail Drawer ──────────────────────────────── */}
       {inspectEvent && (
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby={inspectModalHeadingId}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs animate-fade-in"
         >
-          <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+          <div className="w-full max-w-md h-full bg-[var(--bg-surface)] border-l border-[var(--border)] shadow-2xl flex flex-col justify-between overflow-y-auto">
+            {/* Header */}
+            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
               <div>
-                <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">{inspectEvent.id}</span>
-                <h3 id={inspectModalHeadingId} className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   Audit Event Record
+                </span>
+                <h3 id={inspectModalHeadingId} className="text-sm font-bold text-[var(--text-primary)]">
+                  {inspectEvent.id}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setInspectEvent(null)}
-                aria-label="Close dialog"
-                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
               >
                 <XIcon size={16} />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-[var(--text-muted)]">Action Type</span>
-                  <span className="font-semibold text-[var(--text-primary)]">{inspectEvent.action}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[var(--text-muted)]">Responsible Actor</span>
-                  <span className="font-semibold text-[var(--text-primary)]">{inspectEvent.actorName}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[var(--text-muted)]">Target Entity</span>
-                  <span className="font-mono font-bold text-[var(--text-primary)]">{inspectEvent.targetId}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[var(--text-muted)]">Timestamp</span>
-                  <span className="font-mono text-[var(--text-secondary)]">{new Date(inspectEvent.timestamp).toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[var(--text-muted)]">Severity</span>
-                  <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${getSeverityBadge(inspectEvent.severity)}`}>
+            {/* Content */}
+            <div className="p-4 space-y-3.5 flex-1 text-xs">
+              <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getActionBadge(inspectEvent.action)}`}>
+                    {inspectEvent.action}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getSeverityBadge(inspectEvent.severity)}`}>
                     {inspectEvent.severity}
                   </span>
                 </div>
+                <div className="text-[11px] text-[var(--text-muted)] font-mono">
+                  Timestamp: {inspectEvent.timestamp}
+                </div>
               </div>
 
+              <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] space-y-2 text-xs">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block">
+                    Responsible Actor
+                  </span>
+                  <span className="font-semibold text-[var(--text-primary)]">{inspectEvent.actorName}</span>
+                </div>
+
+                <div className="pt-2 border-t border-[var(--border)]">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block">
+                    Target Resource
+                  </span>
+                  <span className="font-mono font-semibold text-[var(--text-primary)]">{inspectEvent.targetId}</span>
+                </div>
+
+                <div className="pt-2 border-t border-[var(--border)]">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block">
+                    Event Summary
+                  </span>
+                  <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">{inspectEvent.summary}</p>
+                </div>
+              </div>
+
+              {/* Raw Payload View */}
               <div>
-                <h4 className="font-bold text-[var(--text-primary)] mb-1">Event Summary</h4>
-                <p className="p-2.5 rounded-lg bg-[var(--bg-surface-2)] text-[var(--text-secondary)] border border-[var(--border)]">
-                  {inspectEvent.summary}
-                </p>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                  Raw Event JSON
+                </span>
+                <pre className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[10px] font-mono text-[var(--text-primary)] overflow-x-auto">
+                  {JSON.stringify(inspectEvent, null, 2)}
+                </pre>
               </div>
             </div>
 
-            <div className="flex justify-between items-center pt-2 border-t border-[var(--border)]">
+            {/* Footer */}
+            <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-surface)] flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => handleCopyId(inspectEvent.id)}
-                className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] underline"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
               >
-                {copiedId === inspectEvent.id ? "Copied ID!" : "Copy Event ID"}
+                {copiedId === inspectEvent.id ? "✓ Copied ID" : "Copy Event ID"}
               </button>
               <button
                 type="button"
                 onClick={() => setInspectEvent(null)}
-                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-brand text-white hover:bg-brand-dark"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
-                Close
+                Close Drawer
               </button>
             </div>
           </div>

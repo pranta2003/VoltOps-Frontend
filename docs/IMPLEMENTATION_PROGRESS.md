@@ -1012,7 +1012,54 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
-## Next Recommended Milestone: Milestone 3 — Dispatcher Operations & Work Orders
-- Build dedicated Service Requests Queue list (`/dispatcher/requests`, Figma Frame 2).
-- Build Service Request Detail & Work Order Conversion screen (`/dispatcher/requests/:id`, Figma Frame 3).
-- Build Work Orders Board (`/dispatcher/work-orders`).
+---
+
+## Milestone: Portal-Wide UX, Visual Identity & Information Architecture Redesign ✅
+- **Date Completed**: 13 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Scope & Objectives**:
+  - Eliminated repetitive dashboard formulas ("heading + 4 metric cards + filter + large table") across all three enterprise portals.
+  - Formulated 3 distinct portal visual and functional identities:
+    1. **Customer Portal**: Calm, clear, welcoming, simple, focused on facility, requests, and billing.
+    2. **Admin Portal**: Precise, professional, structured, secure, focused on governance, permissions, and compliance.
+    3. **Dispatcher Portal**: High-velocity triage, fast to scan, information-dense only where necessary, focused on urgent breakdowns, technician capacity, shift schedules, and work orders.
+  - Enforced a rigorous enterprise typography scale:
+    * Page Title: 20–24px (`text-lg sm:text-xl font-bold`)
+    * Section Title: 16–18px (`text-base sm:text-lg font-semibold`)
+    * Card Title: 13–15px (`text-xs sm:text-sm font-medium`)
+    * Table Headers: 11–12px (`text-[11px] font-semibold uppercase tracking-wider`)
+    * Body Text: 13–14px (`text-xs sm:text-sm`)
+    * Secondary Text: 11–12px (`text-[11px]`)
+    * Small Metadata: 10–11px (`text-[10px]`)
+- **Delivered Redesigns**:
+  1. **Dispatcher Service Requests (`src/pages/dispatcher/ServiceRequests.tsx`)**:
+     - Redesigned into an operational **Breakdown Triage Workspace**.
+     - Top **Priority Distribution Bar** with 4 color-weighted pills (`Urgent`, `High`, `Medium`, `Low`) that act as immediate 1-click triage filters.
+     - High-density triage queue with concise problem summaries, status indicators, and direct actions.
+     - Right slide-over **Request Detail Drawer** (`RequestDetailDrawer`) allowing comprehensive ticket inspection, customer contact, facility location, and direct technician matching & dispatch modal trigger without losing list position.
+     - Preserved canonical SLA modal rules, 7 trades filter, and local demonstration honesty.
+  2. **Dispatcher Work Orders (`src/pages/dispatcher/WorkOrders.tsx`)**:
+     - Transformed into an **Operations Ledger**.
+     - Top **Lifecycle Status Strip** (`All Orders`, `Unassigned`, `Assigned`, `In Transit`, `On Site`, `Completed`) with live counts and 1-click status filtering.
+     - Clear technician assignment column with avatar and direct assign action for unassigned jobs.
+     - Right slide-over **Operations Inspection Drawer** (`OperationsInspectionDrawer`) with linear lifecycle progress stepper, advance status controls, SLA arrival targets, and technician profile.
+  3. **Dispatcher Technician Roster (`src/pages/dispatcher/TechnicianRoster.tsx`)**:
+     - Replaced generic data table with a **Technician Capacity Grid**.
+     - Top **Availability Overview counter** (`Available`, `On Job`, `In Transit`, `On Leave`, `Off Duty`).
+     - Capacity cards displaying technician avatar, employee ID, trade, branch, active job workload count (`Ready`, `X Active Jobs`, `At Capacity (3 Jobs)`), and a "Skill Passport" action.
+     - Streamlined **Skill Passport Modal** with government license compliance, validity dates, verified badges, and competency tags.
+  4. **Dispatcher Schedule (`src/pages/dispatcher/DispatcherSchedule.tsx`)**:
+     - Removed 3 oversized KPI cards and 3 giant hub cards.
+     - Schedule is now primary: compact title "Technician Schedule", interactive date navigation (`[<] Fri, Nov 13, 2026 (Today) [>]`), operational summary counter, and compact hub filter pills.
+     - Visual **Shift Lanes** (`Morning Shift 08:00–16:00`, `Evening Shift 16:00–00:00`, `Night Standby 00:00–08:00`) with color-coded accent borders, showing assigned technicians, trade badges, and active job tags.
+  5. **Dispatcher Audit Log (`src/pages/dispatcher/DispatchAuditLog.tsx`)**:
+     - Transformed into a **Chronological Audit Timeline & Event Ledger**.
+     - Compact title "Dispatch Audit", recorded events subheader, timeline row presentation with time, action badge, severity pill, actor, target link, and summary.
+     - Inline expandable details and right slide-over **Event Detail Drawer** with raw JSON payload inspection and 1-click ID copy. Preserved JSON export.
+- **Verification & Quality Gate**:
+  - Automated tests: **55 / 55 tests passing** (100% pass rate).
+  - Production build: `tsc && vite build` built cleanly in 5.31s with **0 errors**.
+  - Chrome DevTools MCP browser testing:
+    * Tested 1440px desktop, 1024px tablet, and 375px mobile responsive viewports.
+    * Tested Dark and Light themes with dynamic contrast and clean token rendering.
+    * Verified route authorization and role guards across Admin, Dispatcher, and Customer.

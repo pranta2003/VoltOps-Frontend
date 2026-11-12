@@ -2,7 +2,7 @@
 // Strictly adheres to VoltOps design contract: "Show information, not explanations."
 // High-density operational view: lifecycle status, arithmetic technician matching, and inspection drawer.
 
-import { FC, useState, useEffect, useCallback, useId, useRef } from "react";
+import { FC, useState, useEffect, useCallback, useMemo, useId, useRef } from "react";
 import { Layout } from "../../components/Layout";
 import { WorkOrder, ServiceCategory, PriorityLevel, WorkOrderStatus } from "../../types";
 import { CANONICAL_SERVICE_CATEGORIES } from "../../types";
@@ -16,6 +16,7 @@ import {
   WrenchIcon,
   CheckIcon,
   AlertTriangleIcon,
+  EyeIcon,
 } from "../../components/Icons";
 
 export const WorkOrders: FC = () => {
@@ -241,9 +242,20 @@ export const WorkOrders: FC = () => {
     );
   };
 
+  const lifecycleCounts = useMemo(() => {
+    return {
+      UNASSIGNED: workOrders.filter((w) => w.status === "UNASSIGNED").length,
+      ASSIGNED: workOrders.filter((w) => w.status === "ASSIGNED").length,
+      TRAVELLING: workOrders.filter((w) => w.status === "TRAVELLING").length,
+      ON_SITE: workOrders.filter((w) => w.status === "ON_SITE").length,
+      COMPLETED: workOrders.filter((w) => w.status === "COMPLETED").length,
+    };
+  }, [workOrders]);
+
   return (
     <Layout
-      title="Work Orders Ledger"
+      title="Work Orders"
+      subtitle="Operational Execution Ledger & Dispatch Control"
       action={
         <div className="flex items-center gap-2">
           <span
@@ -290,7 +302,7 @@ export const WorkOrders: FC = () => {
         </div>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3.5">
         {/* Error notification banner if request failed */}
         {errorMessage && (
           <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
@@ -307,12 +319,45 @@ export const WorkOrders: FC = () => {
             </button>
           </div>
         )}
-        {/* Subheader */}
-        <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pb-1 border-b border-[var(--border)]">
+
+        {/* ── Compact Lifecycle Status Strip ──────────────────────────────── */}
+        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] flex flex-wrap items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-[var(--text-primary)]">{workOrders.length} Work Orders</span>
-            <span>•</span>
-            <span>Operations Ledger</span>
+            <span className="text-xs font-semibold text-[var(--text-primary)]">
+              {workOrders.length} Operational Orders
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">· Field Execution</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {[
+              { id: "ALL", label: "All Orders", count: workOrders.length, dot: "bg-slate-400" },
+              { id: "UNASSIGNED", label: "Unassigned", count: lifecycleCounts.UNASSIGNED, dot: "bg-rose-500 animate-pulse" },
+              { id: "ASSIGNED", label: "Assigned", count: lifecycleCounts.ASSIGNED, dot: "bg-indigo-500" },
+              { id: "TRAVELLING", label: "In Transit", count: lifecycleCounts.TRAVELLING, dot: "bg-amber-500" },
+              { id: "ON_SITE", label: "On Site", count: lifecycleCounts.ON_SITE, dot: "bg-blue-500" },
+              { id: "COMPLETED", label: "Completed", count: lifecycleCounts.COMPLETED, dot: "bg-emerald-500" },
+            ].map((tab) => {
+              const isSelected = selectedStatus === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSelectedStatus(tab.id)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${
+                    isSelected
+                      ? "border border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs"
+                      : "border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${tab.dot}`} />
+                  <span className="font-medium">{tab.label}</span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded font-bold bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border)]">
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -374,7 +419,7 @@ export const WorkOrders: FC = () => {
               className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
               <option value="ALL">All Priorities</option>
-              <option value="URGENT">Urgent (20–40m Arrival)</option>
+              <option value="URGENT">Urgent Priority</option>
               <option value="HIGH">High Priority</option>
               <option value="MEDIUM">Medium Priority</option>
               <option value="LOW">Low Priority</option>
@@ -384,50 +429,26 @@ export const WorkOrders: FC = () => {
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
             />
           </div>
-
-          {/* Status Tabs */}
-          <div className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] p-0.5 text-xs">
-            {[
-              { id: "ALL", label: "All" },
-              { id: "UNASSIGNED", label: "Unassigned" },
-              { id: "TRAVELLING", label: "In Transit" },
-              { id: "ON_SITE", label: "On Site" },
-              { id: "COMPLETED", label: "Completed" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setSelectedStatus(tab.id)}
-                className={`px-3 py-1 rounded-md font-medium transition-all ${
-                  selectedStatus === tab.id
-                    ? "bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-sm"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
         </div>
 
-        {/* ── High-Density Work Orders Table ──────────────────────────────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
+        {/* ── High-Density Work Orders Operations Table ──────────────────── */}
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-xs">
           <div className="w-full max-w-full overflow-x-auto scrollbar-thin">
-            <table className="w-full min-w-[960px] text-left text-xs sm:text-[13px] border-collapse table-fixed">
+            <table className="w-full min-w-[960px] text-left text-xs border-collapse table-fixed">
               <colgroup>
                 <col className="w-[85px]" />
                 <col className="w-[185px]" />
                 <col className="w-[175px]" />
                 <col className="w-[85px]" />
                 <col className="w-[110px]" />
-                <col className="w-[130px]" />
+                <col className="w-[140px]" />
                 <col className="w-[105px]" />
                 <col className="w-[115px]" />
               </colgroup>
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-2.5 px-3">Order ID</th>
-                  <th className="py-2.5 px-3">Customer</th>
+                  <th className="py-2.5 px-3">Customer & Location</th>
                   <th className="py-2.5 px-3">Trade & Asset</th>
                   <th className="py-2.5 px-3">Priority</th>
                   <th className="py-2.5 px-3">Status</th>
@@ -451,27 +472,39 @@ export const WorkOrders: FC = () => {
                   </tr>
                 ) : (
                   workOrders.map((wo) => (
-                    <tr key={wo.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-2.5 px-3 font-mono font-bold text-xs text-[var(--text-primary)] whitespace-nowrap truncate">{wo.id}</td>
+                    <tr
+                      key={wo.id}
+                      onClick={(e) => handleOpenInspect(wo, e as any)}
+                      className="hover:bg-[var(--bg-surface-2)] transition-colors cursor-pointer group"
+                    >
+                      <td className="py-2.5 px-3 font-mono font-bold text-xs text-[var(--text-primary)] whitespace-nowrap truncate">
+                        {wo.id}
+                      </td>
                       <td className="py-2.5 px-3">
-                        <div className="font-semibold text-[var(--text-primary)] truncate" title={`${wo.customerName} - ${wo.facilityAddress}`}>
+                        <div
+                          className="font-semibold text-[var(--text-primary)] truncate text-xs"
+                          title={`${wo.customerName} - ${wo.facilityAddress}`}
+                        >
                           {wo.customerName}
                         </div>
-                        <div className="text-xs text-[var(--text-muted)] truncate" title={wo.facilityAddress}>
+                        <div className="text-[11px] text-[var(--text-muted)] truncate" title={wo.facilityAddress}>
                           {wo.facilityAddress}
                         </div>
                       </td>
                       <td className="py-2.5 px-3">
-                        <div className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)] truncate" title={`${wo.assetName} (${wo.category})`}>
+                        <div
+                          className="font-medium text-xs text-[var(--text-primary)] truncate"
+                          title={`${wo.assetName} (${wo.category})`}
+                        >
                           {wo.assetName}
                         </div>
-                        <div className="text-xs text-[var(--text-muted)] truncate" title={wo.category}>
+                        <div className="text-[11px] text-[var(--text-muted)] truncate" title={wo.category}>
                           {wo.category}
                         </div>
                       </td>
                       <td className="py-2.5 px-3 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${getPriorityBadge(
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getPriorityBadge(
                             wo.priority
                           )}`}
                         >
@@ -479,31 +512,38 @@ export const WorkOrders: FC = () => {
                         </span>
                       </td>
                       <td className="py-2.5 px-3 whitespace-nowrap">{getStatusBadge(wo.status)}</td>
-                      <td className="py-2.5 px-3 whitespace-nowrap">
+                      <td className="py-2.5 px-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         {wo.assignedTechnicianName ? (
                           <div className="flex items-center gap-1.5 min-w-0">
                             <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0">
                               {wo.assignedTechnicianName.substring(0, 2).toUpperCase()}
                             </span>
-                            <span className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)] truncate" title={wo.assignedTechnicianName}>
+                            <span
+                              className="font-medium text-xs text-[var(--text-primary)] truncate max-w-[95px]"
+                              title={wo.assignedTechnicianName}
+                            >
                               {wo.assignedTechnicianName}
                             </span>
                           </div>
                         ) : (
-                          <span className="text-amber-600 dark:text-amber-400 font-semibold text-xs">
-                            Unassigned
-                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => handleOpenAssign(wo, e)}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition-all"
+                          >
+                            + Assign Tech
+                          </button>
                         )}
                       </td>
                       <td className="py-2.5 px-3 whitespace-nowrap text-xs">
                         {renderArrivalSla(wo)}
                       </td>
-                      <td className="py-2.5 px-3 text-right whitespace-nowrap space-x-1">
+                      <td className="py-2.5 px-3 text-right whitespace-nowrap space-x-1" onClick={(e) => e.stopPropagation()}>
                         {wo.status === "UNASSIGNED" && (
                           <button
                             type="button"
                             onClick={(e) => handleOpenAssign(wo, e)}
-                            className="px-2 py-0.5 rounded-md text-xs font-bold bg-brand text-white hover:bg-brand-dark active:scale-95 transition-all shadow-sm"
+                            className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-xs"
                           >
                             Assign
                           </button>
@@ -511,9 +551,10 @@ export const WorkOrders: FC = () => {
                         <button
                           type="button"
                           onClick={(e) => handleOpenInspect(wo, e)}
-                          className="px-2 py-0.5 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                          title="Inspect Order"
+                          className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all inline-flex items-center"
                         >
-                          Inspect
+                          <EyeIcon size={13} />
                         </button>
                       </td>
                     </tr>
@@ -525,167 +566,215 @@ export const WorkOrders: FC = () => {
         </div>
       </div>
 
-      {/* ── Slide-Over / Inspect Detail Modal ────────────────────────────── */}
+      {/* ── Slide-Over Operations Inspection Drawer ─────────────────────── */}
       {inspectOrder && (
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby={inspectModalHeadingId}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs animate-fade-in"
         >
-          <div className="w-full max-w-xl rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+          <div className="w-full max-w-lg h-full bg-[var(--bg-surface)] border-l border-[var(--border)] shadow-2xl flex flex-col justify-between overflow-y-auto">
+            {/* Drawer Header */}
+            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                  Work Order Inspection
+                  Work Order Inspection Drawer
                 </span>
-                <h3 id={inspectModalHeadingId} className="text-base font-bold text-[var(--text-primary)]">
+                <h3 id={inspectModalHeadingId} className="text-sm font-bold text-[var(--text-primary)]">
                   {inspectOrder.id} — {inspectOrder.customerName}
                 </h3>
               </div>
-              <button
-                type="button"
-                onClick={handleCloseModals}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
-              >
-                <XIcon size={16} />
-              </button>
-            </div>
-
-            {/* Lifecycle Stepper */}
-            <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
-                Operational Lifecycle
-              </div>
-              <div className="grid grid-cols-4 gap-2 text-center text-[10px]">
-                <div
-                  className={`p-1.5 rounded-lg border ${
-                    inspectOrder.status === "UNASSIGNED"
-                      ? "border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-700 font-bold"
-                      : "border-[var(--border)] text-[var(--text-muted)]"
-                  }`}
+              <div className="flex items-center gap-2">
+                {getStatusBadge(inspectOrder.status)}
+                <button
+                  type="button"
+                  onClick={handleCloseModals}
+                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
                 >
-                  1. Unassigned
-                </div>
-                <div
-                  className={`p-1.5 rounded-lg border ${
-                    inspectOrder.status === "ASSIGNED"
-                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 font-bold"
-                      : "border-[var(--border)] text-[var(--text-muted)]"
-                  }`}
-                >
-                  2. Assigned
-                </div>
-                <div
-                  className={`p-1.5 rounded-lg border ${
-                    inspectOrder.status === "TRAVELLING" || inspectOrder.status === "ON_SITE"
-                      ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-700 font-bold"
-                      : "border-[var(--border)] text-[var(--text-muted)]"
-                  }`}
-                >
-                  3. Field Work
-                </div>
-                <div
-                  className={`p-1.5 rounded-lg border ${
-                    inspectOrder.status === "COMPLETED"
-                      ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 font-bold"
-                      : "border-[var(--border)] text-[var(--text-muted)]"
-                  }`}
-                >
-                  4. Completed
-                </div>
+                  <XIcon size={16} />
+                </button>
               </div>
             </div>
 
-            {/* Breakdown Details */}
-            <div className="p-3.5 rounded-xl border border-[var(--border)] text-xs space-y-2">
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <span className="text-[var(--text-muted)] block text-[11px]">Facility Address</span>
-                  <span className="font-semibold text-[var(--text-primary)]">{inspectOrder.facilityAddress}</span>
+            {/* Drawer Content */}
+            <div className="p-4 space-y-3.5 flex-1 text-xs">
+              {/* Operational Lifecycle Stepper */}
+              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                  Operational Lifecycle Progression
                 </div>
-                <div>
-                  <span className="text-[var(--text-muted)] block text-[11px]">Required Trade</span>
-                  <span className="font-semibold text-[var(--text-primary)]">{inspectOrder.category}</span>
+                <div className="grid grid-cols-4 gap-1.5 text-center text-[10px]">
+                  <div
+                    className={`p-1.5 rounded-lg border ${
+                      inspectOrder.status === "UNASSIGNED"
+                        ? "border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-700 font-bold"
+                        : "border-[var(--border)] text-[var(--text-muted)]"
+                    }`}
+                  >
+                    1. Unassigned
+                  </div>
+                  <div
+                    className={`p-1.5 rounded-lg border ${
+                      inspectOrder.status === "ASSIGNED"
+                        ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 font-bold"
+                        : "border-[var(--border)] text-[var(--text-muted)]"
+                    }`}
+                  >
+                    2. Assigned
+                  </div>
+                  <div
+                    className={`p-1.5 rounded-lg border ${
+                      inspectOrder.status === "TRAVELLING" || inspectOrder.status === "ON_SITE"
+                        ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-700 font-bold"
+                        : "border-[var(--border)] text-[var(--text-muted)]"
+                    }`}
+                  >
+                    3. Field Work
+                  </div>
+                  <div
+                    className={`p-1.5 rounded-lg border ${
+                      inspectOrder.status === "COMPLETED"
+                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 font-bold"
+                        : "border-[var(--border)] text-[var(--text-muted)]"
+                    }`}
+                  >
+                    4. Completed
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-[var(--border)]">
-                <div>
-                  <span className="text-[var(--text-muted)] block text-[11px]">Equipment / Asset</span>
-                  <span className="font-semibold text-[var(--text-primary)]">{inspectOrder.assetName}</span>
+              {/* Facility & Equipment Information */}
+              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Facility</span>
+                    <span className="font-semibold text-[var(--text-primary)]">{inspectOrder.facilityAddress}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Trade Category</span>
+                    <span className="font-semibold text-[var(--text-primary)]">{inspectOrder.category}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[var(--text-muted)] block text-[11px]">Physical Arrival SLA</span>
-                  <span className="font-semibold text-[var(--text-primary)]">
-                    {inspectOrder.slaDeadline ? (
-                      <span className="font-mono">
-                        {new Date(inspectOrder.slaDeadline).toLocaleTimeString()} ({inspectOrder.coveragePlan === "247-priority" ? "20m Rapid SLA" : "40m Standard SLA"})
-                      </span>
-                    ) : (
-                      <span className="text-amber-700 dark:text-amber-400">
-                        {inspectOrder.coveragePlan === "8hr" ? "Plan A (Window: 08:00–17:00, No Arrival SLA)" : "Plan D (Custom Negotiated Terms)"}
-                      </span>
+
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--border)]">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Equipment Asset</span>
+                    <span className="font-semibold text-[var(--text-primary)]">{inspectOrder.assetName}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Arrival Target SLA</span>
+                    <span className="font-semibold text-[var(--text-primary)]">
+                      {inspectOrder.slaDeadline ? (
+                        <span className="font-mono">
+                          {new Date(inspectOrder.slaDeadline).toLocaleTimeString()} ({inspectOrder.coveragePlan === "247-priority" ? "20m Rapid" : "40m Standard"})
+                        </span>
+                      ) : (
+                        <span className="text-amber-700 dark:text-amber-400">
+                          {inspectOrder.coveragePlan === "8hr" ? "Plan A (08:00–17:00, No Arrival SLA)" : "Plan D (Negotiated)"}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-[var(--border)]">
+                  <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Problem Summary</span>
+                  <p className="font-medium text-[var(--text-primary)] mt-0.5">{inspectOrder.problemSummary}</p>
+                </div>
+
+                {inspectOrder.workNotes && (
+                  <div className="pt-2 border-t border-[var(--border)]">
+                    <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Dispatch Notes</span>
+                    <p className="text-[11px] text-[var(--text-primary)] mt-0.5">{inspectOrder.workNotes}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Assigned Technician Profile Strip */}
+              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] space-y-1">
+                <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
+                  Dispatched Technician
+                </span>
+                {inspectOrder.assignedTechnicianName ? (
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs flex items-center justify-center border border-emerald-500/20">
+                        {inspectOrder.assignedTechnicianName.substring(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-xs text-[var(--text-primary)]">
+                          {inspectOrder.assignedTechnicianName}
+                        </div>
+                        <div className="text-[10px] text-[var(--text-muted)]">Verified Field Lead</div>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                      Dispatched
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-amber-600 dark:text-amber-400 font-semibold text-xs">
+                      No technician currently assigned
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        const wo = inspectOrder;
+                        handleCloseModals();
+                        handleOpenAssign(wo, e);
+                      }}
+                      className="px-2.5 py-1 rounded text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs"
+                    >
+                      Assign Now
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Linear Status Transition Controls */}
+              {inspectOrder.status !== "COMPLETED" && (
+                <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2">
+                  <div className="text-xs font-semibold text-[var(--text-primary)]">Advance Status:</div>
+                  <div className="flex flex-wrap gap-2">
+                    {VALID_WORK_ORDER_TRANSITIONS[inspectOrder.status]?.includes("TRAVELLING") && (
+                      <button
+                        type="button"
+                        onClick={() => handleTransitionStatus("TRAVELLING")}
+                        disabled={isUpdatingStatus}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 active:scale-95 transition-all disabled:opacity-50"
+                      >
+                        {isUpdatingStatus ? "Updating..." : "Mark In Transit (TRAVELLING)"}
+                      </button>
                     )}
-                  </span>
-                </div>
-              </div>
-
-              <div className="pt-1 border-t border-[var(--border)]">
-                <span className="text-[var(--text-muted)] block text-[11px]">Problem Summary</span>
-                <p className="font-medium text-[var(--text-primary)]">{inspectOrder.problemSummary}</p>
-              </div>
-
-              {inspectOrder.workNotes && (
-                <div className="pt-1 border-t border-[var(--border)] bg-[var(--bg-surface-2)] p-2 rounded">
-                  <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Dispatch Notes</span>
-                  <p className="text-[11px] text-[var(--text-primary)]">{inspectOrder.workNotes}</p>
+                    {VALID_WORK_ORDER_TRANSITIONS[inspectOrder.status]?.includes("ON_SITE") && (
+                      <button
+                        type="button"
+                        onClick={() => handleTransitionStatus("ON_SITE")}
+                        disabled={isUpdatingStatus}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-50"
+                      >
+                        {isUpdatingStatus ? "Updating..." : "Mark Arrived (ON_SITE)"}
+                      </button>
+                    )}
+                    {VALID_WORK_ORDER_TRANSITIONS[inspectOrder.status]?.includes("COMPLETED") && (
+                      <button
+                        type="button"
+                        onClick={() => handleTransitionStatus("COMPLETED")}
+                        disabled={isUpdatingStatus}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all disabled:opacity-50"
+                      >
+                        {isUpdatingStatus ? "Updating..." : "Mark Sign-off Complete (COMPLETED)"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Lifecycle Status Transition Controls */}
-            {inspectOrder.status !== "COMPLETED" && (
-              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2">
-                <div className="text-xs font-semibold text-[var(--text-primary)]">Update Field Status:</div>
-                <div className="flex flex-wrap gap-2">
-                  {VALID_WORK_ORDER_TRANSITIONS[inspectOrder.status]?.includes("TRAVELLING") && (
-                    <button
-                      type="button"
-                      onClick={() => handleTransitionStatus("TRAVELLING")}
-                      disabled={isUpdatingStatus}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 active:scale-95 transition-all disabled:opacity-50"
-                    >
-                      {isUpdatingStatus ? "Updating..." : "Mark In Transit (TRAVELLING)"}
-                    </button>
-                  )}
-                  {VALID_WORK_ORDER_TRANSITIONS[inspectOrder.status]?.includes("ON_SITE") && (
-                    <button
-                      type="button"
-                      onClick={() => handleTransitionStatus("ON_SITE")}
-                      disabled={isUpdatingStatus}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-50"
-                    >
-                      {isUpdatingStatus ? "Updating..." : "Mark Arrived (ON_SITE)"}
-                    </button>
-                  )}
-                  {VALID_WORK_ORDER_TRANSITIONS[inspectOrder.status]?.includes("COMPLETED") && (
-                    <button
-                      type="button"
-                      onClick={() => handleTransitionStatus("COMPLETED")}
-                      disabled={isUpdatingStatus}
-                      className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all disabled:opacity-50"
-                    >
-                      {isUpdatingStatus ? "Updating..." : "Mark Sign-off Complete (COMPLETED)"}
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Modal Actions */}
-            <div className="pt-3 border-t border-[var(--border)] flex items-center justify-between">
+            {/* Drawer Footer Actions */}
+            <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-surface)] flex items-center justify-between">
               <div>
                 {inspectOrder.status === "UNASSIGNED" && (
                   <button
@@ -695,7 +784,7 @@ export const WorkOrders: FC = () => {
                       handleCloseModals();
                       handleOpenAssign(wo, e);
                     }}
-                    className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-xs"
                   >
                     Match & Assign Technician
                   </button>
@@ -706,7 +795,7 @@ export const WorkOrders: FC = () => {
                 onClick={handleCloseModals}
                 className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
-                Close
+                Close Drawer
               </button>
             </div>
           </div>

@@ -1,16 +1,14 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Layout } from "../../components/Layout";
-import { MetricCard } from "../../components/MetricCard";
 import {
   ClockIcon,
-  ShieldCheckIcon,
-  BuildingIcon,
-  RadioIcon,
   SearchIcon,
   ChevronDownIcon,
   CalendarIcon,
   CheckCircleIcon,
   MapPinIcon,
+  RadioIcon,
+  ChevronRightIcon,
 } from "../../components/Icons";
 
 interface ShiftRosterItem {
@@ -119,28 +117,68 @@ export function DispatcherSchedule() {
   const [selectedBranch, setSelectedBranch] = useState<string>("ALL");
   const [selectedShift, setSelectedShift] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [dayOffset, setDayOffset] = useState(0);
 
-  const filteredRoster = ROSTER_SCHEDULE.filter((item) => {
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const match =
-        item.technicianName.toLowerCase().includes(q) ||
-        item.technicianId.toLowerCase().includes(q) ||
-        item.primaryTrade.toLowerCase().includes(q) ||
-        item.branch.toLowerCase().includes(q);
-      if (!match) return false;
-    }
+  const currentDateDisplay = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + dayOffset);
+    return {
+      weekday: d.toLocaleDateString("en-US", { weekday: "short" }),
+      date: d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      isToday: dayOffset === 0,
+    };
+  }, [dayOffset]);
 
-    if (selectedBranch !== "ALL" && !item.branch.includes(selectedBranch)) {
-      return false;
-    }
+  const filteredRoster = useMemo(() => {
+    return ROSTER_SCHEDULE.filter((item) => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const match =
+          item.technicianName.toLowerCase().includes(q) ||
+          item.technicianId.toLowerCase().includes(q) ||
+          item.primaryTrade.toLowerCase().includes(q) ||
+          item.branch.toLowerCase().includes(q);
+        if (!match) return false;
+      }
 
-    if (selectedShift !== "ALL" && !item.shift.includes(selectedShift)) {
-      return false;
-    }
+      if (selectedBranch !== "ALL" && !item.branch.includes(selectedBranch)) {
+        return false;
+      }
 
-    return true;
-  });
+      if (selectedShift !== "ALL" && !item.shift.includes(selectedShift)) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [searchQuery, selectedBranch, selectedShift]);
+
+  const shiftLanes = [
+    {
+      id: "Morning",
+      label: "Morning Shift",
+      window: "08:00 - 16:00",
+      accent: "border-l-4 border-l-emerald-500",
+      badge: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+      items: filteredRoster.filter((r) => r.shift.startsWith("Morning")),
+    },
+    {
+      id: "Evening",
+      label: "Evening Shift",
+      window: "16:00 - 00:00",
+      accent: "border-l-4 border-l-amber-500",
+      badge: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
+      items: filteredRoster.filter((r) => r.shift.startsWith("Evening")),
+    },
+    {
+      id: "Night",
+      label: "Night Standby",
+      window: "00:00 - 08:00",
+      accent: "border-l-4 border-l-indigo-500",
+      badge: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
+      items: filteredRoster.filter((r) => r.shift.startsWith("Night")),
+    },
+  ];
 
   const getStatusBadge = (status: ShiftRosterItem["status"]) => {
     switch (status) {
@@ -149,77 +187,80 @@ export function DispatcherSchedule() {
       case "STANDBY":
         return "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20";
       case "ON_LEAVE":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20";
+        return "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20";
     }
   };
 
   return (
     <Layout
-      title="Dispatcher Shift Schedule"
-      subtitle="Workforce Shift Roster & 24/7 Regional Hub Coverage Matrix"
+      title="Technician Schedule"
       action={
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-secondary)] font-semibold">
-            Today: {new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setDayOffset((prev) => prev - 1)}
+            aria-label="Previous Day"
+            className="p-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          >
+            <ChevronRightIcon size={14} className="rotate-180" />
+          </button>
+          <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-primary)] font-semibold">
+            {currentDateDisplay.weekday}, {currentDateDisplay.date} {currentDateDisplay.isToday ? "(Today)" : ""}
           </span>
+          <button
+            type="button"
+            onClick={() => setDayOffset((prev) => prev + 1)}
+            aria-label="Next Day"
+            className="p-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+          >
+            <ChevronRightIcon size={14} />
+          </button>
+          {dayOffset !== 0 && (
+            <button
+              type="button"
+              onClick={() => setDayOffset(0)}
+              className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold underline px-1"
+            >
+              Today
+            </button>
+          )}
         </div>
       }
     >
-      <div className="space-y-4">
-        {/* ── Shift Coverage Metric Cards ─────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          <MetricCard
-            label="Active On Duty"
-            value="3 Shift Leads"
-            subtext="Morning Operations (08:00 - 16:00)"
-            icon={RadioIcon}
-            trend={{ direction: "up", label: "Full Coverage" }}
-          />
-
-          <MetricCard
-            label="Standby Coverage"
-            value="5 Ready"
-            subtext="Evening & Night SLA Responders"
-            icon={ClockIcon}
-            trend={{ direction: "neutral", label: "24/7 Active" }}
-          />
-
-          <MetricCard
-            label="Regional Hub Health"
-            value="3 / 3 Hubs"
-            subtext="EPZ · Gazipur · Tejgaon Active"
-            icon={BuildingIcon}
-            trend={{ direction: "neutral", label: "100% Hub Uptime" }}
-          />
-        </div>
-
-        {/* ── Regional Hub Coverage Strip ─────────────────────────────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-xs flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Hub 1</span>
-              <h4 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)]">EPZ Industrial Core</h4>
-              <p className="text-[11px] text-[var(--text-muted)] mt-0.5">3 Technicians · Electrical & Facility</p>
-            </div>
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" title="Active Hub" />
+      <div className="space-y-3.5">
+        {/* ── Operational Summary & Hub Strip ────────────────────────────── */}
+        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] flex flex-wrap items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-[var(--text-primary)]">
+              Shift Roster: 9 Technicians Assigned
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">·</span>
+            <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium">
+              3 On Duty
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">·</span>
+            <span className="text-[11px] text-blue-700 dark:text-blue-400 font-medium">
+              5 Standby
+            </span>
+            <span className="text-[11px] text-[var(--text-muted)]">·</span>
+            <span className="text-[11px] text-purple-700 dark:text-purple-400 font-medium">
+              1 On Leave
+            </span>
           </div>
 
-          <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-xs flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Hub 2</span>
-              <h4 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)]">Gazipur Industrial Zone</h4>
-              <p className="text-[11px] text-[var(--text-muted)] mt-0.5">3 Technicians · HVAC & Plumbing</p>
-            </div>
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" title="Active Hub" />
-          </div>
-
-          <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-xs flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Hub 3</span>
-              <h4 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)]">Tejgaon Commercial Core</h4>
-              <p className="text-[11px] text-[var(--text-muted)] mt-0.5">3 Technicians · CCTV & IT Systems</p>
-            </div>
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" title="Active Hub" />
+          <div className="flex items-center gap-2 text-[11px]">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              EPZ Core (3)
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Gazipur Zone (3)
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Tejgaon Hub (3)
+            </span>
           </div>
         </div>
 
@@ -235,7 +276,7 @@ export function DispatcherSchedule() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by technician name, ID, or trade..."
+              placeholder="Search by technician name, ID, trade or hub..."
               aria-label="Search schedule"
               className="w-full text-xs pl-9 pr-8 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
@@ -268,7 +309,7 @@ export function DispatcherSchedule() {
               aria-label="Filter by shift window"
               className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
             >
-              <option value="ALL">All Shift Windows</option>
+              <option value="ALL">All Shifts (3)</option>
               <option value="Morning">Morning (08:00 - 16:00)</option>
               <option value="Evening">Evening (16:00 - 00:00)</option>
               <option value="Night">Night Standby (00:00 - 08:00)</option>
@@ -280,79 +321,101 @@ export function DispatcherSchedule() {
           </div>
         </div>
 
-        {/* ── Shift Roster Table ─────────────────────────────────────────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
-          <div className="w-full max-w-full overflow-x-auto scrollbar-thin">
-            <table className="w-full min-w-[900px] text-left text-xs sm:text-[13px] border-collapse table-fixed">
-              <colgroup>
-                <col className="w-[180px]" />
-                <col className="w-[170px]" />
-                <col className="w-[170px]" />
-                <col className="w-[180px]" />
-                <col className="w-[100px]" />
-                <col className="w-[160px]" />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
-                  <th className="py-2.5 px-3">Technician</th>
-                  <th className="py-2.5 px-3">Branch Hub</th>
-                  <th className="py-2.5 px-3">Shift Window</th>
-                  <th className="py-2.5 px-3">Trade Coverage</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3">Current Assignment</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {filteredRoster.map((item) => (
-                  <tr key={item.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                    <td className="py-2.5 px-3">
-                      <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-xs font-bold flex items-center justify-center shrink-0">
-                          {item.technicianName.substring(0, 2).toUpperCase()}
-                        </span>
-                        <div className="min-w-0">
-                          <span className="font-semibold text-[var(--text-primary)] text-xs sm:text-[13px] block truncate">
-                            {item.technicianName}
+        {/* ── Shift Lanes Timeline View ──────────────────────────────────── */}
+        <div className="space-y-3.5">
+          {shiftLanes.map((lane) => {
+            if (selectedShift !== "ALL" && !lane.id.includes(selectedShift)) {
+              return null;
+            }
+
+            return (
+              <div
+                key={lane.id}
+                className={`rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-xs ${lane.accent}`}
+              >
+                {/* Lane Header */}
+                <div className="px-4 py-2.5 bg-[var(--bg-surface-2)] border-b border-[var(--border)] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-xs text-[var(--text-primary)]">{lane.label}</span>
+                    <span className="font-mono text-[11px] text-[var(--text-muted)]">({lane.window})</span>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${lane.badge}`}>
+                    {lane.items.length} Techs
+                  </span>
+                </div>
+
+                {/* Technician Shift Rows */}
+                {lane.items.length === 0 ? (
+                  <div className="p-4 text-center text-xs text-[var(--text-muted)]">
+                    No technicians scheduled in this shift matching filters.
+                  </div>
+                ) : (
+                  <div className="divide-y divide-[var(--border)]">
+                    {lane.items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 hover:bg-[var(--bg-surface-2)] transition-colors text-xs"
+                      >
+                        {/* Technician ID & Name */}
+                        <div className="flex items-center gap-2.5 min-w-[200px]">
+                          <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 text-xs font-bold flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+                            {item.technicianName.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <span className="font-semibold text-xs text-[var(--text-primary)] block">
+                              {item.technicianName}
+                            </span>
+                            <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                              {item.technicianId} · {item.branch}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Trade Competencies */}
+                        <div className="min-w-[180px]">
+                          <span className="font-medium text-xs text-[var(--text-primary)] block truncate" title={item.primaryTrade}>
+                            {item.primaryTrade}
                           </span>
-                          <span className="text-xs text-[var(--text-muted)] font-mono">{item.technicianId}</span>
+                          {item.secondaryTrade && (
+                            <span className="text-[10px] text-[var(--text-muted)] block truncate">
+                              + {item.secondaryTrade}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Status */}
+                        <div>
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getStatusBadge(
+                              item.status
+                            )}`}
+                          >
+                            {item.status.replace("_", " ")}
+                          </span>
+                        </div>
+
+                        {/* Current Assignment / Dispatch Task */}
+                        <div className="min-w-[190px] text-right">
+                          {item.activeJob ? (
+                            <span
+                              className="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 block truncate"
+                              title={item.activeJob}
+                            >
+                              {item.activeJob}
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-[var(--text-muted)] font-mono">
+                              {item.status === "ON_LEAVE" ? "Off Duty (Leave)" : "Ready / Standby"}
+                            </span>
+                          )}
                         </div>
                       </div>
-                    </td>
-                    <td className="py-2.5 px-3 truncate" title={item.branch}>
-                      <span className="text-xs font-medium text-[var(--text-secondary)]">{item.branch}</span>
-                    </td>
-                    <td className="py-2.5 px-3 whitespace-nowrap font-mono text-xs text-[var(--text-secondary)]">
-                      {item.shift}
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <span className="font-medium text-xs text-[var(--text-primary)] block truncate" title={item.primaryTrade}>
-                        {item.primaryTrade}
-                      </span>
-                      {item.secondaryTrade && (
-                        <span className="text-[11px] text-[var(--text-muted)] block truncate" title={`Secondary: ${item.secondaryTrade}`}>
-                          + {item.secondaryTrade}
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-2.5 px-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${getStatusBadge(item.status)}`}>
-                        {item.status.replace("_", " ")}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3">
-                      {item.activeJob ? (
-                        <span className="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 block truncate" title={item.activeJob}>
-                          {item.activeJob}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-[var(--text-muted)] font-mono">Standby / Unallocated</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </Layout>
