@@ -1225,7 +1225,7 @@ export function LandingPage() {
                 </div>
 
                 <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
-                  {["Business Hours (08:00 - 16:00)", "Scheduled daytime repairs", "All 7 trades covered"].map((b) => (
+                  {["5 included visits / cycle", "Business Hours (08:00 - 16:00)", "Scheduled daytime repairs", "All 7 trades covered"].map((b) => (
                     <li key={b} className="flex items-center gap-2">
                       <CheckIcon className="text-emerald-500" />{b}
                     </li>
@@ -1273,7 +1273,7 @@ export function LandingPage() {
                 </div>
 
                 <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
-                  {["Round-the-clock coverage", "40-min physical arrival SLA", "Digital repair logs"].map((b) => (
+                  {["10 included visits / cycle", "Round-the-clock coverage", "40-min physical arrival SLA", "Digital repair logs"].map((b) => (
                     <li key={b} className="flex items-center gap-2">
                       <CheckIcon className="text-emerald-500" />{b}
                     </li>
@@ -1326,8 +1326,8 @@ export function LandingPage() {
                 </div>
 
                 <ul className="space-y-1.5 text-xs">
-                  {["Critical commercial coverage", "20-min rapid arrival (2x faster)", "Top emergency priority"].map((b, i) => (
-                    <li key={b} className={`flex items-center gap-2 ${i === 0 ? "font-bold text-slate-900 dark:text-white" : "text-slate-800 dark:text-slate-200"}`}>
+                  {["15 included visits / cycle", "Critical commercial coverage", "20-min rapid arrival (2x faster)", "Top emergency priority"].map((b, i) => (
+                    <li key={b} className={`flex items-center gap-2 ${i === 0 || i === 1 ? "font-bold text-slate-900 dark:text-white" : "text-slate-800 dark:text-slate-200"}`}>
                       <CheckIcon className="text-[#10b981]" />{b}
                     </li>
                   ))}
@@ -1375,7 +1375,7 @@ export function LandingPage() {
                 </div>
 
                 <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
-                  {["Tailored enterprise shifts", "Negotiated SLAs", "Multi-facility scaling"].map((b) => (
+                  {["Negotiated visit allowance", "Tailored enterprise shifts", "Negotiated SLAs", "Multi-facility scaling"].map((b) => (
                     <li key={b} className="flex items-center gap-2">
                       <CheckIcon className="text-emerald-500" />{b}
                     </li>

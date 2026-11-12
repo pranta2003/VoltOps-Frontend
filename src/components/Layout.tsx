@@ -76,7 +76,6 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
         return [
           { label: "My Dashboard", path: "/customer", icon: BuildingIcon },
           { label: "New Request", path: "/customer/new-request", icon: AlertTriangleIcon },
-          { label: "Request History", path: "/customer/history", icon: ClockIcon },
           { label: "Facility Assets", path: "/customer/assets", icon: WrenchIcon },
           { label: "Invoices & Billing", path: "/customer/invoices", icon: CheckCircleIcon },
         ];

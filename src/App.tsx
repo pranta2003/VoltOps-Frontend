@@ -192,7 +192,7 @@ export default function App() {
                 path="/customer/history"
                 element={
                   <ProtectedRoute allowedRoles={["CUSTOMER"]}>
-                    <RequestHistory />
+                    <Navigate to="/customer?view=all" replace />
                   </ProtectedRoute>
                 }
               />

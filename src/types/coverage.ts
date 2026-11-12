@@ -13,6 +13,7 @@ export interface CoveragePlanDefinition {
   code: string;
   dailyWindow: string;
   physicalArrivalSlaMinutes: number | null; // null for 8hr and custom
+  includedVisits: number | null; // included visits per billing cycle (null for custom negotiated)
   slaLabel: string;
   description: string;
   isGuaranteedSla: boolean;
@@ -25,6 +26,7 @@ export const APPROVED_COVERAGE_PLANS: Record<CoveragePlanId, CoveragePlanDefinit
     code: "Plan A",
     dailyWindow: "08:00 – 16:00 Business Hours",
     physicalArrivalSlaMinutes: null,
+    includedVisits: 5,
     slaLabel: "Daily Window Only (No Physical Arrival SLA)",
     description: "Scheduled daytime repairs within business hours. No guaranteed physical arrival SLA.",
     isGuaranteedSla: false,
@@ -35,6 +37,7 @@ export const APPROVED_COVERAGE_PLANS: Record<CoveragePlanId, CoveragePlanDefinit
     code: "Plan B",
     dailyWindow: "24/7 Facility Support",
     physicalArrivalSlaMinutes: 40,
+    includedVisits: 10,
     slaLabel: "40-Minute Physical Arrival SLA",
     description: "Continuous commercial facility protection with a 40-minute guaranteed physical arrival SLA.",
     isGuaranteedSla: true,
@@ -45,6 +48,7 @@ export const APPROVED_COVERAGE_PLANS: Record<CoveragePlanId, CoveragePlanDefinit
     code: "Plan C",
     dailyWindow: "24/7 Mission-Critical Support",
     physicalArrivalSlaMinutes: 20,
+    includedVisits: 15,
     slaLabel: "20-Minute Rapid Arrival SLA",
     description: "High-priority commercial uptime with a 20-minute rapid on-site technician arrival SLA.",
     isGuaranteedSla: true,
@@ -55,6 +59,7 @@ export const APPROVED_COVERAGE_PLANS: Record<CoveragePlanId, CoveragePlanDefinit
     code: "Plan D",
     dailyWindow: "Custom Negotiated Schedule",
     physicalArrivalSlaMinutes: null,
+    includedVisits: null,
     slaLabel: "Negotiated Terms (No Default SLA)",
     description: "Tailored enterprise SLA across multi-site facilities. No invented default price or arrival SLA.",
     isGuaranteedSla: false,

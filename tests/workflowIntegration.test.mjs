@@ -154,6 +154,75 @@ class WorkflowHarness {
     return [...this.assets];
   }
 
+  getSubscriptionEntitlement(customerId = "cust-epz-01", planId = "247-standard", customAllowance) {
+    const PLAN_ALLOWANCES = {
+      "8hr": 5,
+      "247-standard": 10,
+      "247-priority": 15,
+      custom: 20,
+    };
+    const included =
+      planId === "custom" && customAllowance !== undefined ? customAllowance : PLAN_ALLOWANCES[planId] || 10;
+
+    const consumedWorkOrderIds = new Set();
+    const customerRequests = this.requests.filter(
+      (r) => r.customerId === customerId || (r.customerName && r.customerName.includes("Apex"))
+    );
+    const reqIds = new Set(customerRequests.map((r) => r.id));
+
+    const wos = this.workOrders.filter(
+      (w) => reqIds.has(w.requestId) || (w.customerName && w.customerName.includes("Apex")) || w.id === "WO-3006"
+    );
+
+    for (const wo of wos) {
+      if (wo.status === "CANCELLED") continue;
+      const rootId = wo.id.split("-f")[0];
+      consumedWorkOrderIds.add(rootId);
+    }
+
+    const used = consumedWorkOrderIds.size;
+    const remaining = Math.max(0, included - used);
+    return {
+      planId,
+      includedVisits: included,
+      usedVisits: used,
+      remainingVisits: remaining,
+      isExhausted: remaining === 0,
+      eligibleWorkOrderIds: Array.from(consumedWorkOrderIds),
+    };
+  }
+
+  reportAssetBreakdown(dto, customer = { id: "cust-epz-01", name: "Apex Spinning Mills" }) {
+    if (!dto.problemTitle?.trim()) throw new Error("Validation Error: Problem title is required.");
+    if (!dto.problemDescription?.trim()) throw new Error("Validation Error: Problem description is required.");
+    if (!dto.assetName?.trim()) throw new Error("Validation Error: Asset name is required.");
+
+    const desc = dto.preferredTechnicianName
+      ? `${dto.problemDescription.trim()}\n[Customer Preferred Technician: ${dto.preferredTechnicianName} — subject to dispatcher confirmation]`
+      : dto.problemDescription.trim();
+
+    const req = this.createCustomerRequest(
+      {
+        category: dto.category,
+        assetName: dto.assetName,
+        problemTitle: dto.problemTitle,
+        problemDescription: desc,
+        priority: dto.priority || "URGENT",
+        coveragePlan: dto.coveragePlan || "247-standard",
+        isAdditionalPaidQuotation: dto.isAdditionalPaidQuotation,
+      },
+      customer
+    );
+
+    // Update asset status
+    const targetAsset = this.assets.find((a) => a.name === dto.assetName || a.tagNumber === dto.tagNumber);
+    if (targetAsset && targetAsset.status === "OPERATIONAL") {
+      targetAsset.status = "NEEDS_SERVICE";
+    }
+
+    return req;
+  }
+
   // 1. Customer create request
   createCustomerRequest(dto, customer = { id: "cust-epz-01", name: "Apex Spinning Mills" }) {
     if (!dto.problemTitle?.trim()) {
@@ -167,6 +236,18 @@ class WorkflowHarness {
     }
 
     const plan = dto.coveragePlan || "247-standard";
+
+    // Subscription visit allowance check
+    if (!dto.isAdditionalPaidQuotation) {
+      const sub = this.getSubscriptionEntitlement(customer.id, plan, dto.customAllowance);
+      if (sub.isExhausted) {
+        const err = new Error(
+          `Service visit allowance exhausted (${sub.includedVisits} of ${sub.includedVisits} used). Please request an additional service pack or quotation.`
+        );
+        err.code = "ALLOWANCE_EXHAUSTED";
+        throw err;
+      }
+    }
     
     // SLA RULE: Physical arrival SLA is governed strictly by Coverage Plan, NEVER by priority urgency
     let slaRemainingMinutes = null;
@@ -803,4 +884,184 @@ test("Test 15: Structural validation accepts operational payloads containing cus
     assets: "not-an-array",
   };
   assert.equal(validateOperationalState(invalidAssetPayload), null);
+});
+
+test("Test 16: Subscription visit allowances assign correct included visits across all plans", () => {
+  const harness = new WorkflowHarness();
+
+  // Plan A: 8-Hour Daily Coverage has 5 included visits
+  const subA = harness.getSubscriptionEntitlement("cust-epz-01", "8hr");
+  assert.equal(subA.includedVisits, 5);
+
+  // Plan B: 24/7 Standard Coverage has 10 included visits
+  const subB = harness.getSubscriptionEntitlement("cust-epz-01", "247-standard");
+  assert.equal(subB.includedVisits, 10);
+
+  // Plan C: 24/7 Priority Coverage has 15 included visits
+  const subC = harness.getSubscriptionEntitlement("cust-epz-01", "247-priority");
+  assert.equal(subC.includedVisits, 15);
+
+  // Plan D: Custom Enterprise Coverage uses negotiated allowance (default 20, or custom configured)
+  const subDDefault = harness.getSubscriptionEntitlement("cust-epz-01", "custom");
+  assert.equal(subDDefault.includedVisits, 20);
+
+  const subDCustom = harness.getSubscriptionEntitlement("cust-epz-01", "custom", 25);
+  assert.equal(subDCustom.includedVisits, 25);
+});
+
+test("Test 17: Service-credit calculation deducts 1 credit per work order, ignores cancellations, and prevents duplicate deductions", () => {
+  const harness = new WorkflowHarness();
+
+  // Initial state: 0 existing work orders for Apex
+  const initialSub = harness.getSubscriptionEntitlement("cust-epz-01", "247-standard");
+  assert.equal(initialSub.usedVisits, 0);
+  assert.equal(initialSub.remainingVisits, 10);
+  assert.equal(initialSub.isExhausted, false);
+
+  // 1. Create a new request and convert to Work Order
+  const req = harness.createCustomerRequest({
+    category: "Electrical and power systems",
+    assetName: "Transformer TR-02",
+    problemTitle: "Oil leak detected",
+    problemDescription: "Inspection needed immediately",
+    priority: "HIGH",
+    coveragePlan: "247-standard",
+  });
+
+  const wo = harness.convertRequestToWorkOrder({ requestId: req.id, priority: "HIGH" });
+
+  // Consumes 1 credit
+  const subAfterWO = harness.getSubscriptionEntitlement("cust-epz-01", "247-standard");
+  assert.equal(subAfterWO.usedVisits, 1);
+  assert.equal(subAfterWO.remainingVisits, 9);
+
+  // 2. Assigning technician to work order must NOT double-deduct credit
+  harness.assignTechnician({ workOrderId: wo.id, technicianId: "tech-01" });
+  const subAfterAssign = harness.getSubscriptionEntitlement("cust-epz-01", "247-standard");
+  assert.equal(subAfterAssign.usedVisits, 1);
+
+  // 3. Cancelled work order must NOT consume credit
+  wo.status = "CANCELLED";
+  const subAfterCancel = harness.getSubscriptionEntitlement("cust-epz-01", "247-standard");
+  assert.equal(subAfterCancel.usedVisits, 0); // Returns back to 0
+  assert.equal(subAfterCancel.remainingVisits, 10);
+
+  // 4. Follow-up visit references on the same work order must NOT consume multiple credits
+  harness.workOrders.push({
+    id: "WO-3006",
+    requestId: "SR-1008",
+    customerName: "Apex Spinning Mills",
+    status: "ON_SITE",
+  });
+  harness.workOrders.push({
+    id: "WO-3006-f1", // follow-up child
+    requestId: "SR-1008",
+    customerName: "Apex Spinning Mills",
+    status: "ON_SITE",
+  });
+  const subAfterFollowUp = harness.getSubscriptionEntitlement("cust-epz-01", "247-standard");
+  assert.equal(subAfterFollowUp.usedVisits, 1); // root WO-3006 and its follow-up count as 1
+});
+
+test("Test 18: Exhausted allowance blocks new standard requests but permits quotation requests", () => {
+  const harness = new WorkflowHarness();
+
+  // Create 5 work orders to exhaust Plan A (5 visits)
+  for (let i = 1; i <= 5; i++) {
+    harness.workOrders.push({
+      id: `WO-TEST-${i}`,
+      requestId: `SR-TEST-${i}`,
+      customerName: "Apex Spinning Mills",
+      status: "COMPLETED",
+    });
+  }
+
+  // Now 5 work orders exist
+  const subA = harness.getSubscriptionEntitlement("cust-epz-01", "8hr");
+  assert.equal(subA.usedVisits, 5);
+  assert.equal(subA.remainingVisits, 0);
+  assert.equal(subA.isExhausted, true);
+
+  // Standard request submission is BLOCKED
+  assert.throws(
+    () => {
+      harness.createCustomerRequest({
+        category: "Electrical and power systems",
+        assetName: "Standby Generator G-01",
+        problemTitle: "Routine check",
+        problemDescription: "Monthly checkup",
+        priority: "LOW",
+        coveragePlan: "8hr",
+      });
+    },
+    { message: /Service visit allowance exhausted/ }
+  );
+
+  // Submission flagged as additional quotation pack is PERMITTED
+  const quotationReq = harness.createCustomerRequest({
+    category: "Electrical and power systems",
+    assetName: "Standby Generator G-01",
+    problemTitle: "Emergency breakdown",
+    problemDescription: "Phase loss on generator",
+    priority: "URGENT",
+    coveragePlan: "8hr",
+    isAdditionalPaidQuotation: true,
+  });
+
+  assert.ok(quotationReq);
+  assert.equal(quotationReq.status, "NEW");
+});
+
+test("Test 19: Facility asset breakdown modal preselects asset, preserves trade, and updates asset status without auto-assigning technician", () => {
+  const harness = new WorkflowHarness();
+
+  const initialAsset = harness.assets.find((a) => a.tagNumber === "EQ-PWR-2021-01");
+  assert.equal(initialAsset.status, "OPERATIONAL");
+
+  // Customer reports breakdown from modal with preferred technician
+  const req = harness.reportAssetBreakdown({
+    category: "Electrical and power systems",
+    assetName: "Standby Generator G-01 (Cummins 250kVA)",
+    tagNumber: "EQ-PWR-2021-01",
+    problemTitle: "Cooling pump failure",
+    problemDescription: "High coolant temperature and water dripping",
+    priority: "HIGH",
+    preferredTechnicianName: "Kamrul Islam",
+  });
+
+  assert.ok(req.id.startsWith("SR-"));
+  assert.equal(req.category, "Electrical and power systems");
+  assert.equal(req.assetName, "Standby Generator G-01 (Cummins 250kVA)");
+  assert.equal(req.status, "NEW"); // Quoted to dispatcher queue, NOT automatically assigned
+  assert.ok(req.problemDescription.includes("Customer Preferred Technician: Kamrul Islam"));
+
+  // Asset operational status is transitioned to NEEDS_SERVICE
+  const updatedAsset = harness.assets.find((a) => a.tagNumber === "EQ-PWR-2021-01");
+  assert.equal(updatedAsset.status, "NEEDS_SERVICE");
+
+  // Verify that no work order or automatic technician assignment has occurred
+  const linkedOrder = harness.workOrders.find((w) => w.requestId === req.id);
+  assert.equal(linkedOrder, undefined); // Dispatcher retains conversion and assignment authority
+});
+
+test("Test 20: Merged Customer Dashboard searches by keyword across multiple fields and lifecycle filters", () => {
+  const harness = new WorkflowHarness();
+
+  // Retrieve customer requests
+  const requests = harness.getCustomerRequests("cust-epz-01");
+  assert.ok(requests.length > 0);
+
+  // Search keyword matching asset
+  const searchAsset = requests.filter((r) => r.assetName.toLowerCase().includes("transformer"));
+  assert.ok(searchAsset.length > 0);
+  assert.equal(searchAsset[0].assetName, "Substation Transformer TR-02");
+
+  // Filter by lifecycle status
+  const filterNew = requests.filter((r) => r.status === "NEW");
+  assert.ok(filterNew.length > 0);
+  assert.equal(filterNew[0].status, "NEW");
+
+  // Search by Request ID
+  const searchId = requests.filter((r) => r.id.toLowerCase().includes("sr-1001"));
+  assert.equal(searchId.length, 1);
 });

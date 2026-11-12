@@ -926,6 +926,52 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
+## Step 3 — Final Customer Portal Workflow Completion (Steps 1–5)
+- **Date**: 12 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Milestone Scope**:
+  1. **Step 1: Merge Request History into Customer Dashboard (`/customer`)**:
+     - Made `src/pages/CustomerDashboard.tsx` the single central overview for customer requests and history.
+     - Preserved KPI metrics (Active Requests, Field Dispatched, Coverage Plan) and added Service Visit Credits KPI card.
+     - Embedded full filter toolbar: ID/asset/problem search, lifecycle status filter, priority urgency filter, and trade category filter.
+     - Added view toggle (`Recent` vs `All History`) and query parameter support (`?view=all`).
+     - Removed "Request History" sidebar link in `src/components/Layout.tsx` (now 4 items: My Dashboard, New Request, Facility Assets, Invoices & Billing).
+     - Configured route redirect from `/customer/history` to `/customer?view=all` in `src/App.tsx`.
+     - Preserved `src/pages/customer/RequestHistory.tsx` as a backward-compatible wrapper.
+  2. **Step 2: Subscription Service-Credit Policies**:
+     - Created `src/services/subscriptionService.ts` encapsulating credit allowance calculation and deduction policies.
+     - Policy Rules:
+       * Plan A (8-Hour Daily): 5 visits / cycle.
+       * Plan B (24/7 Standard): 10 visits / cycle.
+       * Plan C (24/7 Priority Emergency): 15 visits / cycle.
+       * Plan D (Enterprise Custom): Negotiated custom visits (default 20).
+     - Credit Deduction Integrity:
+       * Exactly 1 credit deducted per approved work order.
+       * Multiple technicians assigned to a single work order do not double-deduct credits.
+       * Follow-up visits for the same root work order do not deduct additional credits.
+       * Cancelled work orders (`status === "CANCELLED"`) release/restore the credit.
+     - Allowance Exhaustion & Quotation Mode:
+       * When allowance is exhausted (`remainingVisits === 0`), standard request submissions are blocked (`ALLOWANCE_EXHAUSTED`).
+       * Customers can toggle "Request Additional Service Pack (Quotation Mode)" in `NewServiceRequest.tsx` or request an add-on pack via the modal on `CustomerDashboard.tsx`.
+     - Updated Landing Page (`src/pages/LandingPage.tsx`) coverage cards with included visit counts.
+  3. **Step 3: Asset-Specific Incident Reporting Modal (`FacilityAssets.tsx`)**:
+     - Replaced page redirect with an accessible in-place `ReportBreakdownModal`.
+     - Automatically preselects target equipment name, equipment tag, and trade category.
+     - Captures Problem Summary, Symptoms & Observations, and Urgency Level.
+     - Features an optional Preferred Technician dropdown with explicit customer-facing notice: *"Preference does not bypass dispatcher review. Certified tech assignment is confirmed upon review."*
+     - Submitting immediately creates a live tracking ticket (`SR-xxxx`), updates local demo state, marks the asset as `NEEDS_SERVICE`, and displays the active incident link.
+  4. **Step 4: Layout & Visual Hierarchy Polish (`FacilityAssets.tsx`)**:
+     - Fixed uniform row heights and column alignment (`Asset & Tag`, `Category`, `Location`, `Status`, `Last Service`, `Active Incident`, `Action`).
+     - Moved technical specifications into the secondary Specs modal.
+     - Verified table responsiveness and clean rendering across dark and light themes.
+  5. **Step 5: Testing, Build & Browser Automation Quality Gate**:
+     - Enhanced `tests/workflowIntegration.test.mjs` with 5 new automated integration tests (Tests 16–20) covering subscription deduction, cancellation restoration, duplicate visit protection, and allowance exhaustion blocking.
+     - Automated test suite: **55 / 55 tests passing** (100% pass rate).
+     - Production build: `tsc && vite build` built cleanly with 0 TypeScript errors and 0 bundling issues.
+     - Real browser testing with Chrome DevTools MCP verified redirect (`/customer/history` -> `/customer?view=all`), search and reset filtering, credit tracker display, modal reporting with technician preference, and mobile viewport responsiveness.
+
+---
+
 ## Next Recommended Milestone: Milestone 3 — Dispatcher Operations & Work Orders
 - Build dedicated Service Requests Queue list (`/dispatcher/requests`, Figma Frame 2).
 - Build Service Request Detail & Work Order Conversion screen (`/dispatcher/requests/:id`, Figma Frame 3).

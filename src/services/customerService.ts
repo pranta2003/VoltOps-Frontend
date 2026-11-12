@@ -16,6 +16,7 @@ import api from "../api/axios";
 import { ServiceRequest, Invoice, ServiceCategory, PriorityLevel, CoveragePlanId, CustomerAsset } from "../types";
 import { getPhysicalArrivalSlaMinutes } from "../types/coverage";
 import { operationalStore } from "./operationalStore";
+import { checkCreditEligibility, getSubscriptionEntitlement, SubscriptionEntitlement } from "./subscriptionService";
 
 export interface CreateServiceRequestDTO {
   category: ServiceCategory;
@@ -27,6 +28,9 @@ export interface CreateServiceRequestDTO {
   contactPhone?: string;
   preferredDateTime?: string;
   coveragePlan?: CoveragePlanId;
+  preferredTechnicianId?: string;
+  preferredTechnicianName?: string;
+  isAdditionalPaidQuotation?: boolean;
 }
 
 export interface CustomerApiResponse<T> {
@@ -126,13 +130,35 @@ export const customerService = {
     }
 
     const currentRequests = operationalStore.getRequests();
-    const newId = `SR-${1000 + currentRequests.length + 1}`;
-    
+    const currentWorkOrders = operationalStore.getWorkOrders();
+    const customerId = customer?.id || "cust-epz-01";
+
     // Coverage plan hierarchy: explicit DTO plan -> customer profile plan -> default standard plan
     const plan: CoveragePlanId = dto.coveragePlan || customer?.coveragePlan || "247-standard";
 
+    // Subscription Service-Credit Policy Validation:
+    // If included allowance is exhausted and request is not flagged as an additional paid quote, block submission.
+    if (!dto.isAdditionalPaidQuotation) {
+      const eligibility = checkCreditEligibility(customerId, currentRequests, currentWorkOrders, plan);
+      if (!eligibility.canSubmit) {
+        throw new CustomerApiError(eligibility.reason || "Monthly service visit allowance exhausted.", {
+          code: "ALLOWANCE_EXHAUSTED",
+        });
+      }
+    }
+
+    const newId = `SR-${1000 + currentRequests.length + 1}`;
+
     // SLA Deadline calculation: strictly governed by Coverage Plan, NEVER by priority urgency
     const slaRemainingMinutes = getPhysicalArrivalSlaMinutes(plan);
+
+    let finalDescription = dto.problemDescription.trim();
+    if (dto.preferredTechnicianName) {
+      finalDescription += `\n[Customer Preferred Technician: ${dto.preferredTechnicianName} — subject to dispatcher verification and availability]`;
+    }
+    if (dto.isAdditionalPaidQuotation) {
+      finalDescription += `\n[Additional Paid Quotation: Monthly service allowance exhausted]`;
+    }
 
     const newRequest: ServiceRequest = {
       id: newId,
@@ -144,7 +170,7 @@ export const customerService = {
       category: dto.category,
       assetName: dto.assetName,
       problemTitle: dto.problemTitle.trim(),
-      problemDescription: dto.problemDescription.trim(),
+      problemDescription: finalDescription,
       priority: dto.priority,
       status: "NEW",
       submittedAt: new Date().toISOString(),
@@ -287,5 +313,14 @@ export const customerService = {
    */
   async payInvoice(invoiceId: string): Promise<CustomerApiResponse<Invoice>> {
     return this.initiatePayment(invoiceId);
+  },
+
+  /**
+   * Get subscription entitlement and service-credit usage for customer.
+   */
+  getSubscription(customerId?: string, planId?: CoveragePlanId): SubscriptionEntitlement {
+    const requests = operationalStore.getRequests();
+    const workOrders = operationalStore.getWorkOrders();
+    return getSubscriptionEntitlement(customerId || "cust-epz-01", requests, workOrders, planId);
   },
 };

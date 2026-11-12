@@ -48,9 +48,20 @@ export function NewServiceRequest() {
   const [createdRequestId, setCreatedRequestId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Subscription Allowance state
+  const subscription = customerService.getSubscription(user?.id, coveragePlan);
+  const [requestAsQuotation, setRequestAsQuotation] = useState(false);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
+
+    if (subscription.isExhausted && !requestAsQuotation) {
+      setErrorMessage(
+        `Monthly service visit allowance exhausted (${subscription.includedVisits} of ${subscription.includedVisits} used). Please select 'Request Additional Service Pack' to submit as a quotation.`
+      );
+      return;
+    }
 
     if (!problemTitle.trim()) {
       setErrorMessage("Please enter a descriptive problem title.");
@@ -74,6 +85,7 @@ export function NewServiceRequest() {
           priority,
           preferredDateTime: `${preferredDate} ${preferredTime}`,
           coveragePlan,
+          isAdditionalPaidQuotation: requestAsQuotation,
         },
         {
           id: user?.id,
@@ -141,6 +153,35 @@ export function NewServiceRequest() {
                 >
                   Dismiss
                 </button>
+              </div>
+            )}
+
+            {/* ── Subscription Service-Credit Policy Banner ─────────────── */}
+            {subscription.isExhausted && (
+              <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-xs space-y-2">
+                <div className="flex items-start gap-2 text-amber-800 dark:text-amber-300 font-bold">
+                  <AlertTriangleIcon size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                  <span>Monthly Service Visit Allowance Exhausted ({subscription.includedVisits} of {subscription.includedVisits} Used)</span>
+                </div>
+                <p className="text-slate-700 dark:text-slate-300">
+                  Standard included service requests are locked for the remainder of this cycle (resets {subscription.billingCycleResetDate}).
+                  You can proceed by submitting an additional on-demand service quotation pack.
+                </p>
+                <div className="pt-1">
+                  {requestAsQuotation ? (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/40">
+                      <span>✓ Additional Service Pack Quotation Mode Active</span>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setRequestAsQuotation(true)}
+                      className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white transition-all shadow-sm"
+                    >
+                      Request Additional Service Pack (Quotation Mode)
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
@@ -351,10 +392,18 @@ export function NewServiceRequest() {
               </Link>
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || (subscription.isExhausted && !requestAsQuotation)}
                 className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
               >
-                <span>{isSubmitting ? "Dispatching..." : "Submit Service Request"}</span>
+                <span>
+                  {isSubmitting
+                    ? "Dispatching..."
+                    : subscription.isExhausted && !requestAsQuotation
+                    ? "Allowance Exhausted"
+                    : requestAsQuotation
+                    ? "Submit Quotation Request"
+                    : "Submit Service Request"}
+                </span>
                 <ArrowRightIcon size={14} />
               </button>
             </div>
