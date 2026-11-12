@@ -1,8 +1,12 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 import { MetricCard } from "../components/MetricCard";
 import { HorizontalBarChart } from "../components/charts/HorizontalBarChart";
+import { technicianService } from "../services/technicianService";
+import { operationalStore } from "../services/operationalStore";
+import { WorkOrder } from "../types";
 import {
   WrenchIcon,
   ClockIcon,
@@ -10,7 +14,6 @@ import {
   ArrowRightIcon,
   AlertTriangleIcon,
   MapPinIcon,
-  PhoneIcon,
   CheckCircleIcon,
 } from "../components/Icons";
 
@@ -27,46 +30,49 @@ interface TechnicianJobItem {
   scheduledTime: string;
 }
 
-const DASHBOARD_TECH_JOBS: TechnicianJobItem[] = [
-  {
-    id: "WO-2048",
-    customerName: "ABC Manufacturing Ltd",
-    facilityAddress: "Plot 42, Sector 7, Export Processing Zone, Dhaka",
-    category: "Electrical and power systems",
-    assetName: "Standby Generator G-01 (Cummins 250kVA)",
-    problemSummary: "Automatic Transfer Switch (ATS) Failure during weekly exercise cycle",
-    priority: "URGENT",
-    status: "TRAVELLING",
-    arrivalSlaRemainingMinutes: 18,
-    scheduledTime: "Immediate Dispatch",
-  },
-  {
-    id: "WO-2047",
-    customerName: "Apex Logistics Hub",
-    facilityAddress: "Building 3, Central Distribution Center, Gazipur",
-    category: "AC, HVAC, and cooling",
-    assetName: "Central Chiller Unit #2",
-    problemSummary: "Compressor low refrigerant pressure interlock tripped",
-    priority: "HIGH",
-    status: "ASSIGNED",
-    arrivalSlaRemainingMinutes: 75,
-    scheduledTime: "Today at 02:00 PM",
-  },
-  {
-    id: "WO-2042",
-    customerName: "Rahimafrooz Facility Hub",
-    facilityAddress: "Tejgaon Industrial Area, Dhaka",
-    category: "Plumbing and water systems",
-    assetName: "Booster Water Pump P-03",
-    problemSummary: "Main pressure seal replacement and flow validation",
-    priority: "MEDIUM",
-    status: "COMPLETED",
-    scheduledTime: "Yesterday",
-  },
-];
-
 export function TechnicianDashboard() {
   const { user } = useAuth();
+  const [jobs, setJobs] = useState<TechnicianJobItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  function loadTechJobs() {
+    setIsLoading(true);
+    technicianService
+      .getJobs(user?.id)
+      .then((res) => {
+        const mapped: TechnicianJobItem[] = res.data.map((w: WorkOrder) => ({
+          id: w.id,
+          customerName: w.customerName,
+          facilityAddress: w.facilityAddress,
+          category: w.category,
+          assetName: w.assetName,
+          problemSummary: w.problemSummary,
+          priority: w.priority,
+          status: (w.status === "UNASSIGNED" ? "ASSIGNED" : w.status) as any,
+          arrivalSlaRemainingMinutes: w.status === "TRAVELLING" || w.status === "ASSIGNED" ? (w.priority === "URGENT" ? 18 : 35) : undefined,
+          scheduledTime: w.status === "COMPLETED" ? "Completed Today" : "Immediate Dispatch",
+        }));
+        setJobs(mapped);
+      })
+      .catch(() => {
+        // Fallback
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    loadTechJobs();
+    const unsubscribe = operationalStore.subscribe(() => {
+      loadTechJobs();
+    });
+    return unsubscribe;
+  }, [user?.id]);
+
+  const activeJobs = jobs.filter((j) => j.status !== "COMPLETED");
+  const enRouteJob = jobs.find((j) => j.status === "TRAVELLING" || (j.status === "ASSIGNED" && j.priority === "URGENT"));
+  const completedCount = jobs.filter((j) => j.status === "COMPLETED").length;
 
   const getStatusBadge = (status: TechnicianJobItem["status"]) => {
     switch (status) {
@@ -84,11 +90,11 @@ export function TechnicianDashboard() {
   return (
     <Layout
       title="Technician Work Overview"
-      subtitle={`Welcome back, ${user?.name || "Technician"} · Electrical & Power Systems Specialist`}
+      subtitle={`Welcome back, ${user?.name || "Kamrul Islam"} · Electrical & Power Systems Specialist`}
       action={
         <Link
           to="/technician/jobs"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-brand text-white hover:bg-brand-dark transition-all shadow-sm"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
         >
           <span>Open My Jobs</span>
           <ArrowRightIcon size={12} />
@@ -101,8 +107,8 @@ export function TechnicianDashboard() {
           <Link to="/technician/jobs" className="block">
             <MetricCard
               label="Assigned Workload"
-              value="2 Active"
-              subtext="1 En Route · 1 Dispatched"
+              value={`${activeJobs.length} Active`}
+              subtext={`${jobs.filter((j) => j.status === "TRAVELLING").length} En Route · ${jobs.filter((j) => j.status === "ASSIGNED").length} Dispatched`}
               icon={WrenchIcon}
               trend={{ direction: "up", label: "Today's Schedule" }}
             />
@@ -110,11 +116,11 @@ export function TechnicianDashboard() {
 
           <MetricCard
             label="Current Transit SLA"
-            value="18 min"
-            subtext="EN ROUTE: Generator G-01 (WO-2048)"
+            value={enRouteJob ? `${enRouteJob.arrivalSlaRemainingMinutes || 20} min` : "On Standby"}
+            subtext={enRouteJob ? `EN ROUTE: ${enRouteJob.assetName} (${enRouteJob.id})` : "No Active Transit Alarm"}
             icon={ClockIcon}
-            alert={true}
-            trend={{ direction: "down", label: "Arrival Target Active" }}
+            alert={!!enRouteJob}
+            trend={{ direction: enRouteJob ? "down" : "neutral", label: enRouteJob ? "Arrival Target Active" : "Standby" }}
           />
 
           <MetricCard
@@ -127,36 +133,58 @@ export function TechnicianDashboard() {
         </div>
 
         {/* ── Active Priority Spotlight Card ────────────────────────────── */}
-        <div className="p-4 rounded-xl border border-rose-500/30 bg-rose-50/20 dark:bg-rose-950/10 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
-              <AlertTriangleIcon size={18} />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="font-mono font-bold text-xs text-rose-700 dark:text-rose-400">WO-2048</span>
-                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20">
-                  URGENT SLA
-                </span>
-                <span className="text-xs text-[var(--text-muted)] font-mono">18m remaining</span>
+        {enRouteJob ? (
+          <div className="p-4 rounded-xl border border-rose-500/30 bg-rose-50/20 dark:bg-rose-950/10 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
+                <AlertTriangleIcon size={18} />
               </div>
-              <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)] truncate mt-0.5">
-                Standby Generator G-01 — Automatic Transfer Switch Failure
-              </h3>
-              <p className="text-xs text-[var(--text-muted)] flex items-center gap-1 mt-0.5 truncate">
-                <MapPinIcon size={12} className="shrink-0 text-slate-400" />
-                <span>Plot 42, Sector 7, Export Processing Zone, Dhaka · ABC Manufacturing Ltd</span>
-              </p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-bold text-xs text-rose-700 dark:text-rose-400">{enRouteJob.id}</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20">
+                    {enRouteJob.priority} SLA
+                  </span>
+                  {enRouteJob.arrivalSlaRemainingMinutes && (
+                    <span className="text-xs text-[var(--text-muted)] font-mono">{enRouteJob.arrivalSlaRemainingMinutes}m remaining</span>
+                  )}
+                </div>
+                <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)] truncate mt-0.5">
+                  {enRouteJob.assetName} — {enRouteJob.problemSummary}
+                </h3>
+                <p className="text-xs text-[var(--text-muted)] flex items-center gap-1 mt-0.5 truncate">
+                  <MapPinIcon size={12} className="shrink-0 text-slate-400" />
+                  <span>{enRouteJob.facilityAddress} · {enRouteJob.customerName}</span>
+                </p>
+              </div>
             </div>
+            <Link
+              to="/technician/jobs"
+              className="inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 transition-all shrink-0"
+            >
+              <span>Update Progress</span>
+              <ArrowRightIcon size={12} />
+            </Link>
           </div>
-          <Link
-            to="/technician/jobs"
-            className="inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-rose-600 text-white hover:bg-rose-700 transition-all shrink-0"
-          >
-            <span>Update En Route</span>
-            <ArrowRightIcon size={12} />
-          </Link>
-        </div>
+        ) : (
+          <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 shadow-sm flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                <CheckCircleIcon size={18} />
+              </div>
+              <div>
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">All Emergency Transits Clear</span>
+                <p className="text-xs text-[var(--text-muted)]">Completed {completedCount} work orders today. Standby for next dispatch assignment.</p>
+              </div>
+            </div>
+            <Link
+              to="/technician/jobs"
+              className="text-xs font-bold text-[#10b981] hover:underline"
+            >
+              View Jobs History →
+            </Link>
+          </div>
+        )}
 
         {/* ── Visual Schedule Timeline & Progress Distribution ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
@@ -173,39 +201,45 @@ export function TechnicianDashboard() {
               </div>
 
               <div className="space-y-2.5 pt-0.5">
-                {DASHBOARD_TECH_JOBS.map((job) => (
-                  <div
-                    key={job.id}
-                    className="flex items-center gap-3 p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]/50 hover:bg-[var(--bg-surface-2)] transition-colors"
-                  >
+                {isLoading ? (
+                  <div className="py-8 text-center text-xs text-[var(--text-muted)]">Loading schedule...</div>
+                ) : jobs.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-[var(--text-muted)]">No jobs assigned yet.</div>
+                ) : (
+                  jobs.slice(0, 4).map((job) => (
                     <div
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 ${
-                        job.status === "COMPLETED"
-                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                          : job.status === "TRAVELLING"
-                          ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 animate-pulse"
-                          : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                      }`}
+                      key={job.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]/50 hover:bg-[var(--bg-surface-2)] transition-colors"
                     >
-                      {job.status === "COMPLETED" ? "✓" : job.id.slice(-2)}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] truncate">
-                          {job.customerName}
-                        </span>
-                        <span
-                          className={`px-2 py-0.5 rounded-md text-xs font-semibold border ${getStatusBadge(
-                            job.status
-                          )}`}
-                        >
-                          {job.status.replace("_", " ")}
-                        </span>
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 ${
+                          job.status === "COMPLETED"
+                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                            : job.status === "TRAVELLING"
+                            ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 animate-pulse"
+                            : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                        }`}
+                      >
+                        {job.status === "COMPLETED" ? "✓" : job.id.slice(-2)}
                       </div>
-                      <div className="text-xs text-[var(--text-muted)] truncate mt-0.5">{job.assetName} · {job.facilityAddress}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] truncate">
+                            {job.customerName}
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 rounded-md text-xs font-semibold border ${getStatusBadge(
+                              job.status
+                            )}`}
+                          >
+                            {job.status.replace("_", " ")}
+                          </span>
+                        </div>
+                        <div className="text-xs text-[var(--text-muted)] truncate mt-0.5">{job.assetName} · {job.facilityAddress}</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -218,96 +252,19 @@ export function TechnicianDashboard() {
                   Passport Trade Competency
                 </h3>
                 <span className="text-xs font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded font-bold">
-                  PASSED
+                  Verified Tier 1
                 </span>
               </div>
-
               <HorizontalBarChart
                 data={[
-                  { label: "Electrical and power systems", value: 100, color: "#10b981", badge: "Primary" },
-                  { label: "AC, HVAC, and cooling", value: 75, color: "#38bdf8", badge: "Secondary" },
-                  { label: "Plumbing and water systems", value: 60, color: "#a855f7" },
-                  { label: "CCTV and security", value: 40, color: "#64748b" },
+                  { label: "High-Voltage Switchgear & Transformers", value: 96, color: "emerald", secondaryLabel: "Class A Master License (DOE-BD)" },
+                  { label: "Automatic Transfer Switches (ATS)", value: 92, color: "emerald", secondaryLabel: "Cummins & Perkins Certified" },
+                  { label: "Three-Phase Motors & Star-Delta Starters", value: 88, color: "blue", secondaryLabel: "Siemens Level 2 Industrial Upkeep" },
+                  { label: "Infrared Thermal Busbar Diagnostics", value: 85, color: "blue", secondaryLabel: "FLIR Level 1 Thermographer" },
                 ]}
                 valueSuffix="%"
               />
             </div>
-          </div>
-        </div>
-
-        {/* ── Assigned Jobs Short Preview ─────────────────────────────────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
-          <div className="p-3.5 sm:p-4 border-b border-[var(--border)] flex items-center justify-between">
-            <div>
-              <h2 className="font-heading font-bold text-sm sm:text-base text-[var(--text-primary)]">
-                Assigned Jobs Preview
-              </h2>
-              <p className="text-xs text-[var(--text-muted)]">Recent work orders allocated to your shift schedule</p>
-            </div>
-            <Link
-              to="/technician/jobs"
-              className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
-            >
-              <span>View Full Roster in My Jobs</span>
-              <ArrowRightIcon size={12} />
-            </Link>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px] text-left text-xs sm:text-[13px] border-collapse table-fixed">
-              <colgroup>
-                <col className="w-[85px]" />
-                <col className="w-[200px]" />
-                <col className="w-[180px]" />
-                <col className="w-[110px]" />
-                <col className="w-[125px]" />
-              </colgroup>
-              <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
-                  <th className="py-2.5 px-3">Job ID</th>
-                  <th className="py-2.5 px-3">Customer & Location</th>
-                  <th className="py-2.5 px-3">Trade & Asset</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {DASHBOARD_TECH_JOBS.map((job) => (
-                  <tr key={job.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                    <td className="py-2.5 px-3 font-mono font-bold text-xs text-[var(--text-primary)] whitespace-nowrap">
-                      {job.id}
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <div className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] truncate" title={job.customerName}>
-                        {job.customerName}
-                      </div>
-                      <div className="text-xs text-[var(--text-muted)] truncate" title={job.facilityAddress}>
-                        {job.facilityAddress}
-                      </div>
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <div className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)] truncate" title={job.assetName}>
-                        {job.assetName}
-                      </div>
-                      <div className="text-xs text-[var(--text-muted)] truncate">{job.category}</div>
-                    </td>
-                    <td className="py-2.5 px-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${getStatusBadge(job.status)}`}>
-                        {job.status.replace("_", " ")}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-right whitespace-nowrap">
-                      <Link
-                        to="/technician/jobs"
-                        className="px-2.5 py-1 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
-                      >
-                        Manage in My Jobs →
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
       </div>

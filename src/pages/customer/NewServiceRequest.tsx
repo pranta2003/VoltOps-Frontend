@@ -1,7 +1,9 @@
 import { useState, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "../../components/Layout";
+import { useAuth } from "../../context/AuthContext";
 import { CANONICAL_SERVICE_CATEGORIES, ServiceCategory, PriorityLevel } from "../../types";
+import { customerService } from "../../services/customerService";
 import {
   AlertTriangleIcon,
   CheckCircleIcon,
@@ -23,6 +25,7 @@ const CUSTOMER_ASSETS = [
 
 export function NewServiceRequest() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Form states
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory>("Electrical and power systems");
@@ -30,24 +33,58 @@ export function NewServiceRequest() {
   const [problemTitle, setProblemTitle] = useState("");
   const [problemDescription, setProblemDescription] = useState("");
   const [priority, setPriority] = useState<PriorityLevel>("URGENT");
-  const [preferredDate, setPreferredDate] = useState("2026-11-10");
+  const [preferredDate, setPreferredDate] = useState("2026-11-12");
   const [preferredTime, setPreferredTime] = useState("Immediate / ASAP");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
+  const [createdRequestId, setCreatedRequestId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!problemTitle.trim() || !problemDescription.trim()) return;
+    if (isSubmitting) return;
+
+    if (!problemTitle.trim()) {
+      setErrorMessage("Please enter a descriptive problem title.");
+      return;
+    }
+    if (!problemDescription.trim()) {
+      setErrorMessage("Please describe the facility problem symptoms and location.");
+      return;
+    }
 
     setIsSubmitting(true);
-    // Simulate instantaneous dispatch queue registration
-    setTimeout(() => {
+    setErrorMessage(null);
+
+    try {
+      const res = await customerService.createRequest(
+        {
+          category: selectedCategory,
+          assetName: selectedAsset,
+          problemTitle: problemTitle.trim(),
+          problemDescription: problemDescription.trim(),
+          priority,
+          preferredDateTime: `${preferredDate} ${preferredTime}`,
+          coveragePlan: "247-standard",
+        },
+        {
+          id: user?.id,
+          name: user?.name,
+          address: user?.company || "Apex Spinning & Weaving Mills, Savar",
+        }
+      );
+
+      setCreatedRequestId(res.data.id);
       setIsSubmitting(false);
       setSubmittedSuccess(true);
+
       setTimeout(() => {
         navigate("/customer");
-      }, 1800);
-    }, 600);
+      }, 2000);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      setErrorMessage(err.message || "Failed to submit service request. Please check inputs and retry.");
+    }
   };
 
   return (
@@ -64,8 +101,11 @@ export function NewServiceRequest() {
             <h2 className="font-heading font-bold text-2xl text-[var(--text-primary)]">
               Service Request Logged Successfully!
             </h2>
+            <div className="inline-block px-4 py-1.5 rounded-full font-mono font-bold text-sm bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/30">
+              Assigned Tracking ID: {createdRequestId || "SR-NEW"}
+            </div>
             <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
-              Your request has been routed to the active Dispatcher queue. The matching engine is calculating eligible technicians based on your 24/7 Standard 40-minute arrival SLA.
+              Your request has been routed to the active Dispatcher queue. Dispatchers and the candidate matching engine have received your notification under the 24/7 Standard 40-minute arrival SLA.
             </p>
             <div className="pt-2 text-xs font-semibold text-[#10b981]">
               Redirecting to request tracker...
@@ -76,6 +116,18 @@ export function NewServiceRequest() {
             onSubmit={handleSubmit}
             className="p-6 sm:p-8 rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-8"
           >
+            {errorMessage && (
+              <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 text-xs flex items-center justify-between">
+                <span>{errorMessage}</span>
+                <button
+                  type="button"
+                  onClick={() => setErrorMessage(null)}
+                  className="font-bold underline hover:no-underline"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
             {/* ── 1. Canonical Service Trade Selection (Strict 7 Trades) ── */}
             <div className="space-y-3">
               <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">

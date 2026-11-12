@@ -80,6 +80,55 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
+## Milestone 4.0: End-to-End Workflow, Data Reliability & Backend Integration Readiness ✅
+- **Date Completed**: 12 November 2026
+- **Branch**: `pranta` (frontend only)
+- **Scope**: Rigorous frontend engineering audit and data architecture unification. Built a reactive frontend operational store connecting Customer, Dispatcher, Technician, and Admin roles into a cohesive service lifecycle. Enforced strict state transitions, eliminated hardcoded data isolation, automated itemized invoice generation upon work order completion, enabled customer invoice settlement, added optimistic live UI reactivity via custom window events and session persistence, and established a comprehensive automated end-to-end integration test suite.
+- **Accomplishments**:
+  1. **Central Operational Store Architecture (`src/services/operationalStore.ts`)**:
+     - Centralizes all live operational entities (Service Requests, Work Orders, Technicians, Invoices, and Dispatch Events).
+     - Provides session-persistent state in browser environments (`sessionStorage`) with transparent in-memory fallback for test harnesses and SSR.
+     - Dispatches decoupled `voltops-operational-update` events on every mutation, enabling instantaneous cross-portal reactivity without tight coupling.
+     - Automatically synchronizes linked Work Orders and Service Requests (e.g. converting a request updates its status and records the assigned `workOrderId`).
+     - Logs comprehensive operational audit events for every dispatch, state transition, and invoice settlement.
+  2. **Customer Operational Service (`src/services/customerService.ts`)**:
+     - Implements `getRequests()`, `createRequest()`, `getInvoices()`, and `payInvoice()`.
+     - Validates payload completeness (facility, equipment/trade, urgency/priority, description).
+     - Dynamically computes priority-based arrival SLAs (Emergency: 60m, High: 120m, Medium: 240m, Low: 480m) and remaining SLA minutes.
+     - Emits audit log events for request creation and invoice payment.
+  3. **Technician Operational Service (`src/services/technicianService.ts`)**:
+     - Implements `getJobs()` and `updateJobStatus()` strictly governed by the canonical state machine:
+       - `UNASSIGNED` -> `ASSIGNED` -> `TRAVELLING` -> `ON_SITE` -> `COMPLETED` (or `CANCELLED`).
+       - Rejects illegal state jumps (e.g. `ASSIGNED` -> `COMPLETED`).
+     - On transition to `COMPLETED`:
+       - Automatically releases the assigned technician back to `AVAILABLE` status.
+       - Auto-generates an itemized customer invoice based on work order trade, hours logged, and canonical labor rate card.
+     - Synchronizes updates with `operationalStore` and notifies subscribers.
+  4. **Dispatcher Operational Bridge (`src/services/dispatcherService.ts`)**:
+     - Seamlessly integrated with `operationalStore`, replacing isolated static mock dictionaries.
+     - Triage, technician matching engine, and work order assignment directly mutate shared store state.
+     - Work order assignment instantly updates technician status to `DISPATCHED` or `ON_SITE` and decrements active capacity.
+  5. **Role Dashboard Data & UI State Hardening**:
+     - `CustomerDashboard.tsx`: Subscribes to live operational updates, renders authentic loading/empty/error states, cross-references linked work orders to show real-time technician arrival progress (`En Route (Within 20–40 min)` -> `Technician Present On-Site` -> `Service Completed & Signed Off`), and provides request inspection drawer.
+     - `NewServiceRequest.tsx`: Validates inputs, blocks duplicate submissions with submission spinlock, generates valid tracking IDs, notifies store, and redirects to dashboard with feedback banner.
+     - `CustomerInvoices.tsx`: Live itemized invoices, real-time payment reconciliation via `payInvoice()`, dynamic status badges (`UNPAID` -> `PAID`), and live download capability.
+     - `MyJobs.tsx`: Real-time job roster from `technicianService.getJobs()`, status transition modal strictly exposing only valid next actions, and live notes/resolution logging.
+     - `TechnicianDashboard.tsx`: Real-time operational telemetry (assigned jobs, active jobs, completed jobs, SLA compliance rate) dynamically calculated from the store, dynamic transit countdown card, and real-time shift route progression.
+  6. **Automated End-to-End Integration Test Suite (`tests/workflowIntegration.test.mjs`)**:
+     - Built 6 end-to-end integration tests verifying the full cross-portal service lifecycle:
+       1. Customer request creation, validation, and SLA computation.
+       2. Dispatcher triage, duplicate conversion prevention, and work order creation.
+       3. Technician candidate scoring, trade eligibility, and assignment.
+       4. Strict linear technician state machine enforcement (`ASSIGNED` -> `TRAVELLING` -> `ON_SITE` -> `COMPLETED`) and illegal transition rejection.
+       5. Automatic itemized invoice generation upon work order completion and customer payment reconciliation.
+       6. Operational audit event trail recording throughout all lifecycle stages.
+  7. **Quality Gate Verification**:
+     - Automated Test Suite: **41/41 tests passing** (35 unit + 6 integration) in 219ms.
+     - Production Build: `npm run build` (`tsc && vite build`) passed cleanly in 6.20s with **0 TypeScript and 0 Vite errors**.
+     - Zero backend files modified, zero backend commits, zero schema modifications.
+
+---
+
 ## Milestone 3.2.2: Visual Refinement — Dispatcher & Technician Layout, Chart Geometry & Light-Mode Contrast ✅
 - **Date Completed**: 11 November 2026
 - **Branch**: `pranta` (frontend only)

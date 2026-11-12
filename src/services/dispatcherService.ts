@@ -21,6 +21,7 @@ import {
   INITIAL_FIELD_TECHNICIANS,
   INITIAL_DISPATCH_EVENTS,
 } from "./mockDispatcherData";
+import { operationalStore } from "./operationalStore";
 
 /**
  * Custom error class for Dispatcher API operations with explicit classification flags.
@@ -55,11 +56,18 @@ export class DispatcherApiError extends Error {
   }
 }
 
-// Local mutable state for demonstration / offline preview
-let localRequests: ServiceRequest[] = JSON.parse(JSON.stringify(INITIAL_SERVICE_REQUESTS));
-let localWorkOrders: WorkOrder[] = JSON.parse(JSON.stringify(INITIAL_WORK_ORDERS));
-let localTechnicians: TechnicianProfile[] = JSON.parse(JSON.stringify(INITIAL_FIELD_TECHNICIANS));
-let localEvents: DispatchEventLog[] = JSON.parse(JSON.stringify(INITIAL_DISPATCH_EVENTS));
+// Local mutable state helpers connected to centralized operational store
+const getLocalRequests = () => operationalStore.getRequests();
+const setLocalRequests = (r: ServiceRequest[]) => operationalStore.setRequests(r);
+
+const getLocalWorkOrders = () => operationalStore.getWorkOrders();
+const setLocalWorkOrders = (w: WorkOrder[]) => operationalStore.setWorkOrders(w);
+
+const getLocalTechnicians = () => operationalStore.getTechnicians();
+const setLocalTechnicians = (t: TechnicianProfile[]) => operationalStore.setTechnicians(t);
+
+const getLocalEvents = () => operationalStore.getEvents();
+const setLocalEvents = (e: DispatchEventLog[]) => operationalStore.setEvents(e);
 
 /**
  * Work Order valid linear state transitions map.
@@ -198,6 +206,10 @@ export const dispatcherService = {
     }
 
     // Compute truthful metrics from baseline state
+    const localRequests = getLocalRequests();
+    const localWorkOrders = getLocalWorkOrders();
+    const localTechnicians = getLocalTechnicians();
+
     const unassignedRequests = localRequests.filter((r) => r.status === "NEW" || r.status === "REVIEWING").length;
     const activeWorkOrders = localWorkOrders.filter(
       (w) => w.status === "ASSIGNED" || w.status === "TRAVELLING" || w.status === "ON_SITE"
@@ -255,7 +267,7 @@ export const dispatcherService = {
       handleDispatcherHttpError(err, { isCollectionQuery: true, actionName: "getServiceRequests" });
     }
 
-    let results = [...localRequests];
+    let results = [...getLocalRequests()];
 
     if (params?.search) {
       const q = params.search.toLowerCase().trim();
@@ -313,6 +325,7 @@ export const dispatcherService = {
     }
 
     // Atomic local validation before modifying state
+    const localRequests = getLocalRequests();
     const request = localRequests.find((r) => r.id === dto.requestId);
     if (!request) {
       throw new DispatcherApiError(`Service request ${dto.requestId} not found in local baseline.`, {
@@ -341,6 +354,7 @@ export const dispatcherService = {
       slaDeadline = null;
     }
 
+    const localWorkOrders = getLocalWorkOrders();
     const newWorkOrderId = `WO-${3000 + localWorkOrders.length + 1}`;
     const newWorkOrder: WorkOrder = {
       id: newWorkOrderId,
@@ -362,8 +376,11 @@ export const dispatcherService = {
     request.status = "CONVERTED";
     request.workOrderId = newWorkOrderId;
     localWorkOrders.unshift(newWorkOrder);
+    setLocalWorkOrders(localWorkOrders);
+    setLocalRequests(localRequests);
 
     // Record audit event
+    const localEvents = getLocalEvents();
     localEvents.unshift({
       id: `EVT-D-${Date.now()}`,
       timestamp: new Date().toISOString(),
@@ -373,6 +390,7 @@ export const dispatcherService = {
       summary: `Converted request ${request.id} into Work Order ${newWorkOrderId} (${request.category}). Plan: ${plan}.`,
       severity: dto.priority === "URGENT" ? "CRITICAL" : "INFO",
     });
+    setLocalEvents(localEvents);
 
     return {
       success: true,
@@ -405,7 +423,7 @@ export const dispatcherService = {
       handleDispatcherHttpError(err, { isCollectionQuery: true, actionName: "getWorkOrders" });
     }
 
-    let results = [...localWorkOrders];
+    let results = [...getLocalWorkOrders()];
 
     if (params?.search) {
       const q = params.search.toLowerCase().trim();
@@ -462,7 +480,7 @@ export const dispatcherService = {
       handleDispatcherHttpError(err, { isCollectionQuery: true, actionName: "getTechnicians" });
     }
 
-    let results = [...localTechnicians];
+    let results = [...getLocalTechnicians()];
 
     if (category && category !== ("ALL" as any)) {
       results = results.filter((t) => t.skills.some((s) => s.category === category));
@@ -512,7 +530,7 @@ export const dispatcherService = {
       handleDispatcherHttpError(err, { resourceId: workOrderId, actionName: "getMatchingTechnicians" });
     }
 
-    const order = localWorkOrders.find((w) => w.id === workOrderId);
+    const order = getLocalWorkOrders().find((w) => w.id === workOrderId);
     if (!order) {
       throw new DispatcherApiError(`Work order ${workOrderId} not found in local baseline.`, {
         status: 404,
@@ -521,6 +539,7 @@ export const dispatcherService = {
     }
 
     const recommendations: TechnicianRecommendation[] = [];
+    const localTechnicians = getLocalTechnicians();
 
     for (const tech of localTechnicians) {
       // Hard check 1: Status exclusion (off duty, on leave, unavailable)
@@ -658,6 +677,7 @@ export const dispatcherService = {
     }
 
     // Atomic local validation before modifying state
+    const localWorkOrders = getLocalWorkOrders();
     const order = localWorkOrders.find((w) => w.id === dto.workOrderId);
     if (!order) {
       throw new DispatcherApiError(`Work order ${dto.workOrderId} not found in local baseline.`, {
@@ -674,6 +694,7 @@ export const dispatcherService = {
       );
     }
 
+    const localTechnicians = getLocalTechnicians();
     const tech = localTechnicians.find((t) => t.id === dto.technicianId);
     if (!tech) {
       throw new DispatcherApiError(`Technician ${dto.technicianId} not found in local baseline.`, {
@@ -702,7 +723,11 @@ export const dispatcherService = {
     tech.status = "ON_JOB";
     tech.activeJobCount += 1;
 
+    setLocalWorkOrders(localWorkOrders);
+    setLocalTechnicians(localTechnicians);
+
     // Record audit event
+    const localEvents = getLocalEvents();
     localEvents.unshift({
       id: `EVT-D-${Date.now()}`,
       timestamp: new Date().toISOString(),
@@ -712,6 +737,7 @@ export const dispatcherService = {
       summary: `Assigned technician ${tech.name} to ${order.id} (${order.customerName}).`,
       severity: "INFO",
     });
+    setLocalEvents(localEvents);
 
     return {
       success: true,
@@ -731,6 +757,7 @@ export const dispatcherService = {
     notes?: string
   ): Promise<DispatcherApiResponse<WorkOrder>> {
     // 1. Lifecycle transition validation guard - reject invalid transitions BEFORE calling network
+    const localWorkOrders = getLocalWorkOrders();
     const localOrder = localWorkOrders.find((w) => w.id === id);
     if (localOrder) {
       const allowedTransitions = VALID_WORK_ORDER_TRANSITIONS[localOrder.status] || [];
@@ -769,6 +796,7 @@ export const dispatcherService = {
       });
     }
 
+    const previousStatus = localOrder.status;
     localOrder.status = status;
     if (status === "TRAVELLING" && !localOrder.startedAt) {
       localOrder.startedAt = new Date().toISOString();
@@ -777,27 +805,69 @@ export const dispatcherService = {
       localOrder.completedAt = new Date().toISOString();
       // Free technician
       if (localOrder.assignedTechnicianId) {
+        const localTechnicians = getLocalTechnicians();
         const tech = localTechnicians.find((t) => t.id === localOrder.assignedTechnicianId);
         if (tech && tech.activeJobCount > 0) {
           tech.activeJobCount -= 1;
           if (tech.activeJobCount === 0) tech.status = "AVAILABLE";
         }
+        setLocalTechnicians(localTechnicians);
       }
+
+      // Generate invoice in operational store for the customer
+      const invoices = operationalStore.getInvoices();
+      const invoiceId = `INV-${4100 + invoices.length + 1}`;
+      const newInvoice = {
+        id: invoiceId,
+        workOrderId: localOrder.id,
+        customerId: "cust-epz-01",
+        customerName: localOrder.customerName,
+        assetName: localOrder.assetName,
+        billingDate: new Date().toISOString().split("T")[0],
+        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        status: "PAYMENT_DUE" as const,
+        items: [
+          {
+            id: `li-${Date.now()}-1`,
+            description: `Commercial Field Service: ${localOrder.category}`,
+            quantity: 1,
+            unitPrice: 150,
+            totalPrice: 150,
+          },
+          {
+            id: `li-${Date.now()}-2`,
+            description: `On-Site Technical Resolution: ${localOrder.problemSummary}`,
+            quantity: 1,
+            unitPrice: 320,
+            totalPrice: 320,
+          },
+        ],
+        subtotal: 470,
+        taxRate: 0.05,
+        taxAmount: 23.5,
+        totalAmount: 493.5,
+        paymentNotice: "Payment is a UI preview only. No real banking transaction will be processed.",
+      };
+      operationalStore.setInvoices([newInvoice, ...invoices]);
     }
 
     if (notes) {
       localOrder.workNotes = localOrder.workNotes ? `${localOrder.workNotes} | ${notes}` : notes;
     }
 
+    setLocalWorkOrders(localWorkOrders);
+
+    const localEvents = getLocalEvents();
     localEvents.unshift({
       id: `EVT-D-${Date.now()}`,
       timestamp: new Date().toISOString(),
       action: "STATUS_CHANGED",
       actorName: "Tania Akter (Dispatcher)",
       targetId: localOrder.id,
-      summary: `Work Order ${localOrder.id} status transitioned from ${localOrder.status} to ${status}.`,
+      summary: `Work Order ${localOrder.id} status transitioned from ${previousStatus} to ${status}.`,
       severity: "INFO",
     });
+    setLocalEvents(localEvents);
 
     return {
       success: true,
@@ -832,7 +902,7 @@ export const dispatcherService = {
 
     return {
       success: true,
-      data: [...localEvents],
+      data: [...getLocalEvents()],
       isOffline: true,
       timestamp: new Date().toISOString(),
     };
@@ -842,9 +912,6 @@ export const dispatcherService = {
    * Reset demonstration state (useful for test runs)
    */
   resetDemonstrationState() {
-    localRequests = JSON.parse(JSON.stringify(INITIAL_SERVICE_REQUESTS));
-    localWorkOrders = JSON.parse(JSON.stringify(INITIAL_WORK_ORDERS));
-    localTechnicians = JSON.parse(JSON.stringify(INITIAL_FIELD_TECHNICIANS));
-    localEvents = JSON.parse(JSON.stringify(INITIAL_DISPATCH_EVENTS));
+    operationalStore.reset();
   },
 };

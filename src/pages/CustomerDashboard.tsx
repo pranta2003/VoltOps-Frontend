@@ -1,79 +1,163 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
-import { CANONICAL_SERVICE_CATEGORIES, ServiceCategory, PriorityLevel } from "../types";
+import { ServiceRequest, PriorityLevel, ServiceCategory } from "../types";
+import { customerService } from "../services/customerService";
+import { operationalStore } from "../services/operationalStore";
 import {
   ClockIcon,
   AlertTriangleIcon,
   CheckCircleIcon,
-  WrenchIcon,
   ArrowRightIcon,
+  XIcon,
 } from "../components/Icons";
 
-interface CustomerRequestItem {
+interface CustomerViewRequest {
   id: string;
   category: ServiceCategory;
   asset: string;
   problem: string;
+  description: string;
   priority: PriorityLevel;
-  status: "IN_REVIEW" | "DISPATCHED" | "IN_PROGRESS" | "COMPLETED";
+  displayStatus: "NEW" | "REVIEWING" | "ASSIGNED" | "TRAVELLING" | "ON_SITE" | "COMPLETED" | "CANCELLED";
   submittedDate: string;
   arrivalSlaWindow?: string;
   assignedTech?: string;
+  workOrderId?: string;
+  workNotes?: string;
 }
-
-const INITIAL_CUSTOMER_REQUESTS: CustomerRequestItem[] = [
-  {
-    id: "SR-1024",
-    category: "Electrical and power systems",
-    asset: "Standby Generator G-01",
-    problem: "Automatic Transfer Switch (ATS) Failure during power test",
-    priority: "URGENT",
-    status: "DISPATCHED",
-    submittedDate: "10 Nov 2026, 10:15 AM",
-    arrivalSlaWindow: "Within 20–40 min",
-    assignedTech: "Kamrul Islam (Certified Master Electrician)",
-  },
-  {
-    id: "SR-1021",
-    category: "AC, HVAC, and cooling",
-    asset: "Central Chiller Unit #2",
-    problem: "Compressor pressure differential trip",
-    priority: "HIGH",
-    status: "IN_REVIEW",
-    submittedDate: "10 Nov 2026, 09:30 AM",
-    arrivalSlaWindow: "Pending Dispatcher Confirmation",
-  },
-  {
-    id: "SR-1018",
-    category: "Internet, networking, and hardware",
-    asset: "Server Room Core Switch SW-01",
-    problem: "Uplink packet drops and optical port degraded",
-    priority: "LOW",
-    status: "COMPLETED",
-    submittedDate: "08 Nov 2026, 02:45 PM",
-  },
-];
 
 export function CustomerDashboard() {
   const { user } = useAuth();
-  const [requests] = useState<CustomerRequestItem[]>(INITIAL_CUSTOMER_REQUESTS);
+  const [requests, setRequests] = useState<CustomerViewRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<CustomerViewRequest | null>(null);
+
+  function loadCustomerData() {
+    setIsLoading(true);
+    setError(null);
+
+    customerService
+      .getRequests(user?.id)
+      .then((res) => {
+        const rawRequests: ServiceRequest[] = res.data;
+        const workOrders = operationalStore.getWorkOrders();
+
+        const mapped: CustomerViewRequest[] = rawRequests.map((r) => {
+          const linkedOrder = workOrders.find((w) => w.id === r.workOrderId || w.requestId === r.id);
+
+          let displayStatus: CustomerViewRequest["displayStatus"] = "NEW";
+          let arrivalSlaWindow = "Pending Dispatcher Review";
+          let assignedTech = undefined;
+          let workNotes = undefined;
+
+          if (linkedOrder) {
+            displayStatus = linkedOrder.status as CustomerViewRequest["displayStatus"];
+            assignedTech = linkedOrder.assignedTechnicianName;
+            workNotes = linkedOrder.workNotes;
+
+            switch (linkedOrder.status) {
+              case "UNASSIGNED":
+                arrivalSlaWindow = "Work Order Created · Dispatcher Assigning Tech";
+                displayStatus = "REVIEWING";
+                break;
+              case "ASSIGNED":
+                arrivalSlaWindow = "Technician Assigned · Standby Departure";
+                break;
+              case "TRAVELLING":
+                arrivalSlaWindow = "En Route (Physical Arrival Guaranteed)";
+                break;
+              case "ON_SITE":
+                arrivalSlaWindow = "Technician Present On-Site";
+                break;
+              case "COMPLETED":
+                arrivalSlaWindow = "Service Completed & Signed Off";
+                break;
+              case "CANCELLED":
+                arrivalSlaWindow = "Service Cancelled";
+                break;
+            }
+          } else {
+            if (r.status === "REVIEWING") {
+              displayStatus = "REVIEWING";
+              arrivalSlaWindow = "Dispatcher Evaluating Candidates";
+            } else if (r.status === "NEW") {
+              displayStatus = "NEW";
+              arrivalSlaWindow = r.coveragePlan === "247-priority" ? "20-Min SLA Priority Window" : "Pending Review";
+            }
+          }
+
+          let formattedDate = r.submittedAt;
+          try {
+            formattedDate = new Date(r.submittedAt).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+          } catch {
+            // Keep raw string
+          }
+
+          return {
+            id: r.id,
+            category: r.category,
+            asset: r.assetName,
+            problem: r.problemTitle,
+            description: r.problemDescription,
+            priority: r.priority,
+            displayStatus,
+            submittedDate: formattedDate,
+            arrivalSlaWindow,
+            assignedTech,
+            workOrderId: linkedOrder?.id || r.workOrderId,
+            workNotes,
+          };
+        });
+
+        setRequests(mapped);
+      })
+      .catch((err) => {
+        setError(err.message || "Failed to load service requests.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }
+
+  useEffect(() => {
+    loadCustomerData();
+    const unsubscribe = operationalStore.subscribe(() => {
+      loadCustomerData();
+    });
+    return unsubscribe;
+  }, [user?.id]);
 
   // Quick stats
-  const activeCount = requests.filter((r) => r.status !== "COMPLETED").length;
-  const inProgressCount = requests.filter((r) => r.status === "DISPATCHED" || r.status === "IN_PROGRESS").length;
+  const activeCount = requests.filter((r) => r.displayStatus !== "COMPLETED" && r.displayStatus !== "CANCELLED").length;
+  const inProgressCount = requests.filter(
+    (r) => r.displayStatus === "ASSIGNED" || r.displayStatus === "TRAVELLING" || r.displayStatus === "ON_SITE"
+  ).length;
 
-  const getStatusBadge = (status: CustomerRequestItem["status"]) => {
+  const getStatusBadge = (status: CustomerViewRequest["displayStatus"]) => {
     switch (status) {
-      case "IN_REVIEW":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
-      case "DISPATCHED":
+      case "NEW":
         return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
-      case "IN_PROGRESS":
-        return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20";
+      case "REVIEWING":
+        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+      case "ASSIGNED":
+        return "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20";
+      case "TRAVELLING":
+        return "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20 font-bold animate-pulse";
+      case "ON_SITE":
+        return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20 font-bold";
       case "COMPLETED":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
+        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 font-semibold";
+      case "CANCELLED":
+        return "bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20";
     }
   };
 
@@ -93,7 +177,7 @@ export function CustomerDashboard() {
   return (
     <Layout
       title="Commercial Facility Portal"
-      subtitle={`Logged in as ${user?.name || "Facility Customer"} · ABC Manufacturing Ltd`}
+      subtitle={`Logged in as ${user?.name || "Facility Customer"} · ${user?.company || "Apex Spinning & Weaving Mills"}`}
       action={
         <Link
           to="/customer/new-request"
@@ -103,136 +187,264 @@ export function CustomerDashboard() {
         </Link>
       }
     >
-      {/* ── Summary Stats Row (Figma: Embedded 27:658 layout) ────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-          <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-            <span>Active Breakdown Requests</span>
-            <AlertTriangleIcon size={16} className="text-amber-500" />
+      <div className="space-y-6">
+        {/* ── Summary Stats Row (Figma: Embedded 27:658 layout) ────────────── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
+            <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+              <span>Active Breakdown Requests</span>
+              <AlertTriangleIcon size={16} className="text-amber-500" />
+            </div>
+            <div className="mt-2 text-3xl font-bold font-heading text-[var(--text-primary)]">
+              {isLoading ? "—" : activeCount}
+            </div>
+            <div className="mt-1 text-xs text-[var(--text-muted)]">Awaiting inspection or repair</div>
           </div>
-          <div className="mt-2 text-3xl font-bold font-heading text-[var(--text-primary)]">
-            {activeCount}
+
+          <div className="p-5 rounded-2xl border border-blue-500/20 bg-blue-500/5 shadow-sm">
+            <div className="flex items-center justify-between text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+              <span>Dispatched Field Technicians</span>
+              <ClockIcon size={16} className="text-blue-500" />
+            </div>
+            <div className="mt-2 text-3xl font-bold font-heading text-blue-600 dark:text-blue-400">
+              {isLoading ? "—" : inProgressCount}
+            </div>
+            <div className="mt-1 text-xs text-blue-600/80 font-medium">Physical arrival SLA active</div>
           </div>
-          <div className="mt-1 text-xs text-[var(--text-muted)]">Awaiting inspection or repair</div>
+
+          <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
+            <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+              <span>Active Coverage Plan</span>
+              <CheckCircleIcon size={16} className="text-[#10b981]" />
+            </div>
+            <div className="mt-2 text-xl font-bold font-heading text-[#10b981]">
+              24/7 Standard (Plan B)
+            </div>
+            <div className="mt-1 text-xs text-[var(--text-muted)]">40-minute arrival SLA guaranteed</div>
+          </div>
         </div>
 
-        <div className="p-5 rounded-2xl border border-blue-500/20 bg-blue-500/5 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-            <span>Technicians On Route</span>
-            <ClockIcon size={16} className="text-blue-500" />
+        {/* ── Request History Table (Figma Embedded 27:658) ─────────────────── */}
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
+          <div className="p-4 sm:p-5 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h2 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                Facility Breakdown Requests
+              </h2>
+              <p className="text-xs text-[var(--text-muted)]">
+                Real-time dispatch milestones, assigned staff, and on-site repair progress
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={loadCustomerData}
+                disabled={isLoading}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
+              >
+                {isLoading ? "Refreshing..." : "Refresh"}
+              </button>
+              <Link
+                to="/customer/new-request"
+                className="text-xs font-bold text-[#10b981] hover:underline flex items-center gap-1"
+              >
+                <span>Submit new issue</span>
+                <ArrowRightIcon size={12} />
+              </Link>
+            </div>
           </div>
-          <div className="mt-2 text-3xl font-bold font-heading text-blue-600 dark:text-blue-400">
-            {inProgressCount}
-          </div>
-          <div className="mt-1 text-xs text-blue-600/80 font-medium">Physical arrival SLA active</div>
-        </div>
 
-        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-          <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-            <span>Active Coverage Plan</span>
-            <CheckCircleIcon size={16} className="text-[#10b981]" />
-          </div>
-          <div className="mt-2 text-xl font-bold font-heading text-[#10b981]">
-            24/7 Standard (Plan B)
-          </div>
-          <div className="mt-1 text-xs text-[var(--text-muted)]">40-minute arrival SLA guaranteed</div>
-        </div>
-      </div>
+          {error && (
+            <div className="p-4 bg-red-500/10 border-b border-red-500/20 text-red-700 dark:text-red-400 text-xs flex items-center justify-between">
+              <span>{error}</span>
+              <button
+                type="button"
+                onClick={loadCustomerData}
+                className="font-bold underline hover:no-underline"
+              >
+                Retry
+              </button>
+            </div>
+          )}
 
-      {/* ── Request History Table (Figma Embedded 27:658) ─────────────────── */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
-        <div className="p-4 sm:p-5 border-b border-[var(--border)] flex items-center justify-between">
-          <div>
-            <h2 className="font-heading font-bold text-base text-[var(--text-primary)]">
-              Facility Breakdown Requests
-            </h2>
-            <p className="text-xs text-[var(--text-muted)]">
-              Real-time dispatch milestones, assigned staff, and on-site repair progress
-            </p>
-          </div>
-          <Link
-            to="/customer/new-request"
-            className="text-xs font-bold text-[#10b981] hover:underline flex items-center gap-1"
-          >
-            <span>Submit new issue</span>
-            <ArrowRightIcon size={12} />
-          </Link>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm">
-            <thead>
-              <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-4">Request ID</th>
-                <th className="py-3 px-4">Service Category & Asset</th>
-                <th className="py-3 px-4">Problem Description</th>
-                <th className="py-3 px-4">Priority</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Arrival SLA Window</th>
-                <th className="py-3 px-4 text-right">Details</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border)]">
-              {requests.map((r) => (
-                <tr key={r.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-bold text-[var(--text-primary)]">
-                    {r.id}
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <div className="font-semibold text-[var(--text-primary)]">{r.asset}</div>
-                    <div className="text-[11px] text-[var(--text-muted)]">{r.category}</div>
-                  </td>
-                  <td className="py-3.5 px-4 max-w-xs">
-                    <div className="text-[var(--text-primary)] font-medium truncate">{r.problem}</div>
-                    <div className="text-[11px] text-[var(--text-muted)]">{r.submittedDate}</div>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] border ${getPriorityBadge(
-                        r.priority
-                      )}`}
-                    >
-                      {r.priority}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getStatusBadge(
-                        r.status
-                      )}`}
-                    >
-                      {r.status.replace("_", " ")}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-xs">
-                    {r.arrivalSlaWindow ? (
-                      <div>
-                        <span className="font-semibold text-blue-600 dark:text-blue-400">
-                          {r.arrivalSlaWindow}
-                        </span>
-                        {r.assignedTech && (
-                          <div className="text-[11px] text-[var(--text-muted)] truncate max-w-xs">
-                            {r.assignedTech}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs sm:text-sm">
+              <thead>
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
+                  <th className="py-3 px-4">Request ID</th>
+                  <th className="py-3 px-4">Service Category & Asset</th>
+                  <th className="py-3 px-4">Problem Description</th>
+                  <th className="py-3 px-4">Priority</th>
+                  <th className="py-3 px-4">Lifecycle Status</th>
+                  <th className="py-3 px-4">Arrival SLA & Technician</th>
+                  <th className="py-3 px-4 text-right">Details</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                      Loading service requests...
+                    </td>
+                  </tr>
+                ) : requests.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-xs text-[var(--text-muted)] space-y-2">
+                      <p>No breakdown requests logged for your facility yet.</p>
+                      <Link
+                        to="/customer/new-request"
+                        className="inline-block px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e]"
+                      >
+                        Submit Your First Request
+                      </Link>
+                    </td>
+                  </tr>
+                ) : (
+                  requests.map((r) => (
+                    <tr key={r.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-[var(--text-primary)]">
+                        {r.id}
+                        {r.workOrderId && (
+                          <div className="text-[10px] font-mono text-[var(--text-muted)]">
+                            WO: {r.workOrderId}
                           </div>
                         )}
-                      </div>
-                    ) : (
-                      <span className="text-[var(--text-muted)]">—</span>
-                    )}
-                  </td>
-                  <td className="py-3.5 px-4 text-right">
-                    <button
-                      type="button"
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
-                    >
-                      Inspect
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <div className="font-semibold text-[var(--text-primary)]">{r.asset}</div>
+                        <div className="text-[11px] text-[var(--text-muted)]">{r.category}</div>
+                      </td>
+                      <td className="py-3.5 px-4 max-w-xs">
+                        <div className="text-[var(--text-primary)] font-medium truncate">{r.problem}</div>
+                        <div className="text-[11px] text-[var(--text-muted)]">{r.submittedDate}</div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] border ${getPriorityBadge(
+                            r.priority
+                          )}`}
+                        >
+                          {r.priority}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] border ${getStatusBadge(
+                            r.displayStatus
+                          )}`}
+                        >
+                          {r.displayStatus.replace("_", " ")}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-xs">
+                        {r.arrivalSlaWindow ? (
+                          <div>
+                            <span className="font-semibold text-blue-600 dark:text-blue-400 block">
+                              {r.arrivalSlaWindow}
+                            </span>
+                            {r.assignedTech && (
+                              <div className="text-[11px] text-[var(--text-muted)] truncate max-w-xs mt-0.5">
+                                Tech: {r.assignedTech}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-[var(--text-muted)]">—</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedRequest(r)}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                        >
+                          Inspect
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
+
+        {/* ── Inspection Detail Modal ────────────────────────────────────── */}
+        {selectedRequest && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="w-full max-w-xl rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+                <div>
+                  <span className="text-[11px] font-mono font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                    Breakdown Audit & Tracking
+                  </span>
+                  <h3 className="font-heading font-bold text-xl text-[var(--text-primary)]">
+                    {selectedRequest.id} — {selectedRequest.asset}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRequest(null)}
+                  className="w-8 h-8 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                >
+                  <XIcon size={14} />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div className="p-3.5 rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1">
+                  <div className="text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[10px]">Problem Title & Scope</div>
+                  <div className="font-bold text-sm text-[var(--text-primary)]">{selectedRequest.problem}</div>
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed pt-1">{selectedRequest.description}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Trade Category</span>
+                    <span className="font-semibold text-[var(--text-primary)]">{selectedRequest.category}</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Priority SLA</span>
+                    <span className="font-bold text-red-600 dark:text-red-400">{selectedRequest.priority}</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Current Lifecycle</span>
+                    <span className="font-bold text-[#10b981]">{selectedRequest.displayStatus.replace("_", " ")}</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
+                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Linked Work Order</span>
+                    <span className="font-mono font-bold text-[var(--text-primary)]">{selectedRequest.workOrderId || "Pending Triage"}</span>
+                  </div>
+                </div>
+
+                {selectedRequest.assignedTech && (
+                  <div className="p-3.5 rounded-2xl border border-blue-500/30 bg-blue-500/10 space-y-1">
+                    <div className="font-bold text-blue-700 dark:text-blue-300">Assigned Field Technician:</div>
+                    <div className="font-semibold text-[var(--text-primary)]">{selectedRequest.assignedTech}</div>
+                    <div className="text-[11px] text-blue-600 dark:text-blue-400">{selectedRequest.arrivalSlaWindow}</div>
+                  </div>
+                )}
+
+                {selectedRequest.workNotes && (
+                  <div className="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 space-y-1">
+                    <div className="font-bold text-emerald-800 dark:text-emerald-300">Technician Completion Notes:</div>
+                    <p className="text-slate-800 dark:text-slate-200">{selectedRequest.workNotes}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end pt-2 border-t border-[var(--border)]">
+                <button
+                  type="button"
+                  onClick={() => setSelectedRequest(null)}
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-colors"
+                >
+                  Close Inspection
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

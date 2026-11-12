@@ -1,8 +1,11 @@
-import { useState, useId } from "react";
+import { useState, useEffect, useId } from "react";
 import { Layout } from "../../components/Layout";
 import { useAuth } from "../../context/AuthContext";
-import { ServiceCategory } from "../../types";
+import { ServiceCategory, WorkOrder } from "../../types";
 import { CANONICAL_SERVICE_CATEGORIES } from "../../types";
+import { technicianService } from "../../services/technicianService";
+import { VALID_WORK_ORDER_TRANSITIONS } from "../../services/dispatcherService";
+import { operationalStore } from "../../services/operationalStore";
 import {
   WrenchIcon,
   ClockIcon,
@@ -33,74 +36,11 @@ export interface TechnicianJobItem {
   completionNotes?: string;
 }
 
-export const INITIAL_TECHNICIAN_JOBS: TechnicianJobItem[] = [
-  {
-    id: "WO-2048",
-    requestId: "SR-1024",
-    customerName: "ABC Manufacturing Ltd",
-    customerPhone: "+880 1711-234567",
-    facilityAddress: "Plot 42, Sector 7, Export Processing Zone, Dhaka",
-    category: "Electrical and power systems",
-    assetName: "Standby Generator G-01 (Cummins 250kVA)",
-    assetSerial: "CUM-2024-8842",
-    problemSummary: "Automatic Transfer Switch (ATS) Failure during weekly exercise cycle",
-    priority: "URGENT",
-    status: "TRAVELLING",
-    arrivalSlaRemainingMinutes: 18,
-    scheduledTime: "Immediate / Emergency Dispatch",
-    triageNotes: "ATS coil overheated; technician dispatched with replacement contacts and diagnostic multimeter.",
-  },
-  {
-    id: "WO-2047",
-    requestId: "SR-1021",
-    customerName: "Apex Logistics Hub",
-    customerPhone: "+880 1819-345678",
-    facilityAddress: "Building 3, Central Distribution Center, Gazipur",
-    category: "AC, HVAC, and cooling",
-    assetName: "Central Chiller Unit #2",
-    assetSerial: "TRN-CH-5509",
-    problemSummary: "Compressor low refrigerant pressure interlock tripped",
-    priority: "HIGH",
-    status: "ASSIGNED",
-    arrivalSlaRemainingMinutes: 75,
-    scheduledTime: "Today at 02:00 PM",
-    triageNotes: "Pressure sensor calibration required; verify R-410A charge and expansion valve.",
-  },
-  {
-    id: "WO-2045",
-    requestId: "SR-1019",
-    customerName: "Standard Security Facility",
-    customerPhone: "+880 1912-456789",
-    facilityAddress: "Gulshan Corporate Avenue, Block C, Dhaka",
-    category: "CCTV and security",
-    assetName: "Perimeter NVR System 32-Channel",
-    assetSerial: "HIK-NVR-9912",
-    problemSummary: "PoE Switch port flapping causing intermittent camera feed dropouts",
-    priority: "MEDIUM",
-    status: "ASSIGNED",
-    scheduledTime: "Today at 04:30 PM",
-    triageNotes: "Bring replacement 24-port PoE switch and Cat6 patch cables.",
-  },
-  {
-    id: "WO-2042",
-    requestId: "SR-1018",
-    customerName: "Rahimafrooz Facility Hub",
-    customerPhone: "+880 1713-987654",
-    facilityAddress: "Tejgaon Industrial Area, Dhaka",
-    category: "Plumbing and water systems",
-    assetName: "Booster Water Pump P-03",
-    assetSerial: "GRN-PMP-1104",
-    problemSummary: "Main pressure seal replacement and flow validation",
-    priority: "MEDIUM",
-    status: "COMPLETED",
-    scheduledTime: "Yesterday",
-    completionNotes: "Mechanical seal replaced; pressure test validated at 6.2 bar. Sign-off completed.",
-  },
-];
-
 export function MyJobs() {
   const { user } = useAuth();
-  const [jobs, setJobs] = useState<TechnicianJobItem[]>(INITIAL_TECHNICIAN_JOBS);
+  const [jobs, setJobs] = useState<TechnicianJobItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"ALL" | "TODAY" | "UPCOMING" | "COMPLETED">("ALL");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
@@ -109,30 +49,81 @@ export function MyJobs() {
   const [statusModalJob, setStatusModalJob] = useState<TechnicianJobItem | null>(null);
   const [workNotes, setWorkNotes] = useState("");
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   const statusModalHeadingId = useId();
   const inspectModalHeadingId = useId();
 
-  const handleUpdateStatus = (newStatus: TechnicianJobItem["status"]) => {
-    if (!statusModalJob) return;
+  function loadJobs() {
+    setIsLoading(true);
+    setError(null);
+    technicianService
+      .getJobs(user?.id)
+      .then((res) => {
+        const mapped: TechnicianJobItem[] = res.data.map((w: WorkOrder) => {
+          let arrivalSlaRemainingMinutes: number | undefined = undefined;
+          if (w.status === "TRAVELLING" || w.status === "ASSIGNED") {
+            arrivalSlaRemainingMinutes = w.priority === "URGENT" ? 18 : 35;
+          }
 
-    setJobs((prev) =>
-      prev.map((j) =>
-        j.id === statusModalJob.id
-          ? {
-              ...j,
-              status: newStatus,
-              arrivalSlaRemainingMinutes: newStatus === "ON_SITE" || newStatus === "COMPLETED" ? undefined : j.arrivalSlaRemainingMinutes,
-              completionNotes: newStatus === "COMPLETED" ? workNotes || "Job completed successfully." : j.completionNotes,
-            }
-          : j
-      )
-    );
+          return {
+            id: w.id,
+            requestId: w.requestId,
+            customerName: w.customerName,
+            customerPhone: "+880 1711-204918",
+            facilityAddress: w.facilityAddress,
+            category: w.category,
+            assetName: w.assetName,
+            assetSerial: w.assetName.includes("(") ? w.assetName.split("(")[1]?.replace(")", "") : "SN-2026-VAL",
+            problemSummary: w.problemSummary,
+            priority: w.priority,
+            status: (w.status === "UNASSIGNED" ? "ASSIGNED" : w.status) as any,
+            arrivalSlaRemainingMinutes,
+            scheduledTime: w.status === "COMPLETED" ? "Completed Today" : "Immediate Dispatch",
+            triageNotes: w.workNotes,
+            completionNotes: w.completedAt ? (w.workNotes || "Job completed successfully.") : undefined,
+          };
+        });
+        setJobs(mapped);
+      })
+      .catch((err) => {
+        setError(err.message || "Failed to load technician jobs.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }
 
-    setActionSuccess(`Status for ${statusModalJob.id} updated to ${newStatus.replace("_", " ")}`);
-    setStatusModalJob(null);
-    setWorkNotes("");
-    setTimeout(() => setActionSuccess(null), 4000);
+  useEffect(() => {
+    loadJobs();
+    const unsubscribe = operationalStore.subscribe(() => {
+      loadJobs();
+    });
+    return unsubscribe;
+  }, [user?.id]);
+
+  const handleUpdateStatus = async (newStatus: TechnicianJobItem["status"]) => {
+    if (!statusModalJob || isUpdatingStatus) return;
+    setIsUpdatingStatus(true);
+
+    try {
+      await technicianService.updateJobStatus(
+        statusModalJob.id,
+        newStatus,
+        workNotes,
+        user?.name || "Kamrul Islam (Technician)"
+      );
+
+      setActionSuccess(`Status for ${statusModalJob.id} updated to ${newStatus.replace("_", " ")}`);
+      setStatusModalJob(null);
+      setWorkNotes("");
+      loadJobs();
+      setTimeout(() => setActionSuccess(null), 4000);
+    } catch (err: any) {
+      alert(err.message || "Failed to update job status.");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
   };
 
   const filteredJobs = jobs.filter((j) => {
@@ -159,61 +150,84 @@ export function MyJobs() {
     }
 
     // Tab
-    if (activeTab === "TODAY") return j.status === "TRAVELLING" || j.status === "ON_SITE";
-    if (activeTab === "UPCOMING") return j.status === "ASSIGNED";
-    if (activeTab === "COMPLETED") return j.status === "COMPLETED";
+    if (activeTab === "TODAY") {
+      return j.status === "ASSIGNED" || j.status === "TRAVELLING" || j.status === "ON_SITE";
+    }
+    if (activeTab === "UPCOMING") {
+      return j.status === "ASSIGNED";
+    }
+    if (activeTab === "COMPLETED") {
+      return j.status === "COMPLETED";
+    }
 
     return true;
   });
 
-  const getPriorityBadge = (p: TechnicianJobItem["priority"]) => {
-    switch (p) {
-      case "URGENT":
-        return "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-900";
-      case "HIGH":
-        return "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-900";
-      case "MEDIUM":
-        return "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-900";
-      case "LOW":
-        return "bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
-    }
-  };
-
-  const getStatusBadge = (s: TechnicianJobItem["status"]) => {
-    switch (s) {
+  const getStatusBadge = (status: TechnicianJobItem["status"]) => {
+    switch (status) {
       case "ASSIGNED":
         return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
       case "TRAVELLING":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 font-bold animate-pulse";
       case "ON_SITE":
-        return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20";
+        return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20 font-bold";
       case "COMPLETED":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
+        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 font-semibold";
     }
   };
 
+  const getPriorityBadge = (priority: TechnicianJobItem["priority"]) => {
+    switch (priority) {
+      case "URGENT":
+        return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20 font-bold";
+      case "HIGH":
+        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+      case "MEDIUM":
+        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+      case "LOW":
+        return "bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20";
+    }
+  };
+
+  const validNextTransitions = statusModalJob
+    ? VALID_WORK_ORDER_TRANSITIONS[statusModalJob.status] || []
+    : [];
+
   return (
     <Layout
-      title="My Assigned Jobs"
-      subtitle={`Active Field Work Orders · ${user?.name || "Technician"}`}
-      action={
-        <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-secondary)] font-semibold">
-          {jobs.filter((j) => j.status !== "COMPLETED").length} Active Jobs
-        </span>
-      }
+      title="Field Service Roster"
+      subtitle={`Logged in as ${user?.name || "Technician"} · Electrical & Power Systems Lead`}
     >
       <div className="space-y-4">
-        {/* Success Feedback Notification */}
+        {/* Action success alert */}
         {actionSuccess && (
-          <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20 flex items-center gap-2 text-xs text-emerald-800 dark:text-emerald-300 animate-fade-in">
-            <CheckCircleIcon size={15} className="text-emerald-500 shrink-0" />
-            <span>{actionSuccess}</span>
+          <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between animate-fade-in">
+            <div className="flex items-center gap-2">
+              <CheckCircleIcon size={16} />
+              <span>{actionSuccess}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActionSuccess(null)}
+              className="text-emerald-600 hover:text-emerald-800"
+            >
+              <XIcon size={14} />
+            </button>
           </div>
         )}
 
-        {/* ── Filter Toolbar ─────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Search Input */}
+        {error && (
+          <div className="p-3.5 rounded-xl border border-red-500/30 bg-red-500/10 text-red-800 dark:text-red-300 text-xs font-semibold flex items-center justify-between">
+            <span>{error}</span>
+            <button type="button" onClick={loadJobs} className="underline font-bold">
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* ── Filter Toolbar ────────────────────────────────────────────── */}
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
+          {/* Search */}
           <div className="relative flex-1 min-w-[220px]">
             <SearchIcon
               size={14}
@@ -223,9 +237,9 @@ export function MyJobs() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by Job ID, customer, asset, problem..."
-              aria-label="Search assigned jobs"
-              className="w-full text-xs pl-9 pr-8 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              placeholder="Search by job ID, asset, customer or address..."
+              aria-label="Search jobs"
+              className="w-full text-xs py-2 pl-9 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
             />
             {searchQuery && (
               <button
@@ -304,101 +318,122 @@ export function MyJobs() {
           </div>
         </div>
 
-        {/* ── High-Density Assigned Jobs Table ───────────────────────────── */}
+        {/* ── Jobs Table ────────────────────────────────────────────────── */}
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
-          <div className="w-full max-w-full overflow-x-auto scrollbar-thin">
-            <table className="w-full min-w-[920px] text-left text-xs sm:text-[13px] border-collapse table-fixed">
-              <colgroup>
-                <col className="w-[85px]" />
-                <col className="w-[180px]" />
-                <col className="w-[170px]" />
-                <col className="w-[190px]" />
-                <col className="w-[85px]" />
-                <col className="w-[105px]" />
-                <col className="w-[105px]" />
-              </colgroup>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
-                  <th className="py-2.5 px-3">Job ID</th>
-                  <th className="py-2.5 px-3">Customer & Location</th>
-                  <th className="py-2.5 px-3">Trade & Asset</th>
-                  <th className="py-2.5 px-3">Problem Summary</th>
-                  <th className="py-2.5 px-3">Priority</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3 text-right">Actions</th>
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
+                  <th className="py-3 px-4">Work Order</th>
+                  <th className="py-3 px-4">Customer & Facility</th>
+                  <th className="py-3 px-4">Target Asset & Trade</th>
+                  <th className="py-3 px-4">Problem Summary</th>
+                  <th className="py-3 px-4">Priority</th>
+                  <th className="py-3 px-4">Operational Status</th>
+                  <th className="py-3 px-4">SLA Countdown</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
-                {filteredJobs.length === 0 ? (
+                {isLoading ? (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-xs text-[var(--text-muted)]">
-                      No jobs match the selected filters.
+                    <td colSpan={8} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                      Loading assigned technician jobs...
+                    </td>
+                  </tr>
+                ) : filteredJobs.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                      No matching jobs found in this view.
                     </td>
                   </tr>
                 ) : (
                   filteredJobs.map((job) => (
                     <tr key={job.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-2.5 px-3 font-mono font-bold text-xs text-[var(--text-primary)] whitespace-nowrap truncate">
+                      <td className="py-3.5 px-4 font-mono font-bold text-[var(--text-primary)]">
                         {job.id}
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <div className="font-semibold text-[var(--text-primary)] truncate" title={job.customerName}>
-                          {job.customerName}
+                        <div className="text-[10px] font-mono text-[var(--text-muted)]">
+                          Ref: {job.requestId}
                         </div>
-                        <div className="text-xs text-[var(--text-muted)] truncate flex items-center gap-1" title={job.facilityAddress}>
+                      </td>
+
+                      <td className="py-3.5 px-4">
+                        <div className="font-semibold text-[var(--text-primary)]">{job.customerName}</div>
+                        <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 mt-0.5">
                           <MapPinIcon size={11} className="shrink-0 text-slate-400" />
-                          <span className="truncate">{job.facilityAddress}</span>
+                          <span className="truncate max-w-[200px]">{job.facilityAddress}</span>
                         </div>
                       </td>
-                      <td className="py-2.5 px-3">
-                        <div className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)] truncate" title={job.assetName}>
-                          {job.assetName}
-                        </div>
-                        <div className="text-xs text-[var(--text-muted)] truncate" title={job.category}>
-                          {job.category}
-                        </div>
+
+                      <td className="py-3.5 px-4">
+                        <div className="font-semibold text-[var(--text-primary)]">{job.assetName}</div>
+                        <div className="text-[11px] text-[var(--text-muted)]">{job.category}</div>
                       </td>
-                      <td className="py-2.5 px-3">
-                        <div className="font-medium text-[var(--text-secondary)] truncate" title={job.problemSummary}>
+
+                      <td className="py-3.5 px-4 max-w-[220px]">
+                        <div className="text-[var(--text-primary)] truncate font-medium">
                           {job.problemSummary}
                         </div>
-                        {job.arrivalSlaRemainingMinutes && (
-                          <div className="text-[11px] font-mono font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-1 mt-0.5">
-                            <ClockIcon size={11} />
-                            <span>Arrival Target: {job.arrivalSlaRemainingMinutes}m</span>
-                          </div>
-                        )}
+                        <div className="text-[11px] text-[var(--text-muted)]">{job.scheduledTime}</div>
                       </td>
-                      <td className="py-2.5 px-3 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${getPriorityBadge(job.priority)}`}>
+
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] border ${getPriorityBadge(
+                            job.priority
+                          )}`}
+                        >
                           {job.priority}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${getStatusBadge(job.status)}`}>
+
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold border ${getStatusBadge(
+                            job.status
+                          )}`}
+                        >
                           {job.status.replace("_", " ")}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3 text-right whitespace-nowrap space-x-1">
-                        {job.status !== "COMPLETED" && (
+
+                      <td className="py-3.5 px-4">
+                        {job.arrivalSlaRemainingMinutes !== undefined ? (
+                          <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-rose-600 dark:text-rose-400">
+                            <ClockIcon size={12} className="animate-spin" />
+                            <span>{job.arrivalSlaRemainingMinutes} min left</span>
+                          </div>
+                        ) : job.status === "COMPLETED" ? (
+                          <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+                            ✓ Completed
+                          </span>
+                        ) : (
+                          <span className="text-[var(--text-muted)]">—</span>
+                        )}
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="inline-flex items-center gap-1.5">
                           <button
                             type="button"
-                            onClick={() => {
-                              setStatusModalJob(job);
-                              setWorkNotes("");
-                            }}
-                            className="px-2 py-0.5 rounded-md text-xs font-bold bg-brand text-white hover:bg-brand-dark active:scale-95 transition-all shadow-sm"
+                            onClick={() => setInspectJob(job)}
+                            className="px-2.5 py-1 rounded text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
                           >
-                            Update
+                            Inspect
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => setInspectJob(job)}
-                          className="px-2 py-0.5 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
-                        >
-                          Details
-                        </button>
+                          {job.status !== "COMPLETED" && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setStatusModalJob(job);
+                                setWorkNotes("");
+                              }}
+                              className="px-2.5 py-1 rounded text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
+                            >
+                              Update Status
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -407,182 +442,192 @@ export function MyJobs() {
             </table>
           </div>
         </div>
+
+        {/* ── Status Update Modal ────────────────────────────────────────── */}
+        {statusModalJob && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={statusModalHeadingId}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+          >
+            <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+                <div>
+                  <h3 id={statusModalHeadingId} className="font-heading font-bold text-base text-[var(--text-primary)]">
+                    Update Job Status
+                  </h3>
+                  <p className="text-xs text-[var(--text-muted)] font-mono">
+                    {statusModalJob.id} · {statusModalJob.customerName}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setStatusModalJob(null)}
+                  aria-label="Close dialog"
+                  className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                >
+                  <XIcon size={16} />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                    Select Valid Linear Progression (Current: {statusModalJob.status})
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateStatus("TRAVELLING")}
+                      disabled={isUpdatingStatus || !validNextTransitions.includes("TRAVELLING")}
+                      className="p-2.5 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300 font-bold hover:bg-blue-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-center"
+                    >
+                      En Route
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateStatus("ON_SITE")}
+                      disabled={isUpdatingStatus || !validNextTransitions.includes("ON_SITE")}
+                      className="p-2.5 rounded-xl border border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-300 font-bold hover:bg-purple-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-center"
+                    >
+                      On Site
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateStatus("COMPLETED")}
+                      disabled={isUpdatingStatus || !validNextTransitions.includes("COMPLETED")}
+                      className="p-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold hover:bg-emerald-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-center"
+                    >
+                      Complete
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                    Field Work Notes / Sign-off Details
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={workNotes}
+                    onChange={(e) => setWorkNotes(e.target.value)}
+                    placeholder="Enter diagnostic observations, parts replaced, or completion notes..."
+                    className="w-full text-xs p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
+                <button
+                  type="button"
+                  onClick={() => setStatusModalJob(null)}
+                  disabled={isUpdatingStatus}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Job Inspection Drawer / Modal ───────────────────────────────── */}
+        {inspectJob && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={inspectModalHeadingId}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+          >
+            <div className="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+                <div>
+                  <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                    {inspectJob.id}
+                  </span>
+                  <h3 id={inspectModalHeadingId} className="font-heading font-bold text-base text-[var(--text-primary)]">
+                    {inspectJob.customerName}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setInspectJob(null)}
+                  aria-label="Close inspection"
+                  className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                >
+                  <XIcon size={16} />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[var(--text-muted)]">Category & Trade</span>
+                    <span className="font-semibold text-[var(--text-primary)]">{inspectJob.category}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[var(--text-muted)]">Target Asset</span>
+                    <span className="font-semibold text-[var(--text-primary)]">{inspectJob.assetName}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[var(--text-muted)]">Serial / Tag</span>
+                    <span className="font-mono text-[var(--text-secondary)]">{inspectJob.assetSerial}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[var(--text-muted)]">Customer Contact</span>
+                    <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                      <PhoneIcon size={11} />
+                      <span>{inspectJob.customerPhone}</span>
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[var(--text-muted)]">Facility Location</span>
+                    <span className="font-medium text-[var(--text-primary)] text-right max-w-[260px]">
+                      {inspectJob.facilityAddress}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-bold text-[var(--text-primary)] mb-1">Problem Description</h4>
+                  <p className="p-2.5 rounded-lg bg-[var(--bg-surface-2)] text-[var(--text-secondary)] border border-[var(--border)]">
+                    {inspectJob.problemSummary}
+                  </p>
+                </div>
+
+                {inspectJob.triageNotes && (
+                  <div>
+                    <h4 className="font-bold text-[var(--text-primary)] mb-1">Dispatcher Triage Notes</h4>
+                    <p className="p-2.5 rounded-lg bg-blue-500/5 text-blue-900 dark:text-blue-300 border border-blue-500/20">
+                      {inspectJob.triageNotes}
+                    </p>
+                  </div>
+                )}
+
+                {inspectJob.completionNotes && (
+                  <div>
+                    <h4 className="font-bold text-[var(--text-primary)] mb-1">Completion Summary</h4>
+                    <p className="p-2.5 rounded-lg bg-emerald-500/5 text-emerald-900 dark:text-emerald-300 border border-emerald-500/20">
+                      {inspectJob.completionNotes}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
+                <button
+                  type="button"
+                  onClick={() => setInspectJob(null)}
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#10b981] text-[#06090e] hover:bg-[#34d399]"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* ── Status Transition Modal ─────────────────────────────────────── */}
-      {statusModalJob && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={statusModalHeadingId}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
-        >
-          <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
-              <div>
-                <h3 id={statusModalHeadingId} className="font-heading font-bold text-base text-[var(--text-primary)]">
-                  Update Job Status
-                </h3>
-                <p className="text-xs text-[var(--text-muted)] font-mono">{statusModalJob.id} · {statusModalJob.customerName}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setStatusModalJob(null)}
-                aria-label="Close dialog"
-                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              >
-                <XIcon size={16} />
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="block font-semibold text-[var(--text-secondary)] mb-1">Select Current Operational State</label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateStatus("TRAVELLING")}
-                    disabled={statusModalJob.status === "TRAVELLING" || statusModalJob.status === "ON_SITE"}
-                    className="p-2.5 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300 font-bold hover:bg-blue-500/20 disabled:opacity-40 transition-all text-center"
-                  >
-                    En Route
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateStatus("ON_SITE")}
-                    disabled={statusModalJob.status === "ON_SITE"}
-                    className="p-2.5 rounded-xl border border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-300 font-bold hover:bg-purple-500/20 disabled:opacity-40 transition-all text-center"
-                  >
-                    On Site
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleUpdateStatus("COMPLETED")}
-                    className="p-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold hover:bg-emerald-500/20 transition-all text-center"
-                  >
-                    Complete
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-[var(--text-secondary)] mb-1">
-                  Field Work Notes / Sign-off Details
-                </label>
-                <textarea
-                  rows={3}
-                  value={workNotes}
-                  onChange={(e) => setWorkNotes(e.target.value)}
-                  placeholder="Enter diagnostic observations, parts replaced, or completion notes..."
-                  className="w-full text-xs p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
-              <button
-                type="button"
-                onClick={() => setStatusModalJob(null)}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Job Inspection Drawer / Modal ───────────────────────────────── */}
-      {inspectJob && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={inspectModalHeadingId}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
-        >
-          <div className="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
-              <div>
-                <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">{inspectJob.id}</span>
-                <h3 id={inspectModalHeadingId} className="font-heading font-bold text-base text-[var(--text-primary)]">
-                  {inspectJob.customerName}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setInspectJob(null)}
-                aria-label="Close inspection"
-                className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              >
-                <XIcon size={16} />
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-[var(--text-muted)]">Category & Trade</span>
-                  <span className="font-semibold text-[var(--text-primary)]">{inspectJob.category}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[var(--text-muted)]">Target Asset</span>
-                  <span className="font-semibold text-[var(--text-primary)]">{inspectJob.assetName}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[var(--text-muted)]">Serial / Tag</span>
-                  <span className="font-mono text-[var(--text-secondary)]">{inspectJob.assetSerial}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[var(--text-muted)]">Phone</span>
-                  <a href={`tel:${inspectJob.customerPhone}`} className="text-emerald-600 font-semibold hover:underline flex items-center gap-1">
-                    <PhoneIcon size={11} />
-                    <span>{inspectJob.customerPhone}</span>
-                  </a>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[var(--text-muted)]">Location</span>
-                  <span className="font-medium text-[var(--text-primary)] text-right max-w-[260px]">{inspectJob.facilityAddress}</span>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-[var(--text-primary)] mb-1">Problem Description</h4>
-                <p className="p-2.5 rounded-lg bg-[var(--bg-surface-2)] text-[var(--text-secondary)] border border-[var(--border)]">
-                  {inspectJob.problemSummary}
-                </p>
-              </div>
-
-              {inspectJob.triageNotes && (
-                <div>
-                  <h4 className="font-bold text-[var(--text-primary)] mb-1">Dispatcher Triage Notes</h4>
-                  <p className="p-2.5 rounded-lg bg-blue-500/5 text-blue-900 dark:text-blue-300 border border-blue-500/20">
-                    {inspectJob.triageNotes}
-                  </p>
-                </div>
-              )}
-
-              {inspectJob.completionNotes && (
-                <div>
-                  <h4 className="font-bold text-[var(--text-primary)] mb-1">Completion Summary</h4>
-                  <p className="p-2.5 rounded-lg bg-emerald-500/5 text-emerald-900 dark:text-emerald-300 border border-emerald-500/20">
-                    {inspectJob.completionNotes}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
-              <button
-                type="button"
-                onClick={() => setInspectJob(null)}
-                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-brand text-white hover:bg-brand-dark"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </Layout>
   );
 }
