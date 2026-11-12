@@ -11,7 +11,7 @@ export function Login() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSelectPreview(role: "ADMIN" | "DISPATCHER" | "TECHNICIAN") {
+  function handleSelectPreview(role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER") {
     if (enterPreviewRole) {
       enterPreviewRole(role);
       navigate("/");
@@ -148,11 +148,11 @@ export function Login() {
             <p className="text-xs text-[var(--text-muted)] leading-relaxed mb-4">
               Explore internal operational dashboards directly without a live backend session. No credentials or JWT tokens stored.
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
                 type="button"
                 onClick={() => handleSelectPreview("ADMIN")}
-                className="px-2.5 py-2 text-xs font-semibold rounded-xl border transition-all text-purple-400 bg-purple-500/10 border-purple-500/20 hover:bg-purple-500/20 active:scale-[0.98] text-center truncate"
+                className="px-2 py-2 text-xs font-semibold rounded-xl border transition-all text-purple-400 bg-purple-500/10 border-purple-500/20 hover:bg-purple-500/20 active:scale-[0.98] text-center truncate"
                 title="Preview as Admin (/admin)"
               >
                 Admin
@@ -160,7 +160,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => handleSelectPreview("DISPATCHER")}
-                className="px-2.5 py-2 text-xs font-semibold rounded-xl border transition-all text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20 active:scale-[0.98] text-center truncate"
+                className="px-2 py-2 text-xs font-semibold rounded-xl border transition-all text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20 active:scale-[0.98] text-center truncate"
                 title="Preview as Dispatcher (/dispatcher)"
               >
                 Dispatcher
@@ -168,10 +168,18 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => handleSelectPreview("TECHNICIAN")}
-                className="px-2.5 py-2 text-xs font-semibold rounded-xl border transition-all text-cyan-400 bg-cyan-500/10 border-cyan-500/20 hover:bg-cyan-500/20 active:scale-[0.98] text-center truncate"
+                className="px-2 py-2 text-xs font-semibold rounded-xl border transition-all text-cyan-400 bg-cyan-500/10 border-cyan-500/20 hover:bg-cyan-500/20 active:scale-[0.98] text-center truncate"
                 title="Preview as Technician (/technician)"
               >
                 Technician
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSelectPreview("CUSTOMER")}
+                className="px-2 py-2 text-xs font-semibold rounded-xl border transition-all text-blue-400 bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20 active:scale-[0.98] text-center truncate"
+                title="Preview as Customer (/customer)"
+              >
+                Customer
               </button>
             </div>
           </div>

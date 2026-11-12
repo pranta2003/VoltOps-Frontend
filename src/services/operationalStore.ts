@@ -4,8 +4,12 @@
 // ARCHITECTURAL BOUNDARY & LIMITATIONS NOTICE:
 // 1. SCOPE: This is a TEMPORARY, CLIENT-SIDE DEMONSTRATION STATE ENGINE.
 //    It is NOT a persistent database and does not replace backend persistence.
-// 2. LIFECYCLE: Persists strictly to browser `sessionStorage` (cleared on tab close).
-//    In Node.js, test harnesses, and SSR environments, it falls back to in-memory state.
+// 2. CROSS-TAB SYNCHRONIZATION:
+//    - Persists to browser `localStorage` across all tabs in the same origin.
+//    - In modern browsers, uses `BroadcastChannel("voltops_operational_sync")` for
+//      instant cross-tab re-rendering.
+//    - Falls back to `window.addEventListener("storage", ...)` for broad browser support.
+//    - In Node.js, test harnesses, and SSR environments, it falls back to in-memory state.
 // 3. SECURITY & DATA ISOLATION:
 //    - Operational state is strictly isolated from authentication credentials.
 //    - NEVER store user passwords, JWT tokens, session cookies, or payment card details here.
@@ -27,6 +31,7 @@ import {
 
 const STORAGE_KEY = "voltops_operational_state_v1";
 const EVENT_NAME = "voltops-operational-update";
+const CHANNEL_NAME = "voltops_operational_sync";
 
 export const INITIAL_INVOICES: Invoice[] = [
   {
@@ -65,7 +70,7 @@ export const INITIAL_INVOICES: Invoice[] = [
     taxRate: 0.05,
     taxAmount: 32.5,
     totalAmount: 682.5,
-    paymentNotice: "Demonstration Billing Statement: Payment gateway integration (Stripe / Bank ACH) pending backend milestone.",
+    paymentNotice: "Demonstration Statement: Requires backend payment gateway integration for authoritative financial settlement.",
   },
 ];
 
@@ -89,11 +94,39 @@ function createPristineBaseline(): OperationalState {
 
 let memoryState: OperationalState = createPristineBaseline();
 
-function hasSessionStorage(): boolean {
+function hasLocalStorage(): boolean {
   try {
-    return typeof window !== "undefined" && typeof window.sessionStorage !== "undefined";
+    return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
   } catch {
     return false;
+  }
+}
+
+// ── Multi-Tab Cross-Communication Channel ───────────────────────────────────
+let broadcastChannel: BroadcastChannel | null = null;
+if (typeof window !== "undefined" && typeof (window as any).BroadcastChannel === "function") {
+  try {
+    broadcastChannel = new BroadcastChannel(CHANNEL_NAME);
+    broadcastChannel.onmessage = (event) => {
+      if (event.data?.type === EVENT_NAME) {
+        notifyLocalSubscribers();
+      }
+    };
+  } catch {
+    broadcastChannel = null;
+  }
+}
+
+// Fallback listener for browsers or environments using standard storage events
+if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+  try {
+    window.addEventListener("storage", (event) => {
+      if (event.key === STORAGE_KEY) {
+        notifyLocalSubscribers();
+      }
+    });
+  } catch {
+    // Storage listener fallback
   }
 }
 
@@ -118,9 +151,9 @@ export function validateOperationalState(candidate: unknown): OperationalState |
 }
 
 function loadState(): OperationalState {
-  if (hasSessionStorage()) {
+  if (hasLocalStorage()) {
     try {
-      const raw = window.sessionStorage.getItem(STORAGE_KEY);
+      const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         const validated = validateOperationalState(parsed);
@@ -128,13 +161,13 @@ function loadState(): OperationalState {
           return validated;
         }
         // Malformed structure detected: discard corrupted state safely
-        console.warn("[VoltOps Demo Store] Malformed session storage structure discarded. Reverting to baseline.");
-        window.sessionStorage.removeItem(STORAGE_KEY);
+        console.warn("[VoltOps Demo Store] Malformed storage structure discarded. Reverting to baseline.");
+        window.localStorage.removeItem(STORAGE_KEY);
       }
     } catch (err) {
-      console.warn("[VoltOps Demo Store] Corrupted session storage JSON discarded:", err);
+      console.warn("[VoltOps Demo Store] Corrupted storage JSON discarded:", err);
       try {
-        window.sessionStorage.removeItem(STORAGE_KEY);
+        window.localStorage.removeItem(STORAGE_KEY);
       } catch {
         // Ignore removal error
       }
@@ -145,22 +178,36 @@ function loadState(): OperationalState {
 
 function saveState(state: OperationalState): void {
   memoryState = state;
-  if (hasSessionStorage()) {
+  if (hasLocalStorage()) {
     try {
-      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
-      // Storage quota exceeded or disabled in strict security mode
+      // Storage quota exceeded or disabled in strict private mode
     }
   }
   notifySubscribers();
 }
 
-function notifySubscribers(): void {
+function notifyLocalSubscribers(): void {
   if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
     try {
       window.dispatchEvent(new CustomEvent(EVENT_NAME));
     } catch {
       // CustomEvent dispatch fallback
+    }
+  }
+}
+
+function notifySubscribers(): void {
+  // 1. Notify current tab components
+  notifyLocalSubscribers();
+
+  // 2. Broadcast to other open tabs in the same origin
+  if (broadcastChannel) {
+    try {
+      broadcastChannel.postMessage({ type: EVENT_NAME, timestamp: Date.now() });
+    } catch {
+      // Channel post fallback
     }
   }
 }
@@ -262,7 +309,7 @@ export const operationalStore = {
   },
 
   /**
-   * Subscribe to state mutations across the application
+   * Subscribe to state mutations across the application (both local tab and cross-tab updates)
    */
   subscribe(callback: () => void): () => void {
     if (typeof window === "undefined" || typeof window.addEventListener !== "function") {

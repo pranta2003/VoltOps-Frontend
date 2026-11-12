@@ -776,7 +776,70 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
-## Role Portals & Core Screens Status (Verified in Code)
+## Milestone 4.1 — Business Logic Integrity, Data Safety & Integration Boundaries
+- **Date**: 12 November 2026
+- **Branch**: `pranta`
+- **Commit**: `01b486e`
+- **Summary of Accomplishments**:
+  1. **Strict Coverage Plan SLAs Enforced**:
+     - Plan A (8-Hour Daily): 08:00–16:00 window, strictly null physical arrival SLA.
+     - Plan B (24/7 Standard): Strictly 40-minute physical arrival SLA.
+     - Plan C (24/7 Priority): Strictly 20-minute physical arrival SLA.
+     - Plan D (Custom Enterprise): Strictly negotiated terms, null physical arrival SLA.
+  2. **Payment Gateway Boundaries**:
+     - Explicit payment initiation disclaimer.
+     - Prevents fabricating full financial collection; invoices transition to `PAYMENT_PENDING` (never `PAID`).
+  3. **Technician Availability Integrity**:
+     - Technicians with active assignments remain `ON_JOB` upon completion of a single order.
+     - Technicians with status `ON_LEAVE` are never erroneously forced to `AVAILABLE`.
+  4. **Route Code Splitting**:
+     - Implemented `React.lazy` and `Suspense` across all 15 application route chunks.
+     - Reduced initial entry point from 785 kB to 471 kB (147 kB gzip) with zero chunk warnings.
+  5. **Validation & Test Coverage**:
+     - Added 10 comprehensive regression integration tests (`tests/workflowIntegration.test.mjs`).
+     - 45/45 tests passing.
+
+---
+
+## Milestone 4.2 — Final Cross-Portal QA, Security & Production Readiness
+- **Date**: 12 November 2026
+- **Branch**: `pranta`
+- **Commit**: `[Current]`
+- **Summary of Accomplishments**:
+  1. **Storage Architecture & Cross-Tab Synchronization**:
+     - Upgraded `operationalStore.ts` from tab-isolated `sessionStorage` to persistent `localStorage`.
+     - Integrated `BroadcastChannel("voltops_operational_sync")` and `window.addEventListener("storage")`.
+     - Tested cross-tab event notification: mutations in one tab instantly notify subscribers across all other tabs without page reload.
+     - Isolated credentials and session tokens from operational state.
+  2. **Payment Semantics Hardened**:
+     - Updated `CustomerInvoices.tsx` and `customerService.ts` to explicitly state demonstration intent.
+     - Enforced that frontend payment actions cannot mark invoices as `PAID` (status held at `PAYMENT_PENDING`).
+     - Added disclaimer notice: "Demonstration Statement: Official billing and settlement require backend financial gateway integration."
+  3. **Auth & Developer Preview Extended**:
+     - Added `CUSTOMER` preview user to `AuthContext.tsx` and `Login.tsx` preview role selector grid (`Admin`, `Dispatcher`, `Technician`, `Customer`).
+     - Fixed 401 redirect loop bug in `axios.ts`: Axios response interceptor now ignores 401 redirects when already on `/login`, `/register`, or `/`.
+  4. **Comprehensive Automated Test Expansion**:
+     - Expanded `tests/workflowIntegration.test.mjs` with:
+       - Test 11: Cross-tab broadcast simulation and event propagation.
+       - Test 12: Customer request submission required field validation.
+     - Total passing test suite: **47/47 tests** (35 unit + 12 end-to-end integration).
+  5. **Live In-Browser Cross-Portal QA (`chrome-devtools-mcp`)**:
+     - Landing page verified at `http://localhost:5173`.
+     - Route authorization verified: unauthenticated access redirects to `/login`; unauthorized customer access to `/admin` redirects to `/unauthorized`.
+     - Full cross-portal end-to-end lifecycle verified live:
+       - Customer submits request for Standby Generator G-01 under Plan C (`SR-1008`).
+       - Dispatcher reviews request in `/dispatcher/requests`, converts to `WO-3006` with 20m SLA target.
+       - Matching Engine ranks and assigns Rafiqul Hasan.
+       - Technician opens `/technician/jobs`, executes linear status progression: `ASSIGNED` -> `TRAVELLING` -> `ON_SITE` -> `COMPLETED`.
+       - Customer verifies completion in `/customer`, inspects auto-generated invoice `INV-4102` ($420.00) in `/customer/invoices`, clicks "Initiate Payment", transitions to `PAYMENT_PENDING` with disclaimer banner.
+       - Dispatcher audit ledger (`/dispatcher/audit`) verifies chronological recording of all 6 operational events (`REQUEST REVIEWED`, `ORDER CREATED`, `TECH DISPATCHED`, 3x `STATUS CHANGED`).
+  6. **Responsive Layout & Accessibility**:
+     - Tested mobile viewport (390×844 px) and tablet viewport (768×1024 px).
+     - Responsive sidebar cleanly switches to mobile toggle button (`Toggle Navigation Menu`).
+     - Zero horizontal scrollbars or overflow regressions across tables and metric cards.
+  7. **Production Build & Compilation**:
+     - `tsc --noEmit` and `vite build` completed in 5.20s with 0 errors and 0 warnings.
+
 
 | Screen | Route | Role | Figma Reference | Backend Status | Status |
 |---|---|---|---|---|---|

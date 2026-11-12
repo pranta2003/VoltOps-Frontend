@@ -204,7 +204,7 @@ export function CustomerInvoices() {
                 {paySuccess && (
                   <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-semibold flex items-center gap-2 animate-fade-in">
                     <CheckCircleIcon size={16} />
-                    <span>Payment intent created. Invoices require external payment gateway confirmation (Stripe / Bank ACH) before status can transition to PAID.</span>
+                    <span>Demonstration payment intent registered in local prototype. No real banking session or monetary transaction occurred. Invoices remain unconfirmed until authoritative backend gateway webhook confirmation.</span>
                   </div>
                 )}
 

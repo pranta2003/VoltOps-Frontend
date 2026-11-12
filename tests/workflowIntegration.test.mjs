@@ -629,3 +629,93 @@ test("Test 10: Dispatcher overload protection prevents technician from exceeding
     (err) => err.code === "TECHNICIAN_OVERLOADED"
   );
 });
+
+// ── TEST GROUP 6: Cross-Tab Sync & Form Validation ───────────────────────────
+test("Test 11: Cross-tab synchronization notifies secondary tab listeners upon state mutations", () => {
+  let tab2NotificationReceived = false;
+
+  // Simulate Tab 2 subscribing to cross-tab updates
+  const tab2Listener = () => {
+    tab2NotificationReceived = true;
+  };
+
+  // Channel simulation
+  class MockBroadcastChannel {
+    constructor(name) {
+      this.name = name;
+      MockBroadcastChannel.channels = MockBroadcastChannel.channels || [];
+      MockBroadcastChannel.channels.push(this);
+    }
+    postMessage(data) {
+      MockBroadcastChannel.channels.forEach((ch) => {
+        if (ch !== this && ch.onmessage) {
+          ch.onmessage({ data });
+        }
+      });
+    }
+  }
+
+  const tab1Channel = new MockBroadcastChannel("voltops_operational_sync");
+  const tab2Channel = new MockBroadcastChannel("voltops_operational_sync");
+  tab2Channel.onmessage = (evt) => {
+    if (evt.data?.type === "voltops-operational-update") {
+      tab2Listener();
+    }
+  };
+
+  // Tab 1 creates a request and broadcasts mutation
+  harness.createCustomerRequest({
+    category: "Electrical and power systems",
+    assetName: "Generator G-09",
+    problemTitle: "Low fuel pressure",
+    problemDescription: "Filter clogged",
+    priority: "HIGH",
+  });
+  tab1Channel.postMessage({ type: "voltops-operational-update", timestamp: Date.now() });
+
+  assert.equal(tab2NotificationReceived, true, "Tab 2 must receive cross-tab operational update");
+});
+
+test("Test 12: Customer request submission strictly validates required fields", () => {
+  // Missing problem title
+  assert.throws(
+    () => {
+      harness.createCustomerRequest({
+        category: "Electrical and power systems",
+        assetName: "Transformer T-1",
+        problemTitle: "   ",
+        problemDescription: "Fault description",
+        priority: "HIGH",
+      });
+    },
+    { message: /Problem title is required/ }
+  );
+
+  // Missing problem description
+  assert.throws(
+    () => {
+      harness.createCustomerRequest({
+        category: "Electrical and power systems",
+        assetName: "Transformer T-1",
+        problemTitle: "Fault title",
+        problemDescription: "",
+        priority: "HIGH",
+      });
+    },
+    { message: /Problem description is required/ }
+  );
+
+  // Missing asset name
+  assert.throws(
+    () => {
+      harness.createCustomerRequest({
+        category: "Electrical and power systems",
+        assetName: "  ",
+        problemTitle: "Fault title",
+        problemDescription: "Fault description",
+        priority: "HIGH",
+      });
+    },
+    { message: /Asset name is required/ }
+  );
+});

@@ -9,11 +9,11 @@ interface AuthContextType {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   isPreview?: boolean;
-  enterPreviewRole?: (role: "ADMIN" | "DISPATCHER" | "TECHNICIAN") => void;
+  enterPreviewRole?: (role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER") => void;
   exitPreview?: () => void;
 }
 
-const PREVIEW_USERS: Record<"ADMIN" | "DISPATCHER" | "TECHNICIAN", AuthUser> = {
+const PREVIEW_USERS: Record<"ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER", AuthUser> = {
   ADMIN: {
     id: "usr-preview-admin",
     name: "Pranta Admin (Preview)",
@@ -38,6 +38,14 @@ const PREVIEW_USERS: Record<"ADMIN" | "DISPATCHER" | "TECHNICIAN", AuthUser> = {
     initials: "KI",
     company: "VoltOps Field Services",
   },
+  CUSTOMER: {
+    id: "cust-epz-01",
+    name: "Apex Facility Manager (Preview)",
+    email: "facility@apexmills.com",
+    role: "CUSTOMER",
+    initials: "AF",
+    company: "Apex Spinning & Weaving Mills, Savar",
+  },
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isPreview, setIsPreview] = useState(false);
 
   // Development-only role preview helpers
-  function enterPreviewRole(role: "ADMIN" | "DISPATCHER" | "TECHNICIAN") {
+  function enterPreviewRole(role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER") {
     if (!import.meta.env.DEV) return;
     setIsPreview(true);
     setUser(PREVIEW_USERS[role]);
@@ -77,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // If in dev mode and a preview role was selected in this session, restore preview
     if (import.meta.env.DEV) {
-      const savedPreviewRole = sessionStorage.getItem("voltops_preview_role") as "ADMIN" | "DISPATCHER" | "TECHNICIAN" | null;
+      const savedPreviewRole = sessionStorage.getItem("voltops_preview_role") as "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER" | null;
       if (savedPreviewRole && PREVIEW_USERS[savedPreviewRole]) {
         setIsPreview(true);
         setUser(PREVIEW_USERS[savedPreviewRole]);
