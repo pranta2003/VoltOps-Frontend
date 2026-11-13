@@ -129,7 +129,7 @@ export function LeaveRequests() {
                 My Leave History & Status
               </h3>
               <p className="text-[11px] text-[var(--text-muted)]">
-                Submitted requests synchronize across Dispatcher Schedule and Availability engines
+                Approval requires Dispatcher or Admin review before shift rosters update.
               </p>
             </div>
             <span className="text-[11px] font-mono font-medium text-[var(--text-muted)]">
@@ -295,7 +295,7 @@ export function LeaveRequests() {
                 </div>
 
                 <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-800 dark:text-amber-300">
-                  Note: Approved leaves update dispatcher shift lanes and mark technician as ON LEAVE.
+                  Notice: All leave requests require Dispatcher or Admin approval before shift assignments change.
                 </div>
 
                 <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border)]">
