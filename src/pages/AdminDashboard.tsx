@@ -5,6 +5,8 @@ import { useAuth } from "../context/AuthContext";
 import { AdminService } from "../services/adminService";
 import { AdminOperationalMetrics, TechnicianVerificationProfile } from "../types/admin";
 import { MetricCard } from "../components/MetricCard";
+import { HorizontalBarChart, HorizontalBarItem } from "../components/charts/HorizontalBarChart";
+import { DonutChart, DonutSegment } from "../components/charts/DonutChart";
 import {
   ShieldCheckIcon,
   AlertTriangleIcon,
@@ -26,6 +28,8 @@ export function AdminDashboard() {
     dataSource: "UNAVAILABLE",
   });
   const [pendingApprovals, setPendingApprovals] = useState<TechnicianVerificationProfile[]>([]);
+  const [roleDistribution, setRoleDistribution] = useState<HorizontalBarItem[]>([]);
+  const [verificationSegments, setVerificationSegments] = useState<DonutSegment[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -38,13 +42,41 @@ export function AdminDashboard() {
       const telemetry = await AdminService.getDashboardMetrics();
       setMetrics(telemetry);
 
-      // 2. Fetch pending verification candidates for administrative action
+      // 2. Fetch technician verification candidates for administrative action
       const techRes = await AdminService.getTechnicians();
       if (techRes.data) {
         const pending = techRes.data.filter((t) => t.verificationStatus === "PENDING_REVIEW");
         setPendingApprovals(pending);
+
+        const verified = techRes.data.filter((t) => t.verificationStatus === "VERIFIED").length;
+        const pendingCount = pending.length;
+        const rejected = techRes.data.filter((t) => t.verificationStatus === "REJECTED").length;
+
+        setVerificationSegments([
+          { label: "Verified Tier 1/2", value: verified, color: "#10b981" },
+          { label: "Pending Review", value: pendingCount, color: "#f59e0b" },
+          { label: "Rejected / Incomplete", value: rejected, color: "#f43f5e" },
+        ]);
       } else {
         setPendingApprovals([]);
+        setVerificationSegments([]);
+      }
+
+      // 3. Fetch directory users for truthful account distribution
+      const userRes = await AdminService.getUsers({ limit: 100 });
+      if (userRes.data?.data) {
+        const allUsers = userRes.data.data;
+        const customers = allUsers.filter((u) => u.role === "CUSTOMER").length;
+        const technicians = allUsers.filter((u) => u.role === "TECHNICIAN").length;
+        const dispatchers = allUsers.filter((u) => u.role === "DISPATCHER").length;
+        const admins = allUsers.filter((u) => u.role === "ADMIN").length;
+
+        setRoleDistribution([
+          { label: "Commercial Clients", value: customers, color: "#10b981" },
+          { label: "Field Technicians", value: technicians, color: "#06b6d4" },
+          { label: "Central Dispatchers", value: dispatchers, color: "#3b82f6" },
+          { label: "System Administrators", value: admins, color: "#a855f7" },
+        ]);
       }
 
       if (telemetry.dataSource === "OFFLINE_BASELINE") {
@@ -209,6 +241,69 @@ export function AdminDashboard() {
           </Link>
         </div>
 
+        {/* ── Meaningful Operational Telemetry & Distributions ───────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          {/* User Account Distribution */}
+          <div className="lg:col-span-7 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-3">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
+              <div>
+                <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
+                  Directory Account Distribution
+                </h3>
+                <p className="text-[11px] text-[var(--text-muted)]">
+                  Active user accounts categorized across operational roles
+                </p>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)] border border-[var(--border)]">
+                {isLive ? "Live Directory" : "Verified Baseline · 12 Accounts"}
+              </span>
+            </div>
+            {loading ? (
+              <div className="space-y-3 py-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-6 bg-[var(--bg-surface-2)] rounded animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <HorizontalBarChart
+                data={roleDistribution}
+                valueSuffix=" users"
+                emptyMessage="No directory accounts loaded"
+              />
+            )}
+          </div>
+
+          {/* Technician Credential & Licensing Breakdown */}
+          <div className="lg:col-span-5 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-3">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
+              <div>
+                <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
+                  Technician Verification Status
+                </h3>
+                <p className="text-[11px] text-[var(--text-muted)]">
+                  Skill passport compliance and renewal health
+                </p>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)] border border-[var(--border)]">
+                {isLive ? "Live Ledger" : "Credential Ledger"}
+              </span>
+            </div>
+            {loading ? (
+              <div className="h-32 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 animate-spin" />
+              </div>
+            ) : (
+              <DonutChart
+                data={verificationSegments}
+                totalLabel="Passports"
+                size={120}
+                strokeWidth={13}
+                emptyMessage="No technician records"
+              />
+            )}
+          </div>
+        </div>
+
         {/* ── Administrative Attention & Governance Section ────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Panel 1: Pending Administrative Approvals */}
@@ -294,8 +389,9 @@ export function AdminDashboard() {
                       Admin, Dispatcher, Technician, and Customer portals guarded
                     </span>
                   </div>
-                  <span className="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                    ENFORCED
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    Enforced
                   </span>
                 </div>
 
@@ -306,8 +402,9 @@ export function AdminDashboard() {
                       Immutable logging across verifications and role actions
                     </span>
                   </div>
-                  <span className="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                    ACTIVE
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    Active
                   </span>
                 </div>
 
@@ -318,8 +415,9 @@ export function AdminDashboard() {
                       Approved visit allowances enforced across Plans A–D
                     </span>
                   </div>
-                  <span className="px-1.5 py-0.5 rounded font-mono font-bold text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                    VERIFIED
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    Verified
                   </span>
                 </div>
               </div>
