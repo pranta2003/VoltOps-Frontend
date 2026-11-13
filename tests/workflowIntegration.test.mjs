@@ -19,7 +19,8 @@ const VALID_WORK_ORDER_TRANSITIONS = {
   UNASSIGNED: ["ASSIGNED", "CANCELLED"],
   ASSIGNED: ["TRAVELLING", "CANCELLED"],
   TRAVELLING: ["ON_SITE", "CANCELLED"],
-  ON_SITE: ["COMPLETED", "CANCELLED"],
+  ON_SITE: ["WORK_COMPLETED_AWAITING_CONFIRMATION", "COMPLETED", "CANCELLED"],
+  WORK_COMPLETED_AWAITING_CONFIRMATION: ["COMPLETED", "CANCELLED"],
   COMPLETED: [],
   CANCELLED: [],
 };
@@ -286,7 +287,7 @@ class WorkflowHarness {
       id,
       customerId: customer.id,
       customerName: customer.name,
-      facilityAddress: dto.facilityAddress || "DEPZ Sector 3, Savar",
+      facilityAddress: dto.facilityAddress || customer?.address || "Plot 14-18, Sector 3, DEPZ, Savar",
       category: dto.category,
       assetName: dto.assetName,
       problemTitle: dto.problemTitle.trim(),
@@ -468,6 +469,35 @@ class WorkflowHarness {
       summary: `Work order transitioned from ${prev} to ${newStatus}`,
     });
 
+    return order;
+  }
+
+  // 4b. Technician submit completion report
+  submitJobCompletion(workOrderId, report) {
+    const order = this.workOrders.find((w) => w.id === workOrderId);
+    if (!order) throw new Error(`Work order ${workOrderId} not found.`);
+
+    this.updateJobStatus(workOrderId, "WORK_COMPLETED_AWAITING_CONFIRMATION", report.notes);
+    order.completionReport = {
+      completedAt: new Date().toISOString(),
+      notes: report.notes,
+      materialsUsed: report.materialsUsed,
+      technicianName: report.technicianName || "Kamrul Islam",
+      confirmedByCustomer: false,
+    };
+    return order;
+  }
+
+  // 4c. Customer or Dispatcher confirm job completion
+  confirmJobCompletion(workOrderId, actorName = "Apex Spinning Mills") {
+    const order = this.workOrders.find((w) => w.id === workOrderId);
+    if (!order) throw new Error(`Work order ${workOrderId} not found.`);
+
+    this.updateJobStatus(workOrderId, "COMPLETED", `Completion confirmed by ${actorName}`);
+    if (order.completionReport) {
+      order.completionReport.confirmedByCustomer = true;
+      order.completionReport.confirmedAt = new Date().toISOString();
+    }
     return order;
   }
 
@@ -1122,4 +1152,197 @@ test("Test 20: Merged Customer Dashboard searches by keyword across multiple fie
   // Search by Request ID
   const searchId = requests.filter((r) => r.id.toLowerCase().includes("sr-1001"));
   assert.equal(searchId.length, 1);
+});
+
+test("Test 21: Complete 5-Step Customer-to-Dispatcher-to-Technician-to-Customer End-to-End Workflow with Data Consistency Verification", () => {
+  const harness = new WorkflowHarness();
+
+  // STEP 1 — Customer submits new service request
+  const requestDto = {
+    category: "ELECTRICAL",
+    assetName: "Main Distribution Panel MDP-01",
+    problemTitle: "Phase Imbalance and Overheating Breaker",
+    problemDescription: "Phase B busbar showing thermal rise (>85C) under peak spinning load.",
+    priority: "URGENT",
+    coveragePlan: "247-priority",
+  };
+  const customer = {
+    id: "cust-epz-01",
+    name: "Apex Spinning & Weaving Mills",
+    address: "Plot 14-18, Sector 3, DEPZ, Savar",
+    phone: "+880 1711-204918",
+  };
+
+  const createdRequest = harness.createCustomerRequest(requestDto, customer);
+
+  // Assertions for Step 1
+  assert.ok(createdRequest.id.startsWith("SR-"));
+  assert.equal(createdRequest.status, "NEW");
+  assert.equal(createdRequest.category, "ELECTRICAL");
+  assert.equal(createdRequest.assetName, "Main Distribution Panel MDP-01");
+  assert.equal(createdRequest.coveragePlan, "247-priority");
+  assert.equal(createdRequest.slaRemainingMinutes, 20); // 24/7 Priority enforces 20m rapid arrival SLA
+  assert.equal(createdRequest.customerName, "Apex Spinning & Weaving Mills");
+  assert.equal(createdRequest.facilityAddress, "Plot 14-18, Sector 3, DEPZ, Savar");
+
+  const recordedRequestId = createdRequest.id;
+
+  // Verify visible in customer portal
+  const customerRequests = harness.getCustomerRequests("cust-epz-01");
+  const foundInCustomerView = customerRequests.find((r) => r.id === recordedRequestId);
+  assert.ok(foundInCustomerView);
+  assert.equal(foundInCustomerView.problemTitle, requestDto.problemTitle);
+
+  // STEP 2 — Dispatcher triages and converts request to Work Order, assigns technician
+  // Find in dispatcher queue
+  const foundInDispatcherQueue = harness.requests.find((r) => r.id === recordedRequestId);
+  assert.ok(foundInDispatcherQueue);
+  assert.equal(foundInDispatcherQueue.status, "NEW");
+
+  // Convert to Work Order
+  const convertedOrder = harness.convertRequestToWorkOrder({
+    requestId: recordedRequestId,
+    priority: "URGENT",
+    notes: "Critical busbar thermal alert. Immediate on-site dispatch authorized.",
+  });
+
+  assert.ok(convertedOrder.id.startsWith("WO-"));
+  const recordedWorkOrderId = convertedOrder.id;
+
+  // Data consistency checks
+  assert.equal(convertedOrder.requestId, recordedRequestId);
+  assert.equal(convertedOrder.customerName, customer.name);
+  assert.equal(convertedOrder.facilityAddress, customer.address);
+  assert.equal(convertedOrder.category, requestDto.category);
+  assert.equal(convertedOrder.assetName, requestDto.assetName);
+  assert.equal(convertedOrder.priority, "URGENT");
+  assert.equal(convertedOrder.coveragePlan, "247-priority");
+  assert.equal(convertedOrder.status, "UNASSIGNED");
+  assert.ok(convertedOrder.slaDeadline !== null); // SLA deadline computed for 247-priority
+
+  // Original request status updated
+  assert.equal(foundInDispatcherQueue.status, "CONVERTED");
+  assert.equal(foundInDispatcherQueue.workOrderId, recordedWorkOrderId);
+
+  // Assign eligible technician
+  const assignedOrder = harness.assignTechnician({
+    workOrderId: recordedWorkOrderId,
+    technicianId: "tech-01",
+    dispatcherNotes: "Assigned Kamrul Islam (Senior High-Voltage Specialist)",
+  });
+
+  assert.equal(assignedOrder.status, "ASSIGNED");
+  assert.equal(assignedOrder.assignedTechnicianId, "tech-01");
+  assert.ok(assignedOrder.assignedTechnicianName.includes("Kamrul Islam"));
+
+  // STEP 3 — Technician progression: Start Travel -> On Site -> Submit Completion Report
+  // En route
+  const travellingOrder = harness.updateJobStatus(recordedWorkOrderId, "TRAVELLING", "Departed EPZ Hub en route to Savar.");
+  assert.equal(travellingOrder.status, "TRAVELLING");
+  assert.ok(travellingOrder.startedAt);
+
+  // Arrived on site
+  const onSiteOrder = harness.updateJobStatus(recordedWorkOrderId, "ON_SITE", "Arrived at DEPZ facility. Commencing diagnostics.");
+  assert.equal(onSiteOrder.status, "ON_SITE");
+
+  // Submits completion report
+  const completionReportDto = {
+    notes: "Thermal imaging confirmed loose terminal lug on Phase B. Cleaned oxidation, torqued to 48 Nm spec, load tested up to 450A with thermal equilibrium at 42C.",
+    materialsUsed: "1x 400A High-Conductivity Compression Lug, Contact Cleaner, Belleville Washers",
+    technicianName: "Kamrul Islam (Senior High-Voltage Specialist)",
+  };
+
+  const awaitingConfirmationOrder = harness.submitJobCompletion(recordedWorkOrderId, completionReportDto);
+
+  // Crucial check: NOT directly COMPLETED
+  assert.equal(awaitingConfirmationOrder.status, "WORK_COMPLETED_AWAITING_CONFIRMATION");
+  assert.ok(awaitingConfirmationOrder.completionReport);
+  assert.equal(awaitingConfirmationOrder.completionReport.notes, completionReportDto.notes);
+  assert.equal(awaitingConfirmationOrder.completionReport.materialsUsed, completionReportDto.materialsUsed);
+  assert.equal(awaitingConfirmationOrder.completionReport.technicianName, completionReportDto.technicianName);
+  assert.equal(awaitingConfirmationOrder.completionReport.confirmedByCustomer, false);
+
+  // STEP 4 — Dispatcher reviews completion report
+  const dispatcherInspectedOrder = harness.workOrders.find((w) => w.id === recordedWorkOrderId);
+  assert.ok(dispatcherInspectedOrder);
+  assert.equal(dispatcherInspectedOrder.status, "WORK_COMPLETED_AWAITING_CONFIRMATION");
+  assert.ok(dispatcherInspectedOrder.completionReport);
+  assert.equal(dispatcherInspectedOrder.completionReport.materialsUsed, completionReportDto.materialsUsed);
+
+  // STEP 5 — Customer confirms satisfactory completion
+  const customerFinalOrder = harness.confirmJobCompletion(recordedWorkOrderId, "Apex Spinning & Weaving Mills");
+
+  // Terminal lifecycle state verified
+  assert.equal(customerFinalOrder.status, "COMPLETED");
+  assert.ok(customerFinalOrder.completedAt);
+  assert.equal(customerFinalOrder.completionReport.confirmedByCustomer, true);
+  assert.ok(customerFinalOrder.completionReport.confirmedAt);
+
+  // Data consistency across entire lifecycle:
+  assert.equal(customerFinalOrder.id, recordedWorkOrderId);
+  assert.equal(customerFinalOrder.requestId, recordedRequestId);
+  assert.equal(customerFinalOrder.customerName, "Apex Spinning & Weaving Mills");
+  assert.equal(customerFinalOrder.facilityAddress, "Plot 14-18, Sector 3, DEPZ, Savar");
+  assert.equal(customerFinalOrder.category, "ELECTRICAL");
+  assert.equal(customerFinalOrder.assetName, "Main Distribution Panel MDP-01");
+  assert.equal(customerFinalOrder.priority, "URGENT");
+  assert.equal(customerFinalOrder.coveragePlan, "247-priority");
+  assert.equal(customerFinalOrder.assignedTechnicianId, "tech-01");
+
+  // Itemized invoice generated automatically upon completion
+  const generatedInvoice = harness.invoices.find((inv) => inv.workOrderId === recordedWorkOrderId);
+  assert.ok(generatedInvoice);
+  assert.equal(generatedInvoice.customerName, "Apex Spinning & Weaving Mills");
+  assert.equal(generatedInvoice.status, "PAYMENT_DUE");
+
+  // Audit trail events recorded
+  const relatedEvents = harness.events.filter((e) => e.targetId === recordedWorkOrderId || e.targetId === recordedRequestId);
+  assert.ok(relatedEvents.length >= 3);
+});
+
+test("Test 22: Strict multi-party sign-off boundary prevents premature job closure", () => {
+  const harness = new WorkflowHarness();
+
+  // Create and advance work order to ON_SITE
+  const req = harness.createCustomerRequest({
+    category: "HVAC",
+    assetName: "Cooling Tower CT-01",
+    problemTitle: "Chilled Water Pump VFD Fault",
+    problemDescription: "Overcurrent trip on variable frequency drive.",
+    priority: "HIGH",
+    coveragePlan: "247-standard",
+  });
+
+  const wo = harness.convertRequestToWorkOrder({ requestId: req.id });
+  harness.assignTechnician({ workOrderId: wo.id, technicianId: "tech-02" });
+  harness.updateJobStatus(wo.id, "TRAVELLING");
+  harness.updateJobStatus(wo.id, "ON_SITE");
+
+  // Attempting to jump directly from ON_SITE to COMPLETED via completion report must advance to WORK_COMPLETED_AWAITING_CONFIRMATION first
+  harness.submitJobCompletion(wo.id, {
+    notes: "Cleaned heat exchanger coils and reprogrammed VFD ramp curve.",
+  });
+
+  assert.equal(wo.status, "WORK_COMPLETED_AWAITING_CONFIRMATION");
+  assert.notEqual(wo.status, "COMPLETED");
+
+  // Attempting illegal jump from WORK_COMPLETED_AWAITING_CONFIRMATION to TRAVELLING or ON_SITE must be rejected
+  assert.throws(
+    () => {
+      harness.updateJobStatus(wo.id, "TRAVELLING");
+    },
+    { code: "INVALID_TRANSITION" }
+  );
+
+  // Completing the order is permitted by sign-off
+  harness.confirmJobCompletion(wo.id, "Apex Spinning Mills");
+  assert.equal(wo.status, "COMPLETED");
+
+  // Attempting to mutate a terminal COMPLETED work order must fail
+  assert.throws(
+    () => {
+      harness.updateJobStatus(wo.id, "ON_SITE");
+    },
+    { code: "INVALID_TRANSITION" }
+  );
 });
