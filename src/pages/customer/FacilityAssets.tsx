@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, FormEvent } from "react";
+import { useState, useEffect, useMemo, FormEvent, Fragment } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { useAuth } from "../../context/AuthContext";
@@ -22,6 +22,7 @@ import {
   ShieldCheckIcon,
   EyeIcon,
   ArrowRightIcon,
+  ChevronDownIcon,
 } from "../../components/Icons";
 
 export function FacilityAssets() {
@@ -31,6 +32,7 @@ export function FacilityAssets() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedAsset, setSelectedAsset] = useState<CustomerAsset | null>(null);
+  const [expandedAssetId, setExpandedAssetId] = useState<string | null>(null);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -247,7 +249,6 @@ export function FacilityAssets() {
   return (
     <Layout
       title="Facility Assets"
-      subtitle="Registered equipment inventory and maintenance history"
       action={
         <div className="flex items-center gap-2">
           <button
@@ -417,12 +418,12 @@ export function FacilityAssets() {
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
                   <th className="py-3 px-4">Asset & Tag</th>
-                  <th className="py-3 px-4">Category</th>
-                  <th className="py-3 px-4">Location</th>
+                  <th className="py-3 px-4 hidden sm:table-cell">Category</th>
+                  <th className="py-3 px-4">Facility Location</th>
                   <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Last Service</th>
-                  <th className="py-3 px-4">Active Incident</th>
-                  <th className="py-3 px-4 text-right">Action</th>
+                  <th className="py-3 px-4 hidden md:table-cell">Last Service</th>
+                  <th className="py-3 px-4 hidden lg:table-cell">Active Incident</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -464,69 +465,166 @@ export function FacilityAssets() {
                 ) : (
                   filteredAssets.map((asset) => {
                     const linkedReq = getLinkedRequest(asset.name);
+                    const isExpanded = expandedAssetId === asset.id;
+
                     return (
-                      <tr key={asset.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                        <td className="py-3 px-4 min-w-[200px] max-w-[280px]">
-                          <div className="font-semibold text-[var(--text-primary)] leading-snug">{asset.name}</div>
-                          <div className="font-mono text-[11px] text-[var(--text-muted)] mt-0.5">Tag: {asset.tagNumber}</div>
-                        </td>
-                        <td className="py-3 px-4 text-[var(--text-muted)] whitespace-nowrap">
-                          {asset.category}
-                        </td>
-                        <td className="py-3 px-4 min-w-[180px] max-w-[260px]">
-                          <span className="text-[var(--text-primary)] font-medium block leading-snug">{asset.location}</span>
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] border font-semibold ${getStatusBadge(
-                              asset.status
-                            )}`}
-                          >
-                            {asset.status.replace(/_/g, " ")}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-xs whitespace-nowrap">
-                          {asset.lastServiceDate ? (
-                            <span className="text-[var(--text-primary)] font-medium block">
-                              {asset.lastServiceDate}
-                            </span>
-                          ) : (
-                            <span className="text-[var(--text-muted)]">—</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 text-xs whitespace-nowrap">
-                          {linkedReq ? (
-                            <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold">
-                              <AlertTriangleIcon size={12} className="shrink-0" />
-                              <span>{linkedReq.id} ({linkedReq.priority})</span>
+                      <Fragment key={asset.id}>
+                        <tr
+                          className={`hover:bg-[var(--bg-surface-2)] transition-colors ${
+                            isExpanded ? "bg-[var(--bg-surface-2)]/50" : ""
+                          }`}
+                        >
+                          <td className="py-3 px-4 min-w-[190px]">
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setExpandedAssetId(isExpanded ? null : asset.id)}
+                                className="p-1 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
+                                title={isExpanded ? "Collapse details" : "Expand full location and specifications"}
+                                aria-expanded={isExpanded}
+                              >
+                                <ChevronDownIcon
+                                  size={13}
+                                  className={`transition-transform duration-200 ${
+                                    isExpanded ? "rotate-180" : ""
+                                  }`}
+                                />
+                              </button>
+                              <div>
+                                <div className="font-semibold text-[var(--text-primary)] leading-snug">
+                                  {asset.name}
+                                </div>
+                                <div className="font-mono text-[11px] text-[var(--text-muted)] mt-0.5">
+                                  Tag: {asset.tagNumber}
+                                </div>
+                              </div>
                             </div>
-                          ) : (
-                            <span className="text-slate-400 dark:text-slate-500 font-normal">None active</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedAsset(asset)}
-                              className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all flex items-center gap-1"
-                              title="View technical passport specifications"
+                          </td>
+
+                          <td className="py-3 px-4 text-[var(--text-muted)] hidden sm:table-cell whitespace-nowrap">
+                            {asset.category}
+                          </td>
+
+                          <td className="py-3 px-4 min-w-[180px]">
+                            <span className="text-[var(--text-primary)] font-medium block leading-snug">
+                              {asset.location}
+                            </span>
+                          </td>
+
+                          <td className="py-3 px-4 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] border font-semibold ${getStatusBadge(
+                                asset.status
+                              )}`}
                             >
-                              <EyeIcon size={12} />
-                              <span>Specs</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openReportModal(asset)}
-                              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#10b981]/15 text-[#10b981] hover:bg-[#10b981]/25 transition-all flex items-center gap-1"
-                              title={`Report breakdown for ${asset.name}`}
-                            >
-                              <WrenchIcon size={12} />
-                              <span>Report</span>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
+                              {asset.status.replace(/_/g, " ")}
+                            </span>
+                          </td>
+
+                          <td className="py-3 px-4 text-xs hidden md:table-cell whitespace-nowrap">
+                            {asset.lastServiceDate ? (
+                              <span className="text-[var(--text-primary)] font-medium block">
+                                {asset.lastServiceDate}
+                              </span>
+                            ) : (
+                              <span className="text-[var(--text-muted)]">—</span>
+                            )}
+                          </td>
+
+                          <td className="py-3 px-4 text-xs hidden lg:table-cell whitespace-nowrap">
+                            {linkedReq ? (
+                              <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold">
+                                <AlertTriangleIcon size={12} className="shrink-0" />
+                                <span>{linkedReq.id} ({linkedReq.priority})</span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 dark:text-slate-500 font-normal">None active</span>
+                            )}
+                          </td>
+
+                          <td className="py-3 px-4 text-right whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedAsset(asset)}
+                                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all flex items-center gap-1"
+                                title="View technical passport specifications"
+                              >
+                                <EyeIcon size={12} />
+                                <span className="hidden sm:inline">Specs</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => openReportModal(asset)}
+                                className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#10b981]/15 text-[#10b981] hover:bg-[#10b981]/25 transition-all flex items-center gap-1"
+                                title={`Report breakdown for ${asset.name}`}
+                              >
+                                <WrenchIcon size={12} />
+                                <span>Report</span>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+
+                        {/* Expandable Detail View for Long Addresses & Specifications */}
+                        {isExpanded && (
+                          <tr className="bg-[var(--bg-surface-2)]/50 border-b border-[var(--border)]">
+                            <td colSpan={7} className="px-6 py-4 space-y-3">
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                                <div>
+                                  <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
+                                    Full Facility Placement & Address
+                                  </span>
+                                  <span className="font-semibold text-[var(--text-primary)] block mt-0.5">
+                                    {asset.location}
+                                  </span>
+                                  <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
+                                    Apex Spinning & Weaving Mills · Savar Industrial EPZ Hub
+                                  </span>
+                                </div>
+
+                                <div>
+                                  <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
+                                    Equipment Identification
+                                  </span>
+                                  <span className="font-semibold text-[var(--text-primary)] block mt-0.5">
+                                    {asset.name}
+                                  </span>
+                                  <span className="text-[11px] font-mono text-[var(--text-muted)] block mt-0.5">
+                                    Category: {asset.category} · Tag: {asset.tagNumber}
+                                  </span>
+                                </div>
+
+                                <div>
+                                  <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
+                                    Maintenance & Service Cycle
+                                  </span>
+                                  <span className="font-medium text-[var(--text-primary)] block mt-0.5">
+                                    Installed: {asset.installedDate || "2021-03-15"}
+                                  </span>
+                                  <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
+                                    Last Service: {asset.lastServiceDate || "None recorded"} · Quarterly Preventive Inspection
+                                  </span>
+                                </div>
+                              </div>
+
+                              {linkedReq && (
+                                <div className="p-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-xs flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <AlertTriangleIcon size={14} className="text-amber-500 shrink-0" />
+                                    <span className="font-semibold text-[var(--text-primary)]">
+                                      Active Service Incident: {linkedReq.id} — {linkedReq.problemTitle}
+                                    </span>
+                                  </div>
+                                  <Link to="/customer" className="font-bold text-[#10b981] hover:underline">
+                                    View on Dashboard →
+                                  </Link>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
                     );
                   })
                 )}
