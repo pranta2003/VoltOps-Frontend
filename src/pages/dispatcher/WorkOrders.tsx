@@ -255,6 +255,7 @@ export const WorkOrders: FC = () => {
       ASSIGNED: workOrders.filter((w) => w.status === "ASSIGNED").length,
       TRAVELLING: workOrders.filter((w) => w.status === "TRAVELLING").length,
       ON_SITE: workOrders.filter((w) => w.status === "ON_SITE").length,
+      WORK_COMPLETED_AWAITING_CONFIRMATION: workOrders.filter((w) => w.status === "WORK_COMPLETED_AWAITING_CONFIRMATION").length,
       COMPLETED: workOrders.filter((w) => w.status === "COMPLETED").length,
     };
   }, [workOrders]);
@@ -338,6 +339,14 @@ export const WorkOrders: FC = () => {
               { id: "ASSIGNED", label: "Assigned", count: lifecycleCounts.ASSIGNED, dot: "bg-indigo-500" },
               { id: "TRAVELLING", label: "In Transit", count: lifecycleCounts.TRAVELLING, dot: "bg-amber-500" },
               { id: "ON_SITE", label: "On Site", count: lifecycleCounts.ON_SITE, dot: "bg-blue-500" },
+              ...(lifecycleCounts.WORK_COMPLETED_AWAITING_CONFIRMATION > 0 || selectedStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION"
+                ? [{
+                    id: "WORK_COMPLETED_AWAITING_CONFIRMATION",
+                    label: "Reported Complete",
+                    count: lifecycleCounts.WORK_COMPLETED_AWAITING_CONFIRMATION,
+                    dot: "bg-cyan-500",
+                  }]
+                : []),
               { id: "COMPLETED", label: "Completed", count: lifecycleCounts.COMPLETED, dot: "bg-emerald-500" },
             ].map((tab) => {
               const isSelected = selectedStatus === tab.id;
@@ -457,6 +466,15 @@ export const WorkOrders: FC = () => {
                     dot: "bg-blue-500",
                     badge: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
                     orders: workOrders.filter((w) => w.status === "ON_SITE"),
+                  }]
+                : []),
+              ...(selectedStatus === "ALL" || selectedStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION"
+                ? [{
+                    statusKey: "WORK_COMPLETED_AWAITING_CONFIRMATION",
+                    title: "Reported Complete",
+                    dot: "bg-cyan-500",
+                    badge: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/20",
+                    orders: workOrders.filter((w) => w.status === "WORK_COMPLETED_AWAITING_CONFIRMATION"),
                   }]
                 : []),
               ...(selectedStatus === "ALL" || selectedStatus === "COMPLETED"

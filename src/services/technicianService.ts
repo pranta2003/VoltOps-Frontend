@@ -119,6 +119,22 @@ export const technicianService = {
       });
     }
 
+    // If already COMPLETED and confirming customer sign-off, record customer verification
+    if (order.status === "COMPLETED" && newStatus === "COMPLETED") {
+      if (order.completionReport) {
+        order.completionReport.confirmedByCustomer = true;
+        order.completionReport.confirmedAt = new Date().toISOString();
+      }
+      operationalStore.setWorkOrders([...workOrders]);
+      return {
+        success: true,
+        data: order,
+        isOffline: true,
+        message: `[Local Preview] Work Order ${workOrderId} customer sign-off recorded.`,
+        timestamp: new Date().toISOString(),
+      };
+    }
+
     // Strict validation of linear lifecycle transition
     const validNextStates = VALID_WORK_ORDER_TRANSITIONS[order.status] || [];
     if (!validNextStates.includes(newStatus)) {
@@ -250,12 +266,19 @@ export const technicianService = {
       throw new TechnicianApiError(`Work Order ${workOrderId} not found.`, { status: 404 });
     }
 
-    return this.updateJobStatus(
+    const res = await this.updateJobStatus(
       workOrderId,
       "WORK_COMPLETED_AWAITING_CONFIRMATION",
-      report.materialsUsed ? `${report.notes} (Materials: ${report.materialsUsed})` : report.notes,
+      report.notes,
       actorName
     );
+
+    if (order.completionReport && report.materialsUsed) {
+      order.completionReport.materialsUsed = report.materialsUsed;
+      operationalStore.setWorkOrders([...workOrders]);
+    }
+
+    return res;
   },
 
   /**

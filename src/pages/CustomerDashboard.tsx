@@ -9,6 +9,7 @@ import {
   CoveragePlanId,
   CANONICAL_SERVICE_CATEGORIES,
   getCoveragePlanSlaLabel,
+  WorkOrderCompletionReport,
 } from "../types";
 import { customerService } from "../services/customerService";
 import { technicianService } from "../services/technicianService";
@@ -53,6 +54,7 @@ interface CustomerViewRequest {
   assignedTech?: string;
   workOrderId?: string;
   workNotes?: string;
+  completionReport?: WorkOrderCompletionReport;
 }
 
 interface CustomerDashboardProps {
@@ -194,6 +196,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             assignedTech,
             workOrderId: linkedOrder?.id || r.workOrderId,
             workNotes,
+            completionReport: linkedOrder?.completionReport,
           };
         });
 
@@ -500,6 +503,39 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </button>
           </div>
         ) : null}
+
+        {/* ── Pending Job Completion Notifications ────────────────────────── */}
+        {requests
+          .filter(
+            (r) =>
+              r.displayStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION" ||
+              (r.displayStatus === "COMPLETED" && r.completionReport && !r.completionReport.confirmedByCustomer)
+          )
+          .map((pReq) => (
+            <div
+              key={`pending-comp-${pReq.id}`}
+              className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fade-in"
+            >
+              <div className="flex items-start gap-2.5">
+                <CheckCircleIcon size={18} className="text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="font-bold text-[var(--text-primary)]">On-Site Work Reported Complete:</strong>{" "}
+                  <span className="text-[var(--text-muted)]">
+                    Technician {pReq.assignedTech || "on site"} has completed work for Request{" "}
+                    <span className="font-mono font-bold text-[var(--text-primary)]">{pReq.id}</span> ({pReq.category} ·{" "}
+                    {pReq.asset}). Please review the completion report and confirm satisfaction.
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedRequest(pReq)}
+                className="px-4 py-1.5 rounded-xl font-bold text-xs bg-cyan-600 hover:bg-cyan-500 text-white transition-all shrink-0 shadow-sm"
+              >
+                Review & Confirm
+              </button>
+            </div>
+          ))}
 
         {/* ── Central Service Requests & History Section ───────────────────── */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm space-y-0">
@@ -899,7 +935,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   </div>
                 )}
 
-                {selectedRequest.displayStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION" && (
+                {(selectedRequest.displayStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION" ||
+                  (selectedRequest.displayStatus === "COMPLETED" &&
+                    selectedRequest.completionReport &&
+                    !selectedRequest.completionReport.confirmedByCustomer)) && (
                   <div className="p-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 space-y-3">
                     <div className="flex items-center gap-2">
                       <CheckCircleIcon size={18} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
@@ -912,13 +951,28 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                         </div>
                       </div>
                     </div>
+                    {selectedRequest.completionReport && (
+                      <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs space-y-1.5">
+                        <div className="font-semibold text-[var(--text-primary)]">Work Performed & Diagnostic:</div>
+                        <p className="text-[var(--text-muted)]">{selectedRequest.completionReport.notes}</p>
+                        {selectedRequest.completionReport.materialsUsed && (
+                          <div className="pt-1 text-[11px] text-[var(--text-muted)]">
+                            <span className="font-semibold text-[var(--text-primary)]">Materials Used: </span>
+                            {selectedRequest.completionReport.materialsUsed}
+                          </div>
+                        )}
+                        <div className="pt-1 text-[10px] font-mono text-cyan-600 dark:text-cyan-400">
+                          Submitted by {selectedRequest.completionReport.technicianName}
+                        </div>
+                      </div>
+                    )}
                     <button
                       type="button"
                       onClick={async () => {
                         if (selectedRequest.workOrderId) {
                           await technicianService.confirmJobCompletion(
                             selectedRequest.workOrderId,
-                            user?.name || "Customer"
+                            user?.name || "Apex Spinning & Weaving Mills"
                           );
                           loadCustomerData();
                           setSelectedRequest(null);
@@ -928,6 +982,23 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     >
                       Confirm Satisfactory Completion
                     </button>
+                  </div>
+                )}
+
+                {selectedRequest.displayStatus === "COMPLETED" &&
+                  selectedRequest.completionReport &&
+                  selectedRequest.completionReport.confirmedByCustomer && (
+                  <div className="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 space-y-1.5">
+                    <div className="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-300">
+                      <CheckCircleIcon size={14} className="text-emerald-600 dark:text-emerald-400" />
+                      <span>Completion Confirmed & Signed Off</span>
+                    </div>
+                    <p className="text-xs text-[var(--text-muted)]">{selectedRequest.completionReport.notes}</p>
+                    {selectedRequest.completionReport.materialsUsed && (
+                      <p className="text-[11px] text-[var(--text-muted)]">
+                        Materials: {selectedRequest.completionReport.materialsUsed}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
