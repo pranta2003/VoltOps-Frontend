@@ -4,7 +4,6 @@ import { useAuth } from "../../context/AuthContext";
 import { ServiceCategory, WorkOrder } from "../../types";
 import { CANONICAL_SERVICE_CATEGORIES } from "../../types";
 import { technicianService } from "../../services/technicianService";
-import { VALID_WORK_ORDER_TRANSITIONS } from "../../services/dispatcherService";
 import { operationalStore } from "../../services/operationalStore";
 import {
   WrenchIcon,
@@ -46,12 +45,16 @@ export function MyJobs() {
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [selectedPriority, setSelectedPriority] = useState<string>("ALL");
   const [inspectJob, setInspectJob] = useState<TechnicianJobItem | null>(null);
-  const [statusModalJob, setStatusModalJob] = useState<TechnicianJobItem | null>(null);
-  const [workNotes, setWorkNotes] = useState("");
+  const [completionModalJob, setCompletionModalJob] = useState<TechnicianJobItem | null>(null);
+  const [completionNotes, setCompletionNotes] = useState("");
+  const [materialsUsed, setMaterialsUsed] = useState("");
+  const [laborHours, setLaborHours] = useState("1.0 hour");
+  const [completionError, setCompletionError] = useState<string | null>(null);
+  const [isSubmittingCompletion, setIsSubmittingCompletion] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
-  const statusModalHeadingId = useId();
+  const completionModalHeadingId = useId();
   const inspectModalHeadingId = useId();
 
   function loadJobs() {
@@ -82,7 +85,7 @@ export function MyJobs() {
             arrivalSlaRemainingMinutes,
             scheduledTime: w.status === "COMPLETED" ? "Completed Today" : "Immediate Dispatch",
             triageNotes: w.workNotes,
-            completionNotes: w.completedAt ? (w.workNotes || "Job completed successfully.") : undefined,
+            completionNotes: w.completionReport?.notes || (w.completedAt ? (w.workNotes || "Job completed successfully.") : undefined),
           };
         });
         setJobs(mapped);
@@ -103,27 +106,56 @@ export function MyJobs() {
     return unsubscribe;
   }, [user?.id]);
 
-  const handleUpdateStatus = async (newStatus: TechnicianJobItem["status"]) => {
-    if (!statusModalJob || isUpdatingStatus) return;
+  const handleDirectTransition = async (job: TechnicianJobItem, nextStatus: "TRAVELLING" | "ON_SITE") => {
     setIsUpdatingStatus(true);
-
     try {
       await technicianService.updateJobStatus(
-        statusModalJob.id,
-        newStatus,
-        workNotes,
+        job.id,
+        nextStatus,
+        nextStatus === "TRAVELLING" ? "En route to facility site" : "Technician arrived on site at facility",
         user?.name || "Kamrul Islam (Technician)"
       );
-
-      setActionSuccess(`Status for ${statusModalJob.id} updated to ${newStatus.replace("_", " ")}`);
-      setStatusModalJob(null);
-      setWorkNotes("");
+      setActionSuccess(`Job ${job.id} marked as ${nextStatus === "TRAVELLING" ? "En Route (TRAVELLING)" : "Arrived On Site (ON_SITE)"}`);
       loadJobs();
       setTimeout(() => setActionSuccess(null), 4000);
     } catch (err: any) {
       alert(err.message || "Failed to update job status.");
     } finally {
       setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleSubmitCompletion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!completionModalJob || isSubmittingCompletion) return;
+
+    if (!completionNotes.trim()) {
+      setCompletionError("Please provide diagnostic observations and resolution notes detailing the completed work.");
+      return;
+    }
+
+    setIsSubmittingCompletion(true);
+    setCompletionError(null);
+
+    try {
+      const detailedNotes = `${completionNotes.trim()} [Labor: ${laborHours}]`;
+      await technicianService.submitJobCompletion(completionModalJob.id, {
+        notes: detailedNotes,
+        materialsUsed: materialsUsed.trim() || "No replacement parts required (Diagnostic / Calibration only)",
+        technicianName: user?.name || "Kamrul Islam (Technician)",
+      });
+
+      setActionSuccess(`Completion report submitted for ${completionModalJob.id}. Work order moved to 'Pending Confirmation'.`);
+      setCompletionModalJob(null);
+      setCompletionNotes("");
+      setMaterialsUsed("");
+      setLaborHours("1.0 hour");
+      loadJobs();
+      setTimeout(() => setActionSuccess(null), 5000);
+    } catch (err: any) {
+      setCompletionError(err.message || "Failed to submit job completion report.");
+    } finally {
+      setIsSubmittingCompletion(false);
     }
   };
 
@@ -197,14 +229,9 @@ export function MyJobs() {
     }
   };
 
-  const validNextTransitions = statusModalJob
-    ? VALID_WORK_ORDER_TRANSITIONS[statusModalJob.status] || []
-    : [];
-
   return (
     <Layout
       title="Field Service Roster"
-      subtitle={`Logged in as ${user?.name || "Technician"} · Electrical & Power Systems Lead`}
     >
       <div className="space-y-4">
         {/* Action success alert */}
@@ -429,17 +456,44 @@ export function MyJobs() {
                           >
                             Inspect
                           </button>
-                          {job.status !== "COMPLETED" && (
+                          {job.status === "ASSIGNED" && (
+                            <button
+                              type="button"
+                              onClick={() => handleDirectTransition(job, "TRAVELLING")}
+                              disabled={isUpdatingStatus}
+                              className="px-2.5 py-1 rounded text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 transition-all shadow-sm disabled:opacity-50"
+                            >
+                              Start Travel
+                            </button>
+                          )}
+                          {job.status === "TRAVELLING" && (
+                            <button
+                              type="button"
+                              onClick={() => handleDirectTransition(job, "ON_SITE")}
+                              disabled={isUpdatingStatus}
+                              className="px-2.5 py-1 rounded text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50"
+                            >
+                              Mark Arrived
+                            </button>
+                          )}
+                          {job.status === "ON_SITE" && (
                             <button
                               type="button"
                               onClick={() => {
-                                setStatusModalJob(job);
-                                setWorkNotes("");
+                                setCompletionModalJob(job);
+                                setCompletionNotes("");
+                                setMaterialsUsed("");
+                                setCompletionError(null);
                               }}
                               className="px-2.5 py-1 rounded text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
                             >
-                              Update Status
+                              Mark as Completed
                             </button>
+                          )}
+                          {job.status === "WORK_COMPLETED_AWAITING_CONFIRMATION" && (
+                            <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20">
+                              Pending Confirmation
+                            </span>
                           )}
                         </div>
                       </td>
@@ -451,99 +505,126 @@ export function MyJobs() {
           </div>
         </div>
 
-        {/* ── Status Update Modal ────────────────────────────────────────── */}
-        {statusModalJob && (
+        {/* ── Technician Job Completion Modal ────────────────────────────── */}
+        {completionModalJob && (
           <div
             role="dialog"
             aria-modal="true"
-            aria-labelledby={statusModalHeadingId}
+            aria-labelledby={completionModalHeadingId}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
           >
-            <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-4">
+            <div className="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-4">
               <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
                 <div>
-                  <h3 id={statusModalHeadingId} className="font-heading font-bold text-base text-[var(--text-primary)]">
-                    Update Job Status
+                  <div className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                    REPORT JOB COMPLETION
+                  </div>
+                  <h3 id={completionModalHeadingId} className="font-heading font-bold text-base text-[var(--text-primary)]">
+                    {completionModalJob.id} · {completionModalJob.assetName}
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)] font-mono">
-                    {statusModalJob.id} · {statusModalJob.customerName}
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Facility: {completionModalJob.customerName} ({completionModalJob.facilityAddress})
                   </p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setStatusModalJob(null)}
-                  aria-label="Close dialog"
+                  onClick={() => setCompletionModalJob(null)}
+                  disabled={isSubmittingCompletion}
+                  aria-label="Close completion form"
                   className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
                   <XIcon size={16} />
                 </button>
               </div>
 
-              <div className="space-y-3 text-xs">
-                <div>
-                  <label className="block font-semibold text-[var(--text-secondary)] mb-1">
-                    Select Valid Linear Progression (Current: {statusModalJob.status})
-                  </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateStatus("TRAVELLING")}
-                      disabled={isUpdatingStatus || !validNextTransitions.includes("TRAVELLING")}
-                      className="p-2.5 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300 font-bold hover:bg-blue-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-center"
-                    >
-                      En Route
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateStatus("ON_SITE")}
-                      disabled={isUpdatingStatus || !validNextTransitions.includes("ON_SITE")}
-                      className="p-2.5 rounded-xl border border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-300 font-bold hover:bg-purple-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-center"
-                    >
-                      On Site
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateStatus("WORK_COMPLETED_AWAITING_CONFIRMATION")}
-                      disabled={isUpdatingStatus || !validNextTransitions.includes("WORK_COMPLETED_AWAITING_CONFIRMATION")}
-                      className="p-2.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 font-bold hover:bg-cyan-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-center"
-                    >
-                      Sign Off
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleUpdateStatus("COMPLETED")}
-                      disabled={isUpdatingStatus || !validNextTransitions.includes("COMPLETED")}
-                      className="p-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold hover:bg-emerald-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-center"
-                    >
-                      Complete
-                    </button>
-                  </div>
+              {completionError && (
+                <div className="p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-400 flex items-center gap-2">
+                  <AlertTriangleIcon size={14} className="shrink-0 text-red-500" />
+                  <span>{completionError}</span>
                 </div>
+              )}
 
+              <form onSubmit={handleSubmitCompletion} className="space-y-3.5 text-xs">
                 <div>
                   <label className="block font-semibold text-[var(--text-secondary)] mb-1">
-                    Field Work Notes / Sign-off Details
+                    Diagnostic Findings & Work Performed <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     rows={3}
-                    value={workNotes}
-                    onChange={(e) => setWorkNotes(e.target.value)}
-                    placeholder="Enter diagnostic observations, parts replaced, or completion notes..."
+                    required
+                    value={completionNotes}
+                    onChange={(e) => setCompletionNotes(e.target.value)}
+                    placeholder="Describe testing performed, corrective repair steps taken, and operational verification..."
                     className="w-full text-xs p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
-              </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
-                <button
-                  type="button"
-                  onClick={() => setStatusModalJob(null)}
-                  disabled={isUpdatingStatus}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                >
-                  Cancel
-                </button>
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                      Materials & Replacement Parts
+                    </label>
+                    <input
+                      type="text"
+                      value={materialsUsed}
+                      onChange={(e) => setMaterialsUsed(e.target.value)}
+                      placeholder="e.g. 1x 40A Contactor, terminal lugs"
+                      className="w-full text-xs p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                      Labor Duration on Site
+                    </label>
+                    <select
+                      value={laborHours}
+                      onChange={(e) => setLaborHours(e.target.value)}
+                      className="w-full text-xs p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    >
+                      <option value="0.5 hour">30 minutes</option>
+                      <option value="1.0 hour">1 hour</option>
+                      <option value="1.5 hours">1.5 hours</option>
+                      <option value="2.0 hours">2 hours</option>
+                      <option value="3.0+ hours">3+ hours</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Clear Operational Policy Notice */}
+                <div className="p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/5 text-[11px] text-[var(--text-secondary)] space-y-1">
+                  <div className="font-semibold text-cyan-700 dark:text-cyan-300 flex items-center gap-1.5">
+                    <CheckCircleIcon size={13} className="text-cyan-500" />
+                    <span>Multi-Party Workflow Guard</span>
+                  </div>
+                  <p>
+                    Submitting this completion report records physical on-site restoration and advances this work order to <strong>Completion Pending Confirmation</strong>. The order will be finalized upon customer confirmation or dispatcher sign-off.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
+                  <div className="text-[11px] text-[var(--text-muted)] font-mono">
+                    Lead: {user?.name || "Kamrul Islam"}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCompletionModalJob(null)}
+                      disabled={isSubmittingCompletion}
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmittingCompletion}
+                      className="px-4 py-1.5 rounded-lg text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm disabled:opacity-50"
+                    >
+                      {isSubmittingCompletion ? "Submitting..." : "Submit Completion Report"}
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
         )}
@@ -621,7 +702,18 @@ export function MyJobs() {
                   </div>
                 )}
 
-                {inspectJob.completionNotes && (
+                {inspectJob.status === "WORK_COMPLETED_AWAITING_CONFIRMATION" && (
+                  <div className="p-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-cyan-700 dark:text-cyan-300 block">
+                      Technician Completion Report (Submitted · Awaiting Confirmation)
+                    </span>
+                    <p className="text-xs text-[var(--text-primary)] font-medium">
+                      {inspectJob.completionNotes || "Resolution notes submitted."}
+                    </p>
+                  </div>
+                )}
+
+                {inspectJob.status === "COMPLETED" && inspectJob.completionNotes && (
                   <div>
                     <h4 className="font-bold text-[var(--text-primary)] mb-1">Completion Summary</h4>
                     <p className="p-2.5 rounded-lg bg-emerald-500/5 text-emerald-900 dark:text-emerald-300 border border-emerald-500/20">

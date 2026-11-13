@@ -43,7 +43,6 @@ export function SkillPassport() {
   return (
     <Layout
       title="Skill Passport"
-      subtitle="Verified professional competencies, trade certifications, and compliance credentials"
       action={
         <Link
           to="/technician/jobs"

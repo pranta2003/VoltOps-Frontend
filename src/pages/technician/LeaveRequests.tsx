@@ -96,7 +96,6 @@ export function LeaveRequests() {
   return (
     <Layout
       title="Leave Requests"
-      subtitle="Submit and track time-off, medical leave, and emergency shift absence requests"
       action={
         <button
           type="button"
