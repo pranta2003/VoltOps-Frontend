@@ -1116,3 +1116,43 @@ This document tracks all completed implementation milestones, verified files, co
   6. **Comprehensive Architectural Documentation**:
      - Created `docs/AUTHENTICATION_ARCHITECTURE.md` detailing the dual-layer architecture, security invariants, backend contract (`POST /api/auth/google`), and status breakdown across implemented, pending credentials, and pending backend scopes.
 
+---
+
+## Milestone: Outstanding Portal Issues & UX Completion ✅
+- **Date Completed**: 14 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Scope & Key Deliverables**:
+  1. **Landing Page Mobile Navigation Refinement**:
+     - Decoupled the mobile dropdown menu from the navbar pill container into an independent, softly rounded floating panel (`rounded-2xl`, `bg-[var(--bg-overlay)]`, `backdrop-blur-2xl`, `shadow-2xl`).
+     - Added accessibility attributes (`aria-controls="mobile-nav-panel"`, `aria-expanded`), Escape key listener to close menu, and automatic viewport resize reset (closes on >=1024px).
+     - Menu items close the menu on link or CTA click, eliminating oversized oval styling.
+  2. **Admin Dashboard Visual Hierarchy & Restrained Analytics**:
+     - Replaced oversized monospace uppercase `ENFORCED`, `ACTIVE`, `VERIFIED` text badges in Governance Posture with compact, restrained status pills (`<span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Enforced`).
+     - Cleaned metric cards and added 2 truthful operational visual charts backed directly by directory store queries (`AdminService.getUsers()`, `AdminService.getTechnicians()`):
+       * `Directory Account Distribution` (HorizontalBarChart showing real user counts across Customer, Technician, Dispatcher, and Admin roles, with `Verified Baseline · 12 Accounts` label).
+       * `Technician Verification Status` (DonutChart showing verified Tier 1/2 vs. pending vs. rejected technicians).
+       * Zero synthetic statistics or invented metrics.
+  3. **Dispatcher Portal Visual Consistency & Completion Tracking**:
+     - Verified concise titles and zero verbose subtitles across all dispatcher screens (`Dispatcher Console`, `Service Requests`, `Work Orders`, `Technicians`, `Schedule`, `Audit Log`).
+     - Standardized status badges with explicit support for `WORK_COMPLETED_AWAITING_CONFIRMATION` ("Reported Complete") across `WorkOrders.tsx` and `DispatcherDashboard.tsx`.
+     - Preserved technician completion notes and materials inspection drawer with "Mark Sign-off Complete" transition.
+  4. **Technician Portal Missing Pages & Navigation**:
+     - Verified router configuration and sidebar links for `/technician/skills` (`SkillPassport.tsx`) and `/technician/leave` (`LeaveRequests.tsx`).
+     - Implemented clean, concise header layouts and truthful licensing/credential records in `SkillPassport.tsx` without invented percentage stats.
+     - Implemented interactive leave request submission form with validation and clear notice: "Notice: Leave approval requires Dispatcher or Admin review before shift assignments change."
+     - Both pages fully operational in Local Preview Mode.
+  5. **Technician Multi-Party Job Completion Workflow**:
+     - Replaced generic status modal in `MyJobs.tsx` with a structured linear execution flow: `Start Travel` -> `Mark Arrived (On Site)` -> `Mark as Completed`.
+     - Enforced that technicians cannot directly mark orders as permanently `COMPLETED`. Clicking "Mark as Completed" opens a dedicated report modal requiring diagnostic observations, work performed, materials/parts used, and labor duration.
+     - Submission advances the work order to `WORK_COMPLETED_AWAITING_CONFIRMATION`.
+     - Dispatcher can review completion notes and issue operational sign-off.
+     - Customer sees the "Technician Submitted Work Completion" alert on their dashboard and can review before clicking "Confirm Satisfactory Completion" to advance the job to `COMPLETED`.
+  6. **Customer Facility Assets Scannability & Address Readability**:
+     - Resolved address truncation and horizontal overflow in `FacilityAssets.tsx`.
+     - Added expandable row details (`expandedAssetId` with chevron toggles) revealing complete address strings, equipment tag, installation date, last service, preventive schedule, and active incident links.
+     - Added responsive column visibility (`hidden sm:table-cell`, `hidden md:table-cell`, `hidden lg:table-cell`) for clean mobile/tablet layout while preserving search and status filters.
+- **Verification & Quality Gate**:
+  - Automated tests: **65 / 65 passing** across test suite.
+  - TypeScript check: `npx tsc --noEmit` passed with 0 errors.
+  - Production build: `npm run build` compiled cleanly with 0 errors.
+
