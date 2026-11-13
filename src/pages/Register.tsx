@@ -1,13 +1,10 @@
 import { useState, FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { GoogleSignInButton } from "../components/GoogleSignInButton";
 
-// This form only creates CUSTOMER accounts. See the long comment in
-// backend/src/controllers/authController.ts for why — staff accounts
-// (Admin/Dispatcher/Technician) are created by an Admin, not through
-// public signup. That "Admin adds a staff member" screen comes in Milestone 2.
 export function Register() {
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -29,37 +26,6 @@ export function Register() {
       sla: "Within 20 minutes — rapid technician physical arrival (2× faster)",
       slaLabel: "Arrival SLA",
     },
-    // Legacy backwards-compatibility fallbacks
-    weekly: {
-      name: "Weekly Plan (Legacy)",
-      sla: "Within 40 minutes technician arrival",
-      slaLabel: "Arrival SLA",
-    },
-    "monthly-standard": {
-      name: "Monthly Standard (Legacy)",
-      sla: "Within 40 minutes technician arrival",
-      slaLabel: "Arrival SLA",
-    },
-    "monthly-priority": {
-      name: "Monthly Priority (Legacy)",
-      sla: "Within 20 minutes rapid technician arrival",
-      slaLabel: "Arrival SLA",
-    },
-    standard: {
-      name: "Monthly Standard (Legacy)",
-      sla: "Within 40 minutes technician arrival",
-      slaLabel: "Arrival SLA",
-    },
-    priority: {
-      name: "Monthly Priority (Legacy)",
-      sla: "Within 20 minutes rapid technician arrival",
-      slaLabel: "Arrival SLA",
-    },
-    enterprise: {
-      name: "Monthly Priority (Legacy)",
-      sla: "Within 20 minutes rapid technician arrival",
-      slaLabel: "Arrival SLA",
-    },
   };
 
   const selectedPackage = packageParam
@@ -75,6 +41,21 @@ export function Register() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+
+  async function handleGoogleSignUp() {
+    setError("");
+    setIsGoogleSubmitting(true);
+
+    try {
+      await loginWithGoogle();
+      navigate("/");
+    } catch (err: any) {
+      setError(err.message || "Google registration failed. Please try again.");
+    } finally {
+      setIsGoogleSubmitting(false);
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -105,10 +86,8 @@ export function Register() {
       await register(trimmedName, trimmedEmail, password);
       navigate("/");
     } catch (err: any) {
-      // Clear sensitive credential from input on failure
       setPassword("");
 
-      // Deliberate HTTP & Network error classification
       if (err.code === "ERR_NETWORK" || !err.response || err.message?.includes("Network Error")) {
         setError(
           "Service temporarily unavailable: Unable to reach the authentication server. Please verify your connection or try again shortly."
@@ -132,99 +111,128 @@ export function Register() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--bg-base)" }}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-8" style={{ background: "var(--bg-base)" }}>
       <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-block">
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)]">VoltOps</h1>
+        <div className="text-center mb-6">
+          <Link to="/" className="inline-block group">
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] group-hover:text-emerald-500 transition-colors">
+              VoltOps
+            </h1>
           </Link>
-          <p className="text-[var(--text-muted)] text-sm mt-1">Create a customer account</p>
+          <p className="text-[var(--text-muted)] text-xs mt-1">Create a facility customer account</p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
+        <div
           className="border rounded-2xl p-6 space-y-4 shadow-[var(--shadow-sm)]"
           style={{ background: "var(--bg-surface)", borderColor: "var(--border)" }}
         >
-          <h2 className="text-lg font-bold text-[var(--text-primary)]">Sign up</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-[var(--text-primary)]">Sign up</h2>
+            <span className="text-[11px] text-[var(--text-muted)]">Commercial Access</span>
+          </div>
 
           {selectedPackage && (
             <div
-              className="text-sm rounded-xl p-3.5 border"
+              className="text-xs rounded-xl p-3 border"
               style={{ background: "rgba(31,107,123,0.08)", borderColor: "var(--accent)" }}
             >
-              <div className="font-semibold" style={{ color: "var(--accent)" }}>
+              <div className="font-semibold text-emerald-600 dark:text-emerald-400">
                 Selected plan: <span className="text-[var(--text-primary)] font-bold">{selectedPackage.name}</span>
               </div>
-              <div className="text-xs text-[var(--text-secondary)] mt-1.5 flex items-center gap-1.5">
-                <span className="font-bold" style={{ color: "#1E824C" }}>✓</span>
-                <span>{selectedPackage.slaLabel || "Commitment"}: <strong style={{ color: "#1E824C" }}>{selectedPackage.sla}</strong></span>
+              <div className="text-[11px] text-[var(--text-secondary)] mt-1 flex items-center gap-1.5">
+                <span className="font-bold text-emerald-600">✓</span>
+                <span>
+                  {selectedPackage.slaLabel || "Commitment"}: <strong>{selectedPackage.sla}</strong>
+                </span>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="text-sm text-status-danger bg-red-500/10 border border-red-500/20 rounded-xl px-3.5 py-2.5">
+            <div className="text-xs text-status-danger bg-red-500/10 border border-red-500/20 rounded-xl px-3.5 py-2.5 leading-relaxed">
               {error}
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Full name</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-              style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-              placeholder="Karim Rahman"
+          {/* Google Sign-up Button */}
+          <div className="space-y-3">
+            <GoogleSignInButton
+              onClick={handleGoogleSignUp}
+              isLoading={isGoogleSubmitting}
+              disabled={isSubmitting}
+              text="Sign up with Google"
             />
+
+            {/* Subtle Divider */}
+            <div className="relative flex items-center justify-center">
+              <div className="w-full border-t border-[var(--border)]" />
+              <span className="absolute px-2.5 text-[10px] font-bold tracking-wider uppercase text-[var(--text-muted)] bg-[var(--bg-surface)]">
+                Or continue with email
+              </span>
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Email</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-              style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-              placeholder="you@company.com"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-3 pt-1">
+            <div>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Full name</label>
+              <input
+                type="text"
+                required
+                value={name}
+                disabled={isSubmitting || isGoogleSubmitting}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full border rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:opacity-50"
+                style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                placeholder="Karim Rahman"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Password</label>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-              style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-              placeholder="At least 6 characters"
-            />
-          </div>
+            <div>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Email</label>
+              <input
+                type="email"
+                required
+                value={email}
+                disabled={isSubmitting || isGoogleSubmitting}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:opacity-50"
+                style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                placeholder="you@company.com"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full text-white rounded-xl py-2.5 text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.99] disabled:opacity-50 shadow-sm"
-            style={{ background: "var(--accent)" }}
-          >
-            {isSubmitting ? "Creating account..." : "Create account"}
-          </button>
+            <div>
+              <label className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Password</label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                disabled={isSubmitting || isGoogleSubmitting}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border rounded-xl px-3.5 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:opacity-50"
+                style={{ background: "var(--bg-surface-2)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                placeholder="At least 6 characters"
+              />
+            </div>
 
-          <p className="text-center text-sm text-[var(--text-muted)]">
+            <button
+              type="submit"
+              disabled={isSubmitting || isGoogleSubmitting}
+              className="w-full text-white rounded-xl py-2.5 text-xs sm:text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.99] disabled:opacity-50 shadow-sm"
+              style={{ background: "var(--accent)" }}
+            >
+              {isSubmitting ? "Creating account..." : "Create Account"}
+            </button>
+          </form>
+
+          <p className="text-center text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border)]">
             Already have an account?{" "}
             <Link to="/login" className="font-semibold hover:underline" style={{ color: "var(--accent)" }}>
               Log in
             </Link>
           </p>
-        </form>
+        </div>
       </div>
     </div>
   );

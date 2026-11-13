@@ -1014,7 +1014,32 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
-## Milestone: Dispatcher Portal Minimalism Correction ✅
+## Milestone: Google Sign-In, Firebase Authentication & JWT-Ready Architecture ✅
+- **Date Completed**: 14 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Scope & Architectural Integration**:
+  1. **Firebase Authentication SDK Integration**:
+     - Integrated official Firebase JavaScript SDK (`firebase@^11.x`).
+     - Created centralized Firebase client module `src/services/firebase.ts` reading Vite-compatible environment variables (`VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`).
+     - Added safe `.env.example` with zero private secrets or credentials.
+     - Hardened `.gitignore` against accidental `.env.local` / `.env.*.local` credential leakage.
+  2. **Professional Google Sign-In Component**:
+     - Created `src/components/GoogleSignInButton.tsx` featuring official SVG Google "G" branding mark, subtle borders, high-contrast accessible typography ("Continue with Google" / "Sign up with Google"), loading spinner state, focus rings, and dark/light mode responsiveness.
+     - Positioned with subtle divider ("OR CONTINUE WITH") on both `Login.tsx` and `Register.tsx`.
+  3. **Architectural Separation: Firebase Identity vs. Application JWT**:
+     - Created `src/services/authService.ts` establishing the clean integration boundary:
+       `Google Account -> Firebase Popup -> Firebase ID Token -> POST /api/auth/google -> Backend ID Token Verification -> Authorized Role Session JWT`.
+     - Strict Security Invariant: Public Google identity maps strictly to `CUSTOMER` role. Privileged `ADMIN`, `DISPATCHER`, and `TECHNICIAN` roles are never self-granted by public OAuth sign-in.
+     - Robust error classifier mapping raw Firebase errors (`auth/popup-closed-by-user`, `auth/popup-blocked`, `auth/unauthorized-domain`, `auth/operation-not-allowed`, `auth/network-request-failed`) to clear, user-friendly messages.
+  4. **Authentication State & Session Management**:
+     - Updated `AuthContext.tsx` with `loginWithGoogle()` and Firebase `onAuthStateChanged` synchronization without flickering between dashboard and login states.
+     - Integrated clean local fallback session for developer demonstration resilience when backend is offline.
+  5. **Automated Verification**:
+     - Created `tests/authService.test.mjs` with 7 comprehensive scenarios verifying configuration absence handling, popup errors, network failures, and default security role assignment.
+     - Test suite: **62 passing tests** across 4 test suites.
+     - TypeScript check `tsc --noEmit`: 0 errors.
+     - Production build `vite build`: Clean compilation in 8.66s.
+
 - **Date Completed**: 13 November 2026
 - **Branch**: `pranta` (Strictly Frontend Only)
 - **Scope & Objectives**:

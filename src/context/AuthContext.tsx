@@ -1,16 +1,20 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import api from "../api/axios";
 import { AuthUser, LoginResponse } from "../types";
+import { authService, formatFirebaseErrorMessage } from "../services/authService";
 
 interface AuthContextType {
   user: AuthUser | null;
-  isLoading: boolean; // true while we check "is there a saved login?" on first load
+  isLoading: boolean; // true while checking saved login or Firebase session
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  loginWithGoogle: () => Promise<AuthUser>;
+  logout: () => Promise<void>;
   isPreview?: boolean;
   enterPreviewRole?: (role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER") => void;
   exitPreview?: () => void;
+  authNotice?: string | null;
+  clearAuthNotice?: () => void;
 }
 
 const PREVIEW_USERS: Record<"ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER", AuthUser> = {
@@ -54,6 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isPreview, setIsPreview] = useState(false);
+  const [authNotice, setAuthNotice] = useState<string | null>(null);
+
+  function clearAuthNotice() {
+    setAuthNotice(null);
+  }
 
   // Development-only role preview helpers
   function enterPreviewRole(role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER") {
@@ -81,11 +90,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = "/login";
   }
 
-  // On first load (or page refresh), check if we have a saved token or active dev preview
+  // Session bootstrap: checks dev preview, saved token, and Firebase auth state
   useEffect(() => {
-    // If in dev mode and a preview role was selected in this session, restore preview
+    // 1. If in dev mode and a preview role was selected in this session, restore preview
     if (import.meta.env.DEV) {
-      const savedPreviewRole = sessionStorage.getItem("voltops_preview_role") as "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER" | null;
+      const savedPreviewRole = sessionStorage.getItem("voltops_preview_role") as
+        | "ADMIN"
+        | "DISPATCHER"
+        | "TECHNICIAN"
+        | "CUSTOMER"
+        | null;
       if (savedPreviewRole && PREVIEW_USERS[savedPreviewRole]) {
         setIsPreview(true);
         setUser(PREVIEW_USERS[savedPreviewRole]);
@@ -94,22 +108,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    // 2. Check saved user / token
     const savedToken = localStorage.getItem("voltops_token");
     const savedUserStr = localStorage.getItem("voltops_user");
 
-    if (!savedToken) {
-      setIsLoading(false);
-      return;
-    }
-
     if (savedUserStr) {
       try {
-        setUser(JSON.parse(savedUserStr));
+        const parsed = JSON.parse(savedUserStr);
+        setUser(parsed);
       } catch {
         localStorage.removeItem("voltops_user");
       }
     }
 
+    if (!savedToken) {
+      // 3. Listen to Firebase auth state if configured
+      if (authService.isConfigured()) {
+        const unsubscribe = authService.onAuthStateChanged((fbUser) => {
+          if (!fbUser && !localStorage.getItem("voltops_token")) {
+            setUser(null);
+          }
+          setIsLoading(false);
+        });
+        return unsubscribe;
+      }
+
+      setIsLoading(false);
+      return;
+    }
+
+    // 4. Validate saved token with backend if present
     api
       .get("/auth/me")
       .then((res) => {
@@ -143,12 +171,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(res.data.user);
   }
 
-  function logout() {
+  async function loginWithGoogle(): Promise<AuthUser> {
+    try {
+      const { voltOpsUser, voltOpsToken, isOfflineMock } = await authService.signInWithGoogle();
+
+      // Store application token and user
+      localStorage.setItem("voltops_token", voltOpsToken);
+      localStorage.setItem("voltops_user", JSON.stringify(voltOpsUser));
+      setUser(voltOpsUser);
+
+      if (isOfflineMock) {
+        setAuthNotice(
+          "Signed in via Google identity. VoltOps backend integration contract ready (Customer role assigned)."
+        );
+      }
+
+      return voltOpsUser;
+    } catch (err: any) {
+      const msg = formatFirebaseErrorMessage(err);
+      throw new Error(msg);
+    }
+  }
+
+  async function logout() {
     setIsPreview(false);
     sessionStorage.removeItem("voltops_preview_role");
     localStorage.removeItem("voltops_token");
     localStorage.removeItem("voltops_user");
     setUser(null);
+
+    // Also sign out of Firebase identity if active
+    await authService.signOut();
   }
 
   return (
@@ -158,10 +211,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         login,
         register,
+        loginWithGoogle,
         logout,
         isPreview,
         enterPreviewRole,
         exitPreview,
+        authNotice,
+        clearAuthNotice,
       }}
     >
       {children}
@@ -169,9 +225,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// A small custom hook so every component does:
-//   const { user, logout } = useAuth();
-// instead of importing useContext + AuthContext everywhere.
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
