@@ -241,6 +241,29 @@ export function LandingPage() {
   // Mobile menu
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Close mobile menu on Escape key press
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen]);
+
+  // Close mobile menu if window is resized to desktop width
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // Active Trade Spotlight in Hero Centerpiece
   const [heroActiveTrade, setHeroActiveTrade] = useState<string>("electrical");
   const selectedTrade = CORE_SERVICES.find((s) => s.id === heroActiveTrade) || CORE_SERVICES[0];
@@ -424,13 +447,12 @@ export function LandingPage() {
       {/* ── Floating Navigation (Accessible & Responsive) ─────────── */}
       <div className="sticky top-4 z-50 px-4 sm:px-6 max-w-6xl mx-auto">
         <nav
-          className={`border ${borderColor} px-4 py-2.5 transition-all duration-300 ${
-            menuOpen ? "rounded-2xl" : "rounded-full"
-          } ${
+          className={`border ${borderColor} px-4 py-2.5 rounded-full transition-all duration-300 ${
             scrolled
               ? "backdrop-blur-2xl shadow-[var(--shadow-md)] bg-[var(--bg-overlay)]"
               : "backdrop-blur-xl bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]"
           }`}
+          aria-label="Main Navigation"
         >
           <div className="flex items-center justify-between">
             {/* Logo Mark with Motion Interaction */}
@@ -494,9 +516,10 @@ export function LandingPage() {
               <button
                 type="button"
                 onClick={() => setMenuOpen(!menuOpen)}
-                className={`p-2 rounded-full border ${borderColor} text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)]`}
-                aria-label="Toggle navigation"
+                className={`p-2 rounded-full border ${borderColor} text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500`}
+                aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
                 aria-expanded={menuOpen}
+                aria-controls="mobile-nav-panel"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   {menuOpen ? (
@@ -508,10 +531,17 @@ export function LandingPage() {
               </button>
             </div>
           </div>
+        </nav>
 
-          {/* Mobile dropdown */}
-          {menuOpen && (
-            <div className={`lg:hidden pt-4 pb-2 border-t mt-3 ${borderColor} space-y-2`}>
+        {/* Clean Rectangular / Softly Rounded Mobile Dropdown Panel */}
+        {menuOpen && (
+          <div
+            id="mobile-nav-panel"
+            className={`lg:hidden mt-2 p-3.5 rounded-2xl border ${borderColor} backdrop-blur-2xl bg-[var(--bg-overlay)] shadow-2xl space-y-1.5 transition-all animate-in fade-in slide-in-from-top-2 duration-150`}
+            role="dialog"
+            aria-label="Mobile Navigation Menu"
+          >
+            <div className="space-y-1">
               {[
                 ["#services", "Services"],
                 ["#dispatch", "Operations"],
@@ -525,29 +555,30 @@ export function LandingPage() {
                   key={href}
                   href={href}
                   onClick={() => setMenuOpen(false)}
-                  className="block px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                  className="block px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
                 >
                   {label}
                 </a>
               ))}
-              <div className="pt-2 flex gap-2">
-                <Link
-                  to="/login"
-                  className="w-1/2 text-center py-2 rounded-full text-xs font-semibold border border-[var(--border)] text-[var(--text-primary)]"
-                >
-                  Sign in
-                </Link>
-                <a
-                  href="#packages"
-                  onClick={() => setMenuOpen(false)}
-                  className="w-1/2 text-center py-2 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e]"
-                >
-                  Choose a Plan
-                </a>
-              </div>
             </div>
-          )}
-        </nav>
+            <div className="pt-2 border-t border-[var(--border)] flex gap-2">
+              <Link
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="w-1/2 text-center py-2.5 rounded-xl text-xs font-semibold border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
+              >
+                Sign in
+              </Link>
+              <a
+                href="#packages"
+                onClick={() => setMenuOpen(false)}
+                className="w-1/2 text-center py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-colors"
+              >
+                Choose a Plan
+              </a>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
