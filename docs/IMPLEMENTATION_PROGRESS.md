@@ -1184,4 +1184,40 @@ This document tracks all completed implementation milestones, verified files, co
      - Verified Dark / Light theme toggle across all portals.
      - Verified clean browser console with zero unhandled JavaScript exceptions or React render crashes.
 
+---
+
+## Milestone: Landing Page Navbar Responsiveness, Persistence, Hero Video Brightness & Seamless Transition ✅
+- **Date Completed**: 14 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Scope & Key Deliverables**:
+  1. **Navbar Responsiveness & Alignment across All Viewports**:
+     - Verified and hardened floating pill navbar across Mobile (375px, 390px), Tablet (768px), Laptop (1024px), and Desktop (1440px).
+     - Enforced `pointer-events-none` on outer fixed wrapper and `pointer-events-auto` on `<nav>` and `#mobile-nav-panel`.
+     - Preserved logo, animated live status ping, theme toggle, and mobile menu button alignment with zero horizontal overflow or clipping (`hasHorizontalOverflow: false`).
+     - Hardened 1024px laptop breakpoint with responsive link padding (`px-2.5 xl:px-3`) preventing wrapping or clipping.
+  2. **Page-Wide Navbar Persistence & Smooth Transition**:
+     - Diagnosed root cause of sticky navbar failure: parent container `overflow-x-hidden` established a non-visible scrollport that prevented `position: sticky` from scrolling with window.
+     - Implemented fixed floating strategy (`fixed top-0 left-0 right-0 z-50 pointer-events-none`) with `max-w-6xl mx-auto px-3.5 sm:px-6 pt-3 sm:pt-4`.
+     - Added Framer Motion entrance animation with `shouldReduceMotion` accessibility fallback.
+     - Enhanced dynamic scroll transition: switches to `backdrop-blur-2xl shadow-[var(--shadow-md)] bg-[var(--bg-overlay)]/95 border-[var(--border-strong)]` when `scrollY > 24`, remaining persistently accessible from hero all the way to footer without layout shift.
+     - Adjusted `<header>` padding (`pt-24 pb-20 sm:pt-28 lg:pt-32 lg:pb-28`) ensuring generous breathing room below the floating pill navbar.
+  3. **Hero Video Brightness & Contrast Optimization**:
+     - Diagnosed excessive darkness: a flat 70% black overlay (`rgba(0, 0, 0, 0.70)`) was applied over the entire video layer, crushing midtones and obscuring engineers and facility background.
+     - Boosted video tag midtone brightness and contrast (`brightness-[1.12] contrast-[1.04]`).
+     - Replaced 70% solid black with a refined radial dark slate gradient (`rgba(6, 12, 20, 0.40) to 0.54` in light mode, `0.44 to 0.62` in dark mode) focused behind the typography.
+     - Ensured headline and subtitle retain crystal-clear text readability (`text-white drop-shadow-md`) while revealing faces, tools, and background environment.
+  4. **Seamless Hero-to-Next-Section Visual Blend**:
+     - Diagnosed awkward dark boundary: short 144px gradient over solid 70% black cut off abruptly right at the bottom edge of the header container against the light section.
+     - Implemented dual-layer smooth transition:
+       * Container-level CSS mask: `maskImage: linear-gradient(to bottom, black 0%, black 65%, transparent 100%)` naturally dissolves the video and overlay to 0 opacity.
+       * Multi-stop bottom gradient: `h-56 sm:h-72` fading seamlessly into `var(--bg-base)` (`#f8fafc` in light mode, `#0b1117` in dark mode).
+       * Completely eliminated sudden dark rectangle, black strip, or abrupt cutoff between the hero and `#services`.
+  5. **Verification & Quality Gate**:
+     - Viewports verified live via Chrome DevTools MCP: 375px, 390px, 768px, 1024px, 1440px.
+     - Automated test suite: **67 / 67 passing** (`node --test`).
+     - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+     - Production build: `npm run build` compiled cleanly into `/dist` in 20.89s with 0 errors.
+     - Console error inspection: 0 errors.
+
+
 

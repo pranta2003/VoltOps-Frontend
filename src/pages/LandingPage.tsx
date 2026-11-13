@@ -444,149 +444,162 @@ export function LandingPage() {
           ))}
       </div>
 
-      {/* ── Floating Navigation (Accessible & Responsive) ─────────── */}
-      <div className="sticky top-4 z-50 px-4 sm:px-6 max-w-6xl mx-auto">
-        <nav
-          className={`border ${borderColor} px-4 py-2.5 rounded-full transition-all duration-300 ${
-            scrolled
-              ? "backdrop-blur-2xl shadow-[var(--shadow-md)] bg-[var(--bg-overlay)]"
-              : "backdrop-blur-xl bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]"
-          }`}
-          aria-label="Main Navigation"
-        >
-          <div className="flex items-center justify-between">
-            {/* Logo Mark with Motion Interaction */}
-            <a href="#" className="flex items-center gap-2.5 group shrink-0 focus-visible:outline-none">
-              <LogoMark size={32} />
-              <div className="flex items-center gap-1.5">
-                <span className="font-heading font-extrabold text-[17px] tracking-tight text-[var(--text-primary)] group-hover:text-emerald-500 transition-colors">
-                  VoltOps
-                </span>
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                </span>
-              </div>
-            </a>
-
-            {/* Desktop Center Nav Pills */}
-            <div className="hidden lg:flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full border border-[var(--border)] bg-[var(--bg-surface-2)]">
-              {[
-                ["#services", "Services"],
-                ["#dispatch", "Operations"],
-                ["#how", "How It Works"],
-                ["#packages", "Plans"],
-                ["#hubs", "Coverage Hubs"],
-                ["#about", "About"],
-                ["#contact", "Contact"],
-              ].map(([href, label]) => (
-                <a
-                  key={href}
-                  href={href}
-                  className="px-3 py-1.5 rounded-full text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all"
-                >
-                  {label}
-                </a>
-              ))}
-            </div>
-
-            {/* Desktop Right Actions with Pure Light/Dark Icon Toggle */}
-            <div className="hidden lg:flex items-center gap-2.5">
-              <ThemeToggle />
-              <Link
-                to="/login"
-                className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] transition-all"
-              >
-                Sign in
-              </Link>
-              <motion.a
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                href="#packages"
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] shadow-[0_0_16px_rgba(16,185,129,0.35)] hover:bg-[#34d399] transition-all group"
-              >
-                <span>Choose Plan</span>
-                <ArrowRightIcon size={12} className="group-hover:translate-x-0.5 transition-transform" />
-              </motion.a>
-            </div>
-
-            {/* Mobile Toggle */}
-            <div className="lg:hidden flex items-center gap-2">
-              <ThemeToggle />
-              <button
-                type="button"
-                onClick={() => setMenuOpen(!menuOpen)}
-                className={`p-2 rounded-full border ${borderColor} text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500`}
-                aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
-                aria-expanded={menuOpen}
-                aria-controls="mobile-nav-panel"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  {menuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
-              </button>
-            </div>
-          </div>
-        </nav>
-
-        {/* Clean Rectangular / Softly Rounded Mobile Dropdown Panel */}
-        {menuOpen && (
-          <div
-            id="mobile-nav-panel"
-            className={`lg:hidden mt-2 p-3.5 rounded-2xl border ${borderColor} backdrop-blur-2xl bg-[var(--bg-overlay)] shadow-2xl space-y-1.5 transition-all animate-in fade-in slide-in-from-top-2 duration-150`}
-            role="dialog"
-            aria-label="Mobile Navigation Menu"
+      {/* ── Floating Navigation (Accessible, Responsive, Persistent Across All Sections) ─────────── */}
+      <motion.div
+        initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed top-0 left-0 right-0 z-50 pointer-events-none px-3.5 sm:px-6 pt-3 sm:pt-4 transition-all duration-300"
+      >
+        <div className="max-w-6xl mx-auto">
+          <nav
+            className={`pointer-events-auto border ${borderColor} px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition-all duration-300 ${
+              scrolled
+                ? "backdrop-blur-2xl shadow-[var(--shadow-md)] bg-[var(--bg-overlay)]/95 border-[var(--border-strong)]"
+                : "backdrop-blur-xl bg-[var(--bg-surface)]/90 shadow-[var(--shadow-sm)]"
+            }`}
+            aria-label="Main Navigation"
           >
-            <div className="space-y-1">
-              {[
-                ["#services", "Services"],
-                ["#dispatch", "Operations"],
-                ["#how", "How It Works"],
-                ["#packages", "Plans"],
-                ["#hubs", "Coverage Hubs"],
-                ["#about", "About"],
-                ["#contact", "Contact"],
-              ].map(([href, label]) => (
-                <a
-                  key={href}
-                  href={href}
-                  onClick={() => setMenuOpen(false)}
-                  className="block px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
-                >
-                  {label}
-                </a>
-              ))}
-            </div>
-            <div className="pt-2 border-t border-[var(--border)] flex gap-2">
-              <Link
-                to="/login"
-                onClick={() => setMenuOpen(false)}
-                className="w-1/2 text-center py-2.5 rounded-xl text-xs font-semibold border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
-              >
-                Sign in
-              </Link>
-              <a
-                href="#packages"
-                onClick={() => setMenuOpen(false)}
-                className="w-1/2 text-center py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-colors"
-              >
-                Choose a Plan
+            <div className="flex items-center justify-between">
+              {/* Logo Mark with Motion Interaction */}
+              <a href="#" className="flex items-center gap-2.5 group shrink-0 focus-visible:outline-none">
+                <LogoMark size={32} />
+                <div className="flex items-center gap-1.5">
+                  <span className="font-heading font-extrabold text-[17px] tracking-tight text-[var(--text-primary)] group-hover:text-emerald-500 transition-colors">
+                    VoltOps
+                  </span>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                </div>
               </a>
+
+              {/* Desktop Center Nav Pills */}
+              <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 text-xs font-semibold px-2 xl:px-3 py-1 rounded-full border border-[var(--border)] bg-[var(--bg-surface-2)]">
+                {[
+                  ["#services", "Services"],
+                  ["#dispatch", "Operations"],
+                  ["#how", "How It Works"],
+                  ["#packages", "Plans"],
+                  ["#hubs", "Coverage Hubs"],
+                  ["#about", "About"],
+                  ["#contact", "Contact"],
+                ].map(([href, label]) => (
+                  <a
+                    key={href}
+                    href={href}
+                    className="px-2.5 xl:px-3 py-1.5 rounded-full text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all"
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
+
+              {/* Desktop Right Actions with Pure Light/Dark Icon Toggle */}
+              <div className="hidden lg:flex items-center gap-2 xl:gap-2.5">
+                <ThemeToggle />
+                <Link
+                  to="/login"
+                  className="px-3 xl:px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] transition-all"
+                >
+                  Sign in
+                </Link>
+                <motion.a
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  href="#packages"
+                  className="inline-flex items-center gap-1.5 px-3.5 xl:px-4 py-1.5 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] shadow-[0_0_16px_rgba(16,185,129,0.35)] hover:bg-[#34d399] transition-all group"
+                >
+                  <span>Choose Plan</span>
+                  <ArrowRightIcon size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                </motion.a>
+              </div>
+
+              {/* Mobile Toggle */}
+              <div className="lg:hidden flex items-center gap-2">
+                <ThemeToggle />
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className={`p-2 rounded-full border ${borderColor} text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500`}
+                  aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+                  aria-expanded={menuOpen}
+                  aria-controls="mobile-nav-panel"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    {menuOpen ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    )}
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          </nav>
+
+          {/* Clean Rectangular / Softly Rounded Mobile Dropdown Panel */}
+          {menuOpen && (
+            <div
+              id="mobile-nav-panel"
+              className={`pointer-events-auto lg:hidden mt-2 p-3.5 rounded-2xl border ${borderColor} backdrop-blur-2xl bg-[var(--bg-overlay)]/95 shadow-2xl space-y-1.5 transition-all animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100vh-5rem)] overflow-y-auto`}
+              role="dialog"
+              aria-label="Mobile Navigation Menu"
+            >
+              <div className="space-y-1">
+                {[
+                  ["#services", "Services"],
+                  ["#dispatch", "Operations"],
+                  ["#how", "How It Works"],
+                  ["#packages", "Plans"],
+                  ["#hubs", "Coverage Hubs"],
+                  ["#about", "About"],
+                  ["#contact", "Contact"],
+                ].map(([href, label]) => (
+                  <a
+                    key={href}
+                    href={href}
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
+              <div className="pt-2 border-t border-[var(--border)] flex gap-2">
+                <Link
+                  to="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-1/2 text-center py-2.5 rounded-xl text-xs font-semibold border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
+                >
+                  Sign in
+                </Link>
+                <a
+                  href="#packages"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-1/2 text-center py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-colors"
+                >
+                  Choose a Plan
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── HERO SECTION: INDUSTRIAL MAINTENANCE PHOTOGRAPHY & ENTRANCE ─── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <header className="relative overflow-hidden pt-12 pb-20 lg:pt-16 lg:pb-28 text-center">
+      <header className="relative overflow-hidden pt-24 pb-20 sm:pt-28 lg:pt-32 lg:pb-28 text-center">
         {/* Hero Background Layer: Looping Cinematic Slow-Motion Video with Dark CSS Overlay */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden -z-1">
+        <div
+          className="absolute inset-0 pointer-events-none overflow-hidden z-0"
+          style={{
+            maskImage: "linear-gradient(to bottom, black 0%, black 65%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 65%, transparent 100%)",
+          }}
+        >
           {/* Highly compressed looping 16:9 video */}
           <video
             autoPlay
@@ -594,31 +607,42 @@ export function LandingPage() {
             muted
             playsInline
             poster="/images/hero-video-poster.jpg"
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[1.12] contrast-[1.04]"
           >
             <source src="/videos/hero-background.mp4" type="video/mp4" />
             <img
               src="/images/hero-video-poster.jpg"
               alt="Commercial Field Service Operations"
-              className="w-full h-full object-cover object-center"
+              className="w-full h-full object-cover object-center filter brightness-[1.12] contrast-[1.04]"
             />
           </video>
 
-          {/* Dark CSS Overlay directly over video layer for 100% text readability & vibrant accent pop */}
+          {/* Balanced cinematic dark overlay: keeps engineers and facility background visible while ensuring high contrast for white text */}
           <div
-            className="absolute inset-0"
-            style={{ backgroundColor: "rgba(0, 0, 0, 0.70)" }}
+            className="absolute inset-0 transition-colors duration-300"
+            style={{
+              background: isDark
+                ? "radial-gradient(ellipse at 50% 32%, rgba(6, 12, 20, 0.44) 0%, rgba(6, 12, 20, 0.62) 100%)"
+                : "radial-gradient(ellipse at 50% 32%, rgba(6, 12, 20, 0.40) 0%, rgba(6, 12, 20, 0.54) 100%)",
+            }}
           />
 
-          {/* Bottom fade into base theme background */}
-          <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-b from-transparent to-[var(--bg-base)]" />
+          {/* Smooth multi-stop bottom fade into base theme background (prevents sudden dark block) */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-56 sm:h-72 pointer-events-none transition-colors duration-300"
+            style={{
+              background: isDark
+                ? "linear-gradient(to bottom, transparent 0%, rgba(11, 17, 23, 0.3) 30%, rgba(11, 17, 23, 0.75) 70%, var(--bg-base) 100%)"
+                : "linear-gradient(to bottom, transparent 0%, rgba(248, 250, 252, 0.25) 30%, rgba(248, 250, 252, 0.8) 70%, var(--bg-base) 100%)",
+            }}
+          />
         </div>
 
         <motion.div
           variants={heroContainerVariants}
           initial="hidden"
           animate="visible"
-          className="relative max-w-6xl mx-auto px-5"
+          className="relative z-10 max-w-6xl mx-auto px-5"
         >
           {/* Editorial Headline with Word/Line Stagger */}
           <motion.h1
