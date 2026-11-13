@@ -173,18 +173,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loginWithGoogle(): Promise<AuthUser> {
     try {
-      const { voltOpsUser, voltOpsToken, isOfflineMock } = await authService.signInWithGoogle();
+      const { voltOpsUser, voltOpsToken } = await authService.signInWithGoogle();
 
       // Store application token and user
       localStorage.setItem("voltops_token", voltOpsToken);
       localStorage.setItem("voltops_user", JSON.stringify(voltOpsUser));
       setUser(voltOpsUser);
-
-      if (isOfflineMock) {
-        setAuthNotice(
-          "Signed in via Google identity. VoltOps backend integration contract ready (Customer role assigned)."
-        );
-      }
 
       return voltOpsUser;
     } catch (err: any) {

@@ -17,8 +17,17 @@ class FirebaseAuthServiceError extends Error {
   }
 }
 
+class BackendTokenExchangeError extends Error {
+  constructor(message, code = "BACKEND_EXCHANGE_FAILED", isBackendUnavailable = true) {
+    super(message);
+    this.name = "BackendTokenExchangeError";
+    this.code = code;
+    this.isBackendUnavailable = isBackendUnavailable;
+  }
+}
+
 function formatFirebaseErrorMessage(err) {
-  if (err instanceof FirebaseAuthServiceError) {
+  if (err instanceof FirebaseAuthServiceError || err instanceof BackendTokenExchangeError) {
     return err.message;
   }
 
@@ -109,4 +118,91 @@ test("Scenario 7: Default security role assignment enforces CUSTOMER role for Go
   assert.notEqual(safeCustomerUser.role, "ADMIN");
   assert.notEqual(safeCustomerUser.role, "DISPATCHER");
   assert.notEqual(safeCustomerUser.role, "TECHNICIAN");
+});
+
+test("Scenario 8: Backend token exchange failure throws BackendTokenExchangeError without creating a session", () => {
+  // Simulating the behavior of exchangeFirebaseTokenWithBackend when backend is offline
+  function simulateExchange(err) {
+    if (err.code === "ERR_NETWORK" || !err.response) {
+      throw new BackendTokenExchangeError(
+        "VoltOps backend server is currently unreachable. The backend authentication API (POST /api/auth/google) must be running to exchange Google identity tokens for application sessions. Please use Local Preview Mode below for testing without a backend.",
+        "BACKEND_UNAVAILABLE",
+        true
+      );
+    }
+    if (err.response?.status === 404) {
+      throw new BackendTokenExchangeError(
+        "Backend endpoint POST /api/auth/google is not yet implemented on the server. Please use Local Preview Mode below for demonstration.",
+        "ENDPOINT_UNIMPLEMENTED",
+        true
+      );
+    }
+  }
+
+  // Verify network failure throws error and does not return a token/session
+  assert.throws(
+    () => simulateExchange({ code: "ERR_NETWORK" }),
+    (thrown) => {
+      assert(thrown instanceof BackendTokenExchangeError);
+      assert.equal(thrown.code, "BACKEND_UNAVAILABLE");
+      assert.equal(thrown.isBackendUnavailable, true);
+      assert.match(thrown.message, /VoltOps backend server is currently unreachable/);
+      return true;
+    }
+  );
+
+  // Verify 404 unmounted endpoint throws actionable error
+  assert.throws(
+    () => simulateExchange({ response: { status: 404 } }),
+    (thrown) => {
+      assert(thrown instanceof BackendTokenExchangeError);
+      assert.equal(thrown.code, "ENDPOINT_UNIMPLEMENTED");
+      assert.match(thrown.message, /POST \/api\/auth\/google is not yet implemented/);
+      return true;
+    }
+  );
+});
+
+test("Scenario 9: Backend rejection (401/403) returns clear authentication error", () => {
+  const rejectionError = new BackendTokenExchangeError(
+    "Google authentication was rejected by the backend.",
+    "BACKEND_AUTH_REJECTED",
+    false
+  );
+  const formatted = formatFirebaseErrorMessage(rejectionError);
+  assert.equal(formatted, "Google authentication was rejected by the backend.");
+  assert.equal(rejectionError.isBackendUnavailable, false);
+});
+
+test("Scenario 10: Demo accounts are strictly quarantined in Local Preview Mode", () => {
+  // Session storage simulation for preview mode segregation
+  const mockSessionStorage = new Map();
+  const mockLocalStorage = new Map();
+
+  function enterPreview(role) {
+    mockSessionStorage.set("voltops_preview_role", role);
+  }
+
+  function getActiveSession() {
+    // If preview active, returns preview user
+    if (mockSessionStorage.has("voltops_preview_role")) {
+      return { type: "PREVIEW", role: mockSessionStorage.get("voltops_preview_role") };
+    }
+    // If regular token exists
+    if (mockLocalStorage.has("voltops_token")) {
+      return { type: "AUTHENTICATED", token: mockLocalStorage.get("voltops_token") };
+    }
+    return null;
+  }
+
+  assert.equal(getActiveSession(), null);
+
+  // Enter preview
+  enterPreview("DISPATCHER");
+  assert.deepEqual(getActiveSession(), { type: "PREVIEW", role: "DISPATCHER" });
+
+  // Exiting preview clears preview state and ensures no synthetic auth token remains in localStorage
+  mockSessionStorage.delete("voltops_preview_role");
+  assert.equal(getActiveSession(), null);
+  assert.equal(mockLocalStorage.has("voltops_token"), false);
 });

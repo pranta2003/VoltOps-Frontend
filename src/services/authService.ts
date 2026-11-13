@@ -43,11 +43,22 @@ export class FirebaseAuthServiceError extends Error {
   }
 }
 
+export class BackendTokenExchangeError extends Error {
+  code: string;
+  isBackendUnavailable: boolean;
+  constructor(message: string, code = "BACKEND_EXCHANGE_FAILED", isBackendUnavailable = true) {
+    super(message);
+    this.name = "BackendTokenExchangeError";
+    this.code = code;
+    this.isBackendUnavailable = isBackendUnavailable;
+  }
+}
+
 /**
- * Maps raw Firebase authentication error codes into clear, user-friendly messages.
+ * Maps raw Firebase authentication error codes and backend exchange errors into clear, user-friendly messages.
  */
 export function formatFirebaseErrorMessage(err: any): string {
-  if (err instanceof FirebaseAuthServiceError) {
+  if (err instanceof FirebaseAuthServiceError || err instanceof BackendTokenExchangeError) {
     return err.message;
   }
 
@@ -96,7 +107,6 @@ export const authService = {
     idToken: string;
     voltOpsUser: AuthUser;
     voltOpsToken: string;
-    isOfflineMock: boolean;
   }> {
     const { auth, googleProvider, isConfigured } = initializeFirebase();
 
@@ -128,59 +138,70 @@ export const authService = {
       idToken,
       voltOpsUser: exchangeResult.user,
       voltOpsToken: exchangeResult.token,
-      isOfflineMock: exchangeResult.isOfflineMock,
     };
   },
 
   /**
    * Future Backend Integration Boundary:
    * Passes the Firebase ID token to the backend endpoint POST /api/auth/google
-   * If the backend is not yet implemented or unreachable, safely provides a structured
-   * customer role session boundary labeled as [Local Google Session].
-   * NEVER grants privileged ADMIN or DISPATCHER roles to arbitrary Google accounts.
+   *
+   * SECURITY & SEPARATION ENFORCEMENT:
+   * - If the backend server is unreachable (ECONNREFUSED / Network Error) or returns 404/500,
+   *   it explicitly THROWS an error informing the user that the VoltOps authentication backend
+   *   is not running.
+   * - It NEVER silently synthesizes a customer session or client JWT.
+   * - Local demonstration mode is strictly reserved for the explicit Developer Preview controls.
    */
   async exchangeFirebaseTokenWithBackend(
     dto: BackendGoogleExchangeDTO
-  ): Promise<{ user: AuthUser; token: string; isOfflineMock: boolean }> {
+  ): Promise<{ user: AuthUser; token: string }> {
     try {
       const res = await api.post<BackendGoogleExchangeResponse>("/auth/google", dto);
       if (res.data?.token && res.data?.user) {
         return {
           user: res.data.user,
           token: res.data.token,
-          isOfflineMock: false,
         };
       }
-    } catch {
-      // Backend not yet running or /auth/google endpoint not yet mounted in backend repo.
-      // Fall through to clean frontend identity boundary:
+      throw new BackendTokenExchangeError(
+        "Malformed response from VoltOps authentication backend: token or user record missing.",
+        "MALFORMED_BACKEND_RESPONSE",
+        false
+      );
+    } catch (err: any) {
+      if (err instanceof BackendTokenExchangeError) {
+        throw err;
+      }
+
+      if (err.code === "ERR_NETWORK" || !err.response || err.message?.includes("Network Error")) {
+        throw new BackendTokenExchangeError(
+          "VoltOps backend server is currently unreachable. The backend authentication API (POST /api/auth/google) must be running to exchange Google identity tokens for application sessions. Please use Local Preview Mode below for testing without a backend.",
+          "BACKEND_UNAVAILABLE",
+          true
+        );
+      }
+
+      const status = err.response?.status;
+      if (status === 404) {
+        throw new BackendTokenExchangeError(
+          "Backend endpoint POST /api/auth/google is not yet implemented on the server. Please use Local Preview Mode below for demonstration.",
+          "ENDPOINT_UNIMPLEMENTED",
+          true
+        );
+      } else if (status === 401 || status === 403) {
+        throw new BackendTokenExchangeError(
+          err.response?.data?.message || err.response?.data?.error || "Google authentication was rejected by the backend.",
+          "BACKEND_AUTH_REJECTED",
+          false
+        );
+      }
+
+      throw new BackendTokenExchangeError(
+        err.response?.data?.message || err.response?.data?.error || "Failed to exchange Google identity with VoltOps backend.",
+        "EXCHANGE_FAILED",
+        false
+      );
     }
-
-    // SAFE FRONTEND BOUNDARY:
-    // When backend is not reachable, map verified Google identity strictly to CUSTOMER role.
-    // Privileged roles (ADMIN, DISPATCHER, TECHNICIAN) can NEVER be self-granted.
-    const safeCustomerUser: AuthUser = {
-      id: `usr-google-${Date.now()}`,
-      name: dto.displayName || "Google User",
-      email: dto.email || "google-user@voltops.local",
-      role: "CUSTOMER", // Strict security rule: default public login role is always CUSTOMER
-      initials: (dto.displayName || "GU")
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase(),
-      avatarUrl: dto.photoUrl || undefined,
-      company: "Commercial Facility Client",
-    };
-
-    const simulatedToken = `demo-google-session-${Date.now()}`;
-
-    return {
-      user: safeCustomerUser,
-      token: simulatedToken,
-      isOfflineMock: true,
-    };
   },
 
   /**

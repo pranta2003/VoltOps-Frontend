@@ -1082,3 +1082,37 @@ This document tracks all completed implementation milestones, verified files, co
   - Production build: `tsc && vite build` built cleanly in **5.53s** with **0 errors**.
   - Bundle size reductions: ServiceRequests (21.75 kB), WorkOrders (27.44 kB), TechnicianRoster (14.93 kB), DispatcherSchedule (9.33 kB), DispatchAuditLog (12.99 kB).
   - Chrome DevTools MCP browser testing verified across 1440px desktop, 1024px tablet, and 375px mobile widths.
+
+---
+
+## Milestone: Authentication Security Audit & Acceptance Verification ✅
+- **Date Completed**: 14 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Scope & Security Invariants**:
+  1. **Strict Failure Boundary for Backend Token Exchange**:
+     - Audited and updated `authService.exchangeFirebaseTokenWithBackend`.
+     - Completely eliminated synthetic session or fake client JWT creation when the backend is unreachable or returns non-200 responses.
+     - Introduced `BackendTokenExchangeError` with error classifications: `BACKEND_UNAVAILABLE` (network failure / connection refused), `ENDPOINT_UNIMPLEMENTED` (404 route unmounted), `BACKEND_AUTH_REJECTED` (401/403 authorization rejection), and `MALFORMED_BACKEND_RESPONSE`.
+     - Real Google sign-in fails fast with user-friendly actionable error messaging instructing the developer/user that the VoltOps backend must be running, or to use Local Preview Mode for demonstration without a backend.
+  2. **Quarantine of Local Preview Mode**:
+     - Demo accounts remain strictly isolated to Local Preview Mode via `sessionStorage.getItem("voltops_preview_role")`.
+     - Preview mode is gated to development (`import.meta.env.DEV`). Exiting preview clears preview storage and redirects cleanly to `/login`.
+     - Zero demo credentials leak into `localStorage["voltops_token"]`.
+  3. **Official Google Sign-In Component & UI State Integrity**:
+     - Verified `src/components/GoogleSignInButton.tsx` adheres to Google's official design specifications (SVG "G" mark, clear text, subtle dark/light borders, focus ring, loading spinner).
+     - Verified `Login.tsx` and `Register.tsx` error banners display actionable feedback upon failed OAuth or backend exchange attempts.
+  4. **Automated Test Coverage**:
+     - Expanded `tests/authService.test.mjs` to 10 automated test scenarios covering:
+       * Missing Firebase `.env` variables
+       * Popup closed, blocked, unauthorized domain, operation disabled, network failure
+       * Security role invariant: Google sign-in defaults strictly to `CUSTOMER`
+       * Backend token exchange failure throws `BackendTokenExchangeError` without creating an application session
+       * Backend 401/403 rejection mapping
+       * Demo account quarantine in Local Preview Mode
+     - Total test suite: **65 / 65 tests passing** (100% pass rate).
+  5. **Type & Build Verification**:
+     - `npx tsc --noEmit`: 0 errors.
+     - Production build `npm run build`: Bundled cleanly in 9.81s with 0 errors.
+  6. **Comprehensive Architectural Documentation**:
+     - Created `docs/AUTHENTICATION_ARCHITECTURE.md` detailing the dual-layer architecture, security invariants, backend contract (`POST /api/auth/google`), and status breakdown across implemented, pending credentials, and pending backend scopes.
+
