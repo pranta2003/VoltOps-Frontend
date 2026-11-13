@@ -1219,5 +1219,42 @@ This document tracks all completed implementation milestones, verified files, co
      - Production build: `npm run build` compiled cleanly into `/dist` in 20.89s with 0 errors.
      - Console error inspection: 0 errors.
 
+---
+
+## Milestone: Landing Page Glass Navbar Refinement, Hero Subject Centering, Wordmark Animation & SaaS Footer Upgrade ✅
+- **Date Completed**: 14 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Scope & Key Deliverables**:
+  1. **Refined Transparent/Glass Navbar (Removed White Pill)**:
+     - Replaced opaque white inner navigation background (`bg-[var(--bg-surface-2)]` rendering as pure white `#ffffff` in light mode) with a unified translucent dark glass treatment (`border border-white/10 bg-white/5 backdrop-blur-sm`).
+     - Nav items styled with high contrast slate typography (`text-slate-200 hover:text-white hover:bg-white/10`), active state with subtle indicator.
+     - Exterior navbar uses `bg-slate-950/45` (unscrolled) and `bg-slate-950/80 border-white/20` (scrolled) with `backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)]` ensuring consistent contrast against both the dark hero video and bright light-theme body sections.
+  2. **Hero Video Subject Framing & Aspect Ratio Preservation**:
+     - Diagnosed root cause: 16:9 video cropped aggressively when `<header>` height grew to ~1009px (`pt-32` padding), pushing the male engineer too far to the right margin and cutting off the female technician.
+     - Corrected hero padding to `pt-20 sm:pt-22 lg:pt-24 pb-20 lg:pb-24` (~850-890px height) and set `objectPosition: "54% 22%"` on both the `<video>` and poster `<img>`.
+     - Preserved natural subject framing: male and female technicians are both visibly framed around the headline with 25-35px clearance below navbar without any distortion or excessive darkening.
+  3. **Staggered VoltOps Wordmark Entrance & Pulsing Live Indicator**:
+     - Implemented letter-by-letter staggered entrance animation for `WORDMARK_LETTERS = ["V","o","l","t","O","p","s"]` with Framer Motion (`staggerChildren: 0.04, delayChildren: 0.12`).
+     - Subtle upward float (`y: 5 -> 0`) and unblur (`filter: blur(2px) -> blur(0px)`) followed by green status dot entrance (`delay: 0.45, scale: 0 -> 1`) with ongoing gentle pulse.
+     - Lightning bolt icon retains gentle floating levitation. Animate runs once on initial page mount (never replays on scroll), with full graceful fallback for `prefers-reduced-motion`.
+  4. **Compact & Balanced Mobile/Tablet Navigation**:
+     - Constrained navbar container max-width dynamically: `max-w-xl md:max-w-3xl lg:max-w-6xl mx-auto`.
+     - Added tablet/mobile pill CTA for "Plans" (`hidden sm:inline-flex lg:hidden`) to balance visual gravity and eliminate awkward empty spacing.
+     - Mobile dropdown panel styled as a sleek dark floating card (`rounded-2xl border border-white/15 bg-slate-950/95 backdrop-blur-2xl`) with keyboard escape handling and automatic closure on link click.
+  5. **Production-Quality Dark SaaS Footer**:
+     - Upgraded minimal single-row footer to a structured SaaS footer (`bg-[#070b10] border-t border-white/10`) with top glowing emerald accent line (`bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent`).
+     - Added Brand area with LogoMark, VoltOps title, pulsing live status indicator, value proposition, and enterprise badge.
+     - Structured two-column quick links (`Platform` and `Solutions`) linked to valid landing section anchors (`#services`, `#dispatch`, `#how`, `#packages`, `#hubs`, `#contact`).
+     - Dynamic copyright year `{new Date().getFullYear()}` and attribution to "Team Pranta" with emerald highlight.
+  6. **Asset Cleanliness Verification**:
+     - Confirmed video asset is professionally named `public/videos/hero-background.mp4` and poster `public/images/hero-video-poster.jpg`. Zero "gemini" strings exist in codebase.
+  7. **Verification & Quality Gate**:
+     - Viewports verified live via Chrome DevTools MCP: 375px, 390px, 768px, 1024px, 1280px, 1440px.
+     - Automated test suite: **67 / 67 passing** (`node --test`).
+     - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+     - Production build: `npm run build` compiled cleanly into `/dist` in 50.87s with 0 errors.
+     - Console error inspection: 0 errors.
+
+
 
 

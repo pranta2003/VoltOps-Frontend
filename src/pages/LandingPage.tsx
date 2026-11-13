@@ -210,6 +210,39 @@ function CheckIcon({ className = "" }: { className?: string }) {
   );
 }
 
+// ── Wordmark Letters for Staggered Entrance ──────────────────────────────
+const WORDMARK_LETTERS = ["V", "o", "l", "t", "O", "p", "s"];
+
+const wordmarkContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04,
+      delayChildren: 0.12,
+    },
+  },
+};
+
+const wordmarkLetterVariants = {
+  hidden: { opacity: 0, y: 5, filter: "blur(2px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] as const },
+  },
+};
+
+const statusDotVariants = {
+  hidden: { scale: 0, opacity: 0 },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    transition: { delay: 0.45, duration: 0.35, ease: "easeOut" as const },
+  },
+};
+
 // ── Main Landing Page Component ──────────────────────────────────────────
 export function LandingPage() {
   const navigate = useNavigate();
@@ -451,32 +484,56 @@ export function LandingPage() {
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         className="fixed top-0 left-0 right-0 z-50 pointer-events-none px-3.5 sm:px-6 pt-3 sm:pt-4 transition-all duration-300"
       >
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-xl md:max-w-3xl lg:max-w-6xl mx-auto">
           <nav
-            className={`pointer-events-auto border ${borderColor} px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition-all duration-300 ${
+            className={`pointer-events-auto border border-white/15 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition-all duration-300 ${
               scrolled
-                ? "backdrop-blur-2xl shadow-[var(--shadow-md)] bg-[var(--bg-overlay)]/95 border-[var(--border-strong)]"
-                : "backdrop-blur-xl bg-[var(--bg-surface)]/90 shadow-[var(--shadow-sm)]"
+                ? "backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] bg-slate-950/80 border-white/20"
+                : "backdrop-blur-xl bg-slate-950/45 shadow-[0_8px_32px_rgba(0,0,0,0.25)]"
             }`}
             aria-label="Main Navigation"
           >
             <div className="flex items-center justify-between">
-              {/* Logo Mark with Motion Interaction */}
+              {/* Logo Mark & Staggered Wordmark */}
               <a href="#" className="flex items-center gap-2.5 group shrink-0 focus-visible:outline-none">
                 <LogoMark size={32} />
                 <div className="flex items-center gap-1.5">
-                  <span className="font-heading font-extrabold text-[17px] tracking-tight text-[var(--text-primary)] group-hover:text-emerald-500 transition-colors">
-                    VoltOps
-                  </span>
-                  <span className="relative flex h-2 w-2">
+                  {shouldReduceMotion ? (
+                    <span className="font-heading font-extrabold text-[17px] tracking-tight text-white group-hover:text-emerald-400 transition-colors">
+                      VoltOps
+                    </span>
+                  ) : (
+                    <motion.div
+                      variants={wordmarkContainerVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="flex font-heading font-extrabold text-[17px] tracking-tight text-white group-hover:text-emerald-400 transition-colors"
+                    >
+                      {WORDMARK_LETTERS.map((char, index) => (
+                        <motion.span
+                          key={index}
+                          variants={wordmarkLetterVariants}
+                          className="inline-block"
+                        >
+                          {char}
+                        </motion.span>
+                      ))}
+                    </motion.div>
+                  )}
+                  <motion.span
+                    variants={shouldReduceMotion ? {} : statusDotVariants}
+                    initial={shouldReduceMotion ? "visible" : "hidden"}
+                    animate="visible"
+                    className="relative flex h-2 w-2"
+                  >
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                  </span>
+                  </motion.span>
                 </div>
               </a>
 
-              {/* Desktop Center Nav Pills */}
-              <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 text-xs font-semibold px-2 xl:px-3 py-1 rounded-full border border-[var(--border)] bg-[var(--bg-surface-2)]">
+              {/* Desktop Center Nav Pills (Cohesive Translucent Glass Treatment) */}
+              <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 text-xs font-semibold px-2 xl:px-2.5 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm">
                 {[
                   ["#services", "Services"],
                   ["#dispatch", "Operations"],
@@ -489,7 +546,7 @@ export function LandingPage() {
                   <a
                     key={href}
                     href={href}
-                    className="px-2.5 xl:px-3 py-1.5 rounded-full text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all"
+                    className="px-2.5 xl:px-3 py-1 rounded-full text-slate-200 hover:text-white hover:bg-white/10 transition-all font-semibold"
                   >
                     {label}
                   </a>
@@ -498,10 +555,10 @@ export function LandingPage() {
 
               {/* Desktop Right Actions with Pure Light/Dark Icon Toggle */}
               <div className="hidden lg:flex items-center gap-2 xl:gap-2.5">
-                <ThemeToggle />
+                <ThemeToggle className="!border-white/15 !bg-white/5 !text-slate-200 hover:!text-white hover:!bg-white/10" />
                 <Link
                   to="/login"
-                  className="px-3 xl:px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] transition-all"
+                  className="px-3 xl:px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-200 hover:text-white hover:bg-white/10 transition-all"
                 >
                   Sign in
                 </Link>
@@ -516,13 +573,19 @@ export function LandingPage() {
                 </motion.a>
               </div>
 
-              {/* Mobile Toggle */}
+              {/* Mobile / Tablet Actions */}
               <div className="lg:hidden flex items-center gap-2">
-                <ThemeToggle />
+                <a
+                  href="#packages"
+                  className="hidden sm:inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
+                >
+                  Plans
+                </a>
+                <ThemeToggle className="!border-white/15 !bg-white/5 !text-slate-200 hover:!text-white hover:!bg-white/10" />
                 <button
                   type="button"
                   onClick={() => setMenuOpen(!menuOpen)}
-                  className={`p-2 rounded-full border ${borderColor} text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500`}
+                  className="p-2 rounded-full border border-white/15 bg-white/5 text-slate-200 hover:text-white hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                   aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
                   aria-expanded={menuOpen}
                   aria-controls="mobile-nav-panel"
@@ -591,7 +654,7 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── HERO SECTION: INDUSTRIAL MAINTENANCE PHOTOGRAPHY & ENTRANCE ─── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <header className="relative overflow-hidden pt-24 pb-20 sm:pt-28 lg:pt-32 lg:pb-28 text-center">
+      <header className="relative overflow-hidden pt-20 sm:pt-22 lg:pt-24 pb-20 lg:pb-24 text-center">
         {/* Hero Background Layer: Looping Cinematic Slow-Motion Video with Dark CSS Overlay */}
         <div
           className="absolute inset-0 pointer-events-none overflow-hidden z-0"
@@ -607,13 +670,15 @@ export function LandingPage() {
             muted
             playsInline
             poster="/images/hero-video-poster.jpg"
-            className="absolute inset-0 w-full h-full object-cover object-center filter brightness-[1.12] contrast-[1.04]"
+            className="absolute inset-0 w-full h-full object-cover filter brightness-[1.12] contrast-[1.04]"
+            style={{ objectPosition: "54% 22%" }}
           >
             <source src="/videos/hero-background.mp4" type="video/mp4" />
             <img
               src="/images/hero-video-poster.jpg"
               alt="Commercial Field Service Operations"
-              className="w-full h-full object-cover object-center filter brightness-[1.12] contrast-[1.04]"
+              className="w-full h-full object-cover filter brightness-[1.12] contrast-[1.04]"
+              style={{ objectPosition: "54% 22%" }}
             />
           </video>
 
@@ -1791,16 +1856,97 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer className="border-t border-[var(--border)] py-8 bg-[var(--bg-surface)]">
-        <div className="max-w-6xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-          <div className="flex items-center gap-2.5">
-            <LogoMark size={26} />
-            <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-              © 2026 VoltOps · Commercial field-service coordination platform
-            </span>
+      {/* ── Production-Quality SaaS Footer (Dark, Sophisticated, Focused) ── */}
+      <footer className="relative border-t border-[var(--border)] bg-[#070b10] text-slate-400 overflow-hidden">
+        {/* Subtle top emerald gradient glow */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 max-w-4xl h-[1px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent pointer-events-none"
+          aria-hidden="true"
+        />
+
+        <div className="max-w-6xl mx-auto px-5 pt-12 pb-8 sm:pt-14 sm:pb-10">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 pb-10 border-b border-white/10 items-start">
+            {/* Brand Area (md:col-span-6 lg:col-span-7) */}
+            <div className="md:col-span-6 lg:col-span-7 space-y-3.5 text-left">
+              <a href="#" className="flex items-center gap-2.5 group w-fit focus-visible:outline-none">
+                <LogoMark size={28} />
+                <span className="font-heading font-extrabold text-[18px] tracking-tight text-white group-hover:text-emerald-400 transition-colors">
+                  VoltOps
+                </span>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+              </a>
+              <p className="text-xs sm:text-sm text-slate-400 max-w-md leading-relaxed">
+                Commercial field-service coordination platform. Deterministic 20–40 minute physical arrival SLAs and verified multi-trade dispatching for mission-critical facilities.
+              </p>
+              <div className="flex items-center gap-2 pt-1 text-[11px] font-semibold text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span>Enterprise Dispatch Engine & Skill Passport Verification</span>
+              </div>
+            </div>
+
+            {/* Quick Navigation (md:col-span-6 lg:col-span-5) */}
+            <div className="md:col-span-6 lg:col-span-5 flex flex-col sm:flex-row sm:justify-end gap-8 sm:gap-14 text-left">
+              <div className="space-y-3">
+                <div className="text-xs font-bold uppercase tracking-wider text-white">
+                  Platform
+                </div>
+                <ul className="space-y-2 text-xs">
+                  <li>
+                    <a href="#services" className="hover:text-emerald-400 transition-colors">
+                      Services & Trades
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#dispatch" className="hover:text-emerald-400 transition-colors">
+                      Operations & Dispatch
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#how" className="hover:text-emerald-400 transition-colors">
+                      How It Works
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="space-y-3">
+                <div className="text-xs font-bold uppercase tracking-wider text-white">
+                  Solutions
+                </div>
+                <ul className="space-y-2 text-xs">
+                  <li>
+                    <a href="#packages" className="hover:text-emerald-400 transition-colors">
+                      Coverage Plans
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#hubs" className="hover:text-emerald-400 transition-colors">
+                      Coverage Hubs
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#contact" className="hover:text-emerald-400 transition-colors">
+                      Contact & Inquiries
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <div className="text-xs text-slate-600 dark:text-slate-400">Team Pranta</div>
+
+          {/* Bottom Row */}
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left text-xs text-slate-500">
+            <div>
+              © {new Date().getFullYear()} VoltOps. All rights reserved. Commercial facility coordination.
+            </div>
+            <div className="flex items-center gap-2 text-slate-400 font-medium">
+              <span>Developed by</span>
+              <span className="text-emerald-400 font-semibold">Team Pranta</span>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
