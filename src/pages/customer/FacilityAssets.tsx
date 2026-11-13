@@ -466,15 +466,15 @@ export function FacilityAssets() {
                     const linkedReq = getLinkedRequest(asset.name);
                     return (
                       <tr key={asset.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                        <td className="py-3 px-4">
-                          <div className="font-semibold text-[var(--text-primary)]">{asset.name}</div>
-                          <div className="font-mono text-[11px] text-[var(--text-muted)]">Tag: {asset.tagNumber}</div>
+                        <td className="py-3 px-4 min-w-[200px] max-w-[280px]">
+                          <div className="font-semibold text-[var(--text-primary)] leading-snug">{asset.name}</div>
+                          <div className="font-mono text-[11px] text-[var(--text-muted)] mt-0.5">Tag: {asset.tagNumber}</div>
                         </td>
                         <td className="py-3 px-4 text-[var(--text-muted)] whitespace-nowrap">
                           {asset.category}
                         </td>
-                        <td className="py-3 px-4 max-w-[200px] truncate" title={asset.location}>
-                          <span className="text-[var(--text-primary)] font-medium">{asset.location}</span>
+                        <td className="py-3 px-4 min-w-[180px] max-w-[260px]">
+                          <span className="text-[var(--text-primary)] font-medium block leading-snug">{asset.location}</span>
                         </td>
                         <td className="py-3 px-4 whitespace-nowrap">
                           <span

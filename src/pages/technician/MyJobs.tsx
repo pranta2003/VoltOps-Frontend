@@ -29,7 +29,7 @@ export interface TechnicianJobItem {
   assetSerial: string;
   problemSummary: string;
   priority: "URGENT" | "HIGH" | "MEDIUM" | "LOW";
-  status: "ASSIGNED" | "TRAVELLING" | "ON_SITE" | "COMPLETED";
+  status: "ASSIGNED" | "TRAVELLING" | "ON_SITE" | "WORK_COMPLETED_AWAITING_CONFIRMATION" | "COMPLETED";
   arrivalSlaRemainingMinutes?: number;
   scheduledTime: string;
   triageNotes?: string;
@@ -152,7 +152,12 @@ export function MyJobs() {
 
     // Tab
     if (activeTab === "TODAY") {
-      return j.status === "ASSIGNED" || j.status === "TRAVELLING" || j.status === "ON_SITE";
+      return (
+        j.status === "ASSIGNED" ||
+        j.status === "TRAVELLING" ||
+        j.status === "ON_SITE" ||
+        j.status === "WORK_COMPLETED_AWAITING_CONFIRMATION"
+      );
     }
     if (activeTab === "UPCOMING") {
       return j.status === "ASSIGNED";
@@ -172,6 +177,8 @@ export function MyJobs() {
         return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 font-bold animate-pulse";
       case "ON_SITE":
         return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20 font-bold";
+      case "WORK_COMPLETED_AWAITING_CONFIRMATION":
+        return "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20 font-bold";
       case "COMPLETED":
         return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 font-semibold";
     }
@@ -477,7 +484,7 @@ export function MyJobs() {
                   <label className="block font-semibold text-[var(--text-secondary)] mb-1">
                     Select Valid Linear Progression (Current: {statusModalJob.status})
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-4 gap-2">
                     <button
                       type="button"
                       onClick={() => handleUpdateStatus("TRAVELLING")}
@@ -493,6 +500,14 @@ export function MyJobs() {
                       className="p-2.5 rounded-xl border border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-300 font-bold hover:bg-purple-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-center"
                     >
                       On Site
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateStatus("WORK_COMPLETED_AWAITING_CONFIRMATION")}
+                      disabled={isUpdatingStatus || !validNextTransitions.includes("WORK_COMPLETED_AWAITING_CONFIRMATION")}
+                      className="p-2.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 font-bold hover:bg-cyan-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all text-center"
+                    >
+                      Sign Off
                     </button>
                     <button
                       type="button"

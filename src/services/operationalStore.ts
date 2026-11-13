@@ -167,6 +167,47 @@ export const INITIAL_CUSTOMER_ASSETS: CustomerAsset[] = [
   },
 ];
 
+export interface TechnicianLeaveRequest {
+  id: string;
+  technicianId: string;
+  technicianName: string;
+  leaveType: "ANNUAL" | "MEDICAL" | "CASUAL" | "EMERGENCY";
+  startDate: string;
+  endDate: string;
+  reason: string;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
+  submittedAt: string;
+  reviewedAt?: string;
+  reviewerNotes?: string;
+}
+
+export const INITIAL_LEAVE_REQUESTS: TechnicianLeaveRequest[] = [
+  {
+    id: "LV-2026-001",
+    technicianId: "tech-01",
+    technicianName: "Kamrul Islam",
+    leaveType: "ANNUAL",
+    startDate: "2026-12-01",
+    endDate: "2026-12-05",
+    reason: "Scheduled family vacation following Q4 industrial maintenance cycle.",
+    status: "APPROVED",
+    submittedAt: "2026-11-01T09:00:00Z",
+    reviewedAt: "2026-11-02T14:30:00Z",
+    reviewerNotes: "Approved by Lead Dispatcher. Standby technician coverage confirmed.",
+  },
+  {
+    id: "LV-2026-002",
+    technicianId: "tech-01",
+    technicianName: "Kamrul Islam",
+    leaveType: "MEDICAL",
+    startDate: "2026-11-20",
+    endDate: "2026-11-21",
+    reason: "Scheduled health checkup and physical fitness certification renewal.",
+    status: "PENDING",
+    submittedAt: "2026-11-12T11:20:00Z",
+  },
+];
+
 export interface OperationalState {
   requests: ServiceRequest[];
   workOrders: WorkOrder[];
@@ -174,6 +215,7 @@ export interface OperationalState {
   invoices: Invoice[];
   events: DispatchEventLog[];
   assets?: CustomerAsset[];
+  leaveRequests?: TechnicianLeaveRequest[];
 }
 
 function createPristineBaseline(): OperationalState {
@@ -184,6 +226,7 @@ function createPristineBaseline(): OperationalState {
     invoices: JSON.parse(JSON.stringify(INITIAL_INVOICES)),
     events: JSON.parse(JSON.stringify(INITIAL_DISPATCH_EVENTS)),
     assets: JSON.parse(JSON.stringify(INITIAL_CUSTOMER_ASSETS)),
+    leaveRequests: JSON.parse(JSON.stringify(INITIAL_LEAVE_REQUESTS)),
   };
 }
 
@@ -242,6 +285,7 @@ export function validateOperationalState(candidate: unknown): OperationalState |
   if (!isArrayOfObjectsWithId(c.invoices)) return null;
   if (!isArrayOfObjectsWithId(c.events)) return null;
   if (c.assets !== undefined && !isArrayOfObjectsWithId(c.assets)) return null;
+  if (c.leaveRequests !== undefined && !isArrayOfObjectsWithId(c.leaveRequests)) return null;
 
   return candidate as OperationalState;
 }
@@ -256,6 +300,9 @@ function loadState(): OperationalState {
         if (validated) {
           if (!validated.assets || !Array.isArray(validated.assets)) {
             validated.assets = JSON.parse(JSON.stringify(INITIAL_CUSTOMER_ASSETS));
+          }
+          if (!validated.leaveRequests || !Array.isArray(validated.leaveRequests)) {
+            validated.leaveRequests = JSON.parse(JSON.stringify(INITIAL_LEAVE_REQUESTS));
           }
           return validated;
         }
@@ -409,6 +456,65 @@ export const operationalStore = {
   setAssets(assets: CustomerAsset[]): void {
     const state = loadState();
     saveState({ ...state, assets });
+  },
+
+  getLeaveRequests(technicianId?: string): TechnicianLeaveRequest[] {
+    const state = loadState();
+    const all: TechnicianLeaveRequest[] = state.leaveRequests && Array.isArray(state.leaveRequests)
+      ? [...state.leaveRequests]
+      : JSON.parse(JSON.stringify(INITIAL_LEAVE_REQUESTS));
+    if (!technicianId) return all;
+    return all.filter((l: TechnicianLeaveRequest) => l.technicianId === technicianId);
+  },
+
+  setLeaveRequests(leaveRequests: TechnicianLeaveRequest[]): void {
+    const state = loadState();
+    saveState({ ...state, leaveRequests });
+  },
+
+  submitLeaveRequest(
+    technicianId: string,
+    technicianName: string,
+    data: {
+      leaveType: "ANNUAL" | "MEDICAL" | "CASUAL" | "EMERGENCY";
+      startDate: string;
+      endDate: string;
+      reason: string;
+    }
+  ): TechnicianLeaveRequest {
+    const state = loadState();
+    const current: TechnicianLeaveRequest[] = state.leaveRequests && Array.isArray(state.leaveRequests)
+      ? [...state.leaveRequests]
+      : JSON.parse(JSON.stringify(INITIAL_LEAVE_REQUESTS));
+
+    const newReq: TechnicianLeaveRequest = {
+      id: `LV-${Date.now().toString().slice(-4)}`,
+      technicianId,
+      technicianName,
+      leaveType: data.leaveType,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      reason: data.reason,
+      status: "PENDING",
+      submittedAt: new Date().toISOString(),
+    };
+
+    saveState({ ...state, leaveRequests: [newReq, ...current] });
+    return newReq;
+  },
+
+  cancelLeaveRequest(requestId: string): boolean {
+    const state = loadState();
+    const current: TechnicianLeaveRequest[] = state.leaveRequests && Array.isArray(state.leaveRequests)
+      ? [...state.leaveRequests]
+      : JSON.parse(JSON.stringify(INITIAL_LEAVE_REQUESTS));
+
+    const target = current.find((l: TechnicianLeaveRequest) => l.id === requestId);
+    if (!target || target.status !== "PENDING") return false;
+
+    target.status = "CANCELLED";
+    saveState({ ...state, leaveRequests: [...current] });
+    return true;
   },
 
   /**

@@ -142,8 +142,19 @@ export const technicianService = {
     } else if (newStatus === "ON_SITE") {
       // Physical technician arrival milestone reached: Arrival SLA met
       order.startedAt = order.startedAt || new Date().toISOString();
+    } else if (newStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION") {
+      order.completionReport = {
+        completedAt: new Date().toISOString(),
+        notes: workNotes || "Work completed on site. Awaiting customer confirmation.",
+        technicianName: actorName,
+        confirmedByCustomer: false,
+      };
     } else if (newStatus === "COMPLETED") {
       order.completedAt = new Date().toISOString();
+      if (order.completionReport) {
+        order.completionReport.confirmedByCustomer = true;
+        order.completionReport.confirmedAt = new Date().toISOString();
+      }
 
       // 1. Reconcile technician availability safely against ALL remaining active assignments
       if (order.assignedTechnicianId) {
@@ -218,5 +229,48 @@ export const technicianService = {
       message: `[Local Preview] Work Order ${workOrderId} status updated to ${newStatus}.`,
       timestamp: new Date().toISOString(),
     };
+  },
+
+  /**
+   * Submit technician completion report with notes and materials.
+   * Transitions status to WORK_COMPLETED_AWAITING_CONFIRMATION.
+   */
+  async submitJobCompletion(
+    workOrderId: string,
+    report: {
+      notes: string;
+      materialsUsed?: string;
+      technicianName?: string;
+    }
+  ): Promise<TechnicianApiResponse<WorkOrder>> {
+    const actorName = report.technicianName || "Kamrul Islam (Technician)";
+    const workOrders = operationalStore.getWorkOrders();
+    const order = workOrders.find((w) => w.id === workOrderId);
+    if (!order) {
+      throw new TechnicianApiError(`Work Order ${workOrderId} not found.`, { status: 404 });
+    }
+
+    return this.updateJobStatus(
+      workOrderId,
+      "WORK_COMPLETED_AWAITING_CONFIRMATION",
+      report.materialsUsed ? `${report.notes} (Materials: ${report.materialsUsed})` : report.notes,
+      actorName
+    );
+  },
+
+  /**
+   * Confirm job completion (Customer action).
+   * Transitions status from WORK_COMPLETED_AWAITING_CONFIRMATION to COMPLETED.
+   */
+  async confirmJobCompletion(
+    workOrderId: string,
+    customerName: string = "Customer"
+  ): Promise<TechnicianApiResponse<WorkOrder>> {
+    return this.updateJobStatus(
+      workOrderId,
+      "COMPLETED",
+      `Completion confirmed by customer ${customerName}.`,
+      `${customerName} (Customer)`
+    );
   },
 };

@@ -11,6 +11,7 @@ import {
   getCoveragePlanSlaLabel,
 } from "../types";
 import { customerService } from "../services/customerService";
+import { technicianService } from "../services/technicianService";
 import { operationalStore } from "../services/operationalStore";
 import {
   getSubscriptionEntitlement,
@@ -37,7 +38,15 @@ interface CustomerViewRequest {
   description: string;
   priority: PriorityLevel;
   coveragePlan?: CoveragePlanId;
-  displayStatus: "NEW" | "REVIEWING" | "ASSIGNED" | "TRAVELLING" | "ON_SITE" | "COMPLETED" | "CANCELLED";
+  displayStatus:
+    | "NEW"
+    | "REVIEWING"
+    | "ASSIGNED"
+    | "TRAVELLING"
+    | "ON_SITE"
+    | "WORK_COMPLETED_AWAITING_CONFIRMATION"
+    | "COMPLETED"
+    | "CANCELLED";
   submittedDate: string;
   rawSubmittedAt: string;
   arrivalSlaWindow?: string;
@@ -126,6 +135,9 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 break;
               case "ON_SITE":
                 arrivalSlaWindow = "On site";
+                break;
+              case "WORK_COMPLETED_AWAITING_CONFIRMATION":
+                arrivalSlaWindow = "Work done · Awaiting your confirmation";
                 break;
               case "COMPLETED":
                 arrivalSlaWindow = "Completed & signed off";
@@ -884,6 +896,38 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   <div className="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 space-y-1">
                     <div className="font-bold text-emerald-800 dark:text-emerald-300">Technician Sign-Off Notes:</div>
                     <p className="text-slate-800 dark:text-slate-200">{selectedRequest.workNotes}</p>
+                  </div>
+                )}
+
+                {selectedRequest.displayStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION" && (
+                  <div className="p-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <CheckCircleIcon size={18} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
+                      <div>
+                        <div className="font-bold text-sm text-[var(--text-primary)]">
+                          Technician Submitted Work Completion
+                        </div>
+                        <div className="text-xs text-[var(--text-muted)]">
+                          Please verify the work performed on-site before confirming satisfactory completion.
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (selectedRequest.workOrderId) {
+                          await technicianService.confirmJobCompletion(
+                            selectedRequest.workOrderId,
+                            user?.name || "Customer"
+                          );
+                          loadCustomerData();
+                          setSelectedRequest(null);
+                        }
+                      }}
+                      className="w-full py-2.5 rounded-xl font-bold text-xs bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
+                    >
+                      Confirm Satisfactory Completion
+                    </button>
                   </div>
                 )}
               </div>

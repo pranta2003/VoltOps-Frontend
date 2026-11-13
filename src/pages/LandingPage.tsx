@@ -421,10 +421,12 @@ export function LandingPage() {
           ))}
       </div>
 
-      {/* ── Floating Pill Navigation (Accessible & Responsive) ─────────── */}
+      {/* ── Floating Navigation (Accessible & Responsive) ─────────── */}
       <div className="sticky top-4 z-50 px-4 sm:px-6 max-w-6xl mx-auto">
         <nav
-          className={`rounded-full border ${borderColor} px-4 py-2.5 transition-all duration-300 ${
+          className={`border ${borderColor} px-4 py-2.5 transition-all duration-300 ${
+            menuOpen ? "rounded-2xl" : "rounded-full"
+          } ${
             scrolled
               ? "backdrop-blur-2xl shadow-[var(--shadow-md)] bg-[var(--bg-overlay)]"
               : "backdrop-blur-xl bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]"

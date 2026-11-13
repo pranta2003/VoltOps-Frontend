@@ -24,6 +24,8 @@ const DispatchAuditLog = lazy(() => import("./pages/dispatcher/DispatchAuditLog"
 
 const TechnicianDashboard = lazy(() => import("./pages/TechnicianDashboard").then((m) => ({ default: m.TechnicianDashboard })));
 const MyJobs = lazy(() => import("./pages/technician/MyJobs").then((m) => ({ default: m.MyJobs })));
+const SkillPassport = lazy(() => import("./pages/technician/SkillPassport").then((m) => ({ default: m.SkillPassport })));
+const LeaveRequests = lazy(() => import("./pages/technician/LeaveRequests").then((m) => ({ default: m.LeaveRequests })));
 
 const CustomerDashboard = lazy(() => import("./pages/CustomerDashboard").then((m) => ({ default: m.CustomerDashboard })));
 const NewServiceRequest = lazy(() => import("./pages/customer/NewServiceRequest").then((m) => ({ default: m.NewServiceRequest })));
@@ -169,6 +171,22 @@ export default function App() {
                 element={
                   <ProtectedRoute allowedRoles={["TECHNICIAN"]}>
                     <MyJobs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/technician/skills"
+                element={
+                  <ProtectedRoute allowedRoles={["TECHNICIAN"]}>
+                    <SkillPassport />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/technician/leave"
+                element={
+                  <ProtectedRoute allowedRoles={["TECHNICIAN"]}>
+                    <LeaveRequests />
                   </ProtectedRoute>
                 }
               />

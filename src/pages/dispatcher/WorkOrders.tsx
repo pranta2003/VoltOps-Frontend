@@ -588,9 +588,9 @@ export const WorkOrders: FC = () => {
                 <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
                   Lifecycle Status
                 </div>
-                <div className="grid grid-cols-4 gap-1.5 text-center text-[10px]">
+                <div className="grid grid-cols-5 gap-1 text-center text-[9px]">
                   <div
-                    className={`p-1.5 rounded-lg border ${
+                    className={`p-1 rounded-lg border ${
                       inspectOrder.status === "UNASSIGNED"
                         ? "border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-700 font-bold"
                         : "border-[var(--border)] text-[var(--text-muted)]"
@@ -599,7 +599,7 @@ export const WorkOrders: FC = () => {
                     1. Unassigned
                   </div>
                   <div
-                    className={`p-1.5 rounded-lg border ${
+                    className={`p-1 rounded-lg border ${
                       inspectOrder.status === "ASSIGNED"
                         ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 font-bold"
                         : "border-[var(--border)] text-[var(--text-muted)]"
@@ -608,22 +608,31 @@ export const WorkOrders: FC = () => {
                     2. Assigned
                   </div>
                   <div
-                    className={`p-1.5 rounded-lg border ${
+                    className={`p-1 rounded-lg border ${
                       inspectOrder.status === "TRAVELLING" || inspectOrder.status === "ON_SITE"
                         ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-700 font-bold"
                         : "border-[var(--border)] text-[var(--text-muted)]"
                     }`}
                   >
-                    3. Field Work
+                    3. On Site
                   </div>
                   <div
-                    className={`p-1.5 rounded-lg border ${
+                    className={`p-1 rounded-lg border ${
+                      inspectOrder.status === "WORK_COMPLETED_AWAITING_CONFIRMATION"
+                        ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 font-bold"
+                        : "border-[var(--border)] text-[var(--text-muted)]"
+                    }`}
+                  >
+                    4. Sign-Off
+                  </div>
+                  <div
+                    className={`p-1 rounded-lg border ${
                       inspectOrder.status === "COMPLETED"
                         ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 font-bold"
                         : "border-[var(--border)] text-[var(--text-muted)]"
                     }`}
                   >
-                    4. Completed
+                    5. Completed
                   </div>
                 </div>
               </div>
@@ -671,6 +680,25 @@ export const WorkOrders: FC = () => {
                   <div className="pt-2 border-t border-[var(--border)]">
                     <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Dispatch Notes</span>
                     <p className="text-[11px] text-[var(--text-primary)] mt-0.5">{inspectOrder.workNotes}</p>
+                  </div>
+                )}
+
+                {inspectOrder.completionReport && (
+                  <div className="pt-2 border-t border-[var(--border)] p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                    <span className="text-[10px] uppercase font-bold text-cyan-700 dark:text-cyan-300 block">
+                      Technician Completion Report
+                    </span>
+                    <p className="text-[11px] text-[var(--text-primary)] mt-0.5 font-medium">
+                      {inspectOrder.completionReport.notes}
+                    </p>
+                    {inspectOrder.completionReport.materialsUsed && (
+                      <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
+                        Materials: {inspectOrder.completionReport.materialsUsed}
+                      </p>
+                    )}
+                    <div className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 mt-1">
+                      Submitted: {new Date(inspectOrder.completionReport.completedAt).toLocaleTimeString()} by {inspectOrder.completionReport.technicianName}
+                    </div>
                   </div>
                 )}
               </div>

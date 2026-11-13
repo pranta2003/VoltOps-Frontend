@@ -158,18 +158,18 @@ export function AdminDashboard() {
 
         {/* ── Compact Operational Overview Indicators ─────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-1">
+          <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
                 Platform Status
               </span>
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
             </div>
-            <div className="text-xl font-bold font-heading text-[var(--text-primary)]">
-              Operational
+            <div className="text-base font-semibold font-heading text-[var(--text-primary)]">
+              System Active
             </div>
             <div className="text-[11px] text-[var(--text-muted)]">
-              {isLive ? "Connected to backend API" : "Local preview mode active"}
+              {isLive ? "Connected to backend" : "Local preview active"}
             </div>
           </div>
 
@@ -200,8 +200,8 @@ export function AdminDashboard() {
 
           <Link to="/admin/audit" className="block">
             <MetricCard
-              label="Security & Governance"
-              value="Enforced"
+              label="Security Posture"
+              value="Compliant"
               subtext="Role Guards & Audit Ledger"
               icon={ShieldCheckIcon}
               trend={{ direction: "neutral", label: "0 Alerts" }}

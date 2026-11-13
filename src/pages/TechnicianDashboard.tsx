@@ -25,7 +25,7 @@ interface TechnicianJobItem {
   assetName: string;
   problemSummary: string;
   priority: "URGENT" | "HIGH" | "MEDIUM" | "LOW";
-  status: "ASSIGNED" | "TRAVELLING" | "ON_SITE" | "COMPLETED";
+  status: "ASSIGNED" | "TRAVELLING" | "ON_SITE" | "WORK_COMPLETED_AWAITING_CONFIRMATION" | "COMPLETED";
   arrivalSlaRemainingMinutes?: number;
   scheduledTime: string;
 }
@@ -34,6 +34,14 @@ export function TechnicianDashboard() {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<TechnicianJobItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Time-based greeting helper
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
 
   function loadTechJobs() {
     setIsLoading(true);
@@ -79,7 +87,7 @@ export function TechnicianDashboard() {
   }, [user?.id]);
 
   const activeJobs = jobs.filter((j) => j.status !== "COMPLETED");
-  const enRouteJob = jobs.find((j) => j.status === "TRAVELLING" || (j.status === "ASSIGNED" && j.priority === "URGENT"));
+  const enRouteJob = jobs.find((j) => j.status === "TRAVELLING" || j.status === "ON_SITE" || (j.status === "ASSIGNED" && j.priority === "URGENT"));
   const completedCount = jobs.filter((j) => j.status === "COMPLETED").length;
 
   const getStatusBadge = (status: TechnicianJobItem["status"]) => {
@@ -90,6 +98,8 @@ export function TechnicianDashboard() {
         return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
       case "ON_SITE":
         return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20";
+      case "WORK_COMPLETED_AWAITING_CONFIRMATION":
+        return "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20";
       case "COMPLETED":
         return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
     }
@@ -97,8 +107,8 @@ export function TechnicianDashboard() {
 
   return (
     <Layout
-      title="Technician Work Overview"
-      subtitle={`Welcome back, ${user?.name || "Kamrul Islam"} · Electrical & Power Systems Specialist`}
+      title="Field Workspace"
+      subtitle={`${getGreeting()}, ${user?.name || "Kamrul Islam"} · Active Shift`}
       action={
         <Link
           to="/technician/jobs"

@@ -69,7 +69,23 @@ export interface ServiceRequest {
 }
 
 // ── 5. Work Orders (Dispatcher -> Technician) ─────────────────────────────
-export type WorkOrderStatus = "UNASSIGNED" | "ASSIGNED" | "TRAVELLING" | "ON_SITE" | "COMPLETED" | "CANCELLED";
+export type WorkOrderStatus =
+  | "UNASSIGNED"
+  | "ASSIGNED"
+  | "TRAVELLING"
+  | "ON_SITE"
+  | "WORK_COMPLETED_AWAITING_CONFIRMATION"
+  | "COMPLETED"
+  | "CANCELLED";
+
+export interface WorkOrderCompletionReport {
+  completedAt: string;
+  notes: string;
+  materialsUsed?: string;
+  technicianName: string;
+  confirmedByCustomer?: boolean;
+  confirmedAt?: string;
+}
 
 export interface WorkOrder {
   id: string; // e.g. "WO-1024" or "WO-2048"
@@ -89,6 +105,7 @@ export interface WorkOrder {
   startedAt?: string;
   completedAt?: string;
   workNotes?: string;
+  completionReport?: WorkOrderCompletionReport;
 }
 
 // ── 6. Technicians & Skills ───────────────────────────────────────────────
