@@ -868,32 +868,32 @@ export function LandingPage() {
             WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 65%, transparent 100%)",
           }}
         >
-          {/* Highly compressed looping 16:9 video */}
+          {/* Highly compressed looping 16:9 video with enhanced brightness */}
           <video
             autoPlay
             loop
             muted
             playsInline
             poster="/images/hero-video-poster.jpg"
-            className="absolute inset-0 w-full h-full object-cover filter brightness-[1.12] contrast-[1.04]"
-            style={{ objectPosition: "54% 22%" }}
+            className="absolute inset-0 w-full h-full object-cover filter brightness-[1.28] contrast-[1.05] saturate-[1.06]"
+            style={{ objectPosition: "50% 25%" }}
           >
             <source src="/videos/hero-background.mp4" type="video/mp4" />
             <img
               src="/images/hero-video-poster.jpg"
               alt="Commercial Field Service Operations"
-              className="w-full h-full object-cover filter brightness-[1.12] contrast-[1.04]"
-              style={{ objectPosition: "54% 22%" }}
+              className="w-full h-full object-cover filter brightness-[1.28] contrast-[1.05]"
+              style={{ objectPosition: "50% 25%" }}
             />
           </video>
 
-          {/* Balanced cinematic dark overlay: keeps engineers and facility background visible while ensuring high contrast for white text */}
+          {/* Balanced cinematic dark overlay: keeps engineers and facility background visible with elevated brightness while ensuring high contrast for white text */}
           <div
             className="absolute inset-0 transition-colors duration-300"
             style={{
               background: isDark
-                ? "radial-gradient(ellipse at 50% 32%, rgba(6, 12, 20, 0.44) 0%, rgba(6, 12, 20, 0.62) 100%)"
-                : "radial-gradient(ellipse at 50% 32%, rgba(6, 12, 20, 0.40) 0%, rgba(6, 12, 20, 0.54) 100%)",
+                ? "radial-gradient(ellipse at 50% 32%, rgba(6, 12, 20, 0.36) 0%, rgba(6, 12, 20, 0.54) 100%)"
+                : "radial-gradient(ellipse at 50% 32%, rgba(6, 12, 20, 0.32) 0%, rgba(6, 12, 20, 0.46) 100%)",
             }}
           />
 
