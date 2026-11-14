@@ -1184,7 +1184,7 @@ export function LandingPage() {
           <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
             7 Supported Trades
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
+          <h2 className="text-3xl sm:text-4xl font-space font-bold tracking-tight text-[var(--text-primary)]">
             What we maintain for your{" "}
             <span className="font-serif-italic font-normal">
               facility
@@ -1295,7 +1295,7 @@ export function LandingPage() {
           <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
             Dispatch Coordination
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
+          <h2 className="text-3xl sm:text-4xl font-space font-bold tracking-tight text-[var(--text-primary)]">
             Transparent matching{" "}
             <span className="font-serif-italic font-normal">
               & audit trail
@@ -1425,7 +1425,7 @@ export function LandingPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
               Coordination Workflow
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
+            <h2 className="text-3xl sm:text-4xl font-space font-bold tracking-tight text-[var(--text-primary)]">
               How VoltOps resolves{" "}
               <span className="font-serif-italic font-normal">
                 breakdowns
@@ -1493,7 +1493,7 @@ export function LandingPage() {
           <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
             Coverage Plans
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
+          <h2 className="text-3xl sm:text-4xl font-space font-bold tracking-tight text-[var(--text-primary)]">
             Choose your facility{" "}
             <span className="font-serif-italic font-normal">
               coverage schedule
@@ -1796,7 +1796,7 @@ export function LandingPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
               Regional Hubs
             </span>
-            <h2 className="text-3xl font-extrabold font-heading text-[var(--text-primary)]">
+            <h2 className="text-3xl font-space font-bold tracking-tight text-[var(--text-primary)]">
               Operational coverage deployment
             </h2>
             <p className="text-sm text-slate-700 dark:text-slate-300">
@@ -1858,7 +1858,7 @@ export function LandingPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
               Our Operational Reach
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
+            <h2 className="text-3xl sm:text-4xl font-space font-bold tracking-tight text-[var(--text-primary)]">
               Built for commercial{" "}
               <span className="font-serif-italic font-normal">
                 operations
@@ -1967,7 +1967,7 @@ export function LandingPage() {
             className="p-8 sm:p-10 rounded-[32px] flex flex-col md:flex-row items-center justify-between gap-6 glass-panel glow-card-emerald mb-14 border border-[#10b981]/40"
           >
             <div className="space-y-2 text-center md:text-left">
-              <h2 className="text-2xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white">
+              <h2 className="text-2xl sm:text-3xl font-space font-bold tracking-tight text-slate-900 dark:text-white">
                 Ready to safeguard your facility operations?
               </h2>
               <p className="text-sm text-slate-700 dark:text-slate-300">
@@ -1992,7 +1992,7 @@ export function LandingPage() {
                 <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
                   Direct Inquiries
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-bold font-heading mt-1.5 text-slate-900 dark:text-white">
+                <h2 className="text-2xl sm:text-3xl font-space font-bold tracking-tight mt-1.5 text-slate-900 dark:text-white">
                   Talk with our team
                 </h2>
                 <p className="text-sm mt-1.5 text-slate-600 dark:text-slate-400">

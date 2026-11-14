@@ -21,6 +21,8 @@ import {
 } from "../services/subscriptionService";
 import { formatBdt } from "../config/coveragePricing";
 import { DemonstrationReceiptModal } from "../components/DemonstrationReceiptModal";
+import { CustomerFeedbackModal } from "../components/CustomerFeedbackModal";
+import { CustomerSupportModal } from "../components/CustomerSupportModal";
 import { notificationService } from "../services/notificationService";
 import {
   ClockIcon,
@@ -34,6 +36,7 @@ import {
   WrenchIcon,
   EyeIcon,
   StarIcon,
+  SendIcon,
 } from "../components/Icons";
 
 interface CustomerViewRequest {
@@ -102,10 +105,50 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const [showQuotationModal, setShowQuotationModal] = useState(false);
   const [quotationRequested, setQuotationRequested] = useState(false);
 
-  // Customer Feedback state
-  const [feedbackRating, setFeedbackRating] = useState<number>(5);
-  const [feedbackComment, setFeedbackComment] = useState<string>("");
-  const [dismissedFeedbackWos, setDismissedFeedbackWos] = useState<string[]>([]);
+  // Dedicated Modals State
+  const [activeFeedbackOrder, setActiveFeedbackOrder] = useState<CustomerViewRequest | null>(null);
+  const [supportModalOpen, setSupportModalOpen] = useState(false);
+  const [supportDefaultId, setSupportDefaultId] = useState("");
+
+  // Persistent dismissed feedback tracking (does not reopen on future visits)
+  const [dismissedFeedbackWos, setDismissedFeedbackWos] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem("voltops_dismissed_feedback_wos");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+
+  const handleDismissFeedback = (workOrderId?: string) => {
+    if (workOrderId) {
+      setDismissedFeedbackWos((prev) => {
+        const next = Array.from(new Set([...prev, workOrderId]));
+        try {
+          localStorage.setItem("voltops_dismissed_feedback_wos", JSON.stringify(next));
+        } catch {}
+        return next;
+      });
+    }
+    setActiveFeedbackOrder(null);
+  };
+
+  // Global keyboard accessibility: Escape closes any open modal safely
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedRequest(null);
+        setActiveFeedbackOrder(null);
+        setShowQuotationModal(false);
+        setActiveReceipt(null);
+        setSupportModalOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   function loadCustomerData() {
     setIsLoading(true);
@@ -155,7 +198,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 arrivalSlaWindow = "On site";
                 break;
               case "WORK_COMPLETED_AWAITING_CONFIRMATION":
-                arrivalSlaWindow = "Work done · Awaiting your confirmation";
+                arrivalSlaWindow = "Work done · Awaiting dispatcher review";
                 break;
               case "COMPLETED":
                 if (linkedOrder.dispatcherApproved) {
@@ -537,24 +580,20 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
         {/* ── Pending Job Completion Notifications ────────────────────────── */}
         {requests
-          .filter(
-            (r) =>
-              r.displayStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION" ||
-              (r.displayStatus === "COMPLETED" && r.completionReport && !r.completionReport.confirmedByCustomer)
-          )
+          .filter((r) => r.displayStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION")
           .map((pReq) => (
             <div
               key={`pending-comp-${pReq.id}`}
               className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fade-in"
             >
               <div className="flex items-start gap-2.5">
-                <CheckCircleIcon size={18} className="text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
+                <ClockIcon size={18} className="text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
                 <div>
                   <strong className="font-bold text-[var(--text-primary)]">On-Site Work Reported Complete:</strong>{" "}
                   <span className="text-[var(--text-muted)]">
                     Technician {pReq.assignedTech || "on site"} has completed work for Request{" "}
                     <span className="font-mono font-bold text-[var(--text-primary)]">{pReq.id}</span> ({pReq.category} ·{" "}
-                    {pReq.asset}). Please review the completion report and confirm satisfaction.
+                    {pReq.asset}). Awaiting senior dispatcher review and sign-off.
                   </span>
                 </div>
               </div>
@@ -563,7 +602,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 onClick={() => setSelectedRequest(pReq)}
                 className="px-4 py-1.5 rounded-xl font-bold text-xs bg-cyan-600 hover:bg-cyan-500 text-white transition-all shrink-0 shadow-sm"
               >
-                Review & Confirm
+                Inspect Report
               </button>
             </div>
           ))}
@@ -594,18 +633,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={() => {
-                    if (cReq.workOrderId) {
-                      setDismissedFeedbackWos((prev) => [...prev, cReq.workOrderId!]);
-                    }
-                  }}
+                  onClick={() => handleDismissFeedback(cReq.workOrderId)}
                   className="px-2.5 py-1.5 rounded-xl font-medium text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
                 >
-                  Dismiss
+                  Maybe later
                 </button>
                 <button
                   type="button"
-                  onClick={() => setSelectedRequest(cReq)}
+                  onClick={() => setActiveFeedbackOrder(cReq)}
                   className="px-4 py-1.5 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white transition-all shadow-sm"
                 >
                   Rate Service (★)
@@ -757,6 +792,19 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               >
                 <RefreshCwIcon size={12} className={isLoading ? "animate-spin" : ""} />
                 <span className="hidden sm:inline">Refresh</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSupportDefaultId("");
+                  setSupportModalOpen(true);
+                }}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5"
+                title="Contact VoltOps Operations Support"
+              >
+                <SendIcon size={12} className="text-emerald-500" />
+                <span className="hidden sm:inline">Contact Support</span>
               </button>
 
               <Link
@@ -1026,8 +1074,15 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
         {/* ── Inspection Detail Modal ────────────────────────────────────── */}
         {selectedRequest && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-xl rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-5">
+          <div
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setSelectedRequest(null);
+            }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+          >
+            <div className="w-full max-w-xl rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
                 <div>
                   <span className="text-[11px] font-mono font-bold text-[var(--text-muted)]">
@@ -1095,26 +1150,32 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   </div>
                 )}
 
-                {(selectedRequest.displayStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION" ||
-                  (selectedRequest.displayStatus === "COMPLETED" &&
-                    selectedRequest.completionReport &&
-                    !selectedRequest.completionReport.confirmedByCustomer)) && (
+                {/* ── State 1: Work Reported Complete — Awaiting Dispatcher Review ── */}
+                {selectedRequest.displayStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION" && (
                   <div className="p-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 space-y-3">
                     <div className="flex items-center gap-2">
-                      <CheckCircleIcon size={18} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
+                      <ClockIcon size={18} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
                       <div>
                         <div className="font-bold text-sm text-[var(--text-primary)]">
                           Technician Submitted Work Completion
                         </div>
                         <div className="text-xs text-[var(--text-muted)]">
-                          Please verify the work performed on-site before confirming satisfactory completion.
+                          Work has been performed on-site by technician {selectedRequest.assignedTech || "assigned"}. Currently queued for senior dispatcher review and sign-off.
                         </div>
                       </div>
                     </div>
                     {selectedRequest.completionReport && (
                       <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs space-y-1.5">
                         <div className="font-semibold text-[var(--text-primary)]">Work Performed & Diagnostic:</div>
-                        <p className="text-[var(--text-muted)]">{selectedRequest.completionReport.notes}</p>
+                        <p className="text-[var(--text-muted)]">
+                          {selectedRequest.completionReport.workPerformed || selectedRequest.completionReport.notes}
+                        </p>
+                        {selectedRequest.completionReport.diagnosis && (
+                          <div className="pt-1 text-[11px] text-[var(--text-muted)]">
+                            <span className="font-semibold text-[var(--text-primary)]">Diagnosis: </span>
+                            {selectedRequest.completionReport.diagnosis}
+                          </div>
+                        )}
                         {selectedRequest.completionReport.materialsUsed && (
                           <div className="pt-1 text-[11px] text-[var(--text-muted)]">
                             <span className="font-semibold text-[var(--text-primary)]">Materials Used: </span>
@@ -1126,25 +1187,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                         </div>
                       </div>
                     )}
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (selectedRequest.workOrderId) {
-                          await technicianService.confirmJobCompletion(
-                            selectedRequest.workOrderId,
-                            user?.name || "Apex Spinning & Weaving Mills"
-                          );
-                          loadCustomerData();
-                          setSelectedRequest(null);
-                        }
-                      }}
-                      className="w-full py-2.5 rounded-xl font-bold text-xs bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
-                    >
-                      Confirm Satisfactory Completion
-                    </button>
                   </div>
                 )}
 
+                {/* ── State 2: Work Completed and Approved by Dispatcher ────────── */}
                 {selectedRequest.displayStatus === "COMPLETED" && (
                   <div className="p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
@@ -1188,109 +1234,42 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                       </div>
                     )}
 
-                    {/* Customer Feedback Experience */}
+                    {/* Customer Feedback Action inside Modal */}
                     {selectedRequest.workOrderId && (
-                      <div className="mt-2 p-3.5 rounded-xl bg-[var(--bg-surface)] border border-emerald-500/20 space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-[var(--text-primary)]">Customer Feedback & Rating</span>
-                          {notificationService.hasProvidedFeedback(selectedRequest.workOrderId) ? (
-                            <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                              Feedback Submitted
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-[var(--text-muted)]">Rate technician performance</span>
-                          )}
-                        </div>
-
+                      <div className="pt-1 flex items-center justify-between text-xs">
                         {notificationService.hasProvidedFeedback(selectedRequest.workOrderId) ? (
-                          <div className="text-xs space-y-1.5 pt-1">
-                            {(() => {
-                              const fb = notificationService.getFeedback(selectedRequest.workOrderId!);
-                              return fb ? (
-                                <>
-                                  <div className="flex items-center gap-1">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                      <StarIcon
-                                        key={star}
-                                        size={14}
-                                        fill={star <= fb.rating ? "currentColor" : "none"}
-                                        className={star <= fb.rating ? "text-amber-400" : "text-gray-300 dark:text-gray-600"}
-                                      />
-                                    ))}
-                                    <span className="ml-1.5 text-[11px] font-bold text-[var(--text-primary)]">{fb.rating} / 5</span>
-                                  </div>
-                                  {fb.comment && (
-                                    <p className="text-[11px] text-[var(--text-muted)] italic">
-                                      "{fb.comment}"
-                                    </p>
-                                  )}
-                                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400">
-                                    Thank you! Your feedback helps us maintain enterprise service standards.
-                                  </div>
-                                </>
-                              ) : null;
-                            })()}
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                              Your Rating:
+                            </span>
+                            <div className="flex items-center gap-0.5 text-amber-400">
+                              {[1, 2, 3, 4, 5].map((s) => {
+                                const fb = notificationService.getFeedback(selectedRequest.workOrderId!);
+                                const r = fb?.rating || 5;
+                                return (
+                                  <StarIcon
+                                    key={s}
+                                    size={13}
+                                    fill={s <= r ? "currentColor" : "none"}
+                                    className={s <= r ? "text-amber-400" : "text-gray-300 dark:text-gray-600"}
+                                  />
+                                );
+                              })}
+                            </div>
                           </div>
                         ) : (
-                          <div className="space-y-2.5">
-                            <div className="flex items-center gap-1.5">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                  key={star}
-                                  type="button"
-                                  onClick={() => setFeedbackRating(star)}
-                                  className="p-1 hover:scale-110 transition-transform"
-                                  aria-label={`Rate ${star} star`}
-                                >
-                                  <StarIcon
-                                    size={18}
-                                    fill={star <= feedbackRating ? "currentColor" : "none"}
-                                    className={star <= feedbackRating ? "text-amber-400" : "text-gray-300 dark:text-gray-600"}
-                                  />
-                                </button>
-                              ))}
-                              <span className="text-[11px] text-[var(--text-muted)] ml-2 font-medium">
-                                {feedbackRating === 5
-                                  ? "Exceptional (5★)"
-                                  : feedbackRating === 4
-                                  ? "Very Good (4★)"
-                                  : feedbackRating === 3
-                                  ? "Satisfactory (3★)"
-                                  : feedbackRating === 2
-                                  ? "Needs Improvement (2★)"
-                                  : "Poor (1★)"}
-                              </span>
-                            </div>
-                            <textarea
-                              value={feedbackComment}
-                              onChange={(e) => setFeedbackComment(e.target.value)}
-                              placeholder="Optional feedback: punctuality, diagnostic accuracy, electrical safety..."
-                              rows={2}
-                              className="w-full text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[#10b981]"
-                            />
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (selectedRequest.workOrderId) {
-                                    notificationService.submitFeedback({
-                                      workOrderId: selectedRequest.workOrderId,
-                                      rating: feedbackRating,
-                                      comment: feedbackComment.trim() || undefined,
-                                      customerName: user?.name || "Apex Spinning & Weaving Mills",
-                                      timestamp: new Date().toISOString(),
-                                    });
-                                    setFeedbackRating(5);
-                                    setFeedbackComment("");
-                                    loadCustomerData();
-                                  }
-                                }}
-                                className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
-                              >
-                                Submit Feedback
-                              </button>
-                            </div>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const target = selectedRequest;
+                              setSelectedRequest(null);
+                              setActiveFeedbackOrder(target);
+                            }}
+                            className="px-3 py-1.5 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white transition-all shadow-sm flex items-center gap-1.5"
+                          >
+                            <StarIcon size={14} fill="currentColor" />
+                            <span>Rate This Service (★)</span>
+                          </button>
                         )}
                       </div>
                     )}
@@ -1298,7 +1277,21 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 )}
               </div>
 
-              <div className="flex justify-end pt-2 border-t border-[var(--border)]">
+              <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const id = selectedRequest.workOrderId || selectedRequest.id;
+                    setSelectedRequest(null);
+                    setSupportDefaultId(id);
+                    setSupportModalOpen(true);
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors flex items-center gap-1.5"
+                >
+                  <SendIcon size={11} className="text-emerald-500" />
+                  <span>Report an Issue</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setSelectedRequest(null)}
@@ -1400,6 +1393,23 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             onClose={() => setActiveReceipt(null)}
           />
         )}
+
+        {/* Customer Satisfaction Feedback Modal */}
+        <CustomerFeedbackModal
+          isOpen={Boolean(activeFeedbackOrder)}
+          onClose={handleDismissFeedback}
+          workOrderId={activeFeedbackOrder?.workOrderId || ""}
+          technicianName={activeFeedbackOrder?.assignedTech}
+          assetName={activeFeedbackOrder?.asset}
+          onSubmitSuccess={loadCustomerData}
+        />
+
+        {/* Customer Support & Issue Escalation Modal */}
+        <CustomerSupportModal
+          isOpen={supportModalOpen}
+          onClose={() => setSupportModalOpen(false)}
+          defaultRelatedId={supportDefaultId}
+        />
       </div>
     </Layout>
   );

@@ -1408,3 +1408,38 @@ This document tracks all completed implementation milestones, verified files, co
      - Automated test suite expanded to **81 / 81 tests passing** (100% pass rate) with dedicated coverage for canonical plan allowances, request plan inheritance, 4-stage Kanban, completion review workflows, customer feedback, admin credential verification, and dispatcher management.
      - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
      - Production build: `npm run build` compiled cleanly into `/dist` in 8.54s with 0 errors.
+
+---
+
+## Milestone 4.6 — Customer UX Completion, Support Contact, Favicon & Pre-Merge Audit
+
+- **Date**: 15 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Baseline Commit**: `cd5b649`
+- **Scope & Key Deliverables**:
+  1. **Customer Completion & Feedback Experience (Resolved "Stuck" Modal Defect)**:
+     - Diagnosed and resolved the root cause of modal freeze: missing keyboard `Escape` handler, absent click-outside backdrop listener, and non-mutually exclusive conditional rendering of `WORK_COMPLETED_AWAITING_CONFIRMATION` versus `COMPLETED`.
+     - Separated pending confirmation state ("On-Site Work Reported Complete", awaiting dispatcher review, read-only completion details) from terminal `COMPLETED` state (`OK — Work completed and dispatcher approved`).
+     - Decoupled completion confirmation from satisfaction feedback by introducing a dedicated non-blocking modal (`CustomerFeedbackModal.tsx`) with 5-star rating, hover states, character-limited commentary, and persistent dismissal tracking in `localStorage` (`voltops_dismissed_feedback_wos`) so "Maybe later" decisions do not re-prompt on future visits.
+     - Added global `Escape` key event listener closing all open modals.
+  2. **Customer Contact Support & Issue Escalation Flow**:
+     - Created `src/types/support.ts` defining `CustomerSupportTicket` and `SUPPORT_CATEGORIES`.
+     - Implemented `CustomerSupportModal.tsx` allowing customers to submit issues across categories (Dispatch, Technical, Billing, Facility Asset, Other) with optional related request linkage.
+     - Dispatches formatted email ticket to `prantakumerpandit@gmail.com` via `mailto:` with URI-encoded subject and structured issue breakdown.
+     - Includes truthful prototype evaluation notice confirming client-side dispatch without fake backend ticket creation.
+     - Integrated "Contact Support" in Customer Dashboard header actions and "Report an Issue" in request inspection modal footer.
+  3. **High-Contrast Brand Tab Favicon (`favicon.svg`)**:
+     - Created `public/favicon.svg` featuring the standalone VoltOps lightning bolt emblem in an emerald gradient (`#34d399` to `#059669`) with dark high-contrast container (`#06090e`), optimized for 16×16 and 32×32 tab displays.
+     - Updated `index.html` with `<link rel="icon" type="image/svg+xml" href="/favicon.svg" />`.
+  4. **Selective Typography Refinement**:
+     - Applied modern software-engineering typography (`font-space font-bold tracking-tight` from Space Grotesk) to major section headers below the hero on the landing page ("What we maintain for your commercial facility", "Transparent matching & audit trail", "How VoltOps resolves breakdowns", "Choose your facility coverage schedule", "Operational coverage deployment", "Built for commercial operations", "Ready to safeguard your facility operations?", "Talk with our team").
+     - Preserved hero headline, subtitle, video, and body copy typography intact.
+  5. **Automated Test Suite Expansion**:
+     - Added Tests 37, 38, 39 to `tests/workflowIntegration.test.mjs`:
+       * Test 37: Customer support ticket mailto formatting to `prantakumerpandit@gmail.com`.
+       * Test 38: Customer feedback dialog persistent dismissal tracking in `localStorage`.
+       * Test 39: Strict mutual exclusivity between `WORK_COMPLETED_AWAITING_CONFIRMATION` and `COMPLETED`.
+     - **84 / 84 tests passing** (100% pass rate).
+  6. **Quality Gate Audits**:
+     - TypeScript check (`npx tsc --noEmit`): 0 errors.
+     - Production build (`npm run build`): Clean build in 8.33s with 0 errors.

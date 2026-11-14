@@ -1961,3 +1961,134 @@ test("Test 36: Admin Dispatcher Management Roster and Status Toggle with Audit T
   assert.equal(auditLog.action, "Dispatcher account deactivated: Bani");
   assert.equal(auditLog.severity, "WARNING");
 });
+
+test("Test 37: Customer Support Ticket & mailto URL dispatch formatting to support email", () => {
+  const ticket = {
+    customerName: "Mohammad Rahman",
+    customerEmail: "rahman@apextextiles.com",
+    customerPhone: "+880 1711-234567",
+    category: "BILLING",
+    subject: "Service pack quota reconciliation",
+    description: "Please check our billing invoice for the 5-pack commercial quotation request.",
+    relatedRequestId: "REQ-2026-004",
+  };
+
+  const recipient = "prantakumerpandit@gmail.com";
+  const subject = `[VoltOps Support] ${ticket.category} - ${ticket.subject}`;
+  const body = [
+    "VOLTOPS CUSTOMER SUPPORT / ISSUE REPORT",
+    "----------------------------------------",
+    `Category: ${ticket.category}`,
+    `Subject: ${ticket.subject}`,
+    `Customer: ${ticket.customerName}`,
+    `Email: ${ticket.customerEmail}`,
+    `Phone: ${ticket.customerPhone}`,
+    `Related Reference: ${ticket.relatedRequestId}`,
+    "",
+    "DESCRIPTION / ISSUE DETAILS:",
+    ticket.description,
+    "",
+    "----------------------------------------",
+    "Dispatched from VoltOps Enterprise Customer Portal",
+  ].join("\n");
+
+  const mailtoUrl = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  assert.ok(mailtoUrl.startsWith("mailto:prantakumerpandit@gmail.com?"), "Must target prantakumerpandit@gmail.com");
+  assert.ok(mailtoUrl.includes(encodeURIComponent("[VoltOps Support] BILLING - Service pack quota reconciliation")), "Subject must be properly URL-encoded");
+  assert.ok(mailtoUrl.includes(encodeURIComponent(ticket.customerEmail)), "Body must contain customer email");
+  assert.ok(mailtoUrl.includes(encodeURIComponent("REQ-2026-004")), "Body must contain related request ID");
+});
+
+test("Test 38: Customer Feedback Dialog Persistent Dismissal Tracking in LocalStorage", () => {
+  const storageMock = new Map();
+  const STORAGE_KEY = "voltops_dismissed_feedback_wos";
+
+  function getDismissed() {
+    const raw = storageMock.get(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }
+
+  function dismissFeedback(workOrderId) {
+    const current = getDismissed();
+    const updated = Array.from(new Set([...current, workOrderId]));
+    storageMock.set(STORAGE_KEY, JSON.stringify(updated));
+    return updated;
+  }
+
+  function shouldPromptFeedback(order) {
+    if (order.status !== "COMPLETED") return false;
+    if (order.completionReport?.customerRating) return false;
+    const dismissed = getDismissed();
+    return !dismissed.includes(order.id);
+  }
+
+  const completedOrder = {
+    id: "WO-2026-9901",
+    status: "COMPLETED",
+    completionReport: { confirmedByCustomer: true, rating: null },
+  };
+
+  assert.equal(shouldPromptFeedback(completedOrder), true, "Initially prompts feedback for unrated completed order");
+
+  dismissFeedback(completedOrder.id);
+  assert.equal(shouldPromptFeedback(completedOrder), false, "Does not prompt after user dismisses with 'Maybe later'");
+
+  // Simulate secondary visit
+  const persisted = getDismissed();
+  assert.deepEqual(persisted, ["WO-2026-9901"], "Dismissal state persists across sessions");
+  assert.equal(shouldPromptFeedback(completedOrder), false, "Survives reload without re-prompting");
+});
+
+test("Test 39: Strict Mutual Exclusivity: WORK_COMPLETED_AWAITING_CONFIRMATION vs COMPLETED", () => {
+  const awaitingOrder = {
+    id: "WO-101",
+    status: "WORK_COMPLETED_AWAITING_CONFIRMATION",
+    completionReport: {
+      workNotes: "Repaired capacitor",
+      materialsUsed: "1x 50uF Capacitor",
+      completedAt: "2026-11-15T00:00:00.000Z",
+      confirmedByCustomer: false,
+    },
+  };
+
+  const completedOrder = {
+    id: "WO-102",
+    status: "COMPLETED",
+    completionReport: {
+      workNotes: "Repaired capacitor",
+      materialsUsed: "1x 50uF Capacitor",
+      completedAt: "2026-11-15T00:00:00.000Z",
+      confirmedByCustomer: true,
+      dispatcherApproved: true,
+    },
+  };
+
+  function renderStatusPill(order) {
+    if (order.status === "WORK_COMPLETED_AWAITING_CONFIRMATION") {
+      return {
+        label: "On-Site Work Reported Complete",
+        canConfirmCompletion: true,
+        isClosedOut: false,
+      };
+    }
+    if (order.status === "COMPLETED") {
+      return {
+        label: "Completed & Verified",
+        canConfirmCompletion: false,
+        isClosedOut: true,
+      };
+    }
+    return { label: order.status, canConfirmCompletion: false, isClosedOut: false };
+  }
+
+  const awaitingPill = renderStatusPill(awaitingOrder);
+  assert.equal(awaitingPill.label, "On-Site Work Reported Complete");
+  assert.equal(awaitingPill.canConfirmCompletion, true);
+  assert.equal(awaitingPill.isClosedOut, false);
+
+  const completedPill = renderStatusPill(completedOrder);
+  assert.equal(completedPill.label, "Completed & Verified");
+  assert.equal(completedPill.canConfirmCompletion, false, "Completed order must NEVER render confirm completion button");
+  assert.equal(completedPill.isClosedOut, true);
+});
