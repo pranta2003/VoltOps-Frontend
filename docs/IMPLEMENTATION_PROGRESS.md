@@ -1471,3 +1471,27 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build in 12.78s (`npm run build`).
+
+---
+
+## Milestone 4.8 — Portal Header Simplification & Role Badge Removal
+
+- **Date**: 15 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Scope & Key Deliverables**:
+  1. **Redundant Role Badge Removal**:
+     - Removed redundant role badge (`CUSTOMER`, `DISPATCHER`, `TECHNICIAN`, `ADMIN`) across all four portals in `src/components/Layout.tsx`.
+     - Preserved notification bell, theme toggle, primary page actions, user profile, and sidebar navigation intact.
+  2. **Dashboard Subtitle Uniformity**:
+     - Verified and unified concise, useful context across all 4 dashboards:
+       * Customer: *Commercial Facility Portal* (`Apex Spinning & Weaving Mills · Savar Facility`)
+       * Dispatcher: *Dispatcher Console* (`EPZ Industrial Core Hub · Central Dispatch`)
+       * Technician: *Field Workspace* (`[Greeting], Kamrul Islam · Active Shift`)
+       * Admin: *Admin Console* (`EPZ Industrial Core Hub · System Governance`)
+  3. **Visual Quality & Responsive Alignment**:
+     - Natural spacing between notifications, theme toggle, and primary action buttons across desktop, tablet, and mobile.
+     - Verified with screenshots in all 4 portals.
+  4. **Quality Gates**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 7.66s (`npm run build`).

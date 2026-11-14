@@ -264,6 +264,7 @@ export const DispatcherDashboard: FC = () => {
   return (
     <Layout
       title="Dispatcher Console"
+      subtitle="EPZ Industrial Core Hub · Central Dispatch"
       action={
         <div className="flex items-center gap-2">
           {/* Status pill: Distinguishes Live, Local Preview, Stale, and Error */}

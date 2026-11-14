@@ -85,21 +85,6 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
 
   const navLinks = getNavLinks();
 
-  // Role display badge format
-  const getRoleBadge = () => {
-    switch (role) {
-      case "ADMIN":
-        return "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20";
-      case "DISPATCHER":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20";
-      case "TECHNICIAN":
-        return "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/20";
-      case "CUSTOMER":
-      default:
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20";
-    }
-  };
-
   // Get user initials
   const initials = user?.name
     ? user.name
@@ -229,15 +214,8 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
             </div>
           </div>
 
-          {/* Right Header Affordances: Role Badge, Notifications, Two-state Theme Toggle, Header Action */}
+          {/* Right Header Affordances: Notifications, Two-state Theme Toggle, Header Action */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Role Badge */}
-            <span
-              className={`hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider border ${getRoleBadge()}`}
-            >
-              {role}
-            </span>
-
             {/* Notification Center */}
             <NotificationCenter />
 
