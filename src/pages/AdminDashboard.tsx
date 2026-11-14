@@ -189,7 +189,7 @@ export function AdminDashboard() {
         )}
 
         {/* ── Compact Operational Overview Indicators ─────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-1">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
@@ -201,7 +201,7 @@ export function AdminDashboard() {
               System Active
             </div>
             <div className="text-[11px] text-[var(--text-muted)]">
-              {isLive ? "Connected to backend" : "Local preview active"}
+              {isLive ? "Backend Live" : "Local Preview"}
             </div>
           </div>
 
@@ -209,7 +209,7 @@ export function AdminDashboard() {
             <MetricCard
               label="Pending Approvals"
               value={loading ? "—" : metrics.pendingVerifications !== null ? metrics.pendingVerifications : 2}
-              subtext="Skill Passports In Queue"
+              subtext="Skill Passports"
               icon={ClockIcon}
               alert={(metrics.pendingVerifications ?? 0) > 0}
               trend={
@@ -224,7 +224,7 @@ export function AdminDashboard() {
             <MetricCard
               label="System Accounts"
               value={loading ? "—" : metrics.totalUsers !== null ? metrics.totalUsers : 12}
-              subtext="Staff & Commercial Clients"
+              subtext="Active Directory"
               icon={BuildingIcon}
               trend={{ direction: "neutral", label: "Directory" }}
             />
@@ -234,7 +234,7 @@ export function AdminDashboard() {
             <MetricCard
               label="Security Posture"
               value="Compliant"
-              subtext="Role Guards & Audit Ledger"
+              subtext="All Roles Guarded"
               icon={ShieldCheckIcon}
               trend={{ direction: "neutral", label: "0 Alerts" }}
             />
@@ -242,20 +242,20 @@ export function AdminDashboard() {
         </div>
 
         {/* ── Meaningful Operational Telemetry & Distributions ───────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
           {/* User Account Distribution */}
-          <div className="lg:col-span-7 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-3">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
+          <div className="lg:col-span-7 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-2.5">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2">
               <div>
-                <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
-                  Directory Account Distribution
+                <h3 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)]">
+                  Directory Distribution
                 </h3>
                 <p className="text-[11px] text-[var(--text-muted)]">
-                  Active user accounts categorized across operational roles
+                  Active accounts by operational role
                 </p>
               </div>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)] border border-[var(--border)]">
-                {isLive ? "Live Directory" : "Verified Baseline · 12 Accounts"}
+                {isLive ? "Live Directory" : "12 Baseline Accounts"}
               </span>
             </div>
             {loading ? (
@@ -274,14 +274,14 @@ export function AdminDashboard() {
           </div>
 
           {/* Technician Credential & Licensing Breakdown */}
-          <div className="lg:col-span-5 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-3">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
+          <div className="lg:col-span-5 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-2.5">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2">
               <div>
-                <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
-                  Technician Verification Status
+                <h3 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)]">
+                  Verification Status
                 </h3>
                 <p className="text-[11px] text-[var(--text-muted)]">
-                  Skill passport compliance and renewal health
+                  Skill passport compliance
                 </p>
               </div>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)] border border-[var(--border)]">
@@ -305,16 +305,16 @@ export function AdminDashboard() {
         </div>
 
         {/* ── Administrative Attention & Governance Section ────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
           {/* Panel 1: Pending Administrative Approvals */}
-          <div className="lg:col-span-7 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-3">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
+          <div className="lg:col-span-7 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-2.5">
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2">
               <div>
-                <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
-                  Pending Administrative Approvals
+                <h3 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)]">
+                  Pending Approvals
                 </h3>
                 <p className="text-[11px] text-[var(--text-muted)]">
-                  Technician skill passports requiring licensing and certification sign-off
+                  Passports requiring credential sign-off
                 </p>
               </div>
               <Link
@@ -333,15 +333,15 @@ export function AdminDashboard() {
                 ))}
               </div>
             ) : pendingApprovals.length === 0 ? (
-              <div className="py-8 text-center text-xs text-[var(--text-muted)] border border-dashed border-[var(--border)] rounded-xl">
-                <CheckCircleIcon size={20} className="text-emerald-500 mx-auto mb-1.5" />
+              <div className="py-6 text-center text-xs text-[var(--text-muted)] border border-dashed border-[var(--border)] rounded-xl">
+                <CheckCircleIcon size={18} className="text-emerald-500 mx-auto mb-1" />
                 <p className="font-semibold text-[var(--text-primary)]">All passports approved</p>
-                <p className="text-[11px]">No technician credentials currently awaiting administrative review.</p>
+                <p className="text-[11px]">No technician credentials currently awaiting review.</p>
               </div>
             ) : (
               <div className="divide-y divide-[var(--border)]">
                 {pendingApprovals.map((tech) => (
-                  <div key={tech.id} className="py-2.5 flex items-center justify-between gap-3 text-xs">
+                  <div key={tech.id} className="py-2 flex items-center justify-between gap-3 text-xs">
                     <div className="min-w-0">
                       <div className="font-semibold text-[var(--text-primary)] truncate">
                         {tech.technicianName}
@@ -358,7 +358,7 @@ export function AdminDashboard() {
                       </span>
                       <Link
                         to="/admin/technicians"
-                        className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[var(--bg-surface-2)] hover:bg-[var(--border)] text-[var(--text-primary)] border border-[var(--border)] transition-all"
+                        className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-[var(--bg-surface-2)] hover:bg-[var(--border)] text-[var(--text-primary)] border border-[var(--border)] transition-all"
                       >
                         Audit
                       </Link>
@@ -370,72 +370,72 @@ export function AdminDashboard() {
           </div>
 
           {/* Panel 2: Security & Governance Posture */}
-          <div className="lg:col-span-5 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-3 flex flex-col justify-between">
+          <div className="lg:col-span-5 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-2.5 flex flex-col justify-between">
             <div>
-              <div className="border-b border-[var(--border)] pb-2.5">
-                <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
-                  Platform Governance Posture
+              <div className="border-b border-[var(--border)] pb-2">
+                <h3 className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)]">
+                  Governance Controls
                 </h3>
                 <p className="text-[11px] text-[var(--text-muted)]">
-                  Security boundaries, authorization enforcement & compliance controls
+                  System policies & compliance boundaries
                 </p>
               </div>
 
-              <div className="mt-3 space-y-2.5 text-xs">
-                <div className="p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-start justify-between gap-2">
+              <div className="mt-2.5 space-y-2 text-xs">
+                <div className="p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between gap-2">
                   <div>
-                    <span className="font-semibold text-[var(--text-primary)] block">Role Separation</span>
+                    <span className="font-medium text-[var(--text-primary)] block">Role Separation</span>
                     <span className="text-[11px] text-[var(--text-muted)]">
-                      Admin, Dispatcher, Technician, and Customer portals guarded
+                      Admin, Dispatcher, Tech, Customer
                     </span>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    Enforced
+                    Guarded
                   </span>
                 </div>
 
-                <div className="p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-start justify-between gap-2">
+                <div className="p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between gap-2">
                   <div>
-                    <span className="font-semibold text-[var(--text-primary)] block">Audit Event Ledger</span>
+                    <span className="font-medium text-[var(--text-primary)] block">Audit Event Ledger</span>
                     <span className="text-[11px] text-[var(--text-muted)]">
-                      Immutable logging across verifications and role actions
+                      Immutable action logging
                     </span>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     Active
                   </span>
                 </div>
 
-                <div className="p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-start justify-between gap-2">
+                <div className="p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between gap-2">
                   <div>
-                    <span className="font-semibold text-[var(--text-primary)] block">Service-Credit Engine</span>
+                    <span className="font-medium text-[var(--text-primary)] block">Service-Credit Engine</span>
                     <span className="text-[11px] text-[var(--text-muted)]">
-                      Approved visit allowances enforced across Plans A–D
+                      Allowance deduction rules
                     </span>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    Verified
+                    Enforced
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[var(--border)] flex items-center justify-between text-xs">
+            <div className="pt-2.5 border-t border-[var(--border)] flex items-center justify-between text-xs">
               <Link
                 to="/admin/audit"
                 className="font-semibold text-[#10b981] hover:underline flex items-center gap-1"
               >
-                <span>Open Audit Log</span>
+                <span>Audit Log</span>
                 <ArrowRightIcon size={11} />
               </Link>
               <Link
                 to="/admin/users"
                 className="text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium"
               >
-                Manage Users →
+                Users Directory →
               </Link>
             </div>
           </div>

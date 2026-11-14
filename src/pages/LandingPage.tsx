@@ -271,6 +271,88 @@ export function LandingPage() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  // Context-aware navbar: adapts appearance to whether the section directly behind the floating navbar is dark or light
+  const [activeSectionTone, setActiveSectionTone] = useState<"dark" | "light">("dark");
+
+  useEffect(() => {
+    if (isDark) {
+      setActiveSectionTone("dark");
+      return;
+    }
+
+    const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-section-tone]"));
+    if (!sections.length) return;
+
+    const determineTone = () => {
+      if (isDark) {
+        setActiveSectionTone("dark");
+        return;
+      }
+      const sampleY = 40; // vertical center of floating navbar
+      const sampleX = window.innerWidth / 2;
+      const el = document.elementFromPoint(sampleX, sampleY);
+      const matched = el?.closest<HTMLElement>("[data-section-tone]");
+      if (matched) {
+        const toneAttr = matched.getAttribute("data-section-tone");
+        setActiveSectionTone(toneAttr === "dark" ? "dark" : "light");
+        return;
+      }
+      for (const sec of sections) {
+        const rect = sec.getBoundingClientRect();
+        if (rect.top <= sampleY && rect.bottom >= sampleY) {
+          const toneAttr = sec.getAttribute("data-section-tone");
+          setActiveSectionTone(toneAttr === "dark" ? "dark" : "light");
+          return;
+        }
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      () => {
+        determineTone();
+      },
+      {
+        rootMargin: "0px 0px -85% 0px",
+        threshold: [0, 0.1, 0.25, 0.5, 0.75, 1.0],
+      }
+    );
+
+    sections.forEach((s) => observer.observe(s));
+    window.addEventListener("scroll", determineTone, { passive: true });
+    window.addEventListener("resize", determineTone, { passive: true });
+    window.addEventListener("hashchange", determineTone, { passive: true });
+
+    determineTone();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", determineTone);
+      window.removeEventListener("resize", determineTone);
+      window.removeEventListener("hashchange", determineTone);
+    };
+  }, [isDark]);
+
+  const isNavbarDark = isDark || activeSectionTone === "dark";
+
+  // Breathing green status dot animation (repeating smoothly every ~2.2s)
+  const dotPulseAnimation = shouldReduceMotion
+    ? undefined
+    : {
+        scale: [1, 1.25, 0.9, 1],
+        opacity: [0.85, 1, 0.45, 0.85],
+        boxShadow: [
+          "0 0 4px rgba(16, 185, 129, 0.4)",
+          "0 0 10px rgba(16, 185, 129, 0.9)",
+          "0 0 2px rgba(16, 185, 129, 0.2)",
+          "0 0 4px rgba(16, 185, 129, 0.4)",
+        ],
+        transition: {
+          duration: 2.2,
+          repeat: Infinity,
+          ease: "easeInOut" as const,
+        },
+      };
+
   // Mobile menu
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -477,7 +559,7 @@ export function LandingPage() {
           ))}
       </div>
 
-      {/* ── Floating Navigation (Accessible, Responsive, Persistent Across All Sections) ─────────── */}
+      {/* ── Floating Navigation (Accessible, Responsive, Persistent Across All Sections, Tone-Adaptive) ─────────── */}
       <motion.div
         initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -486,10 +568,14 @@ export function LandingPage() {
       >
         <div className="max-w-xl md:max-w-3xl lg:max-w-6xl mx-auto">
           <nav
-            className={`pointer-events-auto border border-white/15 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition-all duration-300 ${
-              scrolled
-                ? "backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] bg-slate-950/80 border-white/20"
-                : "backdrop-blur-xl bg-slate-950/45 shadow-[0_8px_32px_rgba(0,0,0,0.25)]"
+            className={`pointer-events-auto px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition-all duration-300 ease-in-out ${
+              isNavbarDark
+                ? scrolled
+                  ? "backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] bg-slate-950/80 border border-white/20"
+                  : "backdrop-blur-xl bg-slate-950/45 shadow-[0_8px_32px_rgba(0,0,0,0.25)] border border-white/15"
+                : scrolled
+                ? "backdrop-blur-2xl shadow-[0_12px_36px_rgba(0,0,0,0.08)] bg-white/85 border border-slate-300/80"
+                : "backdrop-blur-xl bg-white/70 shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-slate-200/80"
             }`}
             aria-label="Main Navigation"
           >
@@ -499,7 +585,13 @@ export function LandingPage() {
                 <LogoMark size={32} />
                 <div className="flex items-center gap-1.5">
                   {shouldReduceMotion ? (
-                    <span className="font-heading font-extrabold text-[17px] tracking-tight text-white group-hover:text-emerald-400 transition-colors">
+                    <span
+                      className={`font-heading font-extrabold text-[17px] tracking-tight transition-colors ${
+                        isNavbarDark
+                          ? "text-white group-hover:text-emerald-400"
+                          : "text-slate-900 group-hover:text-emerald-600"
+                      }`}
+                    >
                       VoltOps
                     </span>
                   ) : (
@@ -507,7 +599,11 @@ export function LandingPage() {
                       variants={wordmarkContainerVariants}
                       initial="hidden"
                       animate="visible"
-                      className="flex font-heading font-extrabold text-[17px] tracking-tight text-white group-hover:text-emerald-400 transition-colors"
+                      className={`flex font-heading font-extrabold text-[17px] tracking-tight transition-colors ${
+                        isNavbarDark
+                          ? "text-white group-hover:text-emerald-400"
+                          : "text-slate-900 group-hover:text-emerald-600"
+                      }`}
                     >
                       {WORDMARK_LETTERS.map((char, index) => (
                         <motion.span
@@ -520,20 +616,43 @@ export function LandingPage() {
                       ))}
                     </motion.div>
                   )}
-                  <motion.span
-                    variants={shouldReduceMotion ? {} : statusDotVariants}
-                    initial={shouldReduceMotion ? "visible" : "hidden"}
-                    animate="visible"
-                    className="relative flex h-2 w-2"
-                  >
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                  </motion.span>
+                  {/* Task 2: Breathing status dot animation (gentle brighten, dim, loop every 2.2s) */}
+                  <span className="relative flex h-2.5 w-2.5 items-center justify-center">
+                    <motion.span
+                      animate={
+                        shouldReduceMotion
+                          ? undefined
+                          : {
+                              scale: [1, 1.8, 1],
+                              opacity: [0.45, 0.05, 0.45],
+                              transition: { duration: 2.2, repeat: Infinity, ease: "easeInOut" as const },
+                            }
+                      }
+                      className="absolute inset-0 rounded-full bg-emerald-400/40 pointer-events-none"
+                    />
+                    <motion.span
+                      variants={shouldReduceMotion ? {} : statusDotVariants}
+                      initial={shouldReduceMotion ? "visible" : "hidden"}
+                      animate="visible"
+                      className="relative flex items-center justify-center"
+                    >
+                      <motion.span
+                        animate={shouldReduceMotion ? undefined : dotPulseAnimation}
+                        className="inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-sm"
+                      />
+                    </motion.span>
+                  </span>
                 </div>
               </a>
 
-              {/* Desktop Center Nav Pills (Cohesive Translucent Glass Treatment) */}
-              <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 text-xs font-semibold px-2 xl:px-2.5 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm">
+              {/* Desktop Center Nav Pills (Context-Aware Translucent Glass Treatment) */}
+              <div
+                className={`hidden lg:flex items-center gap-0.5 xl:gap-1 text-xs font-semibold px-2 xl:px-2.5 py-1 rounded-full border backdrop-blur-sm transition-all duration-300 ${
+                  isNavbarDark
+                    ? "border-white/10 bg-white/5"
+                    : "border-slate-900/10 bg-slate-900/[0.04]"
+                }`}
+              >
                 {[
                   ["#services", "Services"],
                   ["#dispatch", "Operations"],
@@ -546,19 +665,33 @@ export function LandingPage() {
                   <a
                     key={href}
                     href={href}
-                    className="px-2.5 xl:px-3 py-1 rounded-full text-slate-200 hover:text-white hover:bg-white/10 transition-all font-semibold"
+                    className={`px-2.5 xl:px-3 py-1 rounded-full transition-all font-semibold ${
+                      isNavbarDark
+                        ? "text-slate-200 hover:text-white hover:bg-white/10"
+                        : "text-slate-700 hover:text-slate-950 hover:bg-slate-900/5"
+                    }`}
                   >
                     {label}
                   </a>
                 ))}
               </div>
 
-              {/* Desktop Right Actions with Pure Light/Dark Icon Toggle */}
+              {/* Desktop Right Actions */}
               <div className="hidden lg:flex items-center gap-2 xl:gap-2.5">
-                <ThemeToggle className="!border-white/15 !bg-white/5 !text-slate-200 hover:!text-white hover:!bg-white/10" />
+                <ThemeToggle
+                  className={
+                    isNavbarDark
+                      ? "!border-white/15 !bg-white/5 !text-slate-200 hover:!text-white hover:!bg-white/10"
+                      : "!border-slate-300/80 !bg-slate-900/[0.04] !text-slate-700 hover:!text-slate-950 hover:!bg-slate-900/10"
+                  }
+                />
                 <Link
                   to="/login"
-                  className="px-3 xl:px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-200 hover:text-white hover:bg-white/10 transition-all"
+                  className={`px-3 xl:px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                    isNavbarDark
+                      ? "text-slate-200 hover:text-white hover:bg-white/10"
+                      : "text-slate-700 hover:text-slate-950 hover:bg-slate-900/5"
+                  }`}
                 >
                   Sign in
                 </Link>
@@ -581,11 +714,21 @@ export function LandingPage() {
                 >
                   Plans
                 </a>
-                <ThemeToggle className="!border-white/15 !bg-white/5 !text-slate-200 hover:!text-white hover:!bg-white/10" />
+                <ThemeToggle
+                  className={
+                    isNavbarDark
+                      ? "!border-white/15 !bg-white/5 !text-slate-200 hover:!text-white hover:!bg-white/10"
+                      : "!border-slate-300/80 !bg-slate-900/[0.04] !text-slate-700 hover:!text-slate-950 hover:!bg-slate-900/10"
+                  }
+                />
                 <button
                   type="button"
                   onClick={() => setMenuOpen(!menuOpen)}
-                  className="p-2 rounded-full border border-white/15 bg-white/5 text-slate-200 hover:text-white hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                  className={`p-2 rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                    isNavbarDark
+                      ? "border-white/15 bg-white/5 text-slate-200 hover:text-white hover:bg-white/10"
+                      : "border-slate-300/80 bg-slate-900/[0.04] text-slate-700 hover:text-slate-950 hover:bg-slate-900/10"
+                  }`}
                   aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
                   aria-expanded={menuOpen}
                   aria-controls="mobile-nav-panel"
@@ -606,7 +749,11 @@ export function LandingPage() {
           {menuOpen && (
             <div
               id="mobile-nav-panel"
-              className={`pointer-events-auto lg:hidden mt-2 p-3.5 rounded-2xl border ${borderColor} backdrop-blur-2xl bg-[var(--bg-overlay)]/95 shadow-2xl space-y-1.5 transition-all animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100vh-5rem)] overflow-y-auto`}
+              className={`pointer-events-auto lg:hidden mt-2 p-3.5 rounded-2xl border backdrop-blur-2xl shadow-2xl space-y-1.5 transition-all animate-in fade-in slide-in-from-top-2 duration-150 max-h-[calc(100vh-5rem)] overflow-y-auto ${
+                isNavbarDark
+                  ? "border-white/15 bg-slate-950/95 text-slate-200"
+                  : "border-slate-200 bg-white/95 text-slate-800"
+              }`}
               role="dialog"
               aria-label="Mobile Navigation Menu"
             >
@@ -624,7 +771,11 @@ export function LandingPage() {
                     key={href}
                     href={href}
                     onClick={() => setMenuOpen(false)}
-                    className="block px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
+                    className={`block px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                      isNavbarDark
+                        ? "text-slate-300 hover:text-white hover:bg-white/10"
+                        : "text-slate-700 hover:text-slate-950 hover:bg-slate-100"
+                    }`}
                   >
                     {label}
                   </a>
@@ -654,7 +805,7 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── HERO SECTION: INDUSTRIAL MAINTENANCE PHOTOGRAPHY & ENTRANCE ─── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <header className="relative overflow-hidden pt-20 sm:pt-22 lg:pt-24 pb-20 lg:pb-24 text-center">
+      <header data-section-tone="dark" className="relative overflow-hidden pt-20 sm:pt-22 lg:pt-24 pb-20 lg:pb-24 text-center">
         {/* Hero Background Layer: Looping Cinematic Slow-Motion Video with Dark CSS Overlay */}
         <div
           className="absolute inset-0 pointer-events-none overflow-hidden z-0"
@@ -968,7 +1119,7 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── Section: The 7 Canonical Service Trades (BALANCED & CENTERED) ─ */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <section id="services" className="py-20 max-w-6xl mx-auto px-5">
+      <section id="services" data-section-tone="auto" className="py-20 max-w-6xl mx-auto px-5">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -1079,7 +1230,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: Operations & Matching Engine Audit Trail ──────────── */}
-      <section id="dispatch" className="py-20 max-w-6xl mx-auto px-5">
+      <section id="dispatch" data-section-tone="auto" className="py-20 max-w-6xl mx-auto px-5">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -1208,7 +1359,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: How It Works (CONCISE 5-STEP PROCESS) ─────────────── */}
-      <section id="how" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+      <section id="how" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
         <div className="max-w-6xl mx-auto px-5">
           <motion.div
             initial="hidden"
@@ -1277,7 +1428,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: Subscription Coverage Plans (CONCISE & ACCURATE) ──── */}
-      <section id="packages" className="py-20 max-w-6xl mx-auto px-5">
+      <section id="packages" data-section-tone="auto" className="py-20 max-w-6xl mx-auto px-5">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -1568,7 +1719,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: Regional Coverage Hubs (CONCISE CARDS) ────────────── */}
-      <section id="hubs" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+      <section id="hubs" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
         <div className="max-w-6xl mx-auto px-5">
           <motion.div
             initial="hidden"
@@ -1630,7 +1781,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: Role Workspaces (CONCISE 1-2 LINES EACH) ──────────── */}
-      <section className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface)]">
+      <section data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface)]">
         <div className="max-w-6xl mx-auto px-5">
           <motion.div
             initial="hidden"
@@ -1679,7 +1830,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: About VoltOps ───────────────────────────────────────── */}
-      <section id="about" className="py-20 max-w-6xl mx-auto px-5">
+      <section id="about" data-section-tone="auto" className="py-20 max-w-6xl mx-auto px-5">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-6 space-y-3 text-left">
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
@@ -1714,7 +1865,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: Contact & Inquiries (Accessible Form) ───────────────── */}
-      <section id="contact" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+      <section id="contact" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
         <div className="max-w-6xl mx-auto px-5">
           {/* Banner */}
           <div
@@ -1857,7 +2008,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Production-Quality SaaS Footer (Dark, Sophisticated, Focused) ── */}
-      <footer className="relative border-t border-[var(--border)] bg-[#070b10] text-slate-400 overflow-hidden">
+      <footer data-section-tone="dark" className="relative border-t border-[var(--border)] bg-[#070b10] text-slate-400 overflow-hidden">
         {/* Subtle top emerald gradient glow */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 max-w-4xl h-[1px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent pointer-events-none"

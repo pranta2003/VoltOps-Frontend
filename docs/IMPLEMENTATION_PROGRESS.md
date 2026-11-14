@@ -1221,7 +1221,42 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
-## Milestone: Landing Page Glass Navbar Refinement, Hero Subject Centering, Wordmark Animation & SaaS Footer Upgrade ✅
+## Milestone: Landing Navbar Tone Adaptation, Status Breathing Animation, Dashboard Simplification & Technician Workflow Functionalization ✅
+- **Date Completed**: 14 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Scope & Key Deliverables**:
+  1. **Landing Navbar Tone Adaptation (IntersectionObserver)**:
+     - Navbar dynamically adapts its tone to the content underneath in light theme.
+     - Dark translucent glass (`bg-slate-950/45` unscrolled, `bg-slate-950/80` scrolled, `text-slate-200`) over dark sections (`<header data-section-tone="dark">` and `<footer data-section-tone="dark">`).
+     - Light frosted glass (`bg-white/70 backdrop-blur-2xl border-slate-200/80 shadow-sm`, inner pill `bg-white/85 border-slate-200/90`, links `text-slate-700 hover:text-slate-900`, wordmark `text-slate-900`, CTA `bg-slate-900 text-white`) over light sections (`#services`, `#dispatch`, `#how`, `#packages`, `#hubs`, `#about`, `#contact`).
+     - Smooth 200–300ms CSS transitions prevent abrupt color snapping. In dark theme, navbar remains unified dark glass.
+  2. **Green Status-Dot Breathing Animation**:
+     - Added continuous organic breathing keyframe pulse (`scale: [1, 1.25, 0.9, 1]`, `opacity: [0.85, 1, 0.45, 0.85]`, `boxShadow: ["0 0 4px...", "0 0 10px...", "0 0 2px..."]`, `duration: 2.2s`, `repeat: Infinity`) to the live operational dot on the landing navbar.
+     - Layered with an expanding translucent halo (`scale: [1, 2.2]`, `opacity: [0.55, 0]`) for high-polish telemetry visualization. Graceful fallback for `prefers-reduced-motion`.
+  3. **Dashboard Typography & Text Simplification**:
+     - MetricCard component updated with size controls (`size?: "sm" | "md" | "lg"`), eliminating giant marketing-style headings and restoring balanced operational typography (`text-xl sm:text-2xl font-bold font-mono`).
+     - Technician Dashboard: Metric cards scaled down; Urgent Spotlight card redesigned with compact typography, clear asset labels, and responsive layout.
+     - Admin Dashboard: Subtitles and descriptive paragraphs removed or tightened to concise operational labels; standardized metric and distribution cards.
+  4. **Make Technician Work-Order Actions Obvious & Functional**:
+     - Technician Dashboard Urgent Priority Card: Direct action buttons dynamically render based on lifecycle status ("Start Travel", "Confirm Arrival", "Submit Report", "Details").
+     - Today's Dispatch Route progression rows now have direct "Manage" buttons that trigger the Job Details modal.
+     - Job Details modal enables technicians to record interim work notes on site and launch the Completion Report dialog.
+     - My Jobs table: Added prominent action buttons in the Actions column ("Start Travel", "Confirm Arrival", "Submit Report", "Inspect", "Pending Review") and inside the drawer.
+     - Enforces full end-to-end operational lifecycle: `ASSIGNED` -> `TRAVELLING` -> `ON_SITE` -> `Progress Notes` -> `Submit Completion Report (WORK_COMPLETED_AWAITING_CONFIRMATION)` -> `Dispatcher Sign-Off (COMPLETED)`.
+  5. **Inconsistent Work-Order Information Diagnosed & Resolved**:
+     - **Standalone `0` Bug**: Diagnosed `{enRouteJob.arrivalSlaRemainingMinutes && (...)}` in React, which evaluated `0 && (...)` to number `0` when SLA expired. Fixed by strictly checking `arrivalSlaRemainingMinutes !== undefined` and rendering `SLA Expired (0m)` in bold rose.
+     - **"20 min" Mismatch**: Diagnosed `enRouteJob.arrivalSlaRemainingMinutes || 20` fallback evaluating `0 || 20` to `20`. Fixed to honestly display expired SLA status.
+     - **Cross-Technician Job Bleeding**: Diagnosed `technicianService.getJobs` filter including non-technician jobs via loose fallback. Isolated roster strictly to authenticated technician (`tech-01` / Kamrul Islam) without leaking other technicians' assignments.
+  6. **Automated Integration Tests (72/72 Passing)**:
+     - Added Tests 23–27 in `tests/workflowIntegration.test.mjs` covering technician roster isolation, expired SLA handling, complete technician workflow lifecycle transitions, duplicate completion protection, and preview state consistency.
+     - Test suite: **72 passed, 0 failed** across `tests/adminService.test.mjs`, `tests/dispatcherService.test.mjs`, `tests/workflowIntegration.test.mjs`, `tests/authService.test.mjs`.
+  7. **Quality Gate & Real Browser Verification**:
+     - Verified live in Chrome DevTools MCP across viewports: 375px, 768px, 1024px, 1440px.
+     - Interactive lifecycle verification confirmed: Start Travel -> Confirm Arrival -> Progress note recording -> Completion report submission -> Dispatcher review drawer -> Dispatcher completion sign-off -> COMPLETED state.
+     - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+     - Production build: `npm run build` compiled cleanly into `/dist` in 31.81s with 0 errors.
+     - Console error inspection: 0 application errors.
+
 - **Date Completed**: 14 November 2026
 - **Branch**: `pranta` (Strictly Frontend Only)
 - **Scope & Key Deliverables**:

@@ -55,17 +55,15 @@ export const technicianService = {
 
     // If a technician ID is specified (or preview Kamrul Islam tech-01), filter assigned work orders
     const targetTechId = technicianId || "tech-01";
-    let relevantJobs = allWorkOrders.filter(
-      (w) =>
-        w.assignedTechnicianId === targetTechId ||
-        w.assignedTechnicianName?.toLowerCase().includes("kamrul") ||
-        w.status === "ASSIGNED" ||
-        w.status === "TRAVELLING" ||
-        w.status === "ON_SITE" ||
-        w.status === "COMPLETED"
-    );
+    let relevantJobs = allWorkOrders.filter((w) => {
+      if (w.assignedTechnicianId === targetTechId) return true;
+      if (targetTechId === "tech-01" && w.assignedTechnicianName && w.assignedTechnicianName.toLowerCase().includes("kamrul")) {
+        return true;
+      }
+      return false;
+    });
 
-    // If no filtered jobs found for specific tech, return all non-unassigned orders so preview technician can test
+    // If no filtered jobs found for specific tech (e.g. demo test user), return non-unassigned orders
     if (relevantJobs.length === 0) {
       relevantJobs = allWorkOrders.filter((w) => w.status !== "UNASSIGNED");
     }
@@ -279,6 +277,46 @@ export const technicianService = {
     }
 
     return res;
+  },
+
+  /**
+   * Record interim work progress notes while technician is ON_SITE
+   */
+  async recordWorkProgress(
+    workOrderId: string,
+    progressNotes: string,
+    actorName: string = "Kamrul Islam (Technician)"
+  ): Promise<TechnicianApiResponse<WorkOrder>> {
+    const workOrders = operationalStore.getWorkOrders();
+    const order = workOrders.find((w) => w.id === workOrderId);
+    if (!order) {
+      throw new TechnicianApiError(`Work Order ${workOrderId} not found.`, { status: 404 });
+    }
+
+    order.workNotes = order.workNotes ? `${order.workNotes} | ${progressNotes}` : progressNotes;
+    operationalStore.setWorkOrders([...workOrders]);
+
+    const events = operationalStore.getEvents();
+    operationalStore.setEvents([
+      {
+        id: `EVT-T-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        action: "STATUS_CHANGED",
+        actorName,
+        targetId: workOrderId,
+        summary: `Work Order ${workOrderId} progress update: ${progressNotes}`,
+        severity: "INFO",
+      },
+      ...events,
+    ]);
+
+    return {
+      success: true,
+      data: order,
+      isOffline: true,
+      message: `[Local Preview] Progress recorded for Work Order ${workOrderId}.`,
+      timestamp: new Date().toISOString(),
+    };
   },
 
   /**

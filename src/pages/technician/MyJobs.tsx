@@ -1,4 +1,5 @@
 import { useState, useEffect, useId } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { useAuth } from "../../context/AuthContext";
 import { ServiceCategory, WorkOrder } from "../../types";
@@ -30,6 +31,7 @@ export interface TechnicianJobItem {
   priority: "URGENT" | "HIGH" | "MEDIUM" | "LOW";
   status: "ASSIGNED" | "TRAVELLING" | "ON_SITE" | "WORK_COMPLETED_AWAITING_CONFIRMATION" | "COMPLETED";
   arrivalSlaRemainingMinutes?: number;
+  isSlaBreached?: boolean;
   scheduledTime: string;
   triageNotes?: string;
   completionNotes?: string;
@@ -37,6 +39,9 @@ export interface TechnicianJobItem {
 
 export function MyJobs() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const urlJobId = searchParams.get("jobId");
+
   const [jobs, setJobs] = useState<TechnicianJobItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +56,8 @@ export function MyJobs() {
   const [laborHours, setLaborHours] = useState("1.0 hour");
   const [completionError, setCompletionError] = useState<string | null>(null);
   const [isSubmittingCompletion, setIsSubmittingCompletion] = useState(false);
+  const [interimNote, setInterimNote] = useState("");
+  const [isSavingInterim, setIsSavingInterim] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
@@ -65,9 +72,15 @@ export function MyJobs() {
       .then((res) => {
         const mapped: TechnicianJobItem[] = res.data.map((w: WorkOrder) => {
           let arrivalSlaRemainingMinutes: number | undefined = undefined;
+          let isSlaBreached = false;
           if ((w.status === "TRAVELLING" || w.status === "ASSIGNED") && w.slaDeadline) {
             const diffMinutes = Math.round((new Date(w.slaDeadline).getTime() - Date.now()) / 60000);
-            arrivalSlaRemainingMinutes = Math.max(0, diffMinutes);
+            if (diffMinutes <= 0) {
+              isSlaBreached = true;
+              arrivalSlaRemainingMinutes = 0;
+            } else {
+              arrivalSlaRemainingMinutes = diffMinutes;
+            }
           }
 
           return {
@@ -83,6 +96,7 @@ export function MyJobs() {
             priority: w.priority,
             status: (w.status === "UNASSIGNED" ? "ASSIGNED" : w.status) as any,
             arrivalSlaRemainingMinutes,
+            isSlaBreached,
             scheduledTime: w.status === "COMPLETED" ? "Completed Today" : "Immediate Dispatch",
             triageNotes: w.workNotes,
             completionNotes: w.completionReport?.notes || (w.completedAt ? (w.workNotes || "Job completed successfully.") : undefined),
@@ -106,6 +120,13 @@ export function MyJobs() {
     return unsubscribe;
   }, [user?.id]);
 
+  useEffect(() => {
+    if (urlJobId && jobs.length > 0) {
+      const match = jobs.find((j) => j.id === urlJobId);
+      if (match) setInspectJob(match);
+    }
+  }, [urlJobId, jobs]);
+
   const handleDirectTransition = async (job: TechnicianJobItem, nextStatus: "TRAVELLING" | "ON_SITE") => {
     setIsUpdatingStatus(true);
     try {
@@ -116,12 +137,35 @@ export function MyJobs() {
         user?.name || "Kamrul Islam (Technician)"
       );
       setActionSuccess(`Job ${job.id} marked as ${nextStatus === "TRAVELLING" ? "En Route (TRAVELLING)" : "Arrived On Site (ON_SITE)"}`);
+      if (inspectJob && inspectJob.id === job.id) {
+        setInspectJob({ ...inspectJob, status: nextStatus });
+      }
       loadJobs();
       setTimeout(() => setActionSuccess(null), 4000);
     } catch (err: any) {
       alert(err.message || "Failed to update job status.");
     } finally {
       setIsUpdatingStatus(false);
+    }
+  };
+
+  const handleSaveInterimProgress = async () => {
+    if (!inspectJob || !interimNote.trim()) return;
+    setIsSavingInterim(true);
+    try {
+      await technicianService.recordWorkProgress(
+        inspectJob.id,
+        interimNote.trim(),
+        user?.name || "Kamrul Islam (Technician)"
+      );
+      setActionSuccess(`Interim progress note recorded for ${inspectJob.id}.`);
+      setInterimNote("");
+      loadJobs();
+      setTimeout(() => setActionSuccess(null), 4000);
+    } catch (err: any) {
+      alert(err.message || "Failed to save progress note.");
+    } finally {
+      setIsSavingInterim(false);
     }
   };
 
@@ -433,8 +477,13 @@ export function MyJobs() {
                       </td>
 
                       <td className="py-3.5 px-4">
-                        {job.arrivalSlaRemainingMinutes !== undefined ? (
+                        {job.isSlaBreached ? (
                           <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-rose-600 dark:text-rose-400">
+                            <AlertTriangleIcon size={12} className="shrink-0" />
+                            <span>SLA Expired (0m)</span>
+                          </div>
+                        ) : job.arrivalSlaRemainingMinutes !== undefined ? (
+                          <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-amber-600 dark:text-amber-400">
                             <ClockIcon size={12} className="animate-spin" />
                             <span>{job.arrivalSlaRemainingMinutes} min left</span>
                           </div>
@@ -449,19 +498,12 @@ export function MyJobs() {
 
                       <td className="py-3.5 px-4 text-right">
                         <div className="inline-flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => setInspectJob(job)}
-                            className="px-2.5 py-1 rounded text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
-                          >
-                            Inspect
-                          </button>
                           {job.status === "ASSIGNED" && (
                             <button
                               type="button"
                               onClick={() => handleDirectTransition(job, "TRAVELLING")}
                               disabled={isUpdatingStatus}
-                              className="px-2.5 py-1 rounded text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 transition-all shadow-sm disabled:opacity-50"
+                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 transition-all shadow-sm disabled:opacity-50"
                             >
                               Start Travel
                             </button>
@@ -471,9 +513,9 @@ export function MyJobs() {
                               type="button"
                               onClick={() => handleDirectTransition(job, "ON_SITE")}
                               disabled={isUpdatingStatus}
-                              className="px-2.5 py-1 rounded text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50"
+                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50"
                             >
-                              Mark Arrived
+                              Confirm Arrival
                             </button>
                           )}
                           {job.status === "ON_SITE" && (
@@ -485,16 +527,23 @@ export function MyJobs() {
                                 setMaterialsUsed("");
                                 setCompletionError(null);
                               }}
-                              className="px-2.5 py-1 rounded text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
+                              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-sm"
                             >
-                              Mark as Completed
+                              Submit Report
                             </button>
                           )}
                           {job.status === "WORK_COMPLETED_AWAITING_CONFIRMATION" && (
-                            <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20">
-                              Pending Confirmation
+                            <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20">
+                              Pending Review
                             </span>
                           )}
+                          <button
+                            type="button"
+                            onClick={() => setInspectJob(job)}
+                            className="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                          >
+                            Inspect
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -721,16 +770,80 @@ export function MyJobs() {
                     </p>
                   </div>
                 )}
+
+                {/* On-Site Interim Note Input */}
+                {inspectJob.status === "ON_SITE" && (
+                  <div className="p-2.5 rounded-xl border border-purple-500/30 bg-purple-500/5 space-y-1.5">
+                    <label className="block font-semibold text-purple-900 dark:text-purple-300 text-[11px]">
+                      Add Interim Progress Note:
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={interimNote}
+                        onChange={(e) => setInterimNote(e.target.value)}
+                        placeholder="e.g. Isolation complete; testing primary feeder..."
+                        className="flex-1 text-xs p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleSaveInterimProgress}
+                        disabled={isSavingInterim || !interimNote.trim()}
+                        className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50"
+                      >
+                        {isSavingInterim ? "Saving..." : "Record"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
+              <div className="flex items-center justify-between gap-2 pt-2 border-t border-[var(--border)]">
                 <button
                   type="button"
                   onClick={() => setInspectJob(null)}
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#10b981] text-[#06090e] hover:bg-[#34d399]"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
                   Close
                 </button>
+
+                <div className="flex items-center gap-2">
+                  {inspectJob.status === "ASSIGNED" && (
+                    <button
+                      type="button"
+                      onClick={() => handleDirectTransition(inspectJob, "TRAVELLING")}
+                      disabled={isUpdatingStatus}
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 transition-all shadow-sm disabled:opacity-50"
+                    >
+                      {isUpdatingStatus ? "Updating..." : "Start Travel"}
+                    </button>
+                  )}
+                  {inspectJob.status === "TRAVELLING" && (
+                    <button
+                      type="button"
+                      onClick={() => handleDirectTransition(inspectJob, "ON_SITE")}
+                      disabled={isUpdatingStatus}
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50"
+                    >
+                      {isUpdatingStatus ? "Updating..." : "Confirm Arrival"}
+                    </button>
+                  )}
+                  {inspectJob.status === "ON_SITE" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCompletionModalJob(inspectJob);
+                        setCompletionNotes("");
+                        setMaterialsUsed("");
+                        setCompletionError(null);
+                        setInspectJob(null);
+                      }}
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-sm"
+                    >
+                      Submit Completion Report
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

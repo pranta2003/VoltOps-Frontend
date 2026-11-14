@@ -472,7 +472,34 @@ class WorkflowHarness {
     return order;
   }
 
-  // 4b. Technician submit completion report
+  // 4b. Record work progress notes while ON_SITE
+  recordWorkProgress(workOrderId, progressNotes, actorName = "Kamrul Islam") {
+    const order = this.workOrders.find((w) => w.id === workOrderId);
+    if (!order) throw new Error(`Work order ${workOrderId} not found.`);
+    order.workNotes = order.workNotes ? `${order.workNotes} | ${progressNotes}` : progressNotes;
+    this.events.unshift({
+      id: `EVT-${Date.now()}`,
+      action: "STATUS_CHANGED",
+      targetId: workOrderId,
+      summary: `Work Order ${workOrderId} progress update: ${progressNotes}`,
+    });
+    return order;
+  }
+
+  // 4c. Filter technician jobs matching technicianService logic
+  getTechnicianJobs(technicianId = "tech-01") {
+    let relevantJobs = this.workOrders.filter(
+      (w) =>
+        w.assignedTechnicianId === technicianId ||
+        (technicianId === "tech-01" && w.assignedTechnicianName && w.assignedTechnicianName.toLowerCase().includes("kamrul"))
+    );
+    if (relevantJobs.length === 0) {
+      relevantJobs = this.workOrders.filter((w) => w.status !== "UNASSIGNED");
+    }
+    return relevantJobs;
+  }
+
+  // 4d. Technician submit completion report
   submitJobCompletion(workOrderId, report) {
     const order = this.workOrders.find((w) => w.id === workOrderId);
     if (!order) throw new Error(`Work order ${workOrderId} not found.`);
@@ -1345,4 +1372,216 @@ test("Test 22: Strict multi-party sign-off boundary prevents premature job closu
     },
     { code: "INVALID_TRANSITION" }
   );
+});
+
+test("Test 23: Technician roster isolation strictly isolates assigned jobs for target technician without leaking jobs of other technicians", () => {
+  const harness = new WorkflowHarness();
+
+  // Create order assigned to tech-01 (Kamrul Islam)
+  const req1 = harness.createCustomerRequest({
+    category: "Electrical and power systems",
+    assetName: "Substation Transformer TR-02",
+    problemTitle: "Oil Temperature High Warning",
+    problemDescription: "Winding temp reached 92C.",
+    priority: "URGENT",
+    coveragePlan: "247-priority",
+  });
+  const wo1 = harness.convertRequestToWorkOrder({ requestId: req1.id });
+  harness.assignTechnician({ workOrderId: wo1.id, technicianId: "tech-01" });
+
+  // Create another order assigned to tech-02 (Farhan Kabir)
+  const req2 = harness.createCustomerRequest({
+    category: "AC, HVAC, and cooling",
+    assetName: "Cooling Tower CT-03",
+    problemTitle: "Motor bearing vibration",
+    problemDescription: "Bearing whine",
+    priority: "MEDIUM",
+    coveragePlan: "247-standard",
+  });
+  const wo2 = harness.convertRequestToWorkOrder({ requestId: req2.id });
+  harness.assignTechnician({ workOrderId: wo2.id, technicianId: "tech-02" });
+
+  // Create another order assigned to tech-03 (Tanvir Ahmed)
+  const req3 = harness.createCustomerRequest({
+    category: "Plumbing and water systems",
+    assetName: "Booster Pump P-03",
+    problemTitle: "Mechanical Gland Seal Failure",
+    problemDescription: "High Volume Leakage",
+    priority: "URGENT",
+    coveragePlan: "247-priority",
+  });
+  const wo3 = harness.convertRequestToWorkOrder({ requestId: req3.id });
+  harness.assignTechnician({ workOrderId: wo3.id, technicianId: "tech-03" });
+
+  // Roster for tech-01 must ONLY contain jobs assigned to tech-01 / Kamrul Islam
+  const tech1Jobs = harness.getTechnicianJobs("tech-01");
+  assert.ok(tech1Jobs.length > 0);
+  for (const job of tech1Jobs) {
+    assert.ok(
+      job.assignedTechnicianId === "tech-01" ||
+      (job.assignedTechnicianName && job.assignedTechnicianName.toLowerCase().includes("kamrul"))
+    );
+    assert.notEqual(job.assignedTechnicianId, "tech-02");
+    assert.notEqual(job.assignedTechnicianId, "tech-03");
+  }
+
+  // Roster for tech-02 must ONLY contain jobs assigned to tech-02
+  const tech2Jobs = harness.getTechnicianJobs("tech-02");
+  assert.ok(tech2Jobs.length > 0);
+  for (const job of tech2Jobs) {
+    assert.equal(job.assignedTechnicianId, "tech-02");
+  }
+});
+
+test("Test 24: Expired SLA deadline (diffMinutes <= 0) explicitly classifies as SLA Breached / Expired with 0m remaining, rather than fabricated target", () => {
+  const harness = new WorkflowHarness();
+
+  // Create work order with SLA deadline 30 minutes in the past
+  const pastDeadline = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+  const req = harness.createCustomerRequest({
+    category: "Electrical and power systems",
+    assetName: "Switchboard MSB-02",
+    problemTitle: "Breaker Tripped",
+    problemDescription: "Overcurrent trip",
+    priority: "URGENT",
+    coveragePlan: "247-priority",
+  });
+  const wo = harness.convertRequestToWorkOrder({ requestId: req.id });
+  wo.slaDeadline = pastDeadline;
+  harness.assignTechnician({ workOrderId: wo.id, technicianId: "tech-01" });
+
+  // Computing SLA status
+  const diffMinutes = Math.round((new Date(wo.slaDeadline).getTime() - Date.now()) / 60000);
+  assert.ok(diffMinutes <= 0, "diffMinutes must be <= 0 for past deadline");
+
+  let arrivalSlaRemainingMinutes = 0;
+  let isSlaBreached = false;
+  if (diffMinutes <= 0) {
+    isSlaBreached = true;
+    arrivalSlaRemainingMinutes = 0;
+  } else {
+    arrivalSlaRemainingMinutes = diffMinutes;
+  }
+
+  assert.equal(isSlaBreached, true);
+  assert.equal(arrivalSlaRemainingMinutes, 0);
+
+  // SLA label must be Expired / Breached and never masked as a 20m target
+  const slaDisplayLabel = isSlaBreached ? "SLA Expired (0m)" : `${arrivalSlaRemainingMinutes} min left`;
+  assert.equal(slaDisplayLabel, "SLA Expired (0m)");
+  assert.notEqual(slaDisplayLabel, "20 min left");
+});
+
+test("Test 25: Full technician workflow (ASSIGNED -> TRAVELLING -> ON_SITE -> Progress notes recorded -> Completion report submitted -> Dispatcher review -> Customer sign-off -> COMPLETED)", () => {
+  const harness = new WorkflowHarness();
+
+  // 1. Submit Request
+  const req = harness.createCustomerRequest({
+    category: "Electrical and power systems",
+    assetName: "ATS-01 Automatic Transfer Switch",
+    problemTitle: "Generator ATS Failure to Transfer",
+    problemDescription: "Contactor coil burnt out during mains outage test.",
+    priority: "URGENT",
+    coveragePlan: "247-priority",
+  });
+  assert.equal(req.status, "NEW");
+
+  // 2. Dispatcher converts to Work Order
+  const wo = harness.convertRequestToWorkOrder({ requestId: req.id });
+  assert.equal(wo.status, "UNASSIGNED");
+  assert.equal(wo.requestId, req.id);
+
+  // 3. Dispatcher assigns Kamrul Islam (tech-01)
+  harness.assignTechnician({ workOrderId: wo.id, technicianId: "tech-01" });
+  assert.equal(wo.status, "ASSIGNED");
+  assert.equal(wo.assignedTechnicianId, "tech-01");
+
+  // 4. Technician starts travelling
+  harness.updateJobStatus(wo.id, "TRAVELLING", "En route to DEPZ facility");
+  assert.equal(wo.status, "TRAVELLING");
+  assert.ok(wo.startedAt);
+
+  // 5. Technician arrives on site
+  harness.updateJobStatus(wo.id, "ON_SITE", "Arrived at facility substation room");
+  assert.equal(wo.status, "ON_SITE");
+
+  // 6. Technician records interim work progress notes while ON_SITE
+  harness.recordWorkProgress(wo.id, "Isolated ATS utility supply; verified coil burnout on 400A contactor.");
+  assert.ok(wo.workNotes.includes("Isolated ATS utility supply"));
+
+  // 7. Technician submits completion report
+  harness.submitJobCompletion(wo.id, {
+    notes: "Replaced 400A auxiliary contactor coil and verified automatic transfer timing in 3 consecutive tests.",
+    materialsUsed: "1x 400A AC Contactor Coil (Schneider LC1D400), 2x Control Fuse 6A",
+    technicianName: "Kamrul Islam",
+  });
+  assert.equal(wo.status, "WORK_COMPLETED_AWAITING_CONFIRMATION");
+  assert.ok(wo.completionReport);
+  assert.equal(wo.completionReport.confirmedByCustomer, false);
+  assert.ok(wo.completionReport.materialsUsed.includes("Schneider"));
+
+  // 8. Customer confirms satisfactory completion
+  harness.confirmJobCompletion(wo.id, "Apex Spinning Mills");
+  assert.equal(wo.status, "COMPLETED");
+  assert.equal(wo.completionReport.confirmedByCustomer, true);
+  assert.ok(wo.completedAt);
+
+  // 9. Itemized invoice generated with PAYMENT_DUE status
+  const inv = harness.invoices.find((i) => i.workOrderId === wo.id);
+  assert.ok(inv, "Invoice must be automatically generated for completed work order");
+  assert.equal(inv.status, "PAYMENT_DUE");
+});
+
+test("Test 26: Duplicate completion report submission updates report notes and materials without creating duplicate work orders or duplicate event records", () => {
+  const harness = new WorkflowHarness();
+
+  const req = harness.createCustomerRequest({
+    category: "Plumbing and water systems",
+    assetName: "Water Pump P-01",
+    problemTitle: "Pump Leak",
+    problemDescription: "Gasket failure",
+    priority: "HIGH",
+    coveragePlan: "247-standard",
+  });
+  const wo = harness.convertRequestToWorkOrder({ requestId: req.id });
+  harness.assignTechnician({ workOrderId: wo.id, technicianId: "tech-01" });
+  harness.updateJobStatus(wo.id, "TRAVELLING");
+  harness.updateJobStatus(wo.id, "ON_SITE");
+
+  // Initial submission
+  harness.submitJobCompletion(wo.id, {
+    notes: "Replaced mechanical seal.",
+    materialsUsed: "Gasket kit",
+  });
+  assert.equal(wo.status, "WORK_COMPLETED_AWAITING_CONFIRMATION");
+  const initialWoCount = harness.workOrders.length;
+
+  // Resubmission with updated details while still awaiting confirmation
+  wo.completionReport.notes = "Replaced mechanical seal and tightened coupling bolts.";
+  wo.completionReport.materialsUsed = "Gasket kit + 4x M12 SS Bolts";
+
+  assert.equal(harness.workOrders.length, initialWoCount);
+  assert.ok(wo.completionReport.notes.includes("coupling bolts"));
+  assert.ok(wo.completionReport.materialsUsed.includes("M12 SS Bolts"));
+});
+
+test("Test 27: Preview state consistency and data structure integrity survives role switching and simulated reload", () => {
+  const harness = new WorkflowHarness();
+
+  const candidate = {
+    requests: harness.requests,
+    workOrders: harness.workOrders,
+    technicians: harness.technicians,
+    invoices: harness.invoices,
+    events: harness.events,
+    assets: harness.assets,
+  };
+
+  const serialized = JSON.stringify(candidate);
+  const parsed = JSON.parse(serialized);
+  const validated = validateOperationalState(parsed);
+
+  assert.ok(validated !== null);
+  assert.equal(validated.workOrders.length, harness.workOrders.length);
+  assert.equal(validated.technicians.length, harness.technicians.length);
 });

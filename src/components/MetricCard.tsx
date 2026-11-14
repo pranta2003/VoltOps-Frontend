@@ -12,6 +12,7 @@ interface MetricCardProps {
   icon?: ComponentType<IconProps>;
   badge?: ReactNode;
   alert?: boolean;
+  size?: "sm" | "md" | "lg";
 }
 
 export const MetricCard: FC<MetricCardProps> = ({
@@ -22,7 +23,18 @@ export const MetricCard: FC<MetricCardProps> = ({
   icon: Icon,
   badge,
   alert = false,
+  size = "md",
 }) => {
+  const isTextValue = typeof value === "string" && !/\d/.test(value);
+  const sizeClasses =
+    size === "sm"
+      ? "text-lg sm:text-xl font-bold font-mono"
+      : size === "lg"
+      ? "text-2xl sm:text-3xl font-extrabold"
+      : isTextValue
+      ? "text-lg sm:text-xl font-bold"
+      : "text-xl sm:text-2xl font-bold font-mono";
+
   return (
     <div
       className={`border rounded-xl p-4 transition-all duration-200 shadow-[var(--shadow-sm)] hover:border-[var(--border-strong)] relative overflow-hidden ${
@@ -54,7 +66,7 @@ export const MetricCard: FC<MetricCardProps> = ({
 
       {/* Main KPI Value */}
       <div className="flex items-baseline gap-2">
-        <span className="font-heading font-extrabold text-2xl sm:text-3xl text-[var(--text-primary)] tracking-tight">
+        <span className={`font-heading text-[var(--text-primary)] tracking-tight ${sizeClasses}`}>
           {value}
         </span>
         {trend && (
