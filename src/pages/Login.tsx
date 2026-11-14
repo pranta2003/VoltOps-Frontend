@@ -1,11 +1,25 @@
-import { useState, FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, FormEvent, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { GoogleSignInButton } from "../components/GoogleSignInButton";
+import { getCoveragePlanPricing, CoveragePlanId } from "../config/coveragePricing";
 
 export function Login() {
   const { login, loginWithGoogle, enterPreviewRole } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Retrieve plan from URL query param or fallback to persisted session state
+  const rawPlanParam = searchParams.get("package") || searchParams.get("plan") || sessionStorage.getItem("voltops_pending_plan");
+  const selectedPlanId = (rawPlanParam ? rawPlanParam.toLowerCase().trim() : null) as CoveragePlanId | null;
+
+  useEffect(() => {
+    if (selectedPlanId) {
+      sessionStorage.setItem("voltops_pending_plan", selectedPlanId);
+    }
+  }, [selectedPlanId]);
+
+  const planPricing = selectedPlanId ? getCoveragePlanPricing(selectedPlanId) : null;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,10 +27,19 @@ export function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
 
+  function continueAfterAuth(role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER") {
+    const pendingPlan = selectedPlanId || sessionStorage.getItem("voltops_pending_plan");
+    if (role === "CUSTOMER" && pendingPlan && pendingPlan !== "custom") {
+      navigate(`/checkout?plan=${pendingPlan}`);
+    } else {
+      navigate("/");
+    }
+  }
+
   function handleSelectPreview(role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER") {
     if (enterPreviewRole) {
       enterPreviewRole(role);
-      navigate("/");
+      continueAfterAuth(role);
     }
   }
 
@@ -25,8 +48,8 @@ export function Login() {
     setIsGoogleSubmitting(true);
 
     try {
-      await loginWithGoogle();
-      navigate("/");
+      const user = await loginWithGoogle();
+      continueAfterAuth(user.role);
     } catch (err: any) {
       setError(err.message || "Google authentication failed. Please try again.");
     } finally {
@@ -53,7 +76,7 @@ export function Login() {
 
     try {
       await login(trimmedEmail, password);
-      navigate("/");
+      continueAfterAuth("CUSTOMER");
     } catch (err: any) {
       setPassword("");
 
@@ -95,6 +118,23 @@ export function Login() {
             <h2 className="text-lg font-bold text-[var(--text-primary)]">Log in</h2>
             <span className="text-[11px] text-[var(--text-muted)]">Commercial Access</span>
           </div>
+
+          {/* Preserved Plan Notice */}
+          {planPricing && (
+            <div className="text-xs rounded-xl p-3 border bg-emerald-500/10 border-emerald-500/30 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                  Pending plan: <strong className="text-[var(--text-primary)]">{planPricing.code}</strong>
+                </span>
+                <span className="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400">
+                  {planPricing.formattedPrice}
+                </span>
+              </div>
+              <div className="text-[11px] text-[var(--text-muted)]">
+                Log in as Customer to continue directly to subscription checkout.
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="text-xs text-status-danger bg-red-500/10 border border-red-500/20 rounded-xl px-3.5 py-2.5 leading-relaxed">
@@ -162,13 +202,17 @@ export function Login() {
 
           <p className="text-center text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border)]">
             New customer?{" "}
-            <Link to="/register" className="font-semibold hover:underline" style={{ color: "var(--accent)" }}>
+            <Link
+              to={selectedPlanId ? `/register?package=${selectedPlanId}` : "/register"}
+              className="font-semibold hover:underline"
+              style={{ color: "var(--accent)" }}
+            >
               Create an account
             </Link>
           </p>
         </div>
 
-        {/* Development-Only Role Preview (strictly stripped or dormant in production builds) */}
+        {/* Development-Only Role Preview */}
         {import.meta.env.DEV && (
           <div
             className="mt-5 border rounded-2xl p-4 shadow-[var(--shadow-sm)]"
@@ -199,7 +243,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => handleSelectPreview("DISPATCHER")}
-                className="px-2 py-1.5 text-xs font-semibold rounded-xl border transition-all text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20 active:scale-[0.98] text-center truncate"
+                className="px-2 py-1.5 text-xs font-semibold rounded-xl border transition-all text-blue-400 bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20 active:scale-[0.98] text-center truncate"
                 title="Preview as Dispatcher (/dispatcher)"
               >
                 Dispatcher
@@ -207,26 +251,22 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => handleSelectPreview("TECHNICIAN")}
-                className="px-2 py-1.5 text-xs font-semibold rounded-xl border transition-all text-cyan-400 bg-cyan-500/10 border-cyan-500/20 hover:bg-cyan-500/20 active:scale-[0.98] text-center truncate"
-                title="Preview as Technician (/technician)"
+                className="px-2 py-1.5 text-xs font-semibold rounded-xl border transition-all text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20 active:scale-[0.98] text-center truncate"
+                title="Preview as Field Technician (/technician)"
               >
                 Technician
               </button>
               <button
                 type="button"
                 onClick={() => handleSelectPreview("CUSTOMER")}
-                className="px-2 py-1.5 text-xs font-semibold rounded-xl border transition-all text-blue-400 bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20 active:scale-[0.98] text-center truncate"
-                title="Preview as Customer (/customer)"
+                className="px-2 py-1.5 text-xs font-bold rounded-xl border transition-all text-cyan-400 bg-cyan-500/10 border-cyan-500/20 hover:bg-cyan-500/20 active:scale-[0.98] text-center truncate"
+                title="Preview as Facility Customer (/customer)"
               >
                 Customer
               </button>
             </div>
           </div>
         )}
-
-        <p className="text-center text-[11px] text-[var(--text-muted)] mt-5">
-          Staff test logins are listed in the project README (seeded accounts).
-        </p>
       </div>
     </div>
   );

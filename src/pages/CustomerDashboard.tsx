@@ -10,6 +10,7 @@ import {
   CANONICAL_SERVICE_CATEGORIES,
   getCoveragePlanSlaLabel,
   WorkOrderCompletionReport,
+  CustomerPurchase,
 } from "../types";
 import { customerService } from "../services/customerService";
 import { technicianService } from "../services/technicianService";
@@ -18,6 +19,8 @@ import {
   getSubscriptionEntitlement,
   SubscriptionEntitlement,
 } from "../services/subscriptionService";
+import { formatBdt } from "../config/coveragePricing";
+import { DemonstrationReceiptModal } from "../components/DemonstrationReceiptModal";
 import {
   ClockIcon,
   AlertTriangleIcon,
@@ -86,6 +89,12 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const [subscription, setSubscription] = useState<SubscriptionEntitlement>(() =>
     customerService.getSubscription(user?.id)
   );
+
+  // Purchases & Receipts State
+  const [purchases, setPurchases] = useState<CustomerPurchase[]>(() =>
+    operationalStore.getPurchases(user?.id)
+  );
+  const [activeReceipt, setActiveReceipt] = useState<CustomerPurchase | null>(null);
 
   // Extra service pack quote modal state
   const [showQuotationModal, setShowQuotationModal] = useState(false);
@@ -202,9 +211,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
         setRequests(mapped);
 
-        // Update subscription status
-        const sub = getSubscriptionEntitlement(user?.id || "cust-epz-01", rawRequests, workOrders);
+        // Update subscription status and purchases
+        const sub = customerService.getSubscription(user?.id);
         setSubscription(sub);
+        setPurchases(operationalStore.getPurchases(user?.id));
       })
       .catch((err) => {
         setError(err.message || "Failed to load service requests.");
@@ -536,6 +546,77 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               </button>
             </div>
           ))}
+
+        {/* ── Subscribed Plan & Demonstration Purchase Receipts ─────────── */}
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-3.5">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                  Active Facility Coverage & Purchases
+                </h2>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                  {subscription.planName}
+                </span>
+              </div>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                Physical arrival commitment: <strong>{subscription.planId === "247-priority" ? "20-minute rapid arrival SLA" : subscription.planId === "247-standard" ? "40-minute arrival SLA" : "8-Hour daily window"}</strong> • {subscription.remainingVisits} of {subscription.includedVisits} service visits available
+              </p>
+            </div>
+
+            <Link
+              to={`/checkout?plan=${subscription.planId}`}
+              className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[var(--bg-surface-2)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text-primary)] transition-all flex items-center gap-1.5 self-start sm:self-auto"
+            >
+              <span>Change Plan / Checkout</span>
+              <ArrowRightIcon size={12} />
+            </Link>
+          </div>
+
+          {/* Receipts List */}
+          <div className="space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block">
+              Demonstration Receipts ({purchases.length})
+            </span>
+
+            {purchases.length === 0 ? (
+              <p className="text-xs text-[var(--text-muted)] italic">No purchases recorded yet.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {purchases.map((pur) => (
+                  <div
+                    key={pur.purchaseId}
+                    className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between gap-3 hover:border-emerald-500/40 transition-colors"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-xs text-[var(--text-primary)]">{pur.receiptId}</span>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600">
+                          {pur.paymentStatus}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                        {pur.planName} • {new Date(pur.date).toLocaleDateString("en-BD", { month: "short", day: "numeric", year: "numeric" })}
+                      </div>
+                      <div className="text-xs font-mono font-bold text-[var(--text-primary)] mt-1">
+                        {formatBdt(pur.totalAmount)} ({pur.billingPeriod})
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveReceipt(pur)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all flex items-center gap-1 shrink-0"
+                    >
+                      <EyeIcon size={13} />
+                      <span>View Receipt</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* ── Central Service Requests & History Section ───────────────────── */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm space-y-0">
@@ -1097,6 +1178,13 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               )}
             </div>
           </div>
+        )}
+        {/* Active Demonstration Receipt Modal */}
+        {activeReceipt && (
+          <DemonstrationReceiptModal
+            purchase={activeReceipt}
+            onClose={() => setActiveReceipt(null)}
+          />
         )}
       </div>
     </Layout>

@@ -20,7 +20,7 @@
 //    - Corrupted or unparseable states are safely discarded, resetting to clean baselines.
 // ============================================================================
 
-import { ServiceRequest, WorkOrder, TechnicianProfile, Invoice, CustomerAsset } from "../types";
+import { ServiceRequest, WorkOrder, TechnicianProfile, Invoice, CustomerAsset, CustomerPurchase } from "../types";
 import { DispatchEventLog } from "../types/dispatcher";
 import {
   INITIAL_SERVICE_REQUESTS,
@@ -216,7 +216,31 @@ export interface OperationalState {
   events: DispatchEventLog[];
   assets?: CustomerAsset[];
   leaveRequests?: TechnicianLeaveRequest[];
+  purchases?: CustomerPurchase[];
 }
+
+export const INITIAL_PURCHASES: CustomerPurchase[] = [
+  {
+    purchaseId: "PUR-2026-0819",
+    receiptId: "REC-DEMO-2026-0819",
+    date: "2026-11-01T09:30:00Z",
+    customerId: "cust-epz-01",
+    customerName: "Apex Facility Manager (Preview)",
+    company: "Apex Spinning & Weaving Mills, Savar",
+    facilityAddress: "Plot 14-18, Sector 3, DEPZ, Savar",
+    planId: "247-priority",
+    planName: "24/7 Priority Coverage (Plan C)",
+    includedVisits: 15,
+    arrivalSla: "Within 20 minutes on site",
+    billingPeriod: "Monthly",
+    amount: 4000,
+    vatAmount: 200,
+    totalAmount: 4200,
+    currency: "BDT",
+    paymentMethod: "DEMO_PAYMENT",
+    paymentStatus: "DEMO_PAID",
+  },
+];
 
 function createPristineBaseline(): OperationalState {
   return {
@@ -227,6 +251,7 @@ function createPristineBaseline(): OperationalState {
     events: JSON.parse(JSON.stringify(INITIAL_DISPATCH_EVENTS)),
     assets: JSON.parse(JSON.stringify(INITIAL_CUSTOMER_ASSETS)),
     leaveRequests: JSON.parse(JSON.stringify(INITIAL_LEAVE_REQUESTS)),
+    purchases: JSON.parse(JSON.stringify(INITIAL_PURCHASES)),
   };
 }
 
@@ -286,6 +311,7 @@ export function validateOperationalState(candidate: unknown): OperationalState |
   if (!isArrayOfObjectsWithId(c.events)) return null;
   if (c.assets !== undefined && !isArrayOfObjectsWithId(c.assets)) return null;
   if (c.leaveRequests !== undefined && !isArrayOfObjectsWithId(c.leaveRequests)) return null;
+  if (c.purchases !== undefined && !Array.isArray(c.purchases)) return null;
 
   return candidate as OperationalState;
 }
@@ -303,6 +329,9 @@ function loadState(): OperationalState {
           }
           if (!validated.leaveRequests || !Array.isArray(validated.leaveRequests)) {
             validated.leaveRequests = JSON.parse(JSON.stringify(INITIAL_LEAVE_REQUESTS));
+          }
+          if (!validated.purchases || !Array.isArray(validated.purchases)) {
+            validated.purchases = JSON.parse(JSON.stringify(INITIAL_PURCHASES));
           }
           return validated;
         }
@@ -515,6 +544,32 @@ export const operationalStore = {
     target.status = "CANCELLED";
     saveState({ ...state, leaveRequests: [...current] });
     return true;
+  },
+
+  /**
+   * Coverage Subscription Purchases & Receipts
+   */
+  getPurchases(customerId?: string): CustomerPurchase[] {
+    const state = loadState();
+    const all: CustomerPurchase[] = state.purchases && Array.isArray(state.purchases)
+      ? [...state.purchases]
+      : JSON.parse(JSON.stringify(INITIAL_PURCHASES));
+    if (!customerId) return all;
+    return all.filter((p) => p.customerId === customerId || p.customerId === "cust-epz-01");
+  },
+
+  addPurchase(purchase: CustomerPurchase): void {
+    const state = loadState();
+    const current: CustomerPurchase[] = state.purchases && Array.isArray(state.purchases)
+      ? [...state.purchases]
+      : JSON.parse(JSON.stringify(INITIAL_PURCHASES));
+
+    // Prevent duplicate purchase insertion
+    if (current.some((p) => p.purchaseId === purchase.purchaseId || p.receiptId === purchase.receiptId)) {
+      return;
+    }
+
+    saveState({ ...state, purchases: [purchase, ...current] });
   },
 
   /**

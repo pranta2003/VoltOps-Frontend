@@ -21,6 +21,15 @@
 // ============================================================================
 
 import { CoveragePlanId, ServiceRequest, WorkOrder } from "../types";
+import { operationalStore } from "./operationalStore";
+
+export function getCustomerActivePlan(customerId?: string): CoveragePlanId {
+  const purchases = operationalStore.getPurchases(customerId);
+  if (purchases && purchases.length > 0) {
+    return purchases[0].planId;
+  }
+  return "247-priority";
+}
 
 export const PLAN_INCLUDED_VISITS: Record<CoveragePlanId, number | null> = {
   "8hr": 5,

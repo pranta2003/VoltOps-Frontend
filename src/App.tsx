@@ -8,6 +8,7 @@ import { Register } from "./pages/Register";
 import { NotFound } from "./pages/NotFound";
 import { Unauthorized } from "./pages/Unauthorized";
 import { LandingPage } from "./pages/LandingPage";
+import { SupportChatWidget } from "./components/SupportChatWidget";
 
 // Route-Level Code Splitting for Dashboards & Complex Portal Views
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard").then((m) => ({ default: m.AdminDashboard })));
@@ -32,6 +33,7 @@ const NewServiceRequest = lazy(() => import("./pages/customer/NewServiceRequest"
 const RequestHistory = lazy(() => import("./pages/customer/RequestHistory").then((m) => ({ default: m.RequestHistory })));
 const FacilityAssets = lazy(() => import("./pages/customer/FacilityAssets").then((m) => ({ default: m.FacilityAssets })));
 const CustomerInvoices = lazy(() => import("./pages/customer/CustomerInvoices").then((m) => ({ default: m.CustomerInvoices })));
+const Checkout = lazy(() => import("./pages/customer/Checkout").then((m) => ({ default: m.Checkout })));
 
 const RouteLoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-[var(--bg-main)] text-[var(--text-muted)] text-xs font-mono">
@@ -230,9 +232,18 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/checkout"
+                element={
+                  <ProtectedRoute allowedRoles={["CUSTOMER", "ADMIN"]}>
+                    <Checkout />
+                  </ProtectedRoute>
+                }
+              />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <SupportChatWidget />
           </Suspense>
         </AuthProvider>
       </BrowserRouter>

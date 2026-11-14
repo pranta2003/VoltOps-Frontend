@@ -11,7 +11,10 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<AuthUser>;
   logout: () => Promise<void>;
   isPreview?: boolean;
-  enterPreviewRole?: (role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER") => void;
+  enterPreviewRole?: (
+    role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER",
+    customOverrides?: Partial<AuthUser>
+  ) => void;
   exitPreview?: () => void;
   authNotice?: string | null;
   clearAuthNotice?: () => void;
@@ -65,16 +68,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   // Development-only role preview helpers
-  function enterPreviewRole(role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER") {
+  function enterPreviewRole(
+    role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER",
+    customOverrides?: Partial<AuthUser>
+  ) {
     if (!import.meta.env.DEV) return;
     setIsPreview(true);
-    setUser(PREVIEW_USERS[role]);
+    const base = PREVIEW_USERS[role];
+    const customized: AuthUser = customOverrides
+      ? {
+          ...base,
+          ...customOverrides,
+          id: customOverrides.id || `demo-${role.toLowerCase()}-${Date.now().toString().slice(-4)}`,
+          role,
+          initials: customOverrides.name
+            ? customOverrides.name
+                .split(" ")
+                .filter(Boolean)
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2)
+            : base.initials,
+        }
+      : base;
+    setUser(customized);
     sessionStorage.setItem("voltops_preview_role", role);
+    sessionStorage.setItem("voltops_preview_user", JSON.stringify(customized));
   }
 
   function exitPreview() {
     setIsPreview(false);
     sessionStorage.removeItem("voltops_preview_role");
+    sessionStorage.removeItem("voltops_preview_user");
     // Restore saved user if present, otherwise null
     const savedUserStr = localStorage.getItem("voltops_user");
     if (savedUserStr && localStorage.getItem("voltops_token")) {
@@ -94,6 +120,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // 1. If in dev mode and a preview role was selected in this session, restore preview
     if (import.meta.env.DEV) {
+      const savedPreviewUserStr = sessionStorage.getItem("voltops_preview_user");
+      if (savedPreviewUserStr) {
+        try {
+          const parsed = JSON.parse(savedPreviewUserStr);
+          setIsPreview(true);
+          setUser(parsed);
+          setIsLoading(false);
+          return;
+        } catch {
+          sessionStorage.removeItem("voltops_preview_user");
+        }
+      }
+
       const savedPreviewRole = sessionStorage.getItem("voltops_preview_role") as
         | "ADMIN"
         | "DISPATCHER"

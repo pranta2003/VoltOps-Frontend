@@ -1,41 +1,27 @@
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { GoogleSignInButton } from "../components/GoogleSignInButton";
+import { getCoveragePlanPricing, CoveragePlanId } from "../config/coveragePricing";
 
 export function Register() {
-  const { register, loginWithGoogle } = useAuth();
+  const { register, loginWithGoogle, enterPreviewRole } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const packageParam = searchParams.get("package");
-  const packageConfig: Record<string, { name: string; sla: string; slaLabel?: string }> = {
-    // Current coverage plans
-    "8hr": {
-      name: "8-Hour Daily Coverage (Plan A)",
-      sla: "8 hours per day defined operational window (no arrival SLA)",
-      slaLabel: "Coverage Window",
-    },
-    "247-standard": {
-      name: "24/7 Standard Coverage (Plan B)",
-      sla: "Within 40 minutes — technician physically arrives at your facility",
-      slaLabel: "Arrival SLA",
-    },
-    "247-priority": {
-      name: "24/7 Priority Coverage (Plan C)",
-      sla: "Within 20 minutes — rapid technician physical arrival (2× faster)",
-      slaLabel: "Arrival SLA",
-    },
-  };
+  // Retrieve plan from URL query param or fallback to persisted session state
+  const rawPlanParam = searchParams.get("package") || searchParams.get("plan") || sessionStorage.getItem("voltops_pending_plan");
+  const selectedPlanId = (rawPlanParam ? rawPlanParam.toLowerCase().trim() : null) as CoveragePlanId | null;
 
-  const selectedPackage = packageParam
-    ? packageConfig[packageParam.toLowerCase()] || {
-        name: packageParam,
-        sla: "Within plan response commitment",
-        slaLabel: "Plan Commitment",
-      }
-    : null;
+  useEffect(() => {
+    if (selectedPlanId) {
+      sessionStorage.setItem("voltops_pending_plan", selectedPlanId);
+    }
+  }, [selectedPlanId]);
 
+  const planPricing = selectedPlanId ? getCoveragePlanPricing(selectedPlanId) : null;
+
+  // Real registration form state
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,13 +29,38 @@ export function Register() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
 
+  // Local Preview demonstration registration state
+  const [demoName, setDemoName] = useState("Karim Rahman");
+  const [demoEmail, setDemoEmail] = useState("karim@pacificepz.com");
+  const [demoCompany, setDemoCompany] = useState("Pacific Fabrics EPZ, Savar");
+
+  function continueAfterAuth() {
+    const pendingPlan = selectedPlanId || sessionStorage.getItem("voltops_pending_plan");
+    if (pendingPlan && pendingPlan !== "custom") {
+      navigate(`/checkout?plan=${pendingPlan}`);
+    } else {
+      navigate("/customer");
+    }
+  }
+
+  function handleDemoRegister() {
+    if (enterPreviewRole) {
+      enterPreviewRole("CUSTOMER", {
+        name: demoName.trim() || "Karim Rahman (Preview)",
+        email: demoEmail.trim() || "karim@pacificepz.com",
+        company: demoCompany.trim() || "Pacific Fabrics EPZ, Savar",
+      });
+      continueAfterAuth();
+    }
+  }
+
   async function handleGoogleSignUp() {
     setError("");
     setIsGoogleSubmitting(true);
 
     try {
       await loginWithGoogle();
-      navigate("/");
+      continueAfterAuth();
     } catch (err: any) {
       setError(err.message || "Google registration failed. Please try again.");
     } finally {
@@ -84,7 +95,7 @@ export function Register() {
 
     try {
       await register(trimmedName, trimmedEmail, password);
-      navigate("/");
+      continueAfterAuth();
     } catch (err: any) {
       setPassword("");
 
@@ -112,7 +123,7 @@ export function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8" style={{ background: "var(--bg-base)" }}>
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md">
         <div className="text-center mb-6">
           <Link to="/" className="inline-block group">
             <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] group-hover:text-emerald-500 transition-colors">
@@ -131,19 +142,30 @@ export function Register() {
             <span className="text-[11px] text-[var(--text-muted)]">Commercial Access</span>
           </div>
 
-          {selectedPackage && (
+          {/* Preserved Plan Banner with BDT Prototype Pricing */}
+          {planPricing && (
             <div
-              className="text-xs rounded-xl p-3 border"
-              style={{ background: "rgba(31,107,123,0.08)", borderColor: "var(--accent)" }}
+              className="text-xs rounded-xl p-3.5 border bg-emerald-500/10 border-emerald-500/30 space-y-1.5"
             >
-              <div className="font-semibold text-emerald-600 dark:text-emerald-400">
-                Selected plan: <span className="text-[var(--text-primary)] font-bold">{selectedPackage.name}</span>
-              </div>
-              <div className="text-[11px] text-[var(--text-secondary)] mt-1 flex items-center gap-1.5">
-                <span className="font-bold text-emerald-600">✓</span>
-                <span>
-                  {selectedPackage.slaLabel || "Commitment"}: <strong>{selectedPackage.sla}</strong>
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                  Selected plan: <strong className="text-[var(--text-primary)]">{planPricing.name}</strong>
                 </span>
+                <span className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">
+                  {planPricing.formattedPrice}
+                  <span className="text-[10px] font-normal text-[var(--text-muted)]">{planPricing.billingUnit}</span>
+                </span>
+              </div>
+              <div className="text-[11px] text-[var(--text-secondary)] flex items-center gap-1.5">
+                <span className="font-bold text-emerald-600">✓</span>
+                <span>Arrival SLA: <strong>{planPricing.arrivalSlaLabel}</strong></span>
+              </div>
+              <div className="text-[11px] text-[var(--text-secondary)] flex items-center gap-1.5">
+                <span className="font-bold text-emerald-600">✓</span>
+                <span>Included allowance: <strong>{planPricing.includedVisitsLabel}</strong></span>
+              </div>
+              <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium pt-1 border-t border-emerald-500/20">
+                {planPricing.prototypeNotice}
               </div>
             </div>
           )}
@@ -226,9 +248,59 @@ export function Register() {
             </button>
           </form>
 
+          {/* Dedicated Local Preview Demonstration Registration */}
+          <div
+            className="mt-4 pt-4 border-t border-[var(--border)] rounded-xl p-3.5 bg-amber-500/5 border border-amber-500/20 space-y-2.5"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                Local Preview Registration
+              </span>
+              <span className="text-[10px] text-[var(--text-muted)] font-mono">DEMO MODE</span>
+            </div>
+            <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+              Demonstrate customer registration, session establishment, and automated plan preservation without a running backend.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div>
+                <label className="text-[10px] text-[var(--text-muted)] block mb-0.5">Demo Name</label>
+                <input
+                  type="text"
+                  value={demoName}
+                  onChange={(e) => setDemoName(e.target.value)}
+                  className="w-full border rounded-lg px-2.5 py-1 text-xs"
+                  style={{ background: "var(--bg-surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-[var(--text-muted)] block mb-0.5">Facility / Company</label>
+                <input
+                  type="text"
+                  value={demoCompany}
+                  onChange={(e) => setDemoCompany(e.target.value)}
+                  className="w-full border rounded-lg px-2.5 py-1 text-xs"
+                  style={{ background: "var(--bg-surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                />
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleDemoRegister}
+              className="w-full py-2 px-3 rounded-xl text-xs font-bold text-amber-950 dark:text-amber-200 bg-amber-400 dark:bg-amber-500/20 hover:bg-amber-500 dark:hover:bg-amber-500/30 border border-amber-500/40 transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.99]"
+            >
+              <span>Demonstrate Registration as Customer</span>
+              {selectedPlanId && <span className="opacity-90">→ Continue to Checkout</span>}
+            </button>
+          </div>
+
           <p className="text-center text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border)]">
             Already have an account?{" "}
-            <Link to="/login" className="font-semibold hover:underline" style={{ color: "var(--accent)" }}>
+            <Link
+              to={selectedPlanId ? `/login?package=${selectedPlanId}` : "/login"}
+              className="font-semibold hover:underline"
+              style={{ color: "var(--accent)" }}
+            >
               Log in
             </Link>
           </p>

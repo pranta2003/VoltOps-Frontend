@@ -1257,10 +1257,54 @@ This document tracks all completed implementation milestones, verified files, co
      - Production build: `npm run build` compiled cleanly into `/dist` in 31.81s with 0 errors.
      - Console error inspection: 0 application errors.
 
+### Milestone 4.3 — Complete Frontend Implementation: Registration, Centralized BDT Pricing, Checkout & Demonstration Receipts, Bilingual Support Chat, and Operational Statistics
+
 - **Date Completed**: 14 November 2026
 - **Branch**: `pranta` (Strictly Frontend Only)
 - **Scope & Key Deliverables**:
-  1. **Refined Transparent/Glass Navbar (Removed White Pill)**:
+  1. **Phase 1: Registration Fix & End-to-End Purchase Journey**:
+     - Diagnosed registration issue: `Register.tsx` only had real backend API call (`api.post("/auth/register")`) without a Local Preview demonstration path, causing `ERR_NETWORK` ("Service temporarily unavailable: Unable to reach the authentication server") when backend is offline.
+     - Preserved selected plan across auth flow using URL query parameters (`/register?package=...`, `/login?package=...`) and resilient `sessionStorage.getItem("voltops_pending_plan")`.
+     - Preserved truthful backend network error reporting when attempting live registration.
+     - Implemented dedicated "Local Preview Registration" card with customizable Name, Email, and Facility fields that establishes a customer session and proceeds directly to `/checkout?plan=${plan}`.
+     - Implemented lazy-loaded `/checkout` route (`src/pages/customer/Checkout.tsx`) guarded by customer/admin roles with full order breakdown, VAT calculation, and clear real vs demo payment boundaries.
+  2. **Phase 2: Centralized BDT Pricing & Demonstration Receipts**:
+     - Created single source of truth `src/config/coveragePricing.ts`:
+       * Plan A: 8-Hour Daily Coverage, ৳1,200/mo, 5 included visits, null arrival SLA.
+       * Plan B: 24/7 Standard, ৳2,500/mo, 10 included visits, 40-minute arrival SLA.
+       * Plan C: 24/7 Priority Emergency, ৳4,000/mo, 15 included visits, 20-minute arrival SLA.
+       * Plan D: Custom Coverage, Custom Quote, negotiated shifts and SLAs.
+       * Explicit prototype demonstration notices on all pricing cards.
+     - Created `src/components/DemonstrationReceiptModal.tsx` displaying Receipt ID (`REC-DEMO-*`), Payment ID (`PUR-*`), customer details, line items in BDT, `DEMO_PAID` badge, and print/save-to-PDF button using `window.print()`.
+     - Enhanced `src/services/operationalStore.ts` with `CustomerPurchase[]` state, `getPurchases(customerId)`, `addPurchase(purchase)` with duplicate prevention, and cross-tab/local storage persistence.
+     - Updated `src/pages/CustomerDashboard.tsx` with "Active Facility Coverage & Purchases" card displaying the active subscribed plan, remaining visit credits, "Change Plan / Checkout" link, and demo receipts with "View Receipt" trigger.
+  3. **Phase 3: Floating Customer Support Chat UI**:
+     - Implemented `src/components/SupportChatWidget.tsx` mounted globally in `src/App.tsx`.
+     - Fixed bottom-right launcher button with unread notification dot, smooth expand/collapse transition, and escape key handling.
+     - Bilingual English / Bengali (`EN` / `বাং`) language switcher.
+     - Welcome messages in both languages, prompt suggestion chips ("Report breakdown" / "ব্রেকডাউন রিপোর্ট", "Check arrival SLA" / "অ্যারাইভাল SLA যাচাই", "Coverage plan pricing" / "প্ল্যান প্রাইসিং").
+     - Message composer with input validation, character counter, send affordance, and attachment/emoji placeholders.
+     - Offline demo responses with clear prototype assistance indicators.
+  4. **Phase 4: Operational Statistics & B2B SaaS Footer Upgrade**:
+     - Replaced role workspaces section in `LandingPage.tsx` with a responsive 4-card statistics section (`#statistics`):
+       * 7 Supported Service Trades (Electrical, HVAC, Plumbing, Power Gen, Network, CCTV & IT).
+       * 20 min Priority Arrival Target (Plan C rapid arrival, 2x faster).
+       * 40 min Standard Arrival Target (Plan B 24/7 arrival).
+       * 5–15 Included Visits per Cycle (Plan A: 5, Plan B: 10, Plan C: 15).
+     - Upgraded footer to high-end B2B SaaS layout with Brand, Platform, Support, Governance columns, prototype payment marks for Stripe & SSLCommerz, and exact clickable GitHub repository link `https://github.com/pranta2003/VoltOps-Frontend`.
+  5. **Automated Testing Suite (75/75 Passing)**:
+     - Added Tests 28, 29, 30 to `tests/workflowIntegration.test.mjs`:
+       * Test 28: Centralized BDT pricing integrity and prototype evaluation disclaimers.
+       * Test 29: Customer checkout & demonstration purchase state transitions and duplicate prevention.
+       * Test 30: Subscription entitlement update and state validation following checkout purchase.
+     - All 75 tests passing across all 4 test suites: `adminService.test.mjs`, `dispatcherService.test.mjs`, `workflowIntegration.test.mjs`, `authService.test.mjs`.
+  6. **TypeScript & Production Build Verification**:
+     - `npx tsc --noEmit` passed with 0 errors.
+     - `npm run build` compiled cleanly into `/dist` with 0 errors.
+  7. **Real Browser End-to-End Acceptance**:
+     - Verified live in Chrome DevTools MCP across 375px, 768px, 1440px viewports.
+     - Complete user journey validated: Landing -> Select Plan C -> Register -> Preview Customer -> Checkout -> Complete Demo Payment -> Receipt Modal -> Customer Dashboard -> Active Plan & Visit Credits -> View Receipt -> Bilingual Support Chat.
+
      - Replaced opaque white inner navigation background (`bg-[var(--bg-surface-2)]` rendering as pure white `#ffffff` in light mode) with a unified translucent dark glass treatment (`border border-white/10 bg-white/5 backdrop-blur-sm`).
      - Nav items styled with high contrast slate typography (`text-slate-200 hover:text-white hover:bg-white/10`), active state with subtle indicator.
      - Exterior navbar uses `bg-slate-950/45` (unscrolled) and `bg-slate-950/80 border-white/20` (scrolled) with `backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)]` ensuring consistent contrast against both the dark hero video and bright light-theme body sections.

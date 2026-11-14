@@ -169,6 +169,8 @@ export interface CustomerProfile {
 // Payment confirmation requires external payment gateway webhook or banking settlement.
 export type InvoiceStatus = "PAYMENT_DUE" | "PAYMENT_PENDING" | "PAID" | "UNPAID" | "CANCELLED";
 
+export type CoveragePlanId = "8hr" | "247-standard" | "247-priority" | "custom";
+
 export interface InvoiceLineItem {
   id: string;
   description: string;
@@ -193,3 +195,26 @@ export interface Invoice {
   totalAmount: number;
   paymentNotice?: string;
 }
+
+// ── 9. Coverage Subscription Purchases & Demonstration Receipts ───────────
+export interface CustomerPurchase {
+  purchaseId: string; // e.g. "PUR-819201"
+  receiptId: string; // e.g. "REC-DEMO-819201"
+  date: string; // ISO string
+  customerId: string;
+  customerName: string;
+  company: string;
+  facilityAddress: string;
+  planId: CoveragePlanId;
+  planName: string;
+  includedVisits: number;
+  arrivalSla: string;
+  billingPeriod: "Monthly" | "Annual";
+  amount: number; // Base in BDT
+  vatAmount: number; // 5% VAT in BDT
+  totalAmount: number; // Total in BDT
+  currency: "BDT";
+  paymentMethod: "DEMO_PAYMENT" | "REAL_GATEWAY";
+  paymentStatus: "DEMO_PAID" | "PENDING_INTEGRATION";
+}
+

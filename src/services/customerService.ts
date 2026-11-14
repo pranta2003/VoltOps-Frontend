@@ -16,7 +16,7 @@ import api from "../api/axios";
 import { ServiceRequest, Invoice, ServiceCategory, PriorityLevel, CoveragePlanId, CustomerAsset } from "../types";
 import { getPhysicalArrivalSlaMinutes } from "../types/coverage";
 import { operationalStore } from "./operationalStore";
-import { checkCreditEligibility, getSubscriptionEntitlement, SubscriptionEntitlement } from "./subscriptionService";
+import { checkCreditEligibility, getSubscriptionEntitlement, SubscriptionEntitlement, getCustomerActivePlan } from "./subscriptionService";
 
 export interface CreateServiceRequestDTO {
   category: ServiceCategory;
@@ -322,6 +322,7 @@ export const customerService = {
   getSubscription(customerId?: string, planId?: CoveragePlanId, customNegotiatedAllowance?: number | null): SubscriptionEntitlement {
     const requests = operationalStore.getRequests();
     const workOrders = operationalStore.getWorkOrders();
-    return getSubscriptionEntitlement(customerId || "cust-epz-01", requests, workOrders, planId, customNegotiatedAllowance);
+    const activePlan = planId || getCustomerActivePlan(customerId);
+    return getSubscriptionEntitlement(customerId || "cust-epz-01", requests, workOrders, activePlan, customNegotiatedAllowance);
   },
 };

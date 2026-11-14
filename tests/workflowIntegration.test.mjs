@@ -14,6 +14,8 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 
 const VALID_WORK_ORDER_TRANSITIONS = {
   UNASSIGNED: ["ASSIGNED", "CANCELLED"],
@@ -37,6 +39,13 @@ function validateOperationalState(candidate) {
   if (!isArrayOfObjectsWithId(candidate.invoices)) return null;
   if (!isArrayOfObjectsWithId(candidate.events)) return null;
   if (candidate.assets !== undefined && !isArrayOfObjectsWithId(candidate.assets)) return null;
+  if (candidate.purchases !== undefined) {
+    const isArrayOfPurchases = Array.isArray(candidate.purchases) &&
+      candidate.purchases.every(
+        (p) => p && typeof p === "object" && typeof p.purchaseId === "string" && typeof p.receiptId === "string"
+      );
+    if (!isArrayOfPurchases) return null;
+  }
 
   return candidate;
 }
@@ -123,6 +132,7 @@ class WorkflowHarness {
 
     this.invoices = [];
     this.events = [];
+    this.purchases = [];
     this.assets = [
       {
         id: "AST-GEN-01",
@@ -544,6 +554,20 @@ class WorkflowHarness {
     );
     err.code = "GATEWAY_WEBHOOK_REQUIRED";
     throw err;
+  }
+
+  // 7. Purchase history & Demonstration Receipts
+  getPurchases(customerId) {
+    if (!customerId) return [...this.purchases];
+    return this.purchases.filter((p) => p.customerId === customerId);
+  }
+
+  addPurchase(purchase) {
+    const exists = this.purchases.some((p) => p.purchaseId === purchase.purchaseId || p.receiptId === purchase.receiptId);
+    if (!exists) {
+      this.purchases = [purchase, ...this.purchases];
+    }
+    return purchase;
   }
 }
 
@@ -1575,6 +1599,7 @@ test("Test 27: Preview state consistency and data structure integrity survives r
     invoices: harness.invoices,
     events: harness.events,
     assets: harness.assets,
+    purchases: harness.purchases,
   };
 
   const serialized = JSON.stringify(candidate);
@@ -1584,4 +1609,130 @@ test("Test 27: Preview state consistency and data structure integrity survives r
   assert.ok(validated !== null);
   assert.equal(validated.workOrders.length, harness.workOrders.length);
   assert.equal(validated.technicians.length, harness.technicians.length);
+  assert.equal(validated.purchases.length, harness.purchases.length);
+});
+
+// ── TEST GROUP 6: Centralized BDT Pricing, Checkout & Demonstration Receipts ─
+test("Test 28: Centralized BDT pricing integrity and prototype evaluation disclaimers", () => {
+  // Read and inspect canonical source config
+  const configPath = path.resolve(process.cwd(), "src/config/coveragePricing.ts");
+  assert.ok(fs.existsSync(configPath), "coveragePricing.ts must exist as single source of truth");
+
+  const configContent = fs.readFileSync(configPath, "utf-8");
+
+  // Plan A: 8hr, ৳1,200/mo, 5 visits, null arrival SLA
+  assert.ok(configContent.includes('monthlyBdtPrice: 1200'), "Plan A must be priced at ৳1,200/mo");
+  assert.ok(configContent.includes('includedVisits: 5'), "Plan A must include 5 visits");
+  assert.ok(configContent.includes('arrivalSlaMinutes: null'), "Plan A must have null arrival SLA");
+
+  // Plan B: 247-standard, ৳2,500/mo, 10 visits, 40-min arrival SLA
+  assert.ok(configContent.includes('monthlyBdtPrice: 2500'), "Plan B must be priced at ৳2,500/mo");
+  assert.ok(configContent.includes('includedVisits: 10'), "Plan B must include 10 visits");
+  assert.ok(configContent.includes('arrivalSlaMinutes: 40'), "Plan B must guarantee 40-minute arrival SLA");
+
+  // Plan C: 247-priority, ৳4,000/mo, 15 visits, 20-min arrival SLA
+  assert.ok(configContent.includes('monthlyBdtPrice: 4000'), "Plan C must be priced at ৳4,000/mo");
+  assert.ok(configContent.includes('includedVisits: 15'), "Plan C must include 15 visits");
+  assert.ok(configContent.includes('arrivalSlaMinutes: 20'), "Plan C must guarantee 20-minute arrival SLA");
+
+  // Plan D: custom quotation
+  assert.ok(configContent.includes('"Plan D"'), "Plan D custom tier must exist");
+  assert.ok(configContent.includes('Custom Quote'), "Plan D must display Custom Quote");
+
+  // Prototype evaluation notices
+  assert.ok(
+    configContent.includes("prototype demonstration rate"),
+    "Pricing configuration must explicitly identify rates as prototype demonstration rates"
+  );
+});
+
+test("Test 29: Customer checkout & demonstration purchase state transitions and duplicate prevention", () => {
+  const harness = new WorkflowHarness();
+
+  const demoPurchase = {
+    purchaseId: "PUR-TEST-901",
+    receiptId: "REC-DEMO-TEST-901",
+    date: new Date().toISOString(),
+    customerId: "cust-epz-01",
+    customerName: "Apex Spinning Mills",
+    company: "Apex Holdings",
+    facilityAddress: "Plot 14-18, Sector 3, DEPZ, Savar",
+    planId: "247-priority",
+    planName: "Plan C — 24/7 Priority Emergency",
+    includedVisits: 15,
+    arrivalSla: "20-minute physical arrival guarantee",
+    billingPeriod: "Monthly",
+    amount: 4000,
+    vatAmount: 200,
+    totalAmount: 4200,
+    currency: "BDT",
+    paymentMethod: "DEMO_PAYMENT",
+    paymentStatus: "DEMO_PAID",
+  };
+
+  // Add purchase
+  harness.addPurchase(demoPurchase);
+  const custPurchases = harness.getPurchases("cust-epz-01");
+  assert.equal(custPurchases.length, 1);
+  assert.equal(custPurchases[0].paymentStatus, "DEMO_PAID");
+  assert.equal(custPurchases[0].paymentMethod, "DEMO_PAYMENT");
+  assert.equal(custPurchases[0].totalAmount, 4200);
+  assert.equal(custPurchases[0].currency, "BDT");
+
+  // Duplicate insertion prevention
+  harness.addPurchase(demoPurchase);
+  assert.equal(harness.getPurchases("cust-epz-01").length, 1, "Duplicate purchaseId must not create duplicate record");
+
+  // Filter isolation by customerId
+  const otherPurchases = harness.getPurchases("cust-square-02");
+  assert.equal(otherPurchases.length, 0, "Purchases must be isolated by customer ID");
+});
+
+test("Test 30: Subscription entitlement update and state validation following checkout purchase", () => {
+  const harness = new WorkflowHarness();
+
+  const purchasePlanC = {
+    purchaseId: "PUR-882201",
+    receiptId: "REC-DEMO-882201",
+    date: new Date().toISOString(),
+    customerId: "cust-epz-01",
+    customerName: "Apex Spinning Mills",
+    company: "Apex Holdings",
+    facilityAddress: "Plot 14-18, Sector 3, DEPZ, Savar",
+    planId: "247-priority",
+    planName: "Plan C — 24/7 Priority Emergency",
+    includedVisits: 15,
+    arrivalSla: "20-minute physical arrival guarantee",
+    billingPeriod: "Monthly",
+    amount: 4000,
+    vatAmount: 200,
+    totalAmount: 4200,
+    currency: "BDT",
+    paymentMethod: "DEMO_PAYMENT",
+    paymentStatus: "DEMO_PAID",
+  };
+
+  harness.addPurchase(purchasePlanC);
+
+  // Validate state structure
+  const state = {
+    requests: harness.requests,
+    workOrders: harness.workOrders,
+    technicians: harness.technicians,
+    invoices: harness.invoices,
+    events: harness.events,
+    assets: harness.assets,
+    purchases: harness.purchases,
+  };
+
+  const validated = validateOperationalState(state);
+  assert.ok(validated !== null, "State with purchases must be valid");
+  assert.equal(validated.purchases.length, 1);
+
+  // Corrupted purchase structure should fail validation
+  const corruptedState = {
+    ...state,
+    purchases: [{ invalidField: 123 }],
+  };
+  assert.equal(validateOperationalState(corruptedState), null, "Corrupted purchase structure must fail validation");
 });

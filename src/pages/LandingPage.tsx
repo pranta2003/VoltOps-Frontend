@@ -2,7 +2,9 @@ import { useState, useEffect, FormEvent, FC } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, useScroll, useSpring, useReducedMotion } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { COVERAGE_PLANS } from "../config/coveragePricing";
 import {
   IconProps,
   ZapIcon,
@@ -247,6 +249,7 @@ const statusDotVariants = {
 export function LandingPage() {
   const navigate = useNavigate();
   const { resolved } = useTheme();
+  const { user } = useAuth();
   const isDark = resolved === "dark";
   const shouldReduceMotion = useReducedMotion();
 
@@ -411,7 +414,12 @@ export function LandingPage() {
       const el = document.getElementById("contact");
       if (el) el.scrollIntoView({ behavior: "smooth" });
     } else {
-      navigate(`/register?package=${plan}`);
+      sessionStorage.setItem("voltops_pending_plan", plan);
+      if (user && user.role === "CUSTOMER") {
+        navigate(`/checkout?plan=${plan}`);
+      } else {
+        navigate(`/register?package=${plan}`);
+      }
     }
   };
 
@@ -1488,8 +1496,11 @@ export function LandingPage() {
                 <p className="text-xs text-slate-600 dark:text-slate-400">Standard business operational window</p>
 
                 <div className="py-3 border-y border-[var(--border)]">
-                  <div className="text-base font-extrabold font-heading text-slate-900 dark:text-white">Pricing upon request</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">08:00 – 16:00 operational window</div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white">{COVERAGE_PLANS["8hr"].formattedPrice}</span>
+                    <span className="text-xs text-slate-500">{COVERAGE_PLANS["8hr"].billingUnit}</span>
+                  </div>
+                  <div className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 font-medium">Prototype Pricing • 08:00 – 17:00</div>
                 </div>
 
                 <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
@@ -1536,8 +1547,11 @@ export function LandingPage() {
                 <p className="text-xs text-slate-600 dark:text-slate-400">Round-the-clock facility coverage</p>
 
                 <div className="py-3 border-y border-[var(--border)]">
-                  <div className="text-base font-extrabold font-heading text-slate-900 dark:text-white">Pricing upon request</div>
-                  <div className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">★ 24 hours · 7 days a week</div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white">{COVERAGE_PLANS["247-standard"].formattedPrice}</span>
+                    <span className="text-xs text-slate-500">{COVERAGE_PLANS["247-standard"].billingUnit}</span>
+                  </div>
+                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">Prototype Pricing • 24 Hours / 7 Days</div>
                 </div>
 
                 <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
@@ -1589,8 +1603,11 @@ export function LandingPage() {
                 <p className="text-xs text-slate-600 dark:text-slate-400">Time-critical commercial complexes</p>
 
                 <div className="py-3 border-y border-[var(--border)]">
-                  <div className="text-base font-extrabold font-heading text-slate-900 dark:text-white">Pricing upon request</div>
-                  <div className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">24/7 · 2× faster arrival SLA</div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white">{COVERAGE_PLANS["247-priority"].formattedPrice}</span>
+                    <span className="text-xs text-slate-500">{COVERAGE_PLANS["247-priority"].billingUnit}</span>
+                  </div>
+                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">Prototype Pricing • 24/7 · 2× faster arrival SLA</div>
                 </div>
 
                 <div className="p-3 rounded-2xl border border-[#10b981]/40 bg-[#10b981]/10">
@@ -1638,8 +1655,10 @@ export function LandingPage() {
                 <p className="text-xs text-slate-600 dark:text-slate-400">Tailored enterprise shift schedules</p>
 
                 <div className="py-3 border-y border-[var(--border)]">
-                  <div className="text-base font-extrabold font-heading text-slate-900 dark:text-white">Negotiated Terms</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Bespoke shifts & SLA window</div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white">{COVERAGE_PLANS["custom"].formattedPrice}</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-0.5 font-medium">Enterprise Negotiated • Custom quote</div>
                 </div>
 
                 <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
@@ -1780,51 +1799,116 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Section: Role Workspaces (CONCISE 1-2 LINES EACH) ──────────── */}
-      <section data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface)]">
+      {/* ── Section: Industrial Impact & Operational Statistics ────────── */}
+      <section id="statistics" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface)]">
         <div className="max-w-6xl mx-auto px-5">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-40px" }}
             variants={sectionContainerVariants}
-            className="text-center max-w-xl mx-auto mb-12 space-y-2.5"
+            className="text-center max-w-xl mx-auto mb-14 space-y-2.5"
           >
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
-              Role Workspaces
+              Operational Commitments
             </span>
-            <h2 className="text-3xl font-extrabold font-heading text-[var(--text-primary)]">
-              Tailored tools for every stakeholder
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
+              Engineered for industrial{" "}
+              <span className="font-serif-italic font-normal">
+                reliability
+              </span>
             </h2>
+            <p className="text-sm text-slate-700 dark:text-slate-300">
+              Measurable service commitments and deterministic arrival targets across commercial facilities.
+            </p>
           </motion.div>
+
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-40px" }}
             variants={sectionContainerVariants}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            {ROLE_WORKSPACES.map(({ icon: Icon, title, desc, glow }) => (
-              <motion.div
-                key={title}
-                variants={cardItemVariants}
-                whileHover={{ y: -5 }}
-                transition={{ duration: 0.2 }}
-                className="flex flex-col"
-              >
-                <div
-                  className={`h-full p-6 rounded-[28px] border border-[var(--border)] glass-panel ${glow} shadow-[var(--shadow-sm)] flex flex-col justify-between`}
-                >
-                  <div>
-                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#10b981] dark:text-[#34d399] mb-3.5">
-                      <Icon size={19} />
-                    </div>
-                    <h3 className="font-bold font-card-title text-base text-[var(--text-primary)] mb-1.5">{title}</h3>
-                    <p className="text-xs leading-relaxed text-[var(--text-secondary)] font-normal">{desc}</p>
-                  </div>
+            {/* Metric 1: 7 Supported Service Trades */}
+            <motion.div
+              variants={cardItemVariants}
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.2 }}
+              className="p-6 rounded-[28px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)] hover:border-[#10b981]/50 transition-all text-center"
+            >
+              <div>
+                <div className="text-4xl sm:text-5xl font-extrabold font-heading text-slate-900 dark:text-white tracking-tight">
+                  7
                 </div>
-              </motion.div>
-            ))}
+                <h3 className="font-bold text-sm text-[var(--text-primary)] mt-2">
+                  Supported Service Trades
+                </h3>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)] mt-3 leading-relaxed pt-3 border-t border-[var(--border)]">
+                Electrical, HVAC, Plumbing, Power Gen, Network, CCTV & IT systems
+              </p>
+            </motion.div>
+
+            {/* Metric 2: 20 min Priority Arrival Target */}
+            <motion.div
+              variants={cardItemVariants}
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.2 }}
+              className="p-6 rounded-[28px] border-2 border-[#10b981] bg-emerald-500/5 glass-panel flex flex-col justify-between shadow-[0_0_24px_rgba(16,185,129,0.15)] hover:border-[#10b981] transition-all text-center"
+            >
+              <div>
+                <div className="text-4xl sm:text-5xl font-extrabold font-heading text-[#10b981] dark:text-[#34d399] tracking-tight">
+                  20<span className="text-xl sm:text-2xl font-bold font-sans ml-1">min</span>
+                </div>
+                <h3 className="font-bold text-sm text-[var(--text-primary)] mt-2">
+                  Priority Arrival Target
+                </h3>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)] mt-3 leading-relaxed pt-3 border-t border-[#10b981]/30">
+                Plan C rapid technician arrival physically at your facility door (2× faster)
+              </p>
+            </motion.div>
+
+            {/* Metric 3: 40 min Standard Arrival Target */}
+            <motion.div
+              variants={cardItemVariants}
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.2 }}
+              className="p-6 rounded-[28px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)] hover:border-[#10b981]/50 transition-all text-center"
+            >
+              <div>
+                <div className="text-4xl sm:text-5xl font-extrabold font-heading text-slate-900 dark:text-white tracking-tight">
+                  40<span className="text-xl sm:text-2xl font-bold font-sans ml-1">min</span>
+                </div>
+                <h3 className="font-bold text-sm text-[var(--text-primary)] mt-2">
+                  Standard Arrival Target
+                </h3>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)] mt-3 leading-relaxed pt-3 border-t border-[var(--border)]">
+                Plan B 24/7 round-the-clock physical technician arrival on site
+              </p>
+            </motion.div>
+
+            {/* Metric 4: 5–15 Included Visits */}
+            <motion.div
+              variants={cardItemVariants}
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.2 }}
+              className="p-6 rounded-[28px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)] hover:border-[#10b981]/50 transition-all text-center"
+            >
+              <div>
+                <div className="text-4xl sm:text-5xl font-extrabold font-heading text-slate-900 dark:text-white tracking-tight">
+                  5–15
+                </div>
+                <h3 className="font-bold text-sm text-[var(--text-primary)] mt-2">
+                  Included Visits per Cycle
+                </h3>
+              </div>
+              <p className="text-xs text-[var(--text-secondary)] mt-3 leading-relaxed pt-3 border-t border-[var(--border)]">
+                Predictable allowance across Plan A (5), Plan B (10), and Plan C (15)
+              </p>
+            </motion.div>
           </motion.div>
         </div>
       </section>
@@ -2015,10 +2099,10 @@ export function LandingPage() {
           aria-hidden="true"
         />
 
-        <div className="max-w-6xl mx-auto px-5 pt-12 pb-8 sm:pt-14 sm:pb-10">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 pb-10 border-b border-white/10 items-start">
-            {/* Brand Area (md:col-span-6 lg:col-span-7) */}
-            <div className="md:col-span-6 lg:col-span-7 space-y-3.5 text-left">
+        <div className="max-w-6xl mx-auto px-5 pt-14 pb-8 sm:pt-16 sm:pb-10 space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-10 pb-10 border-b border-white/10 items-start">
+            {/* Brand Area (md:col-span-5 lg:col-span-4) */}
+            <div className="md:col-span-5 lg:col-span-4 space-y-3.5 text-left">
               <a href="#" className="flex items-center gap-2.5 group w-fit focus-visible:outline-none">
                 <LogoMark size={28} />
                 <span className="font-heading font-extrabold text-[18px] tracking-tight text-white group-hover:text-emerald-400 transition-colors">
@@ -2029,7 +2113,7 @@ export function LandingPage() {
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
               </a>
-              <p className="text-xs sm:text-sm text-slate-400 max-w-md leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
                 Commercial field-service coordination platform. Deterministic 20–40 minute physical arrival SLAs and verified multi-trade dispatching for mission-critical facilities.
               </p>
               <div className="flex items-center gap-2 pt-1 text-[11px] font-semibold text-emerald-400">
@@ -2038,8 +2122,9 @@ export function LandingPage() {
               </div>
             </div>
 
-            {/* Quick Navigation (md:col-span-6 lg:col-span-5) */}
-            <div className="md:col-span-6 lg:col-span-5 flex flex-col sm:flex-row sm:justify-end gap-8 sm:gap-14 text-left">
+            {/* Quick Navigation: 3 Distinct Columns (md:col-span-7 lg:col-span-8) */}
+            <div className="md:col-span-7 lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 text-left">
+              {/* Column 1: Platform */}
               <div className="space-y-3">
                 <div className="text-xs font-bold uppercase tracking-wider text-white">
                   Platform
@@ -2060,42 +2145,113 @@ export function LandingPage() {
                       How It Works
                     </a>
                   </li>
-                </ul>
-              </div>
-
-              <div className="space-y-3">
-                <div className="text-xs font-bold uppercase tracking-wider text-white">
-                  Solutions
-                </div>
-                <ul className="space-y-2 text-xs">
                   <li>
                     <a href="#packages" className="hover:text-emerald-400 transition-colors">
                       Coverage Plans
                     </a>
                   </li>
+                </ul>
+              </div>
+
+              {/* Column 2: Support */}
+              <div className="space-y-3">
+                <div className="text-xs font-bold uppercase tracking-wider text-white">
+                  Support
+                </div>
+                <ul className="space-y-2 text-xs">
                   <li>
-                    <a href="#hubs" className="hover:text-emerald-400 transition-colors">
-                      Coverage Hubs
+                    <a href="#contact" className="hover:text-emerald-400 transition-colors">
+                      Dispatch Inquiries
                     </a>
                   </li>
                   <li>
-                    <a href="#contact" className="hover:text-emerald-400 transition-colors">
-                      Contact & Inquiries
+                    <a href="#hubs" className="hover:text-emerald-400 transition-colors">
+                      Regional Hubs
                     </a>
+                  </li>
+                  <li>
+                    <a href="#statistics" className="hover:text-emerald-400 transition-colors">
+                      SLA Commitments
+                    </a>
+                  </li>
+                  <li>
+                    <span className="text-emerald-400/80 cursor-default">
+                      24/7 Hotline Support
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Column 3: Legal & Standards */}
+              <div className="space-y-3">
+                <div className="text-xs font-bold uppercase tracking-wider text-white">
+                  Governance
+                </div>
+                <ul className="space-y-2 text-xs">
+                  <li>
+                    <span className="text-slate-400 hover:text-slate-200 transition-colors cursor-default">
+                      Service Level Terms
+                    </span>
+                  </li>
+                  <li>
+                    <span className="text-slate-400 hover:text-slate-200 transition-colors cursor-default">
+                      Commercial Privacy
+                    </span>
+                  </li>
+                  <li>
+                    <span className="text-slate-400 hover:text-slate-200 transition-colors cursor-default">
+                      Safety & Compliance
+                    </span>
+                  </li>
+                  <li>
+                    <span className="text-slate-400 hover:text-slate-200 transition-colors cursor-default">
+                      Audit Trail Standards
+                    </span>
                   </li>
                 </ul>
               </div>
             </div>
           </div>
 
+          {/* Planned Payment Methods Architecture Strip */}
+          <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+            <div className="space-y-0.5 text-center sm:text-left">
+              <span className="text-xs font-bold text-slate-200 block">
+                Payment Gateway Integration Architecture
+              </span>
+              <p className="text-[11px] text-slate-400">
+                Prepared for automated corporate billing settlements and rapid subscription processing.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5 flex-wrap justify-center">
+              <span className="px-3 py-1 rounded-lg border border-white/15 bg-white/5 font-mono text-[11px] font-bold text-slate-300">
+                Stripe Secure Checkout
+              </span>
+              <span className="px-3 py-1 rounded-lg border border-white/15 bg-white/5 font-mono text-[11px] font-bold text-slate-300">
+                SSLCommerz Gateway
+              </span>
+              <span className="text-[9px] uppercase tracking-wider font-mono font-bold text-amber-400/90 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
+                Prototype Architecture
+              </span>
+            </div>
+          </div>
+
           {/* Bottom Row */}
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left text-xs text-slate-500">
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left text-xs text-slate-500">
             <div>
               © {new Date().getFullYear()} VoltOps. All rights reserved. Commercial facility coordination.
             </div>
-            <div className="flex items-center gap-2 text-slate-400 font-medium">
+            <div className="flex items-center gap-1.5 text-slate-400 font-medium">
               <span>Developed by</span>
-              <span className="text-emerald-400 font-semibold">Team Pranta</span>
+              <a
+                href="https://github.com/pranta2003/VoltOps-Frontend"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-400 font-semibold hover:text-emerald-300 underline underline-offset-4 decoration-emerald-500/40 hover:decoration-emerald-300 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 rounded"
+              >
+                Team Pranta
+              </a>
             </div>
           </div>
         </div>
