@@ -970,34 +970,34 @@ export function LandingPage() {
               className="flex flex-col justify-between text-left p-6 sm:p-7 rounded-[28px] glass-panel glow-card-emerald order-2 md:order-2 lg:order-1 md:col-span-1 lg:col-span-3"
             >
               <div className="space-y-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-heading">
                   Service Coverage
                 </span>
                 <div className="space-y-1.5">
-                  <h4 className="text-xl font-bold font-heading text-slate-900 dark:text-white leading-snug">
+                  <h4 className="text-xl sm:text-[22px] font-bold font-heading text-slate-900 dark:text-white tracking-tight leading-snug">
                     7 trades. One partner.
                   </h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                     One service partner for your facility.
                   </p>
                 </div>
 
-                <div className="space-y-2.5 pt-2">
-                  <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200">
+                <div className="space-y-2 pt-2">
+                  <div className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center gap-2.5 text-xs font-medium font-heading text-slate-800 dark:text-slate-200">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" />
-                    <span>Electrical & Power Systems</span>
+                    <span className="tracking-tight">Electrical & Power Systems</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200">
+                  <div className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center gap-2.5 text-xs font-medium font-heading text-slate-800 dark:text-slate-200">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" />
-                    <span>HVAC & Industrial Cooling</span>
+                    <span className="tracking-tight">HVAC & Industrial Cooling</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200">
+                  <div className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center gap-2.5 text-xs font-medium font-heading text-slate-800 dark:text-slate-200">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" />
-                    <span>Plumbing & Piping Networks</span>
+                    <span className="tracking-tight">Plumbing & Piping Networks</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200">
+                  <div className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center gap-2.5 text-xs font-medium font-heading text-slate-800 dark:text-slate-200">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" />
-                    <span>Security, IT & Infrastructure</span>
+                    <span className="tracking-tight">Security, IT & Infrastructure</span>
                   </div>
                 </div>
               </div>
@@ -1005,7 +1005,7 @@ export function LandingPage() {
               <div className="border-t border-[var(--border)] pt-4 mt-6">
                 <a
                   href="#services"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#10b981] dark:text-[#34d399] hover:underline"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold font-heading text-[#10b981] dark:text-[#34d399] hover:underline"
                 >
                   <span>View all 7 trades</span>
                   <ArrowRightIcon size={12} />
@@ -1126,32 +1126,32 @@ export function LandingPage() {
               className="flex flex-col justify-between text-left p-6 sm:p-7 rounded-[28px] glass-panel glow-card-amber order-3 md:order-3 lg:order-3 md:col-span-1 lg:col-span-3"
             >
               <div className="space-y-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 font-heading">
                   Response Times
                 </span>
                 <div className="space-y-1.5">
-                  <h4 className="text-xl font-bold font-heading text-slate-900 dark:text-white leading-snug">
+                  <h4 className="text-xl sm:text-[22px] font-bold font-heading text-slate-900 dark:text-white tracking-tight leading-snug">
                     Coverage response times
                   </h4>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                     Arrival time means technician arrival, not repair completion.
                   </p>
                 </div>
 
-                <div className="space-y-2 pt-1">
-                  <div className="p-3 rounded-xl border border-emerald-500/25 bg-emerald-500/5 dark:bg-emerald-500/10 flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-900 dark:text-white">Plan C — Priority</span>
-                    <span className="font-extrabold text-[#10b981] dark:text-[#34d399]">20-minute arrival</span>
+                <div className="space-y-2 pt-2">
+                  <div className="py-2.5 px-3 rounded-xl border border-emerald-500/25 bg-emerald-500/5 dark:bg-emerald-500/10 flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-900 dark:text-white font-heading tracking-tight">Plan C — Priority</span>
+                    <span className="font-bold text-[#10b981] dark:text-[#34d399] font-heading tabular-nums">20-minute arrival</span>
                   </div>
 
-                  <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-900 dark:text-white">Plan B — Standard</span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200">40-minute arrival</span>
+                  <div className="py-2.5 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-900 dark:text-white font-heading tracking-tight">Plan B — Standard</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 font-heading tabular-nums">40-minute arrival</span>
                   </div>
 
-                  <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-900 dark:text-white">Plan A — Daily</span>
-                    <span className="font-medium text-slate-500 dark:text-slate-400">8h daily coverage</span>
+                  <div className="py-2.5 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-900 dark:text-white font-heading tracking-tight">Plan A — Daily</span>
+                    <span className="font-medium text-slate-600 dark:text-slate-400 font-heading tabular-nums">8h daily coverage</span>
                   </div>
                 </div>
               </div>
@@ -1159,7 +1159,7 @@ export function LandingPage() {
               <div className="border-t border-[var(--border)] pt-4 mt-6">
                 <a
                   href="#packages"
-                  className="inline-flex items-center justify-between w-full text-xs font-bold text-[#10b981] dark:text-[#34d399] hover:underline"
+                  className="inline-flex items-center justify-between w-full text-xs font-bold font-heading text-[#10b981] dark:text-[#34d399] hover:underline"
                 >
                   <span>Compare Plans</span>
                   <ArrowRightIcon size={12} />

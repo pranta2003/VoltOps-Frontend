@@ -1529,3 +1529,28 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build in 8.10s (`npm run build`).
+
+---
+
+## Milestone 4.10 — Hero Side-Card Typography Polish, Full Regression Audit & Main Integration
+
+- **Date**: 15 November 2026
+- **Branch**: `pranta` (Merged to `main`)
+- **Scope & Key Deliverables**:
+  1. **Hero Side-Card Typography Harmonization (`src/pages/LandingPage.tsx`)**:
+     - Harmonized font family across all three hero cards using canonical `Plus Jakarta Sans` (`font-heading`) for titles, subtitles, item labels, plan names, and response time metrics.
+     - Symmetrical headings: Both side cards calibrated to `text-xl sm:text-[22px] font-bold font-heading tracking-tight leading-snug`.
+     - Consistent subtitles: Both side cards use `text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal`.
+     - Structured trade rows in Left Card: High-density `py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]` rows with `text-xs font-medium font-heading tracking-tight text-slate-800 dark:text-slate-200`.
+     - Structured response rows in Right Card: Unified plan names (`font-semibold text-xs tracking-tight`) and response times (`font-bold/semibold text-xs tabular-nums`).
+     - Perfect height balance: Left (452px), Center (452px), and Right (452px) on desktop viewports.
+  2. **Comprehensive Frontend Regression & Multi-Portal Verification**:
+     - Customer Portal: Request submission, active order tracking, SLA deadline counters, facility equipment breakdown modal, itemized billing, receipt modal, and feedback rating.
+     - Dispatcher Portal: 4-stage Kanban lifecycle, manual/smart matching engine, emergency triage alerts, and technician capacity roster.
+     - Technician Portal: Daily job roster, arrival/start/complete status stepper, multi-party completion report, and skill passport.
+     - Admin Portal: User management, technician verification ledger, live telemetry refresh, and compliance audit trail.
+     - Responsiveness & Zero Overflow: Verified desktop (1280px), tablet (768px), and mobile (390px) viewports with zero horizontal overflow.
+  3. **Quality Gates**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 13.43s (`npm run build`).
