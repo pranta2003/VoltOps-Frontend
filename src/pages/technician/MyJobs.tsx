@@ -275,7 +275,7 @@ export function MyJobs() {
 
   return (
     <Layout
-      title="Field Service Roster"
+      title="My Jobs"
     >
       <div className="space-y-4">
         {/* Action success alert */}

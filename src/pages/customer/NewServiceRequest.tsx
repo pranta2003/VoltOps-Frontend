@@ -126,8 +126,8 @@ export function NewServiceRequest() {
 
   return (
     <Layout
-      title="Submit Service Request"
-      subtitle="Log a commercial equipment breakdown across our 7 certified trades"
+      title="New Service Request"
+      subtitle="Log a facility service request"
     >
       <div className="max-w-4xl mx-auto">
         {submittedSuccess ? (

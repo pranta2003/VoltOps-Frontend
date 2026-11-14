@@ -57,14 +57,6 @@ export function TechnicianDashboard() {
   const completionModalHeadingId = useId();
   const inspectModalHeadingId = useId();
 
-  // Time-based greeting helper
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
-  };
-
   function loadTechJobs() {
     setIsLoading(true);
     technicianService
@@ -229,8 +221,8 @@ export function TechnicianDashboard() {
 
   return (
     <Layout
-      title="Field Workspace"
-      subtitle={`${getGreeting()}, ${user?.name || "Kamrul Islam"} · Active Shift`}
+      title="My Jobs"
+      subtitle={`${user?.name || "Kamrul Islam"} · Active Shift`}
       action={
         <Link
           to="/technician/jobs"

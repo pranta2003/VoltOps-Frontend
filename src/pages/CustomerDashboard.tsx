@@ -385,7 +385,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
   return (
     <Layout
-      title="Commercial Facility Portal"
+      title="Dashboard"
       subtitle={`${user?.company || "Apex Spinning & Weaving Mills"} · Savar Facility`}
       action={
         <div className="flex items-center gap-2">

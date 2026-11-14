@@ -101,8 +101,8 @@ export function AdminDashboard() {
 
   return (
     <Layout
-      title="Admin Console"
-      subtitle="EPZ Industrial Core Hub · System Governance"
+      title="Overview"
+      subtitle="EPZ Industrial Core Hub"
       action={
         <div className="flex items-center gap-2">
           <button

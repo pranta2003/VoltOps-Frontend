@@ -1495,3 +1495,37 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build in 7.66s (`npm run build`).
+
+---
+
+## Milestone 4.9 — Radical Simplification: Landing Page Hero Copy & Streamlined Portal Header Titles
+
+- **Date**: 15 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Scope & Key Deliverables**:
+  1. **Landing Page Hero Copy Radical Simplification (`src/pages/LandingPage.tsx`)**:
+     - **Main Headline**: Clean, concise, punchy headline — `One partner. Every facility repair.`
+     - **Supporting Text**: Single crisp sentence — `"Commercial maintenance across seven essential trades."` (Zero marketing fluff).
+     - **Left Card (`SERVICE COVERAGE`)**: Heading `7 trades. One partner.`, subtitle `"One service partner for your facility."`, clean list of core trade categories, direct link to `#services`.
+     - **Centre Card (`EXPLORE SERVICES`)**: Title `Explore facility services`, subtitle `"Choose a trade to see what's covered."`, trade selector with single short description and capability tags. Removed duplicate certified technician badges and arrival guarantees. Bottom link: `"View all services →"`.
+     - **Right Card (`RESPONSE TIMES`)**: Title `Coverage response times`, single-line plan targets:
+       * Plan C — Priority: `20-minute arrival`
+       * Plan B — Standard: `40-minute arrival`
+       * Plan A — Daily: `8h daily coverage`
+       * SLA Clarification: `"Arrival time means technician arrival, not repair completion."`
+       * Link: `"Compare Plans"` (`#packages`).
+  2. **Streamlined Functional Portal Headers Across All 4 Portals**:
+     - **Customer Dashboard** (`CustomerDashboard.tsx`): Title changed to **"Dashboard"** (was "Commercial Facility Portal"); facility context preserved (`Apex Spinning & Weaving Mills · Savar Facility`).
+     - **Dispatcher Dashboard** (`DispatcherDashboard.tsx`): Title changed to **"Dashboard"** (was "Dispatcher Console"); hub context preserved (`EPZ Industrial Core Hub`).
+     - **Technician Dashboard** (`TechnicianDashboard.tsx`): Title changed to **"My Jobs"** (was "Field Workspace"); technician shift context preserved (`Kamrul Islam · Active Shift`).
+     - **Admin Dashboard** (`AdminDashboard.tsx`): Title changed to **"Overview"** (was "Admin Console"); hub context preserved (`EPZ Industrial Core Hub`).
+     - **Customer Invoices** (`CustomerInvoices.tsx`): Title changed to **"Invoices"**; subtitle trimmed to `"Work order billing and statements"`.
+     - **New Service Request** (`NewServiceRequest.tsx`): Title changed to **"New Service Request"**; subtitle trimmed to `"Log a facility service request"`.
+     - **Technician Roster** (`MyJobs.tsx`): Title changed to **"My Jobs"**.
+  3. **Visual Quality & Responsive Verification**:
+     - Verified desktop, tablet, and mobile layouts in both light and dark modes.
+     - Captured and archived screenshots: `hero-simplified.png`, `header-customer-dashboard.png`, `header-dispatcher-dashboard.png`, `header-technician-dashboard.png`, `header-admin-overview.png`.
+  4. **Quality Gates**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.10s (`npm run build`).

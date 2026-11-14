@@ -71,8 +71,8 @@ export function CustomerInvoices() {
 
   return (
     <Layout
-      title="Invoices & Commercial Billing"
-      subtitle="Itemized work order billing and payment statements"
+      title="Invoices"
+      subtitle="Work order billing and statements"
     >
       <div className="space-y-6 max-w-6xl mx-auto">
         {error && (
