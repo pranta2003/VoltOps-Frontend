@@ -1555,7 +1555,7 @@ export function LandingPage() {
                 </div>
 
                 <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
-                  {["5 included visits / cycle", "Business Hours (08:00 - 16:00)", "Scheduled daytime repairs", "All 7 trades covered"].map((b) => (
+                  {["15 included visits / cycle", "Business Hours (08:00 - 16:00)", "Scheduled daytime repairs", "All 7 trades covered"].map((b) => (
                     <li key={b} className="flex items-center gap-2">
                       <CheckIcon className="text-emerald-500" />{b}
                     </li>
@@ -1606,7 +1606,7 @@ export function LandingPage() {
                 </div>
 
                 <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
-                  {["10 included visits / cycle", "Round-the-clock coverage", "40-min physical arrival SLA", "Digital repair logs"].map((b) => (
+                  {["25 included visits / cycle", "Round-the-clock coverage", "40-min physical arrival SLA", "Digital repair logs"].map((b) => (
                     <li key={b} className="flex items-center gap-2">
                       <CheckIcon className="text-emerald-500" />{b}
                     </li>
@@ -1662,7 +1662,7 @@ export function LandingPage() {
                 </div>
 
                 <ul className="space-y-1.5 text-xs">
-                  {["15 included visits / cycle", "Critical commercial coverage", "20-min rapid arrival (2x faster)", "Top emergency priority"].map((b, i) => (
+                  {["30 included visits / cycle", "Critical commercial coverage", "20-min rapid arrival (2x faster)", "Top emergency priority"].map((b, i) => (
                     <li key={b} className={`flex items-center gap-2 ${i === 0 || i === 1 ? "font-bold text-slate-900 dark:text-white" : "text-slate-800 dark:text-slate-200"}`}>
                       <CheckIcon className="text-[#10b981]" />{b}
                     </li>

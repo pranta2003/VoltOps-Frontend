@@ -21,6 +21,7 @@ import {
 } from "../services/subscriptionService";
 import { formatBdt } from "../config/coveragePricing";
 import { DemonstrationReceiptModal } from "../components/DemonstrationReceiptModal";
+import { notificationService } from "../services/notificationService";
 import {
   ClockIcon,
   AlertTriangleIcon,
@@ -32,6 +33,7 @@ import {
   ShieldCheckIcon,
   WrenchIcon,
   EyeIcon,
+  StarIcon,
 } from "../components/Icons";
 
 interface CustomerViewRequest {
@@ -100,6 +102,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const [showQuotationModal, setShowQuotationModal] = useState(false);
   const [quotationRequested, setQuotationRequested] = useState(false);
 
+  // Customer Feedback state
+  const [feedbackRating, setFeedbackRating] = useState<number>(5);
+  const [feedbackComment, setFeedbackComment] = useState<string>("");
+  const [dismissedFeedbackWos, setDismissedFeedbackWos] = useState<string[]>([]);
+
   function loadCustomerData() {
     setIsLoading(true);
     setError(null);
@@ -151,7 +158,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 arrivalSlaWindow = "Work done · Awaiting your confirmation";
                 break;
               case "COMPLETED":
-                arrivalSlaWindow = "Completed & signed off";
+                if (linkedOrder.dispatcherApproved) {
+                  arrivalSlaWindow = "OK — Work completed and dispatcher approved";
+                } else {
+                  arrivalSlaWindow = "Completed & signed off";
+                }
                 break;
               case "CANCELLED":
                 arrivalSlaWindow = "Cancelled";
@@ -380,7 +391,17 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             <div className="mt-2 text-lg font-bold font-heading text-[#10b981] truncate">
               {subscription.planName}
             </div>
-            <div className="mt-1 text-xs text-[var(--text-muted)]">40-minute arrival SLA guaranteed</div>
+            <div className="mt-1 text-xs text-[var(--text-muted)] truncate">
+              {subscription.planId === "247-priority"
+                ? "20-minute arrival SLA guaranteed"
+                : subscription.planId === "247-standard"
+                ? "40-minute arrival SLA guaranteed"
+                : subscription.planId === "8hr"
+                ? "8-Hour daily window (08:00 - 16:00)"
+                : subscription.hasActiveSubscription
+                ? "Negotiated operational terms"
+                : "Active subscription required"}
+            </div>
           </div>
 
           {/* Card 4: Service Credits & Allowance */}
@@ -547,6 +568,52 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </div>
           ))}
 
+        {/* ── Completed & Dispatcher Approved Feedback Prompts ────────────── */}
+        {requests
+          .filter(
+            (r) =>
+              r.displayStatus === "COMPLETED" &&
+              r.workOrderId &&
+              !notificationService.hasProvidedFeedback(r.workOrderId) &&
+              !dismissedFeedbackWos.includes(r.workOrderId)
+          )
+          .map((cReq) => (
+            <div
+              key={`feedback-prompt-${cReq.id}`}
+              className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fade-in"
+            >
+              <div className="flex items-start gap-2.5">
+                <StarIcon size={18} className="text-amber-500 shrink-0 mt-0.5" fill="currentColor" />
+                <div>
+                  <strong className="font-bold text-[var(--text-primary)]">Work Completed & Dispatcher Approved:</strong>{" "}
+                  <span className="text-[var(--text-muted)]">
+                    Service for Request <span className="font-mono font-bold text-[var(--text-primary)]">{cReq.id}</span> ({cReq.asset}) is complete. How was your experience with technician {cReq.assignedTech || "on site"}?
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (cReq.workOrderId) {
+                      setDismissedFeedbackWos((prev) => [...prev, cReq.workOrderId!]);
+                    }
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl font-medium text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
+                >
+                  Dismiss
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRequest(cReq)}
+                  className="px-4 py-1.5 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white transition-all shadow-sm"
+                >
+                  Rate Service (★)
+                </button>
+              </div>
+            </div>
+          ))}
+
         {/* ── Subscribed Plan & Demonstration Purchase Receipts ─────────── */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-3.5">
@@ -555,20 +622,32 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 <h2 className="font-heading font-bold text-base text-[var(--text-primary)]">
                   Active Facility Coverage & Purchases
                 </h2>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                  {subscription.planName}
-                </span>
+                {subscription.hasActiveSubscription ? (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                    {subscription.planName}
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                    No Active Subscription
+                  </span>
+                )}
               </div>
               <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                Physical arrival commitment: <strong>{subscription.planId === "247-priority" ? "20-minute rapid arrival SLA" : subscription.planId === "247-standard" ? "40-minute arrival SLA" : "8-Hour daily window"}</strong> • {subscription.remainingVisits} of {subscription.includedVisits} service visits available
+                {subscription.hasActiveSubscription ? (
+                  <>
+                    Physical arrival commitment: <strong>{subscription.planId === "247-priority" ? "20-minute rapid arrival SLA" : subscription.planId === "247-standard" ? "40-minute arrival SLA" : subscription.planId === "8hr" ? "8-Hour daily window" : "Negotiated terms"}</strong> • {subscription.remainingVisits !== null ? `${subscription.remainingVisits} of ${subscription.includedVisits} service visits available` : "Negotiated allowance"}
+                  </>
+                ) : (
+                  <span>An active subscription plan is required to submit on-site dispatch requests and receive guaranteed arrival SLAs.</span>
+                )}
               </p>
             </div>
 
             <Link
-              to={`/checkout?plan=${subscription.planId}`}
+              to={subscription.hasActiveSubscription && subscription.planId ? `/checkout?plan=${subscription.planId}` : "/#packages"}
               className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[var(--bg-surface-2)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text-primary)] transition-all flex items-center gap-1.5 self-start sm:self-auto"
             >
-              <span>Change Plan / Checkout</span>
+              <span>{subscription.hasActiveSubscription ? "Change Plan / Checkout" : "Subscribe to a Plan"}</span>
               <ArrowRightIcon size={12} />
             </Link>
           </div>
@@ -1066,19 +1145,154 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   </div>
                 )}
 
-                {selectedRequest.displayStatus === "COMPLETED" &&
-                  selectedRequest.completionReport &&
-                  selectedRequest.completionReport.confirmedByCustomer && (
-                  <div className="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 space-y-1.5">
-                    <div className="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-300">
-                      <CheckCircleIcon size={14} className="text-emerald-600 dark:text-emerald-400" />
-                      <span>Completion Confirmed & Signed Off</span>
+                {selectedRequest.displayStatus === "COMPLETED" && (
+                  <div className="p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                      <div className="flex items-center gap-2">
+                        <CheckCircleIcon size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <span className="font-bold text-sm text-emerald-800 dark:text-emerald-300">
+                          OK — Work completed and dispatcher approved
+                        </span>
+                      </div>
+                      {selectedRequest.completionReport?.dispatcherApprovedAt && (
+                        <span className="text-[10px] text-emerald-700/80 dark:text-emerald-400 font-mono">
+                          Approved: {new Date(selectedRequest.completionReport.dispatcherApprovedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-xs text-[var(--text-muted)]">{selectedRequest.completionReport.notes}</p>
-                    {selectedRequest.completionReport.materialsUsed && (
-                      <p className="text-[11px] text-[var(--text-muted)]">
-                        Materials: {selectedRequest.completionReport.materialsUsed}
-                      </p>
+
+                    {selectedRequest.completionReport && (
+                      <div className="p-3.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs space-y-2">
+                        <div>
+                          <span className="font-semibold text-[var(--text-primary)]">Work Performed: </span>
+                          <span className="text-[var(--text-muted)]">
+                            {selectedRequest.completionReport.workPerformed || selectedRequest.completionReport.notes}
+                          </span>
+                        </div>
+                        {selectedRequest.completionReport.diagnosis && (
+                          <div>
+                            <span className="font-semibold text-[var(--text-primary)]">Diagnosis & Root Cause: </span>
+                            <span className="text-[var(--text-muted)]">{selectedRequest.completionReport.diagnosis}</span>
+                          </div>
+                        )}
+                        {selectedRequest.completionReport.materialsUsed && (
+                          <div>
+                            <span className="font-semibold text-[var(--text-primary)]">Materials / Components: </span>
+                            <span className="text-[var(--text-muted)]">{selectedRequest.completionReport.materialsUsed}</span>
+                          </div>
+                        )}
+                        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-[var(--text-muted)] border-t border-[var(--border)]">
+                          <span>Technician: <strong className="text-[var(--text-primary)]">{selectedRequest.completionReport.technicianName}</strong></span>
+                          <span>Reviewer: <strong className="text-[var(--text-primary)]">{selectedRequest.completionReport.dispatcherApprovedBy || "Tania Akter (Senior Dispatcher)"}</strong></span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Customer Feedback Experience */}
+                    {selectedRequest.workOrderId && (
+                      <div className="mt-2 p-3.5 rounded-xl bg-[var(--bg-surface)] border border-emerald-500/20 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-[var(--text-primary)]">Customer Feedback & Rating</span>
+                          {notificationService.hasProvidedFeedback(selectedRequest.workOrderId) ? (
+                            <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                              Feedback Submitted
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-[var(--text-muted)]">Rate technician performance</span>
+                          )}
+                        </div>
+
+                        {notificationService.hasProvidedFeedback(selectedRequest.workOrderId) ? (
+                          <div className="text-xs space-y-1.5 pt-1">
+                            {(() => {
+                              const fb = notificationService.getFeedback(selectedRequest.workOrderId!);
+                              return fb ? (
+                                <>
+                                  <div className="flex items-center gap-1">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                      <StarIcon
+                                        key={star}
+                                        size={14}
+                                        fill={star <= fb.rating ? "currentColor" : "none"}
+                                        className={star <= fb.rating ? "text-amber-400" : "text-gray-300 dark:text-gray-600"}
+                                      />
+                                    ))}
+                                    <span className="ml-1.5 text-[11px] font-bold text-[var(--text-primary)]">{fb.rating} / 5</span>
+                                  </div>
+                                  {fb.comment && (
+                                    <p className="text-[11px] text-[var(--text-muted)] italic">
+                                      "{fb.comment}"
+                                    </p>
+                                  )}
+                                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                                    Thank you! Your feedback helps us maintain enterprise service standards.
+                                  </div>
+                                </>
+                              ) : null;
+                            })()}
+                          </div>
+                        ) : (
+                          <div className="space-y-2.5">
+                            <div className="flex items-center gap-1.5">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  onClick={() => setFeedbackRating(star)}
+                                  className="p-1 hover:scale-110 transition-transform"
+                                  aria-label={`Rate ${star} star`}
+                                >
+                                  <StarIcon
+                                    size={18}
+                                    fill={star <= feedbackRating ? "currentColor" : "none"}
+                                    className={star <= feedbackRating ? "text-amber-400" : "text-gray-300 dark:text-gray-600"}
+                                  />
+                                </button>
+                              ))}
+                              <span className="text-[11px] text-[var(--text-muted)] ml-2 font-medium">
+                                {feedbackRating === 5
+                                  ? "Exceptional (5★)"
+                                  : feedbackRating === 4
+                                  ? "Very Good (4★)"
+                                  : feedbackRating === 3
+                                  ? "Satisfactory (3★)"
+                                  : feedbackRating === 2
+                                  ? "Needs Improvement (2★)"
+                                  : "Poor (1★)"}
+                              </span>
+                            </div>
+                            <textarea
+                              value={feedbackComment}
+                              onChange={(e) => setFeedbackComment(e.target.value)}
+                              placeholder="Optional feedback: punctuality, diagnostic accuracy, electrical safety..."
+                              rows={2}
+                              className="w-full text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[#10b981]"
+                            />
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (selectedRequest.workOrderId) {
+                                    notificationService.submitFeedback({
+                                      workOrderId: selectedRequest.workOrderId,
+                                      rating: feedbackRating,
+                                      comment: feedbackComment.trim() || undefined,
+                                      customerName: user?.name || "Apex Spinning & Weaving Mills",
+                                      timestamp: new Date().toISOString(),
+                                    });
+                                    setFeedbackRating(5);
+                                    setFeedbackComment("");
+                                    loadCustomerData();
+                                  }
+                                }}
+                                className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
+                              >
+                                Submit Feedback
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}

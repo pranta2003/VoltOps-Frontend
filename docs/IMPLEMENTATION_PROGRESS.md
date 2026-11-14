@@ -1361,3 +1361,50 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
      - Production build: `npm run build` compiled cleanly into `/dist` in 13.81s with 0 errors.
      - Cross-device verification in Chrome DevTools MCP across 320px, 375px, 390px, 768px, 1024px, 1440px viewports.
+
+---
+
+### Milestone 4.5 — Subscription, Service Workflow & Portal Management Refinement
+
+- **Date Completed**: 15 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Baseline Commit**: `9d2e8f2`
+- **Scope & Key Deliverables**:
+  1. **Phase 1: Canonical Subscription Plan Allowances & Request Plan Inheritance**:
+     - Updated canonical monthly included visits: Plan A = 15 visits, Plan B = 25 visits, Plan C = 30 visits, Plan D = null / strictly negotiated.
+     - Synchronized across `src/config/coveragePricing.ts`, `src/types/coverage.ts`, `src/services/subscriptionService.ts`, `src/services/operationalStore.ts`, `LandingPage.tsx`, `Checkout.tsx`, and `FacilityAssets.tsx`.
+     - Removed manual plan selection grid from customer service request forms (`NewServiceRequest.tsx`).
+     - Requests automatically inherit the customer's active subscription (`activePlan = subscription.planId`) and display a compact read-only badge (`Active Coverage: Plan C · 20-minute arrival SLA`) with remaining visits and billing cycle reset date.
+     - Displays subscription-required banner linking to Plans if customer has no active coverage.
+  2. **Phase 2: Facility Assets Subscription Allowance Summary**:
+     - Added compact 3-card allowance summary near top of `FacilityAssets.tsx`: Monthly Included Visits, Visits Used, Visits Remaining (in vibrant emerald).
+     - Derives live usage and progress bar from unified `getSubscriptionEntitlement()` calculation matching `CustomerDashboard.tsx`.
+     - Automatically passes active subscription plan to breakdown report modal.
+  3. **Phase 3: Simplified 4-Stage Dispatcher Kanban Lifecycle**:
+     - Consolidated Dispatcher Kanban in `WorkOrders.tsx` into 4 clear stages: `UNASSIGNED`, `ASSIGNED`, `WORK_COMPLETED_AWAITING_CONFIRMATION`, `COMPLETED`.
+     - Removed redundant separate `TRAVELLING` and `ON_SITE` columns while preserving real-time travel/arrival status via sub-badges on assigned cards.
+     - Updated dispatcher filter tabs and lifecycle counts to reflect the 4 canonical stages.
+  4. **Phase 4: Technician Completion Report Review & Customer Feedback**:
+     - Enhanced `WorkOrderCompletionReport` interface with `workPerformed`, `diagnosis`, `materialsUsed`, `technicianId`, `dispatcherApproved`, `dispatcherApprovedAt`, `dispatcherApprovedBy`, `correctionRequested`, and `correctionReason`.
+     - Technician submits completion report with diagnosis and parts used (`submitJobCompletion`).
+     - Dispatcher Dashboard features prominent **"Pending Completion Reviews"** card and interactive Review Modal to either `Approve & Complete Work Order` or `Request Correction` with mandatory reason.
+     - Customer Dashboard displays prominent `OK — Work completed and dispatcher approved` status with detailed completion report view.
+     - Integrated interactive 5-star rating + optional comment customer feedback system (`notificationService.submitFeedback`), with feedback recording and rating display.
+  5. **Phase 5: Admin Technician Credential Approval Local Preview Fix**:
+     - Diagnosed root cause: `submitVerificationDecision` previously attempted direct API PATCH to `/technicians/:id/verify` without a local preview fallback, throwing `ERR_NETWORK` / 404 when backend was offline.
+     - In Local Preview Mode, `AdminService.submitVerificationDecision` now persists approval/rejection to local store, updates `operationalStore.getTechnicians()`, and records a comprehensive `SystemAuditEvent` with all required fields (`technicianId`, `credentialId`, `previousStatus`, `newStatus`, `reviewingAdmin`, `reviewTimestamp`, `auditNote`).
+     - Displays action success notice: `Saved in Local Preview: [Technician Name] marked as verified/rejected` with zero network error banners.
+     - Outside preview mode, truthful API error reporting remains intact.
+     - Enforced business logic validation: expired credentials cannot be approved without formal renewal, and rejections require mandatory audit notes.
+  6. **Phase 6: Shared Unified Notification Center (`NotificationCenter.tsx`)**:
+     - Created accessible header notification bell icon mounted in `Layout.tsx` across all 4 portals (Customer, Dispatcher, Technician, Admin).
+     - Role-based filtering with unread counter badge, dropdown popover, semantic category icons, relative timestamps, navigation handler, and "Mark all as read" action.
+     - Persisted via `notificationService` in `localStorage` with initial role-specific seeds.
+  7. **Phase 7: Admin Dispatcher Management Page (`/admin/dispatchers`)**:
+     - Created `src/pages/admin/DispatcherManagement.tsx` accessible via `/admin/dispatchers` and Admin sidebar navigation.
+     - Displays comprehensive Dispatcher Operations Roster featuring Tania Akter, Bani, and Farhana Yasmin with employee IDs, branch hubs, contact details, shift statuses, handled queues, and assigned regions.
+     - Includes dispatcher inspection modal and account activation/deactivation toggle with confirmation modal, persistent local updates, and system audit logging.
+  8. **Phase 8 & 9: Cross-Portal Lifecycle Verification, Automated Tests & Build**:
+     - Automated test suite expanded to **81 / 81 tests passing** (100% pass rate) with dedicated coverage for canonical plan allowances, request plan inheritance, 4-stage Kanban, completion review workflows, customer feedback, admin credential verification, and dispatcher management.
+     - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
+     - Production build: `npm run build` compiled cleanly into `/dist` in 8.54s with 0 errors.

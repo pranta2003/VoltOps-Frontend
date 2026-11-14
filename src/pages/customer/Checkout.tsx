@@ -81,7 +81,7 @@ export function Checkout() {
       facilityAddress: facilityAddress.trim() || "Plot 14-18, Sector 3, Savar DEPZ, Dhaka",
       planId: planPricing.id,
       planName: planPricing.name,
-      includedVisits: planPricing.includedVisits || 15,
+      includedVisits: planPricing.includedVisits || 30,
       arrivalSla: planPricing.arrivalSlaLabel,
       billingPeriod,
       amount: baseAmount,
@@ -447,7 +447,7 @@ export function Checkout() {
                       Establishing Demonstration Facility Escrow
                     </p>
                     <p className="text-[11px] text-[var(--text-muted)] max-w-xs mx-auto leading-relaxed">
-                      Allocating {planPricing.name} quota ({planPricing.includedVisits || 15} visits, {planPricing.arrivalSlaLabel}) in local demonstration memory...
+                      Allocating {planPricing.name} quota ({planPricing.includedVisits || 30} visits, {planPricing.arrivalSlaLabel}) in local demonstration memory...
                     </p>
                   </div>
                 </div>

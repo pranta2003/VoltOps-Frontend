@@ -47,7 +47,7 @@ export interface PriorityInfo {
 export * from "./coverage";
 
 // ── 4. Service Requests (Customer -> Dispatcher) ──────────────────────────
-export type RequestStatus = "NEW" | "REVIEWING" | "CONVERTED" | "CANCELLED";
+export type RequestStatus = "NEW" | "REVIEWING" | "CONVERTED" | "RESOLVED" | "CANCELLED";
 
 export interface ServiceRequest {
   id: string; // e.g. "SR-001" or "SR-1024"
@@ -82,9 +82,17 @@ export interface WorkOrderCompletionReport {
   completedAt: string;
   notes: string;
   materialsUsed?: string;
+  workPerformed?: string;
+  diagnosis?: string;
+  technicianId?: string;
   technicianName: string;
   confirmedByCustomer?: boolean;
   confirmedAt?: string;
+  dispatcherApproved?: boolean;
+  dispatcherApprovedAt?: string;
+  dispatcherApprovedBy?: string;
+  correctionRequested?: boolean;
+  correctionReason?: string;
 }
 
 export interface WorkOrder {
@@ -106,6 +114,9 @@ export interface WorkOrder {
   completedAt?: string;
   workNotes?: string;
   completionReport?: WorkOrderCompletionReport;
+  dispatcherApproved?: boolean;
+  dispatcherApprovedAt?: string;
+  dispatcherApprovedBy?: string;
 }
 
 // ── 6. Technicians & Skills ───────────────────────────────────────────────

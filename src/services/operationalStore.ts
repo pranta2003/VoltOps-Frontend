@@ -230,7 +230,7 @@ export const INITIAL_PURCHASES: CustomerPurchase[] = [
     facilityAddress: "Plot 14-18, Sector 3, DEPZ, Savar",
     planId: "247-priority",
     planName: "24/7 Priority Coverage (Plan C)",
-    includedVisits: 15,
+    includedVisits: 30,
     arrivalSla: "Within 20 minutes on site",
     billingPeriod: "Monthly",
     amount: 4000,

@@ -2,6 +2,7 @@ import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { ThemeToggle } from "./ThemeToggle";
+import { NotificationCenter } from "./NotificationCenter";
 import {
   BuildingIcon,
   RadioIcon,
@@ -60,6 +61,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
         return [
           { label: "Admin Console", path: "/admin", icon: SettingsIcon },
           { label: "User Management", path: "/admin/users", icon: BuildingIcon },
+          { label: "Dispatchers", path: "/admin/dispatchers", icon: RadioIcon },
           { label: "Technicians", path: "/admin/technicians", icon: ShieldCheckIcon },
           { label: "Audit Log", path: "/admin/audit", icon: CheckCircleIcon },
         ];
@@ -227,7 +229,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
             </div>
           </div>
 
-          {/* Right Header Affordances: Role Badge, Two-state Theme Toggle, Header Action */}
+          {/* Right Header Affordances: Role Badge, Notifications, Two-state Theme Toggle, Header Action */}
           <div className="flex items-center gap-2 shrink-0">
             {/* Role Badge */}
             <span
@@ -235,6 +237,9 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
             >
               {role}
             </span>
+
+            {/* Notification Center */}
+            <NotificationCenter />
 
             {/* Two-state Theme Toggle */}
             <ThemeToggle />

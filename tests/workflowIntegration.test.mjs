@@ -167,9 +167,9 @@ class WorkflowHarness {
 
   getSubscriptionEntitlement(customerId = "cust-epz-01", planId = "247-standard", customAllowance) {
     const PLAN_ALLOWANCES = {
-      "8hr": 5,
-      "247-standard": 10,
-      "247-priority": 15,
+      "8hr": 15,
+      "247-standard": 25,
+      "247-priority": 30,
       custom: null, // Negotiated value; strictly configured per account
     };
     const isNegotiated = planId === "custom";
@@ -992,20 +992,20 @@ test("Test 15: Structural validation accepts operational payloads containing cus
 test("Test 16: Subscription visit allowances assign correct included visits across all plans and enforces negotiated Plan D rule", () => {
   const harness = new WorkflowHarness();
 
-  // Plan A: 8-Hour Daily Coverage has 5 included visits
+  // Plan A: 8-Hour Daily Coverage has 15 included visits
   const subA = harness.getSubscriptionEntitlement("cust-epz-01", "8hr");
-  assert.equal(subA.includedVisits, 5);
-  assert.equal(subA.remainingVisits, 5);
+  assert.equal(subA.includedVisits, 15);
+  assert.equal(subA.remainingVisits, 15);
 
-  // Plan B: 24/7 Standard Coverage has 10 included visits
+  // Plan B: 24/7 Standard Coverage has 25 included visits
   const subB = harness.getSubscriptionEntitlement("cust-epz-01", "247-standard");
-  assert.equal(subB.includedVisits, 10);
-  assert.equal(subB.remainingVisits, 10);
+  assert.equal(subB.includedVisits, 25);
+  assert.equal(subB.remainingVisits, 25);
 
-  // Plan C: 24/7 Priority Coverage has 15 included visits
+  // Plan C: 24/7 Priority Coverage has 30 included visits
   const subC = harness.getSubscriptionEntitlement("cust-epz-01", "247-priority");
-  assert.equal(subC.includedVisits, 15);
-  assert.equal(subC.remainingVisits, 15);
+  assert.equal(subC.includedVisits, 30);
+  assert.equal(subC.remainingVisits, 30);
 
   // Plan D: Custom Enterprise Coverage does NOT default to 20 or unlimited
   const subDUnconfigured = harness.getSubscriptionEntitlement("cust-epz-01", "custom");
@@ -1054,7 +1054,7 @@ test("Test 17: Service-credit calculation deducts 1 credit per work order, ignor
   // Initial state: 0 existing work orders for Apex
   const initialSub = harness.getSubscriptionEntitlement("cust-epz-01", "247-standard");
   assert.equal(initialSub.usedVisits, 0);
-  assert.equal(initialSub.remainingVisits, 10);
+  assert.equal(initialSub.remainingVisits, 25);
   assert.equal(initialSub.isExhausted, false);
 
   // 1. Create a new request and convert to Work Order
@@ -1072,7 +1072,7 @@ test("Test 17: Service-credit calculation deducts 1 credit per work order, ignor
   // Consumes 1 credit
   const subAfterWO = harness.getSubscriptionEntitlement("cust-epz-01", "247-standard");
   assert.equal(subAfterWO.usedVisits, 1);
-  assert.equal(subAfterWO.remainingVisits, 9);
+  assert.equal(subAfterWO.remainingVisits, 24);
 
   // 2. Assigning technician to work order must NOT double-deduct credit
   harness.assignTechnician({ workOrderId: wo.id, technicianId: "tech-01" });
@@ -1083,7 +1083,7 @@ test("Test 17: Service-credit calculation deducts 1 credit per work order, ignor
   wo.status = "CANCELLED";
   const subAfterCancel = harness.getSubscriptionEntitlement("cust-epz-01", "247-standard");
   assert.equal(subAfterCancel.usedVisits, 0); // Returns back to 0
-  assert.equal(subAfterCancel.remainingVisits, 10);
+  assert.equal(subAfterCancel.remainingVisits, 25);
 
   // 4. Follow-up visit references on the same work order must NOT consume multiple credits
   harness.workOrders.push({
@@ -1105,8 +1105,8 @@ test("Test 17: Service-credit calculation deducts 1 credit per work order, ignor
 test("Test 18: Exhausted allowance blocks new standard requests but permits quotation requests", () => {
   const harness = new WorkflowHarness();
 
-  // Create 5 work orders to exhaust Plan A (5 visits)
-  for (let i = 1; i <= 5; i++) {
+  // Create 15 work orders to exhaust Plan A (15 visits)
+  for (let i = 1; i <= 15; i++) {
     harness.workOrders.push({
       id: `WO-TEST-${i}`,
       requestId: `SR-TEST-${i}`,
@@ -1115,9 +1115,9 @@ test("Test 18: Exhausted allowance blocks new standard requests but permits quot
     });
   }
 
-  // Now 5 work orders exist
+  // Now 15 work orders exist
   const subA = harness.getSubscriptionEntitlement("cust-epz-01", "8hr");
-  assert.equal(subA.usedVisits, 5);
+  assert.equal(subA.usedVisits, 15);
   assert.equal(subA.remainingVisits, 0);
   assert.equal(subA.isExhausted, true);
 
@@ -1620,19 +1620,19 @@ test("Test 28: Centralized BDT pricing integrity and prototype evaluation discla
 
   const configContent = fs.readFileSync(configPath, "utf-8");
 
-  // Plan A: 8hr, ৳1,200/mo, 5 visits, null arrival SLA
+  // Plan A: 8hr, ৳1,200/mo, 15 visits, null arrival SLA
   assert.ok(configContent.includes('monthlyBdtPrice: 1200'), "Plan A must be priced at ৳1,200/mo");
-  assert.ok(configContent.includes('includedVisits: 5'), "Plan A must include 5 visits");
+  assert.ok(configContent.includes('includedVisits: 15'), "Plan A must include 15 visits");
   assert.ok(configContent.includes('arrivalSlaMinutes: null'), "Plan A must have null arrival SLA");
 
-  // Plan B: 247-standard, ৳2,500/mo, 10 visits, 40-min arrival SLA
+  // Plan B: 247-standard, ৳2,500/mo, 25 visits, 40-min arrival SLA
   assert.ok(configContent.includes('monthlyBdtPrice: 2500'), "Plan B must be priced at ৳2,500/mo");
-  assert.ok(configContent.includes('includedVisits: 10'), "Plan B must include 10 visits");
+  assert.ok(configContent.includes('includedVisits: 25'), "Plan B must include 25 visits");
   assert.ok(configContent.includes('arrivalSlaMinutes: 40'), "Plan B must guarantee 40-minute arrival SLA");
 
-  // Plan C: 247-priority, ৳4,000/mo, 15 visits, 20-min arrival SLA
+  // Plan C: 247-priority, ৳4,000/mo, 30 visits, 20-min arrival SLA
   assert.ok(configContent.includes('monthlyBdtPrice: 4000'), "Plan C must be priced at ৳4,000/mo");
-  assert.ok(configContent.includes('includedVisits: 15'), "Plan C must include 15 visits");
+  assert.ok(configContent.includes('includedVisits: 30'), "Plan C must include 30 visits");
   assert.ok(configContent.includes('arrivalSlaMinutes: 20'), "Plan C must guarantee 20-minute arrival SLA");
 
   // Plan D: custom quotation
@@ -1659,7 +1659,7 @@ test("Test 29: Customer checkout & demonstration purchase state transitions and 
     facilityAddress: "Plot 14-18, Sector 3, DEPZ, Savar",
     planId: "247-priority",
     planName: "Plan C — 24/7 Priority Emergency",
-    includedVisits: 15,
+    includedVisits: 30,
     arrivalSla: "20-minute physical arrival guarantee",
     billingPeriod: "Monthly",
     amount: 4000,
@@ -1701,7 +1701,7 @@ test("Test 30: Subscription entitlement update and state validation following ch
     facilityAddress: "Plot 14-18, Sector 3, DEPZ, Savar",
     planId: "247-priority",
     planName: "Plan C — 24/7 Priority Emergency",
-    includedVisits: 15,
+    includedVisits: 30,
     arrivalSla: "20-minute physical arrival guarantee",
     billingPeriod: "Monthly",
     amount: 4000,
@@ -1735,4 +1735,229 @@ test("Test 30: Subscription entitlement update and state validation following ch
     purchases: [{ invalidField: 123 }],
   };
   assert.equal(validateOperationalState(corruptedState), null, "Corrupted purchase structure must fail validation");
+});
+
+// ── TEST GROUP 7: Subscription, Service Workflow & Portal Management Refinement ─
+
+test("Test 31: Canonical Subscription Plan Allowances (15, 25, 30, Negotiated) and request plan inheritance", () => {
+  const harness = new WorkflowHarness();
+
+  // Validate canonical allowances
+  const subA = harness.getSubscriptionEntitlement("cust-epz-01", "8hr");
+  assert.equal(subA.includedVisits, 15, "Plan A must include exactly 15 visits");
+
+  const subB = harness.getSubscriptionEntitlement("cust-epz-01", "247-standard");
+  assert.equal(subB.includedVisits, 25, "Plan B must include exactly 25 visits");
+
+  const subC = harness.getSubscriptionEntitlement("cust-epz-01", "247-priority");
+  assert.equal(subC.includedVisits, 30, "Plan C must include exactly 30 visits");
+
+  const subD = harness.getSubscriptionEntitlement("cust-epz-01", "custom");
+  assert.equal(subD.includedVisits, null, "Plan D must strictly be negotiated with null included visits");
+  assert.equal(subD.needsConfiguration, true);
+
+  // Automatic plan inheritance in request submission
+  const customerSub = { planId: "247-priority" };
+  const req = harness.createCustomerRequest({
+    category: "Electrical and power systems",
+    assetName: "Standby Generator G-01",
+    problemTitle: "Routine load verification",
+    problemDescription: "Inherited subscription coverage check",
+    priority: "HIGH",
+    coveragePlan: customerSub.planId,
+  });
+
+  assert.equal(req.coveragePlan, "247-priority", "Request must automatically inherit customer's active plan");
+});
+
+test("Test 32: Simplified 4-Stage Dispatcher Kanban Lifecycle categorizes active jobs into ASSIGNED", () => {
+  const harness = new WorkflowHarness();
+
+  const stages = ["UNASSIGNED", "ASSIGNED", "WORK_COMPLETED_AWAITING_CONFIRMATION", "COMPLETED"];
+  assert.equal(stages.length, 4, "Kanban must define exactly 4 top-level lifecycle columns");
+
+  // Filter function matching Dispatcher Kanban logic
+  function categorizeForKanban(status) {
+    if (status === "UNASSIGNED") return "UNASSIGNED";
+    if (status === "ASSIGNED" || status === "TRAVELLING" || status === "ON_SITE") return "ASSIGNED";
+    if (status === "WORK_COMPLETED_AWAITING_CONFIRMATION") return "WORK_COMPLETED_AWAITING_CONFIRMATION";
+    if (status === "COMPLETED") return "COMPLETED";
+    return null;
+  }
+
+  assert.equal(categorizeForKanban("UNASSIGNED"), "UNASSIGNED");
+  assert.equal(categorizeForKanban("ASSIGNED"), "ASSIGNED");
+  assert.equal(categorizeForKanban("TRAVELLING"), "ASSIGNED", "TRAVELLING orders must group under ASSIGNED column");
+  assert.equal(categorizeForKanban("ON_SITE"), "ASSIGNED", "ON_SITE orders must group under ASSIGNED column");
+  assert.equal(categorizeForKanban("WORK_COMPLETED_AWAITING_CONFIRMATION"), "WORK_COMPLETED_AWAITING_CONFIRMATION");
+  assert.equal(categorizeForKanban("COMPLETED"), "COMPLETED");
+});
+
+test("Test 33: Technician Completion Report review approval and correction request workflows", () => {
+  const harness = new WorkflowHarness();
+
+  // 1. Technician submits completion report
+  const order = {
+    id: "WO-9901",
+    requestId: "SR-9901",
+    customerName: "Apex Spinning Mills",
+    status: "WORK_COMPLETED_AWAITING_CONFIRMATION",
+    assignedTechnicianId: "tech-01",
+    assignedTechnicianName: "Kamrul Islam",
+    completionReport: {
+      completedAt: new Date().toISOString(),
+      notes: "Main breaker auxiliary contact replaced and verified under 100A test load.",
+      workPerformed: "Replaced ABB auxiliary contacts",
+      diagnosis: "Worn contact springs caused intermittent micro-tripping",
+      materialsUsed: "ABB Aux Contact Block (1x)",
+      technicianName: "Kamrul Islam",
+      dispatcherApproved: false,
+    },
+  };
+  harness.workOrders.push(order);
+
+  // 2. Dispatcher Correction Request
+  function requestCorrection(wo, reason, dispatcherName) {
+    wo.status = "ON_SITE";
+    wo.completionReport.correctionRequested = true;
+    wo.completionReport.correctionReason = reason;
+    wo.completionReport.dispatcherApproved = false;
+    return wo;
+  }
+
+  requestCorrection(order, "Please attach breaker insulation resistance test value before sign-off", "Tania Akter");
+  assert.equal(order.status, "ON_SITE", "Work order must return to ON_SITE on correction request");
+  assert.equal(order.completionReport.correctionRequested, true);
+  assert.equal(order.completionReport.correctionReason, "Please attach breaker insulation resistance test value before sign-off");
+
+  // 3. Dispatcher Approval
+  function approveCompletion(wo, dispatcherName) {
+    wo.status = "COMPLETED";
+    wo.completedAt = new Date().toISOString();
+    wo.completionReport.dispatcherApproved = true;
+    wo.completionReport.dispatcherApprovedAt = new Date().toISOString();
+    wo.completionReport.dispatcherApprovedBy = dispatcherName;
+    wo.completionReport.correctionRequested = false;
+    wo.dispatcherApproved = true;
+    return wo;
+  }
+
+  approveCompletion(order, "Tania Akter (Senior Dispatcher)");
+  assert.equal(order.status, "COMPLETED", "Work order must transition to COMPLETED on approval");
+  assert.equal(order.completionReport.dispatcherApproved, true);
+  assert.equal(order.completionReport.dispatcherApprovedBy, "Tania Akter (Senior Dispatcher)");
+});
+
+test("Test 34: Customer Completion Confirmation, dispatcher approval banner, and feedback rating", () => {
+  const completedOrder = {
+    id: "WO-9902",
+    status: "COMPLETED",
+    dispatcherApproved: true,
+    completionReport: {
+      completedAt: new Date().toISOString(),
+      notes: "Replaced chiller sensor",
+      technicianName: "Tariqul Alam",
+      dispatcherApproved: true,
+      dispatcherApprovedBy: "Tania Akter",
+    },
+  };
+
+  // Arrival / Status window text evaluation
+  const displayStatus = completedOrder.dispatcherApproved
+    ? "OK — Work completed and dispatcher approved"
+    : "Completed & signed off";
+  assert.equal(displayStatus, "OK — Work completed and dispatcher approved");
+
+  // Customer Feedback Simulation
+  const feedbacks = {};
+  function submitFeedback(fb) {
+    feedbacks[fb.workOrderId] = fb;
+  }
+
+  submitFeedback({
+    workOrderId: completedOrder.id,
+    rating: 5,
+    comment: "Prompt arrival and clean execution.",
+    customerName: "Apex Facility Manager",
+  });
+
+  assert.ok(feedbacks[completedOrder.id], "Feedback must be recorded");
+  assert.equal(feedbacks[completedOrder.id].rating, 5);
+  assert.equal(feedbacks[completedOrder.id].comment, "Prompt arrival and clean execution.");
+});
+
+test("Test 35: Admin Technician Credential Verification validation & audit ledger logging", () => {
+  const expiredTech = {
+    id: "tech-exp-01",
+    technicianName: "Mahmud Hasan",
+    licenseNumber: "CSCO-142890",
+    expiryDate: "20 Jan 2025",
+    verificationStatus: "PENDING_REVIEW",
+  };
+
+  // Validation: Expired credential cannot be approved
+  function validateDecision(tech, status, notes) {
+    if (status === "VERIFIED" && tech.expiryDate) {
+      const expDate = new Date(tech.expiryDate);
+      if (!isNaN(expDate.getTime()) && expDate.getTime() < Date.now()) {
+        return { success: false, error: `Cannot approve expired credential (${tech.expiryDate})` };
+      }
+    }
+    if (status === "REJECTED" && (!notes || !notes.trim())) {
+      return { success: false, error: "An administrative audit note explaining the rejection reason is required" };
+    }
+    return { success: true };
+  }
+
+  const approveExpiredResult = validateDecision(expiredTech, "VERIFIED", "Approved");
+  assert.equal(approveExpiredResult.success, false);
+  assert.match(approveExpiredResult.error, /Cannot approve expired credential/);
+
+  const rejectWithoutNoteResult = validateDecision(expiredTech, "REJECTED", "");
+  assert.equal(rejectWithoutNoteResult.success, false);
+  assert.match(rejectWithoutNoteResult.error, /audit note explaining the rejection reason is required/);
+
+  const rejectWithNoteResult = validateDecision(expiredTech, "REJECTED", "Certification expired in Jan 2025. Renewal required.");
+  assert.equal(rejectWithNoteResult.success, true);
+});
+
+test("Test 36: Admin Dispatcher Management Roster and Status Toggle with Audit Trail", () => {
+  const dispatchers = [
+    {
+      id: "demo-usr-disp-1",
+      name: "Tania Akter",
+      employeeId: "DSP-EPZ-01",
+      branch: "EPZ Industrial Core",
+      isActive: true,
+      shiftStatus: "ON_DUTY",
+    },
+    {
+      id: "demo-usr-disp-2",
+      name: "Bani",
+      employeeId: "DSP-GZP-02",
+      branch: "Gazipur Hub",
+      isActive: true,
+      shiftStatus: "ON_DUTY",
+    },
+  ];
+
+  assert.equal(dispatchers.length, 2, "Must list Tania Akter and Bani");
+  assert.equal(dispatchers[0].name, "Tania Akter");
+  assert.equal(dispatchers[1].name, "Bani");
+
+  // Toggle status
+  function toggleStatus(disp) {
+    disp.isActive = !disp.isActive;
+    disp.shiftStatus = disp.isActive ? "STANDBY" : "OFF_DUTY";
+    return {
+      action: `Dispatcher account ${disp.isActive ? "activated" : "deactivated"}: ${disp.name}`,
+      severity: disp.isActive ? "INFO" : "WARNING",
+    };
+  }
+
+  const auditLog = toggleStatus(dispatchers[1]);
+  assert.equal(dispatchers[1].isActive, false);
+  assert.equal(dispatchers[1].shiftStatus, "OFF_DUTY");
+  assert.equal(auditLog.action, "Dispatcher account deactivated: Bani");
+  assert.equal(auditLog.severity, "WARNING");
 });

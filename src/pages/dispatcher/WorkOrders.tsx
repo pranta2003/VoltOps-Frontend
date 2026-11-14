@@ -252,9 +252,7 @@ export const WorkOrders: FC = () => {
   const lifecycleCounts = useMemo(() => {
     return {
       UNASSIGNED: workOrders.filter((w) => w.status === "UNASSIGNED").length,
-      ASSIGNED: workOrders.filter((w) => w.status === "ASSIGNED").length,
-      TRAVELLING: workOrders.filter((w) => w.status === "TRAVELLING").length,
-      ON_SITE: workOrders.filter((w) => w.status === "ON_SITE").length,
+      ASSIGNED: workOrders.filter((w) => w.status === "ASSIGNED" || w.status === "TRAVELLING" || w.status === "ON_SITE").length,
       WORK_COMPLETED_AWAITING_CONFIRMATION: workOrders.filter((w) => w.status === "WORK_COMPLETED_AWAITING_CONFIRMATION").length,
       COMPLETED: workOrders.filter((w) => w.status === "COMPLETED").length,
     };
@@ -337,8 +335,6 @@ export const WorkOrders: FC = () => {
                 ? [{ id: "UNASSIGNED", label: "Unassigned", count: lifecycleCounts.UNASSIGNED, dot: "bg-rose-500" }]
                 : []),
               { id: "ASSIGNED", label: "Assigned", count: lifecycleCounts.ASSIGNED, dot: "bg-indigo-500" },
-              { id: "TRAVELLING", label: "In Transit", count: lifecycleCounts.TRAVELLING, dot: "bg-amber-500" },
-              { id: "ON_SITE", label: "On Site", count: lifecycleCounts.ON_SITE, dot: "bg-blue-500" },
               ...(lifecycleCounts.WORK_COMPLETED_AWAITING_CONFIRMATION > 0 || selectedStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION"
                 ? [{
                     id: "WORK_COMPLETED_AWAITING_CONFIRMATION",
@@ -447,25 +443,7 @@ export const WorkOrders: FC = () => {
                     title: "Assigned",
                     dot: "bg-indigo-500",
                     badge: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
-                    orders: workOrders.filter((w) => w.status === "ASSIGNED"),
-                  }]
-                : []),
-              ...(selectedStatus === "ALL" || selectedStatus === "TRAVELLING"
-                ? [{
-                    statusKey: "TRAVELLING",
-                    title: "In Transit",
-                    dot: "bg-amber-500",
-                    badge: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
-                    orders: workOrders.filter((w) => w.status === "TRAVELLING"),
-                  }]
-                : []),
-              ...(selectedStatus === "ALL" || selectedStatus === "ON_SITE"
-                ? [{
-                    statusKey: "ON_SITE",
-                    title: "On Site",
-                    dot: "bg-blue-500",
-                    badge: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
-                    orders: workOrders.filter((w) => w.status === "ON_SITE"),
+                    orders: workOrders.filter((w) => w.status === "ASSIGNED" || w.status === "TRAVELLING" || w.status === "ON_SITE"),
                   }]
                 : []),
               ...(selectedStatus === "ALL" || selectedStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION"
@@ -519,10 +497,22 @@ export const WorkOrders: FC = () => {
                       >
                         {/* Top: ID & Status */}
                         <div className="flex items-center justify-between gap-1">
-                          <span className="font-mono font-bold text-xs text-[var(--text-primary)]">
-                            {wo.id}
-                          </span>
-                          <span className="text-[10px] text-[var(--text-muted)] font-mono">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="font-mono font-bold text-xs text-[var(--text-primary)]">
+                              {wo.id}
+                            </span>
+                            {wo.status === "TRAVELLING" && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 shrink-0">
+                                In Transit
+                              </span>
+                            )}
+                            {wo.status === "ON_SITE" && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 shrink-0">
+                                On Site
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-[var(--text-muted)] font-mono shrink-0">
                             {renderArrivalSla(wo)}
                           </span>
                         </div>

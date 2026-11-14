@@ -34,12 +34,15 @@ export function NewServiceRequest() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // Subscription Allowance state - automatically inherits customer's active plan
+  const subscription = customerService.getSubscription(user?.id);
+  const activePlan = subscription.planId;
+
   // Form states
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory>("Electrical and power systems");
   const [selectedAsset, setSelectedAsset] = useState<string>(CUSTOMER_ASSETS[0]);
   const [problemTitle, setProblemTitle] = useState("");
   const [problemDescription, setProblemDescription] = useState("");
-  const [coveragePlan, setCoveragePlan] = useState<CoveragePlanId>("247-standard");
   const [priority, setPriority] = useState<PriorityLevel>("URGENT");
   const [preferredDate, setPreferredDate] = useState("2026-11-12");
   const [preferredTime, setPreferredTime] = useState("Immediate / ASAP");
@@ -47,14 +50,18 @@ export function NewServiceRequest() {
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
   const [createdRequestId, setCreatedRequestId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Subscription Allowance state
-  const subscription = customerService.getSubscription(user?.id, coveragePlan);
   const [requestAsQuotation, setRequestAsQuotation] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
+
+    if (!subscription.hasActiveSubscription || !activePlan) {
+      setErrorMessage(
+        "An active subscription is required to submit a commercial service request. Please choose a coverage plan to proceed."
+      );
+      return;
+    }
 
     if (subscription.needsConfiguration && !requestAsQuotation) {
       setErrorMessage(
@@ -91,14 +98,14 @@ export function NewServiceRequest() {
           problemDescription: problemDescription.trim(),
           priority,
           preferredDateTime: `${preferredDate} ${preferredTime}`,
-          coveragePlan,
+          coveragePlan: activePlan,
           isAdditionalPaidQuotation: requestAsQuotation,
         },
         {
           id: user?.id,
           name: user?.name,
           address: user?.company || "Apex Spinning & Weaving Mills, Savar",
-          coveragePlan,
+          coveragePlan: activePlan,
         }
       );
 
@@ -115,7 +122,7 @@ export function NewServiceRequest() {
     }
   };
 
-  const planInfo = APPROVED_COVERAGE_PLANS[coveragePlan];
+  const planInfo = activePlan ? APPROVED_COVERAGE_PLANS[activePlan] : null;
 
   return (
     <Layout
@@ -136,10 +143,12 @@ export function NewServiceRequest() {
             </div>
             <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
               Routed to active dispatcher queue under{" "}
-              <strong className="text-[var(--text-primary)] font-semibold">{planInfo.name}</strong>.{" "}
-              {planInfo.isGuaranteedSla
+              <strong className="text-[var(--text-primary)] font-semibold">
+                {planInfo ? planInfo.name : "Active Coverage"}
+              </strong>.{" "}
+              {planInfo?.isGuaranteedSla
                 ? `Guaranteed ${planInfo.physicalArrivalSlaMinutes}-minute arrival SLA is active.`
-                : "Scheduled during standard business hours (08:00–16:00)."}
+                : "Scheduled under active facility coverage."}
             </p>
             <div className="pt-2 text-xs font-semibold text-[#10b981]">
               Redirecting to request tracker...
@@ -295,54 +304,70 @@ export function NewServiceRequest() {
               </div>
             </div>
 
-            {/* ── 4. Coverage Plan Selector ─────────────────────────────── */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-[var(--text-muted)]">
-                  4. Coverage Plan <span className="text-red-500">*</span>
-                </label>
-                <span className="text-[11px] text-[var(--text-muted)]">Governs guaranteed arrival SLA</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {(Object.keys(APPROVED_COVERAGE_PLANS) as CoveragePlanId[]).map((planKey) => {
-                  const plan = APPROVED_COVERAGE_PLANS[planKey];
-                  const isChecked = coveragePlan === planKey;
-                  return (
-                    <label
-                      key={planKey}
-                      className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
-                        isChecked
-                          ? "border-[#10b981] bg-[#10b981]/10 text-[var(--text-primary)] ring-1 ring-[#10b981] shadow-sm font-bold"
-                          : "border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:border-[var(--border-strong)]"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold">{plan.name}</span>
-                        <input
-                          type="radio"
-                          name="coveragePlan"
-                          value={planKey}
-                          checked={isChecked}
-                          onChange={() => setCoveragePlan(planKey)}
-                          className="accent-[#10b981]"
-                        />
+            {/* ── 4. Active Subscription Coverage (Inherited Automatically) ── */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-[var(--text-muted)]">
+                4. Facility Coverage Plan
+              </label>
+              {subscription.hasActiveSubscription && activePlan ? (
+                <div className="p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                      <ShieldCheckIcon size={18} className="text-[#10b981]" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold font-heading text-[var(--text-primary)]">
+                          Active Coverage: {subscription.planName}
+                        </span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                          {activePlan === "247-priority"
+                            ? "20-minute arrival SLA"
+                            : activePlan === "247-standard"
+                            ? "40-minute arrival SLA"
+                            : activePlan === "8hr"
+                            ? "8-Hour daily window"
+                            : "Negotiated SLA"}
+                        </span>
                       </div>
-                      <div className="text-[11px] text-[#10b981] font-semibold mt-1">
-                        {plan.slaLabel}
-                      </div>
-                      <div className="text-[10px] text-[var(--text-muted)] mt-1 line-clamp-2">
-                        {planKey === "8hr"
-                          ? "Business hours (08:00–16:00)"
-                          : planKey === "247-standard"
-                          ? "Guaranteed 40-min arrival 24/7"
-                          : planKey === "247-priority"
-                          ? "Guaranteed 20-min rapid arrival 24/7"
-                          : "Custom negotiated SLA terms"}
-                      </div>
-                    </label>
-                  );
-                })}
-              </div>
+                      <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                        Guaranteed arrival window automatically inherited from your facility subscription.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="sm:text-right shrink-0">
+                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 block">
+                      {subscription.remainingVisits !== null
+                        ? `${subscription.remainingVisits} of ${subscription.includedVisits} visits remaining`
+                        : "Negotiated Allowance"}
+                    </span>
+                    <span className="text-[10px] text-[var(--text-muted)]">
+                      Resets {subscription.billingCycleResetDate}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangleIcon size={18} className="text-amber-500 shrink-0" />
+                    <div>
+                      <span className="text-xs font-bold text-amber-800 dark:text-amber-300 block">
+                        Subscription Required
+                      </span>
+                      <p className="text-[11px] text-amber-700/80 dark:text-amber-400/80 mt-0.5">
+                        An active commercial coverage plan is required to submit a service request.
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    to="/#packages"
+                    className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shrink-0 self-start sm:self-auto shadow-sm"
+                  >
+                    Choose a Plan
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* ── 5. Urgency Level ──────────────────────────────────────── */}

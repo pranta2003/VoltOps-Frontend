@@ -33,6 +33,70 @@ import {
   OFFLINE_BASELINE_AUDIT_EVENTS,
 } from "./mockAdminData";
 import { ServiceCategory, Role } from "../types";
+import { operationalStore } from "./operationalStore";
+import { notificationService } from "./notificationService";
+
+const STORAGE_ADMIN_TECHS_KEY = "voltops_admin_technicians_v1";
+const STORAGE_ADMIN_AUDIT_KEY = "voltops_admin_audit_logs_v1";
+
+export function isLocalPreviewSession(): boolean {
+  if (typeof window === "undefined") return true;
+  return Boolean(
+    sessionStorage.getItem("voltops_preview_role") ||
+    sessionStorage.getItem("voltops_preview_user") ||
+    !localStorage.getItem("voltops_token")
+  );
+}
+
+export function getLocalAdminTechnicians(): TechnicianVerificationProfile[] {
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem(STORAGE_ADMIN_TECHS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return JSON.parse(JSON.stringify(OFFLINE_BASELINE_TECHNICIANS));
+}
+
+export function saveLocalAdminTechnicians(techs: TechnicianVerificationProfile[]): void {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(STORAGE_ADMIN_TECHS_KEY, JSON.stringify(techs));
+    } catch {
+      // fallback
+    }
+  }
+}
+
+export function getLocalAuditLogs(): SystemAuditEvent[] {
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem(STORAGE_ADMIN_AUDIT_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return JSON.parse(JSON.stringify(OFFLINE_BASELINE_AUDIT_EVENTS));
+}
+
+export function saveLocalAuditLogs(logs: SystemAuditEvent[]): void {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(STORAGE_ADMIN_AUDIT_KEY, JSON.stringify(logs));
+    } catch {
+      // fallback
+    }
+  }
+}
 
 export class AdminService {
   /**
@@ -377,7 +441,7 @@ export class AdminService {
       // Backend is offline or forbidden
       return {
         success: true,
-        data: OFFLINE_BASELINE_TECHNICIANS,
+        data: getLocalAdminTechnicians(),
         isLive: false,
         statusCode: err.response?.status,
         endpointConnected: false,
@@ -390,7 +454,7 @@ export class AdminService {
 
     return {
       success: true,
-      data: OFFLINE_BASELINE_TECHNICIANS,
+      data: getLocalAdminTechnicians(),
       isLive: false,
       endpointConnected: false,
     };
@@ -399,47 +463,159 @@ export class AdminService {
   /**
    * Submits a formal verification decision (Approve / Reject) with audit notes.
    * Target: PATCH /api/technicians/:id/verify
-   * RULE: Never pretends persistence if backend endpoint is unavailable.
+   * In Local Preview Mode, updates operational store and logs audit event.
    */
   static async submitVerificationDecision(
     techId: string,
     payload: SubmitVerificationDecisionPayload
-  ): Promise<ServiceResult<{ id: string; status: string }>> {
-    try {
-      const res = await api.patch(`/technicians/${techId}/verify`, payload);
-      if (res.data) {
+  ): Promise<ServiceResult<{ id: string; status: string; technicianName?: string }>> {
+    const isPreview = isLocalPreviewSession();
+    const localTechs = getLocalAdminTechnicians();
+    const tech = localTechs.find((t) => t.id === techId);
+
+    // Business Logic Validation: Expired credentials cannot be approved
+    if (payload.status === "VERIFIED" && tech?.expiryDate) {
+      const expDate = new Date(tech.expiryDate);
+      if (!isNaN(expDate.getTime()) && expDate.getTime() < Date.now()) {
         return {
-          success: true,
-          data: { id: techId, status: payload.status },
-          isLive: true,
-          endpointConnected: true,
+          success: false,
+          data: null,
+          isLive: false,
+          endpointConnected: false,
+          error: `Validation Error: Cannot approve expired credential (${tech.expiryDate}). Formal certificate renewal or supervisor exception is required.`,
         };
       }
-    } catch (err: any) {
-      const status = err.response?.status;
-      const message =
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        (status === 404
-          ? "Backend endpoint PATCH /api/technicians/:id/verify is not yet implemented in the backend repository. Decision cannot be saved."
-          : err.message || "Failed to submit credential verification decision.");
+    }
 
+    // Business Logic Validation: Rejection requires explanatory audit note
+    if (payload.status === "REJECTED" && (!payload.notes || !payload.notes.trim())) {
       return {
         success: false,
         data: null,
         isLive: false,
-        statusCode: status,
-        endpointConnected: status !== 404 && err.code !== "ERR_NETWORK",
-        error: message,
+        endpointConnected: false,
+        error: "Validation Error: An administrative audit note explaining the rejection reason is required before proceeding.",
       };
     }
 
+    // Attempt live backend update if not in local preview mode
+    if (!isPreview) {
+      try {
+        const res = await api.patch(`/technicians/${techId}/verify`, payload);
+        if (res.data) {
+          return {
+            success: true,
+            data: { id: techId, status: payload.status, technicianName: tech?.technicianName },
+            isLive: true,
+            endpointConnected: true,
+          };
+        }
+      } catch (err: any) {
+        const status = err.response?.status;
+        const message =
+          err.response?.data?.error ||
+          err.response?.data?.message ||
+          (status === 404
+            ? "Backend endpoint PATCH /api/technicians/:id/verify is not yet implemented in the backend repository. Decision cannot be saved."
+            : err.message || "Failed to submit credential verification decision.");
+
+        return {
+          success: false,
+          data: null,
+          isLive: false,
+          statusCode: status,
+          endpointConnected: status !== 404 && err.code !== "ERR_NETWORK",
+          error: message,
+        };
+      }
+    }
+
+    // Local Preview Mode: Execute and persist locally in operational store & audit log
+    const previousStatus = tech?.verificationStatus || "PENDING_REVIEW";
+    const reviewingAdmin = "Pranta (Lead Admin)";
+    const reviewTimestamp = new Date().toISOString();
+    const formattedReviewTimestamp = new Date().toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    // 1. Update technician profile in local store
+    const updatedTechs = localTechs.map((t) =>
+      t.id === techId
+        ? {
+            ...t,
+            verificationStatus: payload.status,
+            verifiedAt: formattedReviewTimestamp,
+            verifiedBy: reviewingAdmin,
+            verificationNotes: payload.notes.trim(),
+          }
+        : t
+    );
+    saveLocalAdminTechnicians(updatedTechs);
+
+    // 2. Synchronize with operationalStore field technicians if matching
+    const opTechs = operationalStore.getTechnicians();
+    const matchingOpTech = opTechs.find((ot) => ot.id === techId || ot.name === tech?.technicianName);
+    if (matchingOpTech) {
+      operationalStore.setTechnicians(
+        opTechs.map((ot) =>
+          ot.id === matchingOpTech.id
+            ? {
+                ...ot,
+                status: payload.status === "VERIFIED" ? (ot.status === "UNAVAILABLE" ? "AVAILABLE" : ot.status) : ot.status,
+              }
+            : ot
+        )
+      );
+    }
+
+    // 3. Record full audit event with all required fields
+    const auditLogs = getLocalAuditLogs();
+    const newAuditEvent: SystemAuditEvent = {
+      id: `demo-aud-${Date.now()}`,
+      timestamp: formattedReviewTimestamp,
+      actorName: reviewingAdmin,
+      actorRole: "ADMIN",
+      actorIp: "127.0.0.1 (Local Preview)",
+      category: "VERIFICATION",
+      action: `Technician credential ${payload.status === "VERIFIED" ? "approved" : "rejected"}: ${tech?.technicianName || techId}`,
+      targetEntity: `Technician ${tech?.technicianName || techId} (${tech?.employeeId || "ID: " + techId})`,
+      targetId: techId,
+      severity: payload.status === "VERIFIED" ? "INFO" : "WARNING",
+      details: JSON.stringify({
+        technicianId: techId,
+        credentialId: tech?.licenseNumber || "LIC-REG",
+        previousStatus,
+        newStatus: payload.status,
+        reviewingAdmin,
+        reviewTimestamp,
+        auditNote: payload.notes.trim(),
+      }),
+    };
+    auditLogs.unshift(newAuditEvent);
+    saveLocalAuditLogs(auditLogs);
+
+    // 4. Trigger in-app notification for Technician
+    notificationService.addNotification({
+      role: "TECHNICIAN",
+      title: payload.status === "VERIFIED" ? "Skills Passport Verified" : "Credential Audit Notice",
+      message: `Your ${tech?.licenseName || "license"} was ${payload.status === "VERIFIED" ? "approved" : "rejected"} by ${reviewingAdmin}. Audit Note: "${payload.notes.trim()}"`,
+      type: payload.status === "VERIFIED" ? "success" : "warning",
+      link: "/technician/skills",
+    });
+
     return {
-      success: false,
-      data: null,
+      success: true,
+      data: {
+        id: techId,
+        status: payload.status,
+        technicianName: tech?.technicianName,
+      },
       isLive: false,
       endpointConnected: false,
-      error: "Verification decision could not be processed.",
     };
   }
 
@@ -492,8 +668,8 @@ export class AdminService {
       const status = err.response?.status;
       const endpointConnected = status !== 404 && err.code !== "ERR_NETWORK";
 
-      // Filter offline baseline
-      let filtered = [...OFFLINE_BASELINE_AUDIT_EVENTS];
+      // Filter offline baseline (with local preview persistence)
+      let filtered = [...getLocalAuditLogs()];
       if (params.search) {
         const q = params.search.toLowerCase();
         filtered = filtered.filter(

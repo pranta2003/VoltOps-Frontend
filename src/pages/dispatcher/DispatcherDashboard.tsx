@@ -35,6 +35,15 @@ export const DispatcherDashboard: FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isStale, setIsStale] = useState(false);
 
+  // Pending Completion Reviews State
+  const [pendingReviews, setPendingReviews] = useState<WorkOrder[]>([]);
+  const [reviewingOrder, setReviewingOrder] = useState<WorkOrder | null>(null);
+  const [correctionReason, setCorrectionReason] = useState("");
+  const [showCorrectionInput, setShowCorrectionInput] = useState(false);
+  const [isReviewSubmitting, setIsReviewSubmitting] = useState(false);
+  const [reviewActionSuccess, setReviewActionSuccess] = useState<string | null>(null);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+
   // Assignment Modal State
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);
   const [matchingTechs, setMatchingTechs] = useState<TechnicianRecommendation[]>([]);
@@ -58,6 +67,9 @@ export const DispatcherDashboard: FC = () => {
       setMetrics(metricsRes.data);
       setIsOffline(metricsRes.isOffline);
       setActiveOrders(ordersRes.data.slice(0, 5));
+      setPendingReviews(
+        ordersRes.data.filter((w) => w.status === "WORK_COMPLETED_AWAITING_CONFIRMATION")
+      );
       setUrgentRequests(requestsRes.data.slice(0, 3));
       setRecentEvents(eventsRes.data.slice(0, 4));
       setErrorMessage(null);
@@ -123,6 +135,62 @@ export const DispatcherDashboard: FC = () => {
       alert(`Assignment failed: ${err.message}`);
     } finally {
       setIsAssigning(false);
+    }
+  };
+
+  const handleOpenReviewModal = (wo: WorkOrder) => {
+    setReviewingOrder(wo);
+    setCorrectionReason("");
+    setShowCorrectionInput(false);
+    setReviewError(null);
+    setReviewActionSuccess(null);
+  };
+
+  const handleApproveReport = async () => {
+    if (!reviewingOrder) return;
+    setIsReviewSubmitting(true);
+    setReviewError(null);
+    try {
+      const res = await dispatcherService.approveCompletionReport(reviewingOrder.id);
+      if (res.success) {
+        setReviewActionSuccess(`Work Order ${reviewingOrder.id} approved and finalized as COMPLETED.`);
+        setTimeout(() => {
+          setReviewingOrder(null);
+          setReviewActionSuccess(null);
+          loadDashboardData();
+        }, 1200);
+      }
+    } catch (err: any) {
+      setReviewError(err.message || "Failed to approve completion report.");
+    } finally {
+      setIsReviewSubmitting(false);
+    }
+  };
+
+  const handleRequestCorrection = async () => {
+    if (!reviewingOrder) return;
+    if (!correctionReason.trim()) {
+      setReviewError("Please specify the correction reason before proceeding.");
+      return;
+    }
+    setIsReviewSubmitting(true);
+    setReviewError(null);
+    try {
+      const res = await dispatcherService.requestCompletionCorrection(reviewingOrder.id, correctionReason.trim());
+      if (res.success) {
+        setReviewActionSuccess(`Correction requested for Work Order ${reviewingOrder.id}. Returned to technician.`);
+        setTimeout(() => {
+          setReviewingOrder(null);
+          setCorrectionReason("");
+          setShowCorrectionInput(false);
+          setReviewActionSuccess(null);
+          loadDashboardData();
+        }, 1200);
+      }
+    } catch (err: any) {
+      setReviewError(err.message || "Failed to request correction.");
+    } finally {
+      setIsReviewSubmitting(false);
     }
   };
 
@@ -339,6 +407,65 @@ export const DispatcherDashboard: FC = () => {
             }
           />
         </div>
+
+        {/* ── Pending Completion Reviews Area ────────────────────────────── */}
+        {pendingReviews.length > 0 && (
+          <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-3.5 sm:p-4 space-y-3 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-cyan-900 dark:text-cyan-200">
+                  Pending Completion Reviews ({pendingReviews.length})
+                </h3>
+              </div>
+              <span className="text-[11px] text-cyan-700 dark:text-cyan-300 font-medium">
+                Technician reports awaiting dispatcher verification
+              </span>
+            </div>
+
+            <div className="divide-y divide-[var(--border)] border border-[var(--border)] rounded-xl bg-[var(--bg-surface)] overflow-hidden">
+              {pendingReviews.map((order) => (
+                <div
+                  key={order.id}
+                  className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[var(--bg-surface-2)]/60 transition-colors"
+                >
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono font-bold text-xs text-[var(--text-primary)]">
+                        {order.id}
+                      </span>
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20">
+                        Review Required
+                      </span>
+                      <span className="text-[11px] text-[var(--text-muted)]">
+                        {order.category}
+                      </span>
+                    </div>
+
+                    <div className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                      {order.customerName} • <span className="font-normal text-[var(--text-muted)]">{order.assetName}</span>
+                    </div>
+
+                    <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-2">
+                      <span>Technician: <strong className="text-[var(--text-primary)]">{order.assignedTechnicianName || "Kamrul Islam"}</strong></span>
+                      <span>•</span>
+                      <span>Submitted: {order.completionReport?.completedAt ? new Date(order.completionReport.completedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Recently"}</span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenReviewModal(order)}
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-[#06090e] transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-sm self-start sm:self-auto"
+                  >
+                    <span>Review Report</span>
+                    <ArrowRightIcon size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ── 2. Operational Overview: Work Order Distribution & Trade Capacity ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
@@ -779,6 +906,169 @@ export const DispatcherDashboard: FC = () => {
                   {isAssigning ? "Dispatching..." : `Confirm Dispatch: ${selectedTech.technicianName}`}
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Dispatcher Completion Report Review Modal ────────────────────── */}
+      {reviewingOrder && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in"
+        >
+          <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-2xl space-y-4 text-[var(--text-primary)]">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold font-heading text-[var(--text-primary)]">
+                    Technician Completion Report Review
+                  </h3>
+                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 border border-cyan-500/20">
+                    {reviewingOrder.id}
+                  </span>
+                </div>
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  Verify technical findings, materials used, and work performed before closing work order.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setReviewingOrder(null)}
+                className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+              >
+                <XIcon size={14} />
+              </button>
+            </div>
+
+            {/* Error or Success Notice */}
+            {reviewError && (
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
+                <AlertTriangleIcon size={14} className="text-rose-500 shrink-0" />
+                <span>{reviewError}</span>
+              </div>
+            )}
+            {reviewActionSuccess && (
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2 font-semibold">
+                <CheckIcon size={14} className="text-emerald-500 shrink-0" />
+                <span>{reviewActionSuccess}</span>
+              </div>
+            )}
+
+            {/* Summary Grid */}
+            <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-[var(--bg-surface-2)] text-xs border border-[var(--border)]">
+              <div>
+                <span className="text-[var(--text-muted)] text-[10px] uppercase font-bold tracking-wider block">Customer & Asset</span>
+                <span className="font-semibold">{reviewingOrder.customerName}</span>
+                <div className="text-[11px] text-[var(--text-muted)] truncate">{reviewingOrder.assetName}</div>
+              </div>
+
+              <div>
+                <span className="text-[var(--text-muted)] text-[10px] uppercase font-bold tracking-wider block">Technician & Trade</span>
+                <span className="font-semibold">{reviewingOrder.assignedTechnicianName || "Kamrul Islam"}</span>
+                <div className="text-[11px] text-[var(--text-muted)] truncate">{reviewingOrder.category}</div>
+              </div>
+            </div>
+
+            {/* Detailed Report Fields */}
+            <div className="space-y-3 text-xs">
+              <div className="p-3 rounded-xl border border-[var(--border)] space-y-1">
+                <span className="font-bold text-[11px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
+                  Work Performed & Resolution
+                </span>
+                <p className="text-[var(--text-primary)] leading-relaxed">
+                  {reviewingOrder.completionReport?.workPerformed || reviewingOrder.completionReport?.notes || reviewingOrder.workNotes || "Technical diagnostic inspection completed."}
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl border border-[var(--border)] space-y-1">
+                <span className="font-bold text-[11px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
+                  On-Site Diagnosis & Root Cause
+                </span>
+                <p className="text-[var(--text-primary)] leading-relaxed">
+                  {reviewingOrder.completionReport?.diagnosis || "Component failure inspected and verified on site."}
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl border border-[var(--border)] space-y-1">
+                <span className="font-bold text-[11px] uppercase tracking-wider text-[var(--text-muted)] block">
+                  Materials & Parts Used
+                </span>
+                <p className="font-mono text-[11px] text-[var(--text-primary)]">
+                  {reviewingOrder.completionReport?.materialsUsed || "Standard diagnostic tooling & equipment consumed."}
+                </p>
+              </div>
+
+              {/* Correction Reason Drawer */}
+              {showCorrectionInput && (
+                <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-2 animate-fade-in">
+                  <label htmlFor="correction-reason" className="font-bold text-amber-800 dark:text-amber-300 block text-xs">
+                    Correction Notes / Reason for Return:
+                  </label>
+                  <textarea
+                    id="correction-reason"
+                    rows={2}
+                    value={correctionReason}
+                    onChange={(e) => setCorrectionReason(e.target.value)}
+                    placeholder="Specify additional measurements, missing photos, or required repairs..."
+                    className="w-full p-2.5 rounded-lg border border-amber-500/30 bg-[var(--bg-surface)] text-xs text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowCorrectionInput(false)}
+                      className="px-2.5 py-1 text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRequestCorrection}
+                      disabled={isReviewSubmitting}
+                      className="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs"
+                    >
+                      {isReviewSubmitting ? "Returning..." : "Send Back for Correction"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Actions */}
+            <div className="pt-3 border-t border-[var(--border)] flex items-center justify-between gap-2">
+              <div>
+                {!showCorrectionInput && (
+                  <button
+                    type="button"
+                    onClick={() => setShowCorrectionInput(true)}
+                    className="px-3 py-1.5 rounded-xl border border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 text-xs font-semibold transition-all"
+                  >
+                    Request Correction
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setReviewingOrder(null)}
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApproveReport}
+                  disabled={isReviewSubmitting}
+                  className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-[#06090e] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <CheckIcon size={13} />
+                  <span>{isReviewSubmitting ? "Approving..." : "Approve & Complete Work Order"}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

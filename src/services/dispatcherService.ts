@@ -22,6 +22,7 @@ import {
   INITIAL_DISPATCH_EVENTS,
 } from "./mockDispatcherData";
 import { operationalStore, reconcileTechnicianOperationalStatus } from "./operationalStore";
+import { notificationService } from "./notificationService";
 
 /**
  * Custom error class for Dispatcher API operations with explicit classification flags.
@@ -439,7 +440,11 @@ export const dispatcherService = {
     }
 
     if (params?.status && params.status !== "ALL") {
-      results = results.filter((w) => w.status === params.status);
+      if (params.status === "ASSIGNED") {
+        results = results.filter((w) => w.status === "ASSIGNED" || w.status === "TRAVELLING" || w.status === "ON_SITE");
+      } else {
+        results = results.filter((w) => w.status === params.status);
+      }
     }
 
     if (params?.category && params.category !== "ALL") {
@@ -904,6 +909,186 @@ export const dispatcherService = {
       success: true,
       data: [...getLocalEvents()],
       isOffline: true,
+      timestamp: new Date().toISOString(),
+    };
+  },
+
+  /**
+   * Dispatcher reviews and formally approves technician completion report.
+   * Finalizes Work Order to COMPLETED and generates customer invoice.
+   */
+  async approveCompletionReport(
+    workOrderId: string,
+    dispatcherName: string = "Tania Akter (Dispatcher)"
+  ): Promise<DispatcherApiResponse<WorkOrder>> {
+    const localWorkOrders = getLocalWorkOrders();
+    const order = localWorkOrders.find((w) => w.id === workOrderId);
+    if (!order) {
+      throw new DispatcherApiError(`Work Order ${workOrderId} not found.`, { status: 404 });
+    }
+
+    order.status = "COMPLETED";
+    order.completedAt = new Date().toISOString();
+    if (!order.completionReport) {
+      order.completionReport = {
+        completedAt: new Date().toISOString(),
+        notes: "Work completed and verified on site.",
+        technicianName: order.assignedTechnicianName || "Assigned Technician",
+      };
+    }
+
+    order.completionReport.dispatcherApproved = true;
+    order.completionReport.dispatcherApprovedAt = new Date().toISOString();
+    order.completionReport.dispatcherApprovedBy = dispatcherName;
+    order.completionReport.correctionRequested = false;
+
+    // Free technician
+    if (order.assignedTechnicianId) {
+      const localTechnicians = getLocalTechnicians();
+      const tech = localTechnicians.find((t) => t.id === order.assignedTechnicianId);
+      if (tech) {
+        reconcileTechnicianOperationalStatus(tech, localWorkOrders);
+        setLocalTechnicians(localTechnicians);
+      }
+    }
+
+    // Update customer service request if linked
+    const requests = operationalStore.getRequests();
+    const req = requests.find((r) => r.id === order.requestId);
+    if (req) {
+      req.status = "RESOLVED";
+      operationalStore.setRequests([...requests]);
+    }
+
+    // Generate invoice in operational store for the customer
+    const invoices = operationalStore.getInvoices();
+    const invoiceId = `INV-${4100 + invoices.length + 1}`;
+    const newInvoice = {
+      id: invoiceId,
+      workOrderId: order.id,
+      customerId: "cust-epz-01",
+      customerName: order.customerName,
+      assetName: order.assetName,
+      billingDate: new Date().toISOString().split("T")[0],
+      dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      status: "PAYMENT_DUE" as const,
+      items: [
+        {
+          id: `li-${Date.now()}-1`,
+          description: `Commercial Field Service: ${order.category}`,
+          quantity: 1,
+          unitPrice: 150,
+          totalPrice: 150,
+        },
+        {
+          id: `li-${Date.now()}-2`,
+          description: `On-Site Technical Resolution: ${order.problemSummary}`,
+          quantity: 1,
+          unitPrice: 320,
+          totalPrice: 320,
+        },
+      ],
+      subtotal: 470,
+      taxRate: 0.05,
+      taxAmount: 23.5,
+      totalAmount: 493.5,
+      paymentNotice: "Payment is a UI preview only. No real banking transaction will be processed.",
+    };
+    operationalStore.setInvoices([newInvoice, ...invoices]);
+    setLocalWorkOrders(localWorkOrders);
+
+    // Notify Customer
+    notificationService.addNotification({
+      role: "CUSTOMER",
+      userId: "cust-epz-01",
+      title: "Work Order Completed & Approved",
+      message: `Work Order ${order.id} (${order.assetName}) has been completed and approved by Dispatcher. Review report and confirm satisfaction.`,
+      type: "success",
+      link: "/customer",
+      actionLabel: "View Report & Rate",
+    });
+
+    // Notify Technician
+    notificationService.addNotification({
+      role: "TECHNICIAN",
+      title: "Completion Report Approved",
+      message: `Your completion report for Work Order ${order.id} was reviewed and approved by ${dispatcherName}.`,
+      type: "success",
+      link: "/technician/jobs",
+    });
+
+    // Add dispatch event log
+    const localEvents = getLocalEvents();
+    localEvents.unshift({
+      id: `EVT-D-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      action: "STATUS_CHANGED",
+      actorName: dispatcherName,
+      targetId: order.id,
+      summary: `Work Order ${order.id} completion report approved by ${dispatcherName}. Marked as COMPLETED.`,
+      severity: "INFO",
+    });
+    setLocalEvents(localEvents);
+
+    return {
+      success: true,
+      data: order,
+      isOffline: true,
+      message: `[Local Preview] Work Order ${order.id} approved and finalized as COMPLETED.`,
+      timestamp: new Date().toISOString(),
+    };
+  },
+
+  /**
+   * Dispatcher requests correction on technician completion report with reason.
+   */
+  async requestCompletionCorrection(
+    workOrderId: string,
+    reason: string,
+    dispatcherName: string = "Tania Akter (Dispatcher)"
+  ): Promise<DispatcherApiResponse<WorkOrder>> {
+    const localWorkOrders = getLocalWorkOrders();
+    const order = localWorkOrders.find((w) => w.id === workOrderId);
+    if (!order) {
+      throw new DispatcherApiError(`Work Order ${workOrderId} not found.`, { status: 404 });
+    }
+
+    order.status = "ON_SITE"; // Returns to ON_SITE for technician correction
+    if (order.completionReport) {
+      order.completionReport.correctionRequested = true;
+      order.completionReport.correctionReason = reason;
+      order.completionReport.dispatcherApproved = false;
+    }
+
+    setLocalWorkOrders(localWorkOrders);
+
+    // Notify Technician
+    notificationService.addNotification({
+      role: "TECHNICIAN",
+      title: "Report Correction Requested",
+      message: `Dispatcher ${dispatcherName} requested correction for Work Order ${order.id}: "${reason}".`,
+      type: "warning",
+      link: "/technician/jobs",
+      actionLabel: "Edit Report",
+    });
+
+    const localEvents = getLocalEvents();
+    localEvents.unshift({
+      id: `EVT-D-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      action: "STATUS_CHANGED",
+      actorName: dispatcherName,
+      targetId: order.id,
+      summary: `Correction requested for Work Order ${order.id}: ${reason}`,
+      severity: "WARNING",
+    });
+    setLocalEvents(localEvents);
+
+    return {
+      success: true,
+      data: order,
+      isOffline: true,
+      message: `[Local Preview] Correction requested for Work Order ${order.id}.`,
       timestamp: new Date().toISOString(),
     };
   },

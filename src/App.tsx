@@ -14,6 +14,7 @@ import { SupportChatWidget } from "./components/SupportChatWidget";
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard").then((m) => ({ default: m.AdminDashboard })));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement").then((m) => ({ default: m.UserManagement })));
 const TechnicianVerification = lazy(() => import("./pages/admin/TechnicianVerification").then((m) => ({ default: m.TechnicianVerification })));
+const DispatcherManagement = lazy(() => import("./pages/admin/DispatcherManagement").then((m) => ({ default: m.DispatcherManagement })));
 const AuditLog = lazy(() => import("./pages/admin/AuditLog").then((m) => ({ default: m.AuditLog })));
 
 const DispatcherDashboard = lazy(() => import("./pages/dispatcher/DispatcherDashboard").then((m) => ({ default: m.DispatcherDashboard })));
@@ -103,6 +104,14 @@ export default function App() {
                 element={
                   <ProtectedRoute allowedRoles={["ADMIN"]}>
                     <TechnicianVerification />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/dispatchers"
+                element={
+                  <ProtectedRoute allowedRoles={["ADMIN"]}>
+                    <DispatcherManagement />
                   </ProtectedRoute>
                 }
               />

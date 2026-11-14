@@ -319,10 +319,10 @@ export const customerService = {
   /**
    * Get subscription entitlement and service-credit usage for customer.
    */
-  getSubscription(customerId?: string, planId?: CoveragePlanId, customNegotiatedAllowance?: number | null): SubscriptionEntitlement {
+  getSubscription(customerId?: string, planId?: CoveragePlanId | null, customNegotiatedAllowance?: number | null): SubscriptionEntitlement {
     const requests = operationalStore.getRequests();
     const workOrders = operationalStore.getWorkOrders();
-    const activePlan = planId || getCustomerActivePlan(customerId);
+    const activePlan = planId !== undefined ? planId : getCustomerActivePlan(customerId);
     return getSubscriptionEntitlement(customerId || "cust-epz-01", requests, workOrders, activePlan, customNegotiatedAllowance);
   },
 };

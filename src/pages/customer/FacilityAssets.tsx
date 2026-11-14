@@ -218,13 +218,13 @@ export function FacilityAssets() {
           preferredTechnicianId: reportPreferredTechId || undefined,
           preferredTechnicianName: preferredTech ? `${preferredTech.name} (${preferredTech.designation})` : undefined,
           isAdditionalPaidQuotation: reportAsQuotation,
-          coveragePlan: "247-standard",
+          coveragePlan: subscription.planId || "247-priority",
         },
         {
           id: user?.id,
           name: user?.name,
           address: user?.company || "Apex Spinning & Weaving Mills, Savar",
-          coveragePlan: "247-standard",
+          coveragePlan: subscription.planId || "247-priority",
         }
       );
 
@@ -272,6 +272,105 @@ export function FacilityAssets() {
       }
     >
       <div className="space-y-6">
+        {/* ── Subscription Service Allowance Summary ────────────────────── */}
+        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--border)] pb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold font-heading text-[var(--text-primary)]">
+                Subscription Visit Allowance
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                {subscription.planName}
+              </span>
+            </div>
+            <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-2">
+              <span>Billing Cycle: Resets {subscription.billingCycleResetDate}</span>
+              {subscription.hasActiveSubscription && (
+                <Link
+                  to={`/checkout?plan=${subscription.planId || "247-priority"}`}
+                  className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
+                  Manage Plan &rarr;
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* 3 Balanced Metric Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Card 1: Monthly Included Visits */}
+            <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
+              <span className="text-xs font-medium text-[var(--text-muted)] block">
+                Monthly Included Visits
+              </span>
+              <div className="mt-1.5 text-2xl font-bold font-heading text-[var(--text-primary)]">
+                {subscription.needsConfiguration ? (
+                  <span className="text-sm font-semibold text-[var(--text-muted)]">Negotiated</span>
+                ) : subscription.includedVisits !== null ? (
+                  subscription.includedVisits
+                ) : (
+                  <span className="text-sm font-semibold text-[var(--text-muted)]">Unavailable</span>
+                )}
+              </div>
+              <span className="text-[11px] text-[var(--text-muted)] mt-0.5 block">
+                {subscription.planId === "8hr" ? "Plan A (Daily)" : subscription.planId === "247-standard" ? "Plan B (Standard)" : subscription.planId === "247-priority" ? "Plan C (Priority)" : "Plan D (Custom)"} allocation
+              </span>
+            </div>
+
+            {/* Card 2: Visits Used */}
+            <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
+              <span className="text-xs font-medium text-[var(--text-muted)] block">
+                Visits Used
+              </span>
+              <div className="mt-1.5 text-2xl font-bold font-heading text-[var(--text-primary)]">
+                {subscription.usedVisits}
+              </div>
+              <span className="text-[11px] text-[var(--text-muted)] mt-0.5 block">
+                Approved non-cancelled dispatches
+              </span>
+            </div>
+
+            {/* Card 3: Visits Remaining (Emerald) */}
+            <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
+              <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400 block">
+                Visits Remaining
+              </span>
+              <div className="mt-1.5 text-2xl font-bold font-heading text-[#10b981]">
+                {subscription.needsConfiguration ? (
+                  <span className="text-sm font-semibold text-slate-500">To be confirmed</span>
+                ) : subscription.remainingVisits !== null ? (
+                  subscription.remainingVisits
+                ) : (
+                  <span className="text-sm font-semibold text-slate-500">—</span>
+                )}
+              </div>
+              <span className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 mt-0.5 block font-medium">
+                {subscription.isExhausted ? "Allowance exhausted this cycle" : "Available for emergency dispatch"}
+              </span>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          {!subscription.needsConfiguration && subscription.includedVisits !== null && (
+            <div className="space-y-1 pt-1">
+              <div className="h-2 w-full bg-[var(--bg-surface-2)] rounded-full overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-300 rounded-full ${
+                    subscription.isExhausted ? "bg-amber-500" : "bg-[#10b981]"
+                  }`}
+                  style={{
+                    width: `${Math.min(100, (subscription.usedVisits / (subscription.includedVisits || 1)) * 100)}%`,
+                  }}
+                />
+              </div>
+              <div className="flex justify-between text-[10px] text-[var(--text-muted)]">
+                <span>{subscription.usedVisits} of {subscription.includedVisits} visits utilized ({Math.round((subscription.usedVisits / subscription.includedVisits) * 100)}%)</span>
+                <span>{subscription.remainingVisits} remaining</span>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* ── Summary KPI Cards ───────────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">

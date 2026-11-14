@@ -130,9 +130,18 @@ export function TechnicianVerification() {
     [technicians]
   );
 
-  // Initiate decision workflow with review note validation
+  // Initiate decision workflow with review note and expiration validation
   const handleInitiateDecision = (status: "VERIFIED" | "REJECTED") => {
     setModalError(null);
+    if (status === "VERIFIED" && selectedTech?.expiryDate) {
+      const expDate = new Date(selectedTech.expiryDate);
+      if (!isNaN(expDate.getTime()) && expDate.getTime() < Date.now()) {
+        setModalError(
+          `Cannot approve expired credential (${selectedTech.expiryDate}). Formal certificate renewal or supervisor exception is required.`
+        );
+        return;
+      }
+    }
     if (status === "REJECTED" && !reviewNote.trim()) {
       setModalError(
         "Please provide an administrative audit note explaining the rejection reason before proceeding."
@@ -161,16 +170,21 @@ export function TechnicianVerification() {
             ? {
                 ...t,
                 verificationStatus: pendingDecision,
-                verifiedAt: new Date().toISOString(),
-                verifiedBy: "Lead Administrator",
+                verifiedAt: new Date().toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                }),
+                verifiedBy: "Pranta (Lead Admin)",
                 verificationNotes: reviewNote.trim(),
               }
             : t
         )
       );
 
+      const noticePrefix = res.isLive ? "Verification updated:" : "Saved in Local Preview:";
       setActionSuccessNotice(
-        `Verification updated: ${selectedTech.technicianName} marked as ${
+        `${noticePrefix} ${selectedTech.technicianName} marked as ${
           pendingDecision === "VERIFIED" ? "verified" : "rejected"
         }.`
       );

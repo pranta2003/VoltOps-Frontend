@@ -4,9 +4,9 @@
 // Strictly enforces commercial subscription entitlements and service credit rules.
 // 
 // ENTITLEMENT ALLOWANCES:
-// - Plan A (8-Hour Daily Coverage): 5 included visits per billing cycle
-// - Plan B (24/7 Standard Coverage): 10 included visits per billing cycle
-// - Plan C (24/7 Priority Coverage): 15 included visits per billing cycle
+// - Plan A (8-Hour Daily Coverage): 15 included visits per billing cycle
+// - Plan B (24/7 Standard Coverage): 25 included visits per billing cycle
+// - Plan C (24/7 Priority Coverage): 30 included visits per billing cycle
 // - Plan D (Custom Enterprise Coverage): Negotiated allowance (strictly configured per account; never defaults to 20 or unlimited)
 //
 // CREDIT CONSUMPTION RULES:
@@ -23,27 +23,28 @@
 import { CoveragePlanId, ServiceRequest, WorkOrder } from "../types";
 import { operationalStore } from "./operationalStore";
 
-export function getCustomerActivePlan(customerId?: string): CoveragePlanId {
+export function getCustomerActivePlan(customerId?: string): CoveragePlanId | null {
   const purchases = operationalStore.getPurchases(customerId);
   if (purchases && purchases.length > 0) {
     return purchases[0].planId;
   }
-  return "247-priority";
+  return null;
 }
 
 export const PLAN_INCLUDED_VISITS: Record<CoveragePlanId, number | null> = {
-  "8hr": 5,
-  "247-standard": 10,
-  "247-priority": 15,
+  "8hr": 15,
+  "247-standard": 25,
+  "247-priority": 30,
   custom: null, // Strictly negotiated; must not default to 20 or unlimited
 };
 
 export interface SubscriptionEntitlement {
-  planId: CoveragePlanId;
+  hasActiveSubscription: boolean;
+  planId: CoveragePlanId | null;
   planName: string;
-  includedVisits: number | null; // null for unconfigured Plan D
+  includedVisits: number | null; // null for unconfigured Plan D or no plan
   usedVisits: number;
-  remainingVisits: number | null; // null for unconfigured Plan D
+  remainingVisits: number | null; // null for unconfigured Plan D or no plan
   billingCycleResetDate: string;
   isExhausted: boolean;
   isNegotiated: boolean;
@@ -117,9 +118,28 @@ export function getSubscriptionEntitlement(
   customerId: string,
   requests: ServiceRequest[],
   workOrders: WorkOrder[],
-  planId: CoveragePlanId = "247-standard",
+  planId: CoveragePlanId | null = "247-standard",
   customNegotiatedAllowance?: number | null
 ): SubscriptionEntitlement {
+  const { usedCount, eligibleWorkOrderIds } = calculateUsedCredits(customerId, requests, workOrders);
+
+  if (!planId) {
+    return {
+      hasActiveSubscription: false,
+      planId: null,
+      planName: "No Active Subscription",
+      includedVisits: null,
+      usedVisits: usedCount,
+      remainingVisits: null,
+      billingCycleResetDate: "1 Dec 2026",
+      isExhausted: true,
+      isNegotiated: false,
+      needsConfiguration: false,
+      statusMessage: "Subscription Required",
+      eligibleWorkOrderIds,
+    };
+  }
+
   const isNegotiated = planId === "custom";
 
   // Plan D: Must use explicitly configured negotiated allowance; never default to 20 or unlimited
@@ -127,9 +147,7 @@ export function getSubscriptionEntitlement(
     ? (typeof customNegotiatedAllowance === "number" && !isNaN(customNegotiatedAllowance)
         ? customNegotiatedAllowance
         : null)
-    : (PLAN_INCLUDED_VISITS[planId] ?? 10);
-
-  const { usedCount, eligibleWorkOrderIds } = calculateUsedCredits(customerId, requests, workOrders);
+    : (PLAN_INCLUDED_VISITS[planId] ?? 25);
 
   const needsConfiguration = isNegotiated && includedVisits === null;
 
@@ -152,6 +170,7 @@ export function getSubscriptionEntitlement(
   }
 
   return {
+    hasActiveSubscription: true,
     planId,
     planName,
     includedVisits,

@@ -12,6 +12,7 @@ import api from "../api/axios";
 import { WorkOrder, WorkOrderStatus, Invoice } from "../types";
 import { VALID_WORK_ORDER_TRANSITIONS } from "./dispatcherService";
 import { operationalStore, reconcileTechnicianOperationalStatus } from "./operationalStore";
+import { notificationService } from "./notificationService";
 
 export interface TechnicianApiResponse<T> {
   success: boolean;
@@ -254,6 +255,8 @@ export const technicianService = {
     report: {
       notes: string;
       materialsUsed?: string;
+      workPerformed?: string;
+      diagnosis?: string;
       technicianName?: string;
     }
   ): Promise<TechnicianApiResponse<WorkOrder>> {
@@ -271,10 +274,24 @@ export const technicianService = {
       actorName
     );
 
-    if (order.completionReport && report.materialsUsed) {
-      order.completionReport.materialsUsed = report.materialsUsed;
+    if (order.completionReport) {
+      if (report.materialsUsed) order.completionReport.materialsUsed = report.materialsUsed;
+      if (report.workPerformed) order.completionReport.workPerformed = report.workPerformed;
+      if (report.diagnosis) order.completionReport.diagnosis = report.diagnosis;
+      order.completionReport.dispatcherApproved = false;
+      order.completionReport.correctionRequested = false;
       operationalStore.setWorkOrders([...workOrders]);
     }
+
+    // Notify Dispatcher that a completion report requires review
+    notificationService.addNotification({
+      role: "DISPATCHER",
+      title: "New Completion Report Submitted",
+      message: `${actorName} submitted completion report for Work Order ${workOrderId} (${order.assetName}). Dispatcher review required.`,
+      type: "warning",
+      link: "/dispatcher",
+      actionLabel: "Review Report",
+    });
 
     return res;
   },
