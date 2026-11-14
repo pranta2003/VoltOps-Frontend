@@ -1,10 +1,11 @@
-import { useState, useEffect, FormEvent, FC } from "react";
+import { useState, useEffect, useRef, FormEvent, FC } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, useScroll, useSpring, useReducedMotion } from "framer-motion";
+import { motion, useScroll, useSpring, useReducedMotion, useInView } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { COVERAGE_PLANS } from "../config/coveragePricing";
+import { OPERATIONAL_REACH_METRICS, OPERATIONAL_REACH_DISCLAIMER } from "../config/operationalReach";
 import {
   IconProps,
   ZapIcon,
@@ -185,12 +186,12 @@ const AMBIENT_PARTICLES = [
 function LogoMark({ size = 34 }: { size?: number }) {
   return (
     <motion.div
-      animate={{ y: [0, -3, 0], scale: [1, 1.02, 1] }}
+      animate={{ y: [0, -4, 0], scale: [1, 1.03, 1] }}
       whileHover={{ scale: 1.08, rotate: 2 }}
       whileTap={{ scale: 0.95 }}
       transition={{
-        y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-        scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+        y: { duration: 2.2, repeat: Infinity, ease: "easeInOut" },
+        scale: { duration: 2.2, repeat: Infinity, ease: "easeInOut" },
       }}
       className="relative flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#10b981] via-[#059669] to-[#047857] shadow-[0_0_20px_rgba(16,185,129,0.45)] cursor-pointer overflow-hidden group shrink-0"
       style={{ width: size, height: size }}
@@ -209,6 +210,48 @@ function CheckIcon({ className = "" }: { className?: string }) {
     <svg className={`w-3.5 h-3.5 shrink-0 ${className}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
     </svg>
+  );
+}
+
+// ── Smooth Count-Up Metric Component for Reach Statistics ────────────────
+function CountUpMetric({
+  value,
+  decimals = 0,
+  suffix = "",
+}: {
+  value: number;
+  decimals?: number;
+  suffix?: string;
+}) {
+  const shouldReduce = useReducedMotion();
+  const [displayValue, setDisplayValue] = useState(shouldReduce ? value : 0);
+  const nodeRef = useRef<HTMLSpanElement>(null);
+  const inView = useInView(nodeRef, { once: true, margin: "-20px" });
+
+  useEffect(() => {
+    if (shouldReduce || !inView) return;
+    const durationMs = 1200;
+    const startTime = performance.now();
+
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / durationMs, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = value * eased;
+      setDisplayValue(decimals > 0 ? parseFloat(current.toFixed(decimals)) : Math.round(current));
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    requestAnimationFrame(step);
+  }, [inView, value, decimals, shouldReduce]);
+
+  return (
+    <span ref={nodeRef} className="tabular-nums">
+      {decimals > 0 ? displayValue.toFixed(decimals) : displayValue}
+      {suffix && <span className="font-sans font-bold ml-0.5 text-2xl sm:text-3xl text-emerald-500">{suffix}</span>}
+    </span>
   );
 }
 
@@ -337,20 +380,19 @@ export function LandingPage() {
 
   const isNavbarDark = isDark || activeSectionTone === "dark";
 
-  // Breathing green status dot animation (repeating smoothly every ~2.2s)
+  // Breathing green status dot animation (vibrant, natural ~1.8s loop)
   const dotPulseAnimation = shouldReduceMotion
     ? undefined
     : {
-        scale: [1, 1.25, 0.9, 1],
-        opacity: [0.85, 1, 0.45, 0.85],
+        scale: [1, 1.25, 1],
+        opacity: [0.9, 1, 0.9],
         boxShadow: [
-          "0 0 4px rgba(16, 185, 129, 0.4)",
-          "0 0 10px rgba(16, 185, 129, 0.9)",
-          "0 0 2px rgba(16, 185, 129, 0.2)",
-          "0 0 4px rgba(16, 185, 129, 0.4)",
+          "0 0 4px rgba(16, 185, 129, 0.5)",
+          "0 0 14px rgba(16, 185, 129, 1)",
+          "0 0 4px rgba(16, 185, 129, 0.5)",
         ],
         transition: {
-          duration: 2.2,
+          duration: 1.8,
           repeat: Infinity,
           ease: "easeInOut" as const,
         },
@@ -624,19 +666,19 @@ export function LandingPage() {
                       ))}
                     </motion.div>
                   )}
-                  {/* Task 2: Breathing status dot animation (gentle brighten, dim, loop every 2.2s) */}
-                  <span className="relative flex h-2.5 w-2.5 items-center justify-center">
+                  {/* Vibrant breathing status dot with outer pulsing ring */}
+                  <span className="relative flex h-3 w-3 items-center justify-center">
                     <motion.span
                       animate={
                         shouldReduceMotion
                           ? undefined
                           : {
-                              scale: [1, 1.8, 1],
-                              opacity: [0.45, 0.05, 0.45],
-                              transition: { duration: 2.2, repeat: Infinity, ease: "easeInOut" as const },
+                              scale: [1, 2.4, 1],
+                              opacity: [0.75, 0.05, 0.75],
+                              transition: { duration: 1.8, repeat: Infinity, ease: "easeInOut" as const },
                             }
                       }
-                      className="absolute inset-0 rounded-full bg-emerald-400/40 pointer-events-none"
+                      className="absolute inset-0 rounded-full bg-emerald-400 pointer-events-none"
                     />
                     <motion.span
                       variants={shouldReduceMotion ? {} : statusDotVariants}
@@ -646,7 +688,7 @@ export function LandingPage() {
                     >
                       <motion.span
                         animate={shouldReduceMotion ? undefined : dotPulseAnimation}
-                        className="inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-sm"
+                        className="inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.9)]"
                       />
                     </motion.span>
                   </span>
@@ -789,18 +831,22 @@ export function LandingPage() {
                   </a>
                 ))}
               </div>
-              <div className="pt-2 border-t border-[var(--border)] flex gap-2">
+              <div className="pt-2.5 border-t border-[var(--border)] flex gap-2">
                 <Link
                   to="/login"
                   onClick={() => setMenuOpen(false)}
-                  className="w-1/2 text-center py-2.5 rounded-xl text-xs font-semibold border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
+                  className={`w-1/2 text-center py-2.5 min-h-[44px] flex items-center justify-center rounded-xl text-xs font-bold transition-all ${
+                    isNavbarDark
+                      ? "border border-white/20 bg-white/10 text-white hover:bg-white/20 hover:border-white/30 shadow-sm"
+                      : "border border-slate-300 bg-slate-100 text-slate-900 hover:bg-slate-200 hover:border-slate-400 shadow-sm"
+                  }`}
                 >
                   Sign in
                 </Link>
                 <a
                   href="#packages"
                   onClick={() => setMenuOpen(false)}
-                  className="w-1/2 text-center py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-colors"
+                  className="w-1/2 text-center py-2.5 min-h-[44px] flex items-center justify-center rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
                 >
                   Choose a Plan
                 </a>
@@ -1799,7 +1845,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Section: Industrial Impact & Operational Statistics ────────── */}
+      {/* ── Section: Our Operational Reach (Commercial Scale & Industrial Reach) ── */}
       <section id="statistics" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface)]">
         <div className="max-w-6xl mx-auto px-5">
           <motion.div
@@ -1810,16 +1856,16 @@ export function LandingPage() {
             className="text-center max-w-xl mx-auto mb-14 space-y-2.5"
           >
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
-              Operational Commitments
+              Our Operational Reach
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)]">
-              Engineered for industrial{" "}
+              Built for commercial{" "}
               <span className="font-serif-italic font-normal">
-                reliability
+                operations
               </span>
             </h2>
             <p className="text-sm text-slate-700 dark:text-slate-300">
-              Measurable service commitments and deterministic arrival targets across commercial facilities.
+              Illustrative platform scale demonstrating multi-zone technician dispatching and enterprise reliability.
             </p>
           </motion.div>
 
@@ -1830,86 +1876,51 @@ export function LandingPage() {
             variants={sectionContainerVariants}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            {/* Metric 1: 7 Supported Service Trades */}
-            <motion.div
-              variants={cardItemVariants}
-              whileHover={{ y: -5 }}
-              transition={{ duration: 0.2 }}
-              className="p-6 rounded-[28px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)] hover:border-[#10b981]/50 transition-all text-center"
-            >
-              <div>
-                <div className="text-4xl sm:text-5xl font-extrabold font-heading text-slate-900 dark:text-white tracking-tight">
-                  7
+            {OPERATIONAL_REACH_METRICS.map((metric) => (
+              <motion.div
+                key={metric.id}
+                variants={cardItemVariants}
+                whileHover={{ y: -5 }}
+                transition={{ duration: 0.2 }}
+                className={`p-6 rounded-[28px] border glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)] transition-all text-center ${
+                  metric.highlight
+                    ? "border-2 border-[#10b981] bg-emerald-500/5 shadow-[0_0_24px_rgba(16,185,129,0.15)]"
+                    : "border-[var(--border)] hover:border-[#10b981]/50"
+                }`}
+              >
+                <div>
+                  <div
+                    className={`text-4xl sm:text-5xl font-extrabold font-heading tracking-tight ${
+                      metric.highlight
+                        ? "text-[#10b981] dark:text-[#34d399]"
+                        : "text-slate-900 dark:text-white"
+                    }`}
+                  >
+                    <CountUpMetric
+                      value={metric.targetValue}
+                      decimals={metric.decimals || 0}
+                      suffix={metric.suffix}
+                    />
+                  </div>
+                  <h3 className="font-bold text-sm text-[var(--text-primary)] mt-2">
+                    {metric.label}
+                  </h3>
                 </div>
-                <h3 className="font-bold text-sm text-[var(--text-primary)] mt-2">
-                  Supported Service Trades
-                </h3>
-              </div>
-              <p className="text-xs text-[var(--text-secondary)] mt-3 leading-relaxed pt-3 border-t border-[var(--border)]">
-                Electrical, HVAC, Plumbing, Power Gen, Network, CCTV & IT systems
-              </p>
-            </motion.div>
-
-            {/* Metric 2: 20 min Priority Arrival Target */}
-            <motion.div
-              variants={cardItemVariants}
-              whileHover={{ y: -5 }}
-              transition={{ duration: 0.2 }}
-              className="p-6 rounded-[28px] border-2 border-[#10b981] bg-emerald-500/5 glass-panel flex flex-col justify-between shadow-[0_0_24px_rgba(16,185,129,0.15)] hover:border-[#10b981] transition-all text-center"
-            >
-              <div>
-                <div className="text-4xl sm:text-5xl font-extrabold font-heading text-[#10b981] dark:text-[#34d399] tracking-tight">
-                  20<span className="text-xl sm:text-2xl font-bold font-sans ml-1">min</span>
-                </div>
-                <h3 className="font-bold text-sm text-[var(--text-primary)] mt-2">
-                  Priority Arrival Target
-                </h3>
-              </div>
-              <p className="text-xs text-[var(--text-secondary)] mt-3 leading-relaxed pt-3 border-t border-[#10b981]/30">
-                Plan C rapid technician arrival physically at your facility door (2× faster)
-              </p>
-            </motion.div>
-
-            {/* Metric 3: 40 min Standard Arrival Target */}
-            <motion.div
-              variants={cardItemVariants}
-              whileHover={{ y: -5 }}
-              transition={{ duration: 0.2 }}
-              className="p-6 rounded-[28px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)] hover:border-[#10b981]/50 transition-all text-center"
-            >
-              <div>
-                <div className="text-4xl sm:text-5xl font-extrabold font-heading text-slate-900 dark:text-white tracking-tight">
-                  40<span className="text-xl sm:text-2xl font-bold font-sans ml-1">min</span>
-                </div>
-                <h3 className="font-bold text-sm text-[var(--text-primary)] mt-2">
-                  Standard Arrival Target
-                </h3>
-              </div>
-              <p className="text-xs text-[var(--text-secondary)] mt-3 leading-relaxed pt-3 border-t border-[var(--border)]">
-                Plan B 24/7 round-the-clock physical technician arrival on site
-              </p>
-            </motion.div>
-
-            {/* Metric 4: 5–15 Included Visits */}
-            <motion.div
-              variants={cardItemVariants}
-              whileHover={{ y: -5 }}
-              transition={{ duration: 0.2 }}
-              className="p-6 rounded-[28px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)] hover:border-[#10b981]/50 transition-all text-center"
-            >
-              <div>
-                <div className="text-4xl sm:text-5xl font-extrabold font-heading text-slate-900 dark:text-white tracking-tight">
-                  5–15
-                </div>
-                <h3 className="font-bold text-sm text-[var(--text-primary)] mt-2">
-                  Included Visits per Cycle
-                </h3>
-              </div>
-              <p className="text-xs text-[var(--text-secondary)] mt-3 leading-relaxed pt-3 border-t border-[var(--border)]">
-                Predictable allowance across Plan A (5), Plan B (10), and Plan C (15)
-              </p>
-            </motion.div>
+                <p
+                  className={`text-xs text-[var(--text-secondary)] mt-3 leading-relaxed pt-3 border-t ${
+                    metric.highlight ? "border-[#10b981]/30" : "border-[var(--border)]"
+                  }`}
+                >
+                  {metric.description}
+                </p>
+              </motion.div>
+            ))}
           </motion.div>
+
+          {/* Understated illustrative prototype disclaimer */}
+          <p className="text-center text-[11px] text-[var(--text-muted)] mt-8 italic">
+            {OPERATIONAL_REACH_DISCLAIMER}
+          </p>
         </div>
       </section>
 
@@ -2213,27 +2224,45 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Planned Payment Methods Architecture Strip */}
-          <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-            <div className="space-y-0.5 text-center sm:text-left">
-              <span className="text-xs font-bold text-slate-200 block">
-                Payment Gateway Integration Architecture
-              </span>
-              <p className="text-[11px] text-slate-400">
-                Prepared for automated corporate billing settlements and rapid subscription processing.
+          {/* Planned Payment Brands & Ecosystem Strip */}
+          <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col lg:flex-row items-center justify-between gap-5">
+            <div className="space-y-1 text-center lg:text-left">
+              <div className="flex items-center justify-center lg:justify-start gap-2">
+                <span className="text-xs font-bold text-slate-200">
+                  Payment Ecosystem
+                </span>
+                <span className="text-[9px] uppercase tracking-wider font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                  Planned Gateway Methods
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 max-w-md">
+                Multi-gateway architecture designed for corporate cards, local MFS settlements, and automated recurring subscriptions.
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap justify-center">
-              <span className="px-3 py-1 rounded-lg border border-white/15 bg-white/5 font-mono text-[11px] font-bold text-slate-300">
-                Stripe Secure Checkout
-              </span>
-              <span className="px-3 py-1 rounded-lg border border-white/15 bg-white/5 font-mono text-[11px] font-bold text-slate-300">
-                SSLCommerz Gateway
-              </span>
-              <span className="text-[9px] uppercase tracking-wider font-mono font-bold text-amber-400/90 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
-                Prototype Architecture
-              </span>
+            {/* Horizontal Brand Strip: 6 Recognizable Brands with Consistent Proportions */}
+            <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center py-1">
+              {[
+                { name: "Stripe", src: "/images/payment-methods/stripe.svg", alt: "Stripe Secure Payments" },
+                { name: "SSLCommerz", src: "/images/payment-methods/sslcommerz.svg", alt: "SSLCommerz Gateway" },
+                { name: "Visa", src: "/images/payment-methods/visa.svg", alt: "Visa Card" },
+                { name: "Mastercard", src: "/images/payment-methods/mastercard.svg", alt: "Mastercard" },
+                { name: "American Express", src: "/images/payment-methods/amex.svg", alt: "American Express" },
+                { name: "bKash", src: "/images/payment-methods/bkash.svg", alt: "bKash Merchant Payment" },
+              ].map((brand) => (
+                <div
+                  key={brand.name}
+                  className="h-8 sm:h-9 px-2.5 py-1 rounded-xl bg-white/95 dark:bg-white/[0.08] border border-white/20 shadow-sm flex items-center justify-center transition-transform hover:scale-105"
+                  title={brand.alt}
+                >
+                  <img
+                    src={brand.src}
+                    alt={brand.alt}
+                    className="h-5 sm:h-5.5 w-auto max-w-[85px] object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
             </div>
           </div>
 

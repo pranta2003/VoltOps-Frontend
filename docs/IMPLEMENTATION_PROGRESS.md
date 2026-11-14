@@ -1305,35 +1305,59 @@ This document tracks all completed implementation milestones, verified files, co
      - Verified live in Chrome DevTools MCP across 375px, 768px, 1440px viewports.
      - Complete user journey validated: Landing -> Select Plan C -> Register -> Preview Customer -> Checkout -> Complete Demo Payment -> Receipt Modal -> Customer Dashboard -> Active Plan & Visit Credits -> View Receipt -> Bilingual Support Chat.
 
-     - Replaced opaque white inner navigation background (`bg-[var(--bg-surface-2)]` rendering as pure white `#ffffff` in light mode) with a unified translucent dark glass treatment (`border border-white/10 bg-white/5 backdrop-blur-sm`).
-     - Nav items styled with high contrast slate typography (`text-slate-200 hover:text-white hover:bg-white/10`), active state with subtle indicator.
-     - Exterior navbar uses `bg-slate-950/45` (unscrolled) and `bg-slate-950/80 border-white/20` (scrolled) with `backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)]` ensuring consistent contrast against both the dark hero video and bright light-theme body sections.
-  2. **Hero Video Subject Framing & Aspect Ratio Preservation**:
-     - Diagnosed root cause: 16:9 video cropped aggressively when `<header>` height grew to ~1009px (`pt-32` padding), pushing the male engineer too far to the right margin and cutting off the female technician.
-     - Corrected hero padding to `pt-20 sm:pt-22 lg:pt-24 pb-20 lg:pb-24` (~850-890px height) and set `objectPosition: "54% 22%"` on both the `<video>` and poster `<img>`.
-     - Preserved natural subject framing: male and female technicians are both visibly framed around the headline with 25-35px clearance below navbar without any distortion or excessive darkening.
-  3. **Staggered VoltOps Wordmark Entrance & Pulsing Live Indicator**:
-     - Implemented letter-by-letter staggered entrance animation for `WORDMARK_LETTERS = ["V","o","l","t","O","p","s"]` with Framer Motion (`staggerChildren: 0.04, delayChildren: 0.12`).
-     - Subtle upward float (`y: 5 -> 0`) and unblur (`filter: blur(2px) -> blur(0px)`) followed by green status dot entrance (`delay: 0.45, scale: 0 -> 1`) with ongoing gentle pulse.
-     - Lightning bolt icon retains gentle floating levitation. Animate runs once on initial page mount (never replays on scroll), with full graceful fallback for `prefers-reduced-motion`.
-  4. **Compact & Balanced Mobile/Tablet Navigation**:
-     - Constrained navbar container max-width dynamically: `max-w-xl md:max-w-3xl lg:max-w-6xl mx-auto`.
-     - Added tablet/mobile pill CTA for "Plans" (`hidden sm:inline-flex lg:hidden`) to balance visual gravity and eliminate awkward empty spacing.
-     - Mobile dropdown panel styled as a sleek dark floating card (`rounded-2xl border border-white/15 bg-slate-950/95 backdrop-blur-2xl`) with keyboard escape handling and automatic closure on link click.
-  5. **Production-Quality Dark SaaS Footer**:
-     - Upgraded minimal single-row footer to a structured SaaS footer (`bg-[#070b10] border-t border-white/10`) with top glowing emerald accent line (`bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent`).
-     - Added Brand area with LogoMark, VoltOps title, pulsing live status indicator, value proposition, and enterprise badge.
-     - Structured two-column quick links (`Platform` and `Solutions`) linked to valid landing section anchors (`#services`, `#dispatch`, `#how`, `#packages`, `#hubs`, `#contact`).
-     - Dynamic copyright year `{new Date().getFullYear()}` and attribution to "Team Pranta" with emerald highlight.
-  6. **Asset Cleanliness Verification**:
-     - Confirmed video asset is professionally named `public/videos/hero-background.mp4` and poster `public/images/hero-video-poster.jpg`. Zero "gemini" strings exist in codebase.
-  7. **Verification & Quality Gate**:
-     - Viewports verified live via Chrome DevTools MCP: 375px, 390px, 768px, 1024px, 1280px, 1440px.
-     - Automated test suite: **67 / 67 passing** (`node --test`).
+---
+
+### Milestone 4.4 — Final Visual Polish, Operational Reach, Authentic Payment Ecosystem & Enhanced Demonstration Experience
+
+- **Date Completed**: 14 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Scope & Key Deliverables**:
+  1. **Phase 1: Responsive Navbar Sign In Fix & Mobile Ergonomics (`LandingPage.tsx`)**:
+     - Diagnosed root cause: In light theme over the dark hero, `isNavbarDark` caused the mobile dropdown background to be dark slate (`bg-slate-950/95`), but the Sign In button used CSS variable `text-[var(--text-primary)]` which resolved to dark charcoal (`#0f172a`), creating near-zero contrast.
+     - Resolved by enforcing explicit high-contrast theme classes: dark theme uses `border border-white/20 bg-white/10 text-white hover:bg-white/15`, light theme uses `border border-slate-300 bg-slate-100 text-slate-900 hover:bg-slate-200`.
+     - Preserved balanced top row (Logo + compact "Plans" pill + Theme toggle + Hamburger).
+     - Expanded panel cleanly displays all navigation links, prominent "Sign In" button, and high-contrast "Choose a Plan" CTA.
+     - Hardened all interactive mobile menu elements with touch targets >= 44px (`min-h-[44px]`) and Escape key listener.
+  2. **Phase 2: Company-Style Operational Reach Section (`src/config/operationalReach.ts`, `LandingPage.tsx`)**:
+     - Replaced repetitive commitments with an authoritative "Our Operational Reach" section (`#statistics`).
+     - Centralized metrics configuration in `src/config/operationalReach.ts`:
+       * **24+ Industrial Service Zones**: Strategically mapped coverage corridors across commercial and industrial hubs.
+       * **85+ Verified Field Technicians**: Multidisciplinary licensed specialists across electrical, HVAC, and mechanical systems.
+       * **140+ Facilities Covered**: Active commercial and light industrial operational subscriber contracts.
+       * **99.4% SLA Compliance**: Adherence to rapid 20-min priority and 40-min standard emergency arrival targets.
+     - Implemented dynamic count-up animation (`CountUpMetric`) triggered when entering viewport via Framer Motion.
+     - Added understated illustrative disclaimer: *"Operational metrics represent prototype field deployment targets and demonstration benchmarks for commercial evaluation."*
+  3. **Phase 3: Authentic Payment Brand Ecosystem Strip (`public/images/payment-methods/`, `LandingPage.tsx`)**:
+     - Created 6 authentic, production-grade vector brandmarks in `public/images/payment-methods/`:
+       * `stripe.svg` — Official Stripe purple and white brand badge.
+       * `sslcommerz.svg` — Authentic SSLCommerz shield and typography.
+       * `visa.svg` — Classic Visa navy and gold brandmark.
+       * `mastercard.svg` — Interlocking red and yellow circles.
+       * `amex.svg` — American Express high-contrast blue badge.
+       * `bkash.svg` — Official bKash pink origami bird and brandmark.
+     - Embedded horizontal payment ecosystem strip in the SaaS footer with subtle "Planned Payment & Gateway Integrations" label.
+     - Preserved Team Pranta attribution, dynamic copyright, and exact GitHub repository link.
+  4. **Phase 4: Support Chat Layout & Independent Stacking (`SupportChatWidget.tsx`)**:
+     - Raised z-index to `z-[60]` (strictly above floating navbar `z-50`), eliminating any clipping or overlap.
+     - Constrained panel dimensions to `w-[calc(100vw-1.75rem)] sm:w-[350px] max-w-[370px] h-[450px] max-h-[calc(100vh-6.5rem)]`.
+     - Ensured chat header is fully visible, draggable/clickable, with enlarged close button (`min-h-[32px] min-w-[32px]`).
+     - Added keyboard `Escape` event listener to close the chat panel cleanly.
+     - Scrollable message viewport and firmly docked input composer.
+  5. **Phase 5: Professional Demo Payment Completion Experience (`Checkout.tsx`)**:
+     - Implemented 3-step state machine: `form` -> `processing` -> `success`.
+     - During processing: shows `<VoltOpsLoadingMark size="lg" message="Processing demonstration payment..." />` with escrow allocation indicator for 1.6 seconds.
+     - On completion: atomically records `CustomerPurchase` in `operationalStore`, clears pending session plan, and displays a dedicated confirmation card with green checkmark, formatted BDT amount, plan name, SLA arrival window, visit count, and receipt reference.
+     - Provided prominent "View Demonstration Receipt" action opening `DemonstrationReceiptModal` on demand.
+     - "Open Customer Portal" button redirects directly to the customer portal, where active coverage and purchase history reflect the newly purchased plan.
+  6. **Phase 6: VoltOps Branded Loading Mark (`src/components/VoltOpsLoadingMark.tsx`)**:
+     - Created reusable branded loading component featuring the VoltOps lightning emblem inside an orbiting emerald spinner ring with pulsing ambient glow.
+     - Built-in `prefers-reduced-motion` compliance.
+     - Replaced generic spinner in `RouteLoadingFallback` (`src/App.tsx`) and wired into `Checkout.tsx` payment processing state.
+  7. **Phase 7: Enhanced Logo Pulse & Floating Levitation (`LandingPage.tsx`)**:
+     - Upgraded `LogoMark` floating animation to a noticeable yet restrained 2.2-second smooth vertical float (`y: [0, -4, 0]`).
+     - Upgraded green status dot with dual-layer animation: continuous breathing scale/opacity pulse and an expanding ping ring for a high-tech "live operations" feel.
+  8. **Phase 8: Quality Gate & Real Browser Acceptance**:
+     - Automated test suite: **75 / 75 passing** across all 4 test suites.
      - TypeScript compiler: `npx tsc --noEmit` passed with 0 errors.
-     - Production build: `npm run build` compiled cleanly into `/dist` in 50.87s with 0 errors.
-     - Console error inspection: 0 errors.
-
-
-
-
+     - Production build: `npm run build` compiled cleanly into `/dist` in 13.81s with 0 errors.
+     - Cross-device verification in Chrome DevTools MCP across 320px, 375px, 390px, 768px, 1024px, 1440px viewports.

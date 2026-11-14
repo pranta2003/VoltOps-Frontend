@@ -10,9 +10,11 @@ import {
 import { operationalStore } from "../../services/operationalStore";
 import { CustomerPurchase } from "../../types";
 import { DemonstrationReceiptModal } from "../../components/DemonstrationReceiptModal";
+import { VoltOpsLoadingMark } from "../../components/VoltOpsLoadingMark";
 import {
   ShieldCheckIcon,
   CheckIcon,
+  CheckCircleIcon,
   CreditCardIcon,
   ArrowRightIcon,
   BuildingIcon,
@@ -49,9 +51,10 @@ export function Checkout() {
   const [facilityAddress, setFacilityAddress] = useState("Plot 14-18, Sector 3, Savar DEPZ, Dhaka");
   const [contactPhone, setContactPhone] = useState("+880 1711-234567");
 
-  // Payment processing state
-  const [isProcessing, setIsProcessing] = useState(false);
+  // Payment processing lifecycle state
+  const [checkoutStep, setCheckoutStep] = useState<"form" | "processing" | "success">("form");
   const [completedPurchase, setCompletedPurchase] = useState<CustomerPurchase | null>(null);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
 
   // Arithmetic calculations in BDT
   const baseMonthlyPrice = planPricing.monthlyBdtPrice || 4000;
@@ -61,8 +64,8 @@ export function Checkout() {
   const totalAmount = baseAmount + vatAmount;
 
   function handleCompleteDemoPayment() {
-    if (isProcessing || completedPurchase) return; // Prevent double submit
-    setIsProcessing(true);
+    if (checkoutStep !== "form" || completedPurchase) return; // Prevent double submit
+    setCheckoutStep("processing");
 
     const suffix = Date.now().toString().slice(-6);
     const purchaseId = `PUR-${suffix}`;
@@ -89,14 +92,17 @@ export function Checkout() {
       paymentStatus: "DEMO_PAID",
     };
 
-    // Save purchase into operational store
-    operationalStore.addPurchase(newPurchase);
+    // Realistic demonstration delay to simulate transaction verification & escrow allocation
+    setTimeout(() => {
+      // Save purchase into operational store
+      operationalStore.addPurchase(newPurchase);
 
-    // Clear pending purchase key
-    sessionStorage.removeItem("voltops_pending_plan");
+      // Clear pending purchase key
+      sessionStorage.removeItem("voltops_pending_plan");
 
-    setIsProcessing(false);
-    setCompletedPurchase(newPurchase);
+      setCompletedPurchase(newPurchase);
+      setCheckoutStep("success");
+    }, 1100);
   }
 
   return (
@@ -433,60 +439,138 @@ export function Checkout() {
                 Payment Method
               </h2>
 
-              {/* 1. Real Payment Gateway (Stripe & SSLCommerz Boundary) */}
-              <div className="p-3.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] opacity-60 space-y-2 cursor-not-allowed">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-2">
-                    <CreditCardIcon size={16} />
-                    <span>Stripe & SSLCommerz Gateways</span>
-                  </span>
-                  <span className="text-[9px] uppercase font-mono font-bold px-2 py-0.5 rounded bg-slate-500/20 text-[var(--text-muted)]">
-                    Requires Backend
-                  </span>
+              {checkoutStep === "processing" ? (
+                <div className="p-8 rounded-3xl border-2 border-emerald-500/40 bg-emerald-500/[0.04] text-center space-y-4 shadow-lg backdrop-blur-sm animate-in fade-in duration-150">
+                  <VoltOpsLoadingMark size="lg" message="Processing demonstration payment..." />
+                  <div className="space-y-1.5 pt-2">
+                    <p className="text-xs font-bold text-[var(--text-primary)]">
+                      Establishing Demonstration Facility Escrow
+                    </p>
+                    <p className="text-[11px] text-[var(--text-muted)] max-w-xs mx-auto leading-relaxed">
+                      Allocating {planPricing.name} quota ({planPricing.includedVisits || 15} visits, {planPricing.arrivalSlaLabel}) in local demonstration memory...
+                    </p>
+                  </div>
                 </div>
-                <p className="text-[10px] text-[var(--text-muted)] leading-relaxed">
-                  Real payment card tokenization and mobile banking (bKash/Nagad) require the live VoltOps backend payment microservice.
-                </p>
-              </div>
+              ) : checkoutStep === "success" && completedPurchase ? (
+                <div className="p-6 sm:p-7 rounded-3xl border-2 border-emerald-500 bg-emerald-500/10 text-center space-y-5 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+                  <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center text-emerald-500 mx-auto shadow-[0_0_24px_rgba(16,185,129,0.35)]">
+                    <CheckCircleIcon size={34} />
+                  </div>
 
-              {/* 2. Demonstration Checkout (Local Preview Mode) */}
-              <div className="p-4 rounded-2xl border-2 border-emerald-500/60 bg-emerald-500/10 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 uppercase tracking-wider">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>Demo Checkout</span>
-                  </span>
-                  <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full">
-                    DEMO_PAID
-                  </span>
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-emerald-600 dark:text-emerald-400 bg-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                      DEMO_PAID • PROTOTYPE
+                    </span>
+                    <h3 className="text-xl font-heading font-extrabold text-[var(--text-primary)] pt-1">
+                      Demo Payment Successful
+                    </h3>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Subscription active for {completedPurchase.company}
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] text-left space-y-2 text-xs">
+                    <div className="flex justify-between items-center pb-2 border-b border-[var(--border)]">
+                      <span className="text-[var(--text-muted)]">Total Amount Paid</span>
+                      <span className="font-extrabold text-sm text-[var(--text-primary)]">{formatBdt(completedPurchase.totalAmount)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[var(--text-muted)]">Subscribed Plan</span>
+                      <span className="font-semibold text-[var(--text-primary)]">{completedPurchase.planName}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[var(--text-muted)]">Guaranteed Arrival</span>
+                      <span className="font-semibold text-emerald-600 dark:text-emerald-400">{completedPurchase.arrivalSla}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[var(--text-muted)]">Maintenance Allowance</span>
+                      <span className="font-semibold text-[var(--text-primary)]">{completedPurchase.includedVisits} included visits</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-1 text-[10px] font-mono text-[var(--text-muted)]">
+                      <span>Receipt Reference</span>
+                      <span>{completedPurchase.receiptId}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-[var(--text-muted)] italic">
+                    Simulated payment in Local Preview Mode. No real financial charge was made.
+                  </p>
+
+                  <div className="space-y-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowReceiptModal(true)}
+                      className="w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 dark:bg-emerald-500 dark:hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-md active:scale-[0.99]"
+                    >
+                      <CreditCardIcon size={16} />
+                      <span>View Demonstration Receipt</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/customer")}
+                      className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)] border border-[var(--border)] transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <span>Open Customer Portal</span>
+                      <ArrowRightIcon size={13} />
+                    </button>
+                  </div>
                 </div>
+              ) : (
+                <>
+                  {/* 1. Real Payment Gateway (Stripe & SSLCommerz Boundary) */}
+                  <div className="p-3.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] opacity-60 space-y-2 cursor-not-allowed">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-2">
+                        <CreditCardIcon size={16} />
+                        <span>Stripe & SSLCommerz Gateways</span>
+                      </span>
+                      <span className="text-[9px] uppercase font-mono font-bold px-2 py-0.5 rounded bg-slate-500/20 text-[var(--text-muted)]">
+                        Requires Backend
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-[var(--text-muted)] leading-relaxed">
+                      Real payment card tokenization and mobile banking (bKash/Nagad) require the live VoltOps backend payment microservice.
+                    </p>
+                  </div>
 
-                <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
-                  Demonstrate the full checkout lifecycle and instant receipt issuance without a real financial charge.
-                </p>
+                  {/* 2. Demonstration Checkout (Local Preview Mode) */}
+                  <div className="p-4 rounded-2xl border-2 border-emerald-500/60 bg-emerald-500/10 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 uppercase tracking-wider">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span>Demo Checkout</span>
+                      </span>
+                      <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full">
+                        DEMO_PAID
+                      </span>
+                    </div>
 
-                <button
-                  type="button"
-                  onClick={handleCompleteDemoPayment}
-                  disabled={isProcessing}
-                  className="w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 dark:bg-emerald-500 dark:hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-md active:scale-[0.99] disabled:opacity-50"
-                >
-                  <CheckIcon size={16} />
-                  <span>
-                    {isProcessing ? "Provisioning Subscription..." : `Complete Demo Payment (${formatBdt(totalAmount)})`}
-                  </span>
-                </button>
-              </div>
+                    <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+                      Demonstrate the full checkout lifecycle and instant receipt issuance without a real financial charge.
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={handleCompleteDemoPayment}
+                      disabled={checkoutStep !== "form"}
+                      className="w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 dark:bg-emerald-500 dark:hover:bg-emerald-400 transition-all flex items-center justify-center gap-2 shadow-md active:scale-[0.99] disabled:opacity-50"
+                    >
+                      <CheckIcon size={16} />
+                      <span>Complete Demo Payment ({formatBdt(totalAmount)})</span>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Demonstration Receipt Modal upon successful Demo Payment */}
-      {completedPurchase && (
+      {/* Demonstration Receipt Modal upon demand or trigger */}
+      {showReceiptModal && completedPurchase && (
         <DemonstrationReceiptModal
           purchase={completedPurchase}
-          onClose={() => setCompletedPurchase(null)}
+          onClose={() => setShowReceiptModal(false)}
           onContinueToPortal={() => navigate("/customer")}
         />
       )}

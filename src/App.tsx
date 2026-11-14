@@ -35,9 +35,11 @@ const FacilityAssets = lazy(() => import("./pages/customer/FacilityAssets").then
 const CustomerInvoices = lazy(() => import("./pages/customer/CustomerInvoices").then((m) => ({ default: m.CustomerInvoices })));
 const Checkout = lazy(() => import("./pages/customer/Checkout").then((m) => ({ default: m.Checkout })));
 
+import { VoltOpsLoadingMark } from "./components/VoltOpsLoadingMark";
+
 const RouteLoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-[var(--bg-main)] text-[var(--text-muted)] text-xs font-mono">
-    Loading VoltOps Module...
+  <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)]">
+    <VoltOpsLoadingMark size="md" message="Loading VoltOps Module..." />
   </div>
 );
 

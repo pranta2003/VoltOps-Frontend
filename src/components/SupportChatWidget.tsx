@@ -53,6 +53,18 @@ export function SupportChatWidget() {
     }
   }, [isOpen, messages]);
 
+  // Close on Escape key press
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   const quickPrompts = {
     EN: [
       "Report breakdown",
@@ -123,25 +135,25 @@ export function SupportChatWidget() {
   };
 
   return (
-    <aside aria-label="Customer Support Assistant" className="fixed bottom-5 right-5 z-40 select-none print:hidden">
+    <aside aria-label="Customer Support Assistant" className="fixed bottom-4 sm:bottom-5 right-3.5 sm:right-6 z-[60] select-none print:hidden">
       {/* ── Expandable Chat Panel ───────────────────────────────────────── */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={shouldReduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.92, y: 16 }}
+            initial={shouldReduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.94, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.92, y: 16 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="w-[360px] sm:w-[390px] max-w-[calc(100vw-2.5rem)] h-[520px] max-h-[82vh] rounded-[28px] border border-[var(--border)] shadow-2xl flex flex-col overflow-hidden mb-3.5 backdrop-blur-2xl"
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: 12 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="w-[calc(100vw-1.75rem)] sm:w-[350px] max-w-[370px] h-[450px] max-h-[calc(100vh-6.5rem)] rounded-[24px] border border-[var(--border)] shadow-2xl flex flex-col overflow-hidden mb-3 backdrop-blur-2xl"
             style={{
               background: "var(--bg-surface)",
               color: "var(--text-primary)",
-              boxShadow: "0 20px 50px -10px rgba(0,0,0,0.35), 0 0 0 1px var(--border)",
+              boxShadow: "0 24px 60px -12px rgba(0,0,0,0.4), 0 0 0 1px var(--border)",
             }}
           >
             {/* Header */}
             <div
-              className="px-4 py-3.5 border-b border-[var(--border)] flex items-center justify-between"
+              className="px-3.5 py-3 border-b border-[var(--border)] flex items-center justify-between shrink-0"
               style={{ background: "var(--bg-surface-2)" }}
             >
               <div className="flex items-center gap-2.5">
@@ -191,7 +203,7 @@ export function SupportChatWidget() {
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors"
+                  className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
                   aria-label="Close Support Chat"
                 >
                   <XIcon size={16} />
