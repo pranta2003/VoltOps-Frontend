@@ -1554,3 +1554,24 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build in 13.43s (`npm run build`).
+
+---
+
+## Milestone 4.11 — GitHub Actions CI Fix, Lockfile Synchronization & Node 24 Alignment
+
+- **Date**: 15 November 2026
+- **Branch**: `fix/ci-node24-lockfile-sync` (Target: `main`)
+- **Root Cause Identified**:
+  1. Root `package-lock.json` was generated in September 2026 before `firebase` and `framer-motion` were added to `package.json`, causing fatal `npm ci` desynchronization in CI.
+  2. User's global `C:\Users\Hp\.npmrc` had `package-lock = false`, which silently prevented local npm runs from updating the lockfile.
+  3. `firebase@13.3.0` dependency `@firebase/app@0.16.6` declares `engines: { node: ">=24.12.0" }`. Local development was running Node `v24.13.0`, but `.github/workflows/ci.yml` had legacy `node-version: 20` hardcoded.
+- **Fix Applied**:
+  1. Added repository-level `.npmrc` enforcing `package-lock=true`.
+  2. Declared `"engines": { "node": ">=24.12.0", "npm": ">=10.0.0" }` in `package.json`.
+  3. Updated `.github/workflows/ci.yml` to `node-version: 24` to match runtime requirements.
+  4. Regenerated full synchronized `package-lock.json` containing all Firebase and Framer Motion packages.
+- **Quality Gates Passed**:
+  - `npm ci`: Clean installation succeeded (303 packages audited in 1m).
+  - TypeScript: 0 errors (`npx tsc --noEmit`).
+  - Automated tests: 84 / 84 passed (`npm test`).
+  - Production build: Succeeded in 8.72s (`npm run build`).
