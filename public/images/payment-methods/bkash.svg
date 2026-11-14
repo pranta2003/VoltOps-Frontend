@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 40" fill="none">
+  <rect width="110" height="40" rx="8" fill="#FFFFFF"/>
+  <rect width="110" height="40" rx="8" stroke="#E2E8F0" stroke-width="1"/>
+  <!-- bKash iconic origami bird symbol -->
+  <g transform="translate(10, 8)">
+    <path fill="#E2136E" d="M12.5 1.5 1.2 8.3l6.9 14.2 12.3-5.2-7.9-15.8Z"/>
+    <path fill="#D12053" d="m1.2 8.3 19.2 9-5.1 6.5-14.1-1.3L1.2 8.3Z"/>
+    <path fill="#C0104B" d="m15.3 23.8 5.1-6.5-12.3 5.2 7.2 1.3Z"/>
+  </g>
+  <!-- bKash brand text -->
+  <text x="42" y="25" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="900" font-size="16" fill="#E2136E" letter-spacing="-0.5">bKash</text>
+</svg>

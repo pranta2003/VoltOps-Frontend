@@ -3,6 +3,8 @@ node_modules/
 
 # Environment secrets - never commit these
 .env
+.env.local
+.env.*.local
 
 # Build output
 dist/
@@ -15,3 +17,6 @@ build/
 
 # Logs
 npm-debug.log*
+
+# Local video backups
+public/videos/backup/

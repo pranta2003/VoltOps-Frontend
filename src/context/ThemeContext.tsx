@@ -6,37 +6,34 @@ import {
   ReactNode,
 } from "react";
 
-export type ThemePreference = "light" | "dark" | "system";
-export type ResolvedTheme = "light" | "dark";
+export type Theme = "light" | "dark";
+// For backward compatibility with existing imports:
+export type ThemePreference = Theme | "system";
+export type ResolvedTheme = Theme;
 
 interface ThemeContextValue {
+  theme: Theme;
+  resolved: Theme;
   preference: ThemePreference;
-  resolved: ResolvedTheme;
+  toggleTheme: () => void;
+  setTheme: (t: Theme) => void;
   setPreference: (p: ThemePreference) => void;
 }
 
+const STORAGE_KEY = "voltops-theme";
+
 const ThemeContext = createContext<ThemeContextValue>({
-  preference: "system",
+  theme: "light",
   resolved: "light",
+  preference: "light",
+  toggleTheme: () => {},
+  setTheme: () => {},
   setPreference: () => {},
 });
 
-const STORAGE_KEY = "voltops-theme";
-
-function getSystemTheme(): ResolvedTheme {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
-
-function resolveTheme(pref: ThemePreference): ResolvedTheme {
-  if (pref === "system") return getSystemTheme();
-  return pref;
-}
-
-function applyTheme(resolved: ResolvedTheme) {
+function applyTheme(t: Theme) {
   const root = document.documentElement;
-  if (resolved === "dark") {
+  if (t === "dark") {
     root.classList.add("dark");
   } else {
     root.classList.remove("dark");
@@ -44,45 +41,50 @@ function applyTheme(resolved: ResolvedTheme) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [preference, setPreferenceState] = useState<ThemePreference>(() => {
+  const [theme, setThemeState] = useState<Theme>(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY) as ThemePreference | null;
-      if (saved === "light" || saved === "dark" || saved === "system") return saved;
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved === "dark" || saved === "light") {
+        return saved;
+      }
     } catch {}
-    return "system";
+    // Default theme: strictly Light
+    return "light";
   });
 
-  const [resolved, setResolved] = useState<ResolvedTheme>(() =>
-    resolveTheme(preference)
-  );
-
-  // Apply theme to DOM whenever resolved changes
+  // Apply theme to DOM
   useEffect(() => {
-    applyTheme(resolved);
-  }, [resolved]);
+    applyTheme(theme);
+  }, [theme]);
 
-  // Listen for OS-level theme change while "system" is selected
-  useEffect(() => {
-    if (preference !== "system") return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => {
-      const next = resolveTheme("system");
-      setResolved(next);
-    };
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, [preference]);
-
-  const setPreference = (p: ThemePreference) => {
-    setPreferenceState(p);
-    setResolved(resolveTheme(p));
+  const setTheme = (next: Theme) => {
+    setThemeState(next);
     try {
-      localStorage.setItem(STORAGE_KEY, p);
+      localStorage.setItem(STORAGE_KEY, next);
     } catch {}
   };
 
+  const toggleTheme = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+  };
+
+  const setPreference = (p: ThemePreference) => {
+    if (p === "dark") setTheme("dark");
+    else setTheme("light");
+  };
+
   return (
-    <ThemeContext.Provider value={{ preference, resolved, setPreference }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        resolved: theme,
+        preference: theme,
+        toggleTheme,
+        setTheme,
+        setPreference,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );
@@ -91,4 +93,3 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme() {
   return useContext(ThemeContext);
 }
-

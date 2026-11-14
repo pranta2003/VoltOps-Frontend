@@ -24,7 +24,14 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem("voltops_token");
       localStorage.removeItem("voltops_user");
-      window.location.href = "/login";
+      if (
+        typeof window !== "undefined" &&
+        window.location.pathname !== "/login" &&
+        window.location.pathname !== "/register" &&
+        window.location.pathname !== "/"
+      ) {
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }
