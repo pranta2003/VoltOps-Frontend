@@ -1447,3 +1447,27 @@ This document tracks all completed implementation milestones, verified files, co
      - Updated hero background video with new cinematic industrial facility footage (`public/videos/hero-background.mp4`).
      - Enhanced video rendering with hardware-accelerated brightness filter (`brightness-[1.28] contrast-[1.05] saturate-[1.06]`).
      - Softened background dark overlay gradient for elevated visual clarity while maintaining high typography contrast.
+
+---
+
+## Milestone 4.7 — Landing Page Hero Section Content Hierarchy & 3-Column Refinement
+
+- **Date**: 15 November 2026
+- **Branch**: `pranta` (Strictly Frontend Only)
+- **Scope & Key Deliverables**:
+  1. **Content Hierarchy & Value Positioning**:
+     - Headline updated to: *"One partner for every facility repair."*
+     - Supporting proposition: *"Commercial maintenance across seven trades, coordinated through one central dispatch team."*
+     - Eliminated marketing exaggeration and premature general SLA promises from the primary headline.
+  2. **Distinct Purpose for 3-Column Hero Grid**:
+     - **Left Column (Service Coverage)**: Focused strictly on multi-trade technical scope (Power & Electrical, HVAC & Cooling, Plumbing & Water, Security & IT Networks) under a single operational agreement, eliminating duplicate workforce/SLA claims.
+     - **Centre Column (Explore Services)**: Dedicated interactive trade explorer showcasing maintained systems and equipment without redundant SLA or certification badges.
+     - **Right Column (Coverage Commitments)**: Clearly differentiates plan commitments (Plan C: 20-min SLA, Plan B: 40-min SLA, Plan A: 8h daily window with no arrival SLA) with a direct link to Compare Plans.
+  3. **Responsive Layout & Theme Support**:
+     - Desktop 3-column row layout (`col-span-3`, `col-span-6`, `col-span-3`) with matching card heights (`items-stretch`).
+     - Responsive stacking on tablet (`md:col-span-2` for interactive explorer, `md:col-span-1` for side cards) and mobile.
+     - Verified in both Dark Mode and Light Mode with high-contrast text readability.
+  4. **Quality Gates**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 12.78s (`npm run build`).

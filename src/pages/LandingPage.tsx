@@ -917,23 +917,20 @@ export function LandingPage() {
           {/* Editorial Headline with Word/Line Stagger */}
           <motion.h1
             variants={heroItemVariants}
-            className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[66px] tracking-tight leading-[1.08] text-white max-w-4xl mx-auto drop-shadow-md"
+            className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[64px] tracking-tight leading-[1.08] text-white max-w-4xl mx-auto drop-shadow-md"
           >
-            Our platform simplifies your{" "}
+            One partner for every{" "}
             <span className="font-serif-italic font-normal text-emerald-300">
-              facility operations
+              facility repair
             </span>
           </motion.h1>
 
-          {/* Subtitle */}
+          {/* Subtitle / Core Value Proposition */}
           <motion.p
             variants={heroItemVariants}
-            className="text-base sm:text-lg lg:text-xl font-heading font-medium text-slate-200 max-w-2xl mx-auto leading-relaxed mt-4 tracking-tight drop-shadow-sm"
+            className="text-base sm:text-lg lg:text-xl font-heading font-normal text-slate-200 max-w-2xl mx-auto leading-relaxed mt-4 tracking-tight drop-shadow-sm"
           >
-            One unified subscription for commercial facility maintenance — certified technicians dispatched with guaranteed arrival in{" "}
-            <span className="font-bold text-[#34d399] underline decoration-emerald-500/50 underline-offset-4">
-              20 to 40 minutes
-            </span>.
+            Commercial maintenance across seven trades, coordinated through one central dispatch team.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -964,53 +961,62 @@ export function LandingPage() {
           {/* ── 3-Card Centerpiece Spotlight ────────────────────────────── */}
           <motion.div
             variants={heroItemVariants}
-            className="mt-12 relative grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch"
+            className="mt-12 relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 items-stretch"
           >
-            {/* Left Card: Service Standards */}
+            {/* Left Card: Service Coverage */}
             <motion.div
               whileHover={{ y: -4 }}
               transition={{ duration: 0.2 }}
-              className="hidden lg:flex lg:col-span-3 flex-col justify-between text-left p-6 rounded-[28px] glass-panel glow-card-emerald"
+              className="flex flex-col justify-between text-left p-6 sm:p-7 rounded-[28px] glass-panel glow-card-emerald order-2 md:order-2 lg:order-1 md:col-span-1 lg:col-span-3"
             >
-              <div className="space-y-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                  Service Standards
+              <div className="space-y-3.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Service Coverage
                 </span>
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
-                    <span>7 Canonical Trades</span>
+                <div className="space-y-1">
+                  <h4 className="text-base font-bold font-heading text-slate-900 dark:text-white leading-snug">
+                    Multi-trade facility scope
+                  </h4>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Consolidates critical technical maintenance under one unified operational agreement:
+                  </p>
+                </div>
+
+                <div className="space-y-2.5 pt-1">
+                  <div className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] mt-1.5 shrink-0" />
+                    <span><strong className="text-slate-900 dark:text-white">Power & Electrical:</strong> Switchgear, backup power & panels</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
-                    <span>20 & 40-Min Physical SLAs</span>
+                  <div className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] mt-1.5 shrink-0" />
+                    <span><strong className="text-slate-900 dark:text-white">HVAC & Cooling:</strong> Central chillers, towers & ventilation</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
-                    <span>Verified Skill Passports</span>
+                  <div className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] mt-1.5 shrink-0" />
+                    <span><strong className="text-slate-900 dark:text-white">Plumbing & Water:</strong> Booster pumps, mains & flow valves</span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
-                    <span>Human Dispatcher Review</span>
+                  <div className="flex items-start gap-2 text-xs text-slate-700 dark:text-slate-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] mt-1.5 shrink-0" />
+                    <span><strong className="text-slate-900 dark:text-white">Security & Network:</strong> Surveillance, gates & server racks</span>
                   </div>
                 </div>
               </div>
 
-              <div className="border-t border-[var(--border)] pt-3.5 mt-3 space-y-0.5">
+              <div className="border-t border-[var(--border)] pt-3.5 mt-4 space-y-0.5">
                 <div className="text-xs font-bold text-emerald-700 dark:text-[#34d399]">
-                  Verified Workforce Roster
+                  Single Operational Agreement
                 </div>
                 <p className="text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
-                  Trade licenses and safety credentials checked before dispatch.
+                  Replaces fragmented third-party contracts with coordinated multi-trade support.
                 </p>
               </div>
             </motion.div>
 
-            {/* Center Card: Interactive Breakdown Trade Selector */}
+            {/* Center Card: Interactive Trade Explorer */}
             <motion.div
               whileHover={{ y: -4 }}
               transition={{ duration: 0.2 }}
-              className="lg:col-span-6"
+              className="order-1 md:order-1 lg:order-2 md:col-span-2 lg:col-span-6"
             >
               <div
                 className="rounded-[32px] border border-[var(--border-strong)] p-6 sm:p-7 text-left relative glass-panel glow-card-emerald shadow-[var(--shadow-float)] flex flex-col justify-between h-full"
@@ -1025,24 +1031,21 @@ export function LandingPage() {
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse" />
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                      Commercial Dispatch Center
+                      Explore Services
                     </span>
                   </div>
                   <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#10b981]/20 text-[#10b981] dark:text-[#34d399] border border-[#10b981]/30">
-                    Active Operations
+                    7 Technical Trades
                   </span>
                 </div>
 
                 {/* Main Card Title */}
                 <div className="space-y-1 mb-3">
                   <h3 className="text-2xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white leading-tight">
-                    Immediate help for{" "}
-                    <span className="font-serif-italic font-normal">
-                      facility breakdowns
-                    </span>
+                    Explore facility trades
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
-                    Select a trade to view response times:
+                    Select a trade to inspect maintained equipment and operational scope:
                   </p>
                 </div>
 
@@ -1086,82 +1089,90 @@ export function LandingPage() {
                         </span>
                       </div>
                     </div>
-                    <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 border"
-                      style={{
-                        borderColor: `${selectedTrade.accentColor}50`,
-                        color: selectedTrade.accentColor,
-                        backgroundColor: `${selectedTrade.accentColor}15`,
-                      }}
-                    >
-                      {selectedTrade.slaBadge}
-                    </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-[var(--border)]">
-                    <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-semibold">
-                      <CheckCircleIcon size={14} className="shrink-0" />
-                      <span>Certified Technicians</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-semibold">
-                      <CheckCircleIcon size={14} className="shrink-0" />
-                      <span>Guaranteed Physical Arrival</span>
-                    </div>
+                  {/* Maintained Systems Tags */}
+                  <div className="pt-2.5 border-t border-[var(--border)] flex flex-wrap items-center gap-1.5">
+                    <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mr-1">Maintained Systems:</span>
+                    {selectedTrade.capabilities.map((cap) => (
+                      <span
+                        key={cap}
+                        className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-[var(--bg-surface-3)] text-slate-700 dark:text-slate-200 border border-[var(--border)]"
+                      >
+                        {cap}
+                      </span>
+                    ))}
                   </div>
                 </div>
 
                 {/* Bottom Assurance Bar */}
                 <div className="flex items-center justify-between text-xs pt-2 border-t border-[var(--border)]">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">
-                    Need emergency repair coverage?
+                  <span className="font-medium text-slate-600 dark:text-slate-400">
+                    Included across every VoltOps coverage agreement
                   </span>
                   <a
-                    href="#packages"
+                    href="#services"
                     className="inline-flex items-center gap-1 font-bold text-[#10b981] dark:text-[#34d399] hover:underline"
                   >
-                    <span>View Plans</span>
+                    <span>Detailed trade breakdown</span>
                     <ArrowRightIcon size={12} />
                   </a>
                 </div>
               </div>
             </motion.div>
 
-            {/* Right Card: Arrival SLA Commitment */}
+            {/* Right Card: Coverage Commitments */}
             <motion.div
               whileHover={{ y: -4 }}
               transition={{ duration: 0.2 }}
-              className="hidden lg:flex lg:col-span-3 flex-col justify-between text-left p-6 rounded-[28px] glass-panel glow-card-amber"
+              className="flex flex-col justify-between text-left p-6 sm:p-7 rounded-[28px] glass-panel glow-card-amber order-3 md:order-3 lg:order-3 md:col-span-1 lg:col-span-3"
             >
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                  Arrival SLA Commitment
+                  Coverage Commitments
                 </span>
-                <h4 className="text-base font-bold font-heading text-slate-900 dark:text-white">
-                  Physical presence on site.
-                </h4>
-                <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
-                  Arrival SLA guarantees a certified technician is physically at your facility door, not an email acknowledgment.
-                </p>
+                <div className="space-y-1">
+                  <h4 className="text-base font-bold font-heading text-slate-900 dark:text-white leading-snug">
+                    Plan-based arrival SLAs
+                  </h4>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Physical arrival guarantees an on-site technician at your facility, distinct from repair completion:
+                  </p>
+                </div>
+
+                <div className="space-y-2 pt-1">
+                  <div className="p-2.5 rounded-xl border border-emerald-500/25 bg-emerald-500/5 dark:bg-emerald-500/10 space-y-0.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-900 dark:text-white">Plan C · Priority</span>
+                      <span className="font-extrabold text-[#10b981] dark:text-[#34d399]">20-Min Arrival SLA</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300">Rapid physical dispatch for critical uptime facilities.</p>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-0.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-900 dark:text-white">Plan B · Standard</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">40-Min Arrival SLA</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300">Continuous 24/7 on-site emergency response.</p>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-0.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-900 dark:text-white">Plan A · Daily</span>
+                      <span className="font-medium text-slate-500 dark:text-slate-400">8h Daily Window</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300">Standard business hours with no physical arrival SLA.</p>
+                  </div>
+                </div>
               </div>
 
-              <div className="border-t border-[var(--border)] pt-3.5 mt-3 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-600 dark:text-slate-400">Plan C (Priority)</span>
-                  <span className="font-bold text-[#10b981] dark:text-[#34d399]">20 Minutes</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-600 dark:text-slate-400">Plan B (Standard)</span>
-                  <span className="font-bold text-slate-900 dark:text-white">40 Minutes</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-600 dark:text-slate-400">Plan A (Daily)</span>
-                  <span className="font-medium text-slate-500">8h Daily Window</span>
-                </div>
+              <div className="border-t border-[var(--border)] pt-3.5 mt-4 space-y-2">
                 <a
                   href="#packages"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#10b981] dark:text-[#34d399] hover:underline pt-1.5 block"
+                  className="inline-flex items-center justify-between w-full text-xs font-bold text-[#10b981] dark:text-[#34d399] hover:underline"
                 >
-                  <span>Compare Plans</span>
+                  <span>Compare Coverage Plans</span>
                   <ArrowRightIcon size={12} />
                 </a>
               </div>
