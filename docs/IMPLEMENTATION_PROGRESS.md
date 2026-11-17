@@ -1557,6 +1557,25 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
+## Milestone 4.14 — Customer Dashboard Single-Pane-of-Glass Master-Detail Integration
+
+- **Date**: 17 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Unify MSlogistic analytics and order tracking into a single-pane-of-glass master-detail layout:
+  1. **Tab Elimination**: Removed all two-tab toggles ("My Orders" vs "Analytics") in favor of a cohesive unified screen.
+  2. **Top Row (Always Visible)**: Fixed 4 KPI Metric Summary Cards (`Total Requests: 3`, `Active Incidents: 2`, `Physical Arrival SLA: 20m Target`, `Techs on Duty: 313`) in a compact, horizontal row.
+  3. **Bottom Section (2-Column Master-Detail Grid: 30% / 70%)**:
+     - **Left Column (30% width)**: Scrollable "My Orders" list with search bar, clear button, and status-badged order cards.
+     - **Right Column (70% width) - DYNAMIC WORKSPACE**:
+       - *State A (Default / No order selected)*: Clean, spacious MSlogistic analytics grid featuring 3 circular SVG progress gauges (`2748/3100`, `75%`, `33%`), the 20-day stacked dispatch bar chart, the `77%` multi-segment resolution donut chart, and top technicians on duty roster.
+       - *State B (Order Selected)*: Cleanly switches to the Live Work Order Workspace displaying the 4-stage horizontal connected node timeline stepper (`Hartford` → `Triage Dispatch` → `Transit` → `New York`), assigned specialist card with call/message triggers, order details breakdown, and facility address. Includes a prominent "← Close Details" button to return to State A.
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 7.84s (`npm run build`).
+
+---
+
 ## Milestone 4.13 — Customer Dashboard MSlogistic Charts & Dual-Mode Workspace (VoltOps Emerald Palette)
 
 - **Date**: 17 November 2026
