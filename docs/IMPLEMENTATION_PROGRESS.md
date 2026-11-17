@@ -1567,18 +1567,19 @@ This document tracks all completed implementation milestones, verified files, co
      - *What is happening at my facility?* Direct scannable active breakdowns with high-contrast status and SLA pills.
      - *What needs my attention?* Consolidated single actionable alert banner (shown only when review or feedback is pending).
      - *Where can I create or inspect a service request?* Clear, single primary `+ New Request` button and row `View details` trigger.
-  2. **Content Removed / Relocated**:
+  2. **Content Removed / Relocated & Anti-Nesting UI Refactor**:
      - Removed 4 generic KPI metric counter boxes (saved 160px vertical height).
-     - Removed redundant full-width coverage/SLA banner ribbon.
-     - Moved extensive diagnostic details, technician reports, and materials into an accessible slide-over Operational Detail Drawer (`aria-modal="true"`, `Escape` dismiss).
-     - Collapsed historical records into an on-demand filterable Service History drawer/accordion.
+     - Flattened all surfaces across the slide-out detail drawer: eliminated nested card boxes in favor of a clean, single-surface Label / Value definition list and typography hierarchy.
+     - Upgraded dark mode contrast: deep canvas, stark white typography (`text-zinc-50`), and muted zinc metadata (`text-zinc-400`).
+     - Refined micro-components: modern soft-tinted status/priority badges with dot indicators and subtle inset rings instead of heavy borders.
+     - Aired out Service History table: seamless header, generous cell padding (`py-3.5 px-5`), and subtle hover interactions (`hover:bg-zinc-800/50`).
   3. **Performance & Bundle Impact**:
-     - Dropped `CustomerDashboard.tsx` production bundle size from **56.22 kB** to **38.22 kB** (a 32% reduction).
+     - Dropped `CustomerDashboard.tsx` production bundle size from **56.22 kB** to **40.27 kB** (a 28% reduction).
 - **Quality Gates Passed**:
   - TypeScript: 0 errors (`npx tsc --noEmit`).
   - Automated tests: 84 / 84 passed (`npm test -- --run`).
-  - Production build: Succeeded in 21.89s with 0 errors (`npm run build`).
-  - Multi-viewport verified: Desktop (1440px), Tablet (768px), Mobile (390px).
+  - Production build: Clean build in 1m 7s (`npx vite build`).
+  - Multi-viewport verified: Desktop (1440px), Tablet (768px), Mobile (390px), and Detail Drawer.
 
 ---
 
