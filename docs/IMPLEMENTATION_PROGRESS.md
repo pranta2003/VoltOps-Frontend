@@ -1557,6 +1557,32 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
+## Milestone 4.13 — Customer Dashboard MSlogistic Charts & Dual-Mode Workspace (VoltOps Emerald Palette)
+
+- **Date**: 17 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Match high-tier Dribbble/HeroUI logistics aesthetics (reference: MSlogistic & "My Orders: 7" split work UI):
+  1. **Strict Elimination of Yellow Accent**:
+     - Completely removed `#F9C333` / yellow tokens across `CustomerDashboard.tsx` and `Layout.tsx`.
+     - Replaced with canonical VoltOps Signal Emerald (`#10b981`), Berry Plum (`#b8287a`), Cyan (`#06b6d4`), and Deep Slate (`#1c1d22`, `#26272e`).
+  2. **Dual Mode Viewport Integration**:
+     - **Mode A: Live Work Orders Workspace (Image 4 Reference)**:
+       - 2-Column Split Layout: Master order list on left (`My Orders: {count}`) with search & filter, high-contrast active selected order card (`bg-[#10b981] text-zinc-950`).
+       - Live Work Order Inspection Workspace on right with 4-stage horizontal connected node timeline tracker (`Hartford` → `Triage Dispatch` → `Transit` → `New York`), assigned specialist card with direct call/message triggers, order details breakdown, and facility address card.
+     - **Mode B: Fleet & Dispatch Analytics (Image 3 Reference — MSlogistic)**:
+       - 4 Top Metric Summary Cards: Total Requests (3), Active Incidents (2), Physical Arrival SLA (20m Target), Technicians on Duty (313).
+       - Left Column: 3 stacked circular SVG progress gauges (`Finished Work Orders: 2748/3100`, `Success Service Rides: 75%`, `Annual Orders Boost: 33%`).
+       - Right Column: High-impact stacked bar chart displaying daily dispatch activity across 20 dates (`15.04` to `06.05`), with stacked Dispatched (`#3a4454`), Delivered (`#10b981`), and Arrived (`#b8287a`) bars with interactive tooltips.
+       - Bottom Section: Multi-segment Donut Chart (`77%` resolution rate with 4-segment breakdown: Cancelled 9%, In Progress 36%, Not Finished 15%, Success Rides 40%) alongside Top Certified Technicians on duty roster (`Cameron Williamson`, `Brooklyn Simmons`, `Jacob Jones`).
+  3. **Sidebar Pill Navigation Sync**:
+     - Updated active route pill in `Layout.tsx` to use VoltOps Signal Emerald (`bg-[#10b981] text-zinc-950 font-bold shadow-md shadow-emerald-500/20 rounded-2xl`).
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 7.98s (`npm run build`). Customer Dashboard bundle: 55.86 kB.
+
+---
+
 ## Milestone 4.12 — Customer Dashboard Logistics-Tier Visual Transformation (MSlogistic / Split Workspace)
 
 - **Date**: 17 November 2026

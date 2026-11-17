@@ -128,7 +128,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
                   to={item.path}
                   className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs transition-all ${
                     isActive
-                      ? "bg-[#F9C333] text-zinc-950 font-bold shadow-md shadow-amber-500/10"
+                      ? "bg-[#10b981] text-zinc-950 font-bold shadow-md shadow-emerald-500/20"
                       : "text-zinc-400 hover:text-white hover:bg-white/[0.06] font-medium"
                   }`}
                 >
@@ -266,7 +266,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
                         onClick={() => setMobileMenuOpen(false)}
                         className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs transition-all ${
                           isActive
-                            ? "bg-[#F9C333] text-zinc-950 font-bold shadow-md shadow-amber-500/10"
+                            ? "bg-[#10b981] text-zinc-950 font-bold shadow-md shadow-emerald-500/20"
                             : "text-zinc-400 hover:text-white hover:bg-white/[0.06] font-medium"
                         }`}
                       >
