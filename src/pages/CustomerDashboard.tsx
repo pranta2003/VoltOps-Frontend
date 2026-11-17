@@ -99,6 +99,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const viewParam = searchParams.get("view");
+  const orderParam = searchParams.get("order");
 
   const [requests, setRequests] = useState<CustomerViewRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -314,6 +315,15 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
       setShowHistory(true);
     }
   }, [viewParam]);
+
+  useEffect(() => {
+    if (orderParam && requests.length > 0) {
+      const match = requests.find((r) => r.id === orderParam || r.workOrderId === orderParam);
+      if (match) setSelectedRequest(match);
+    } else if (!orderParam) {
+      setSelectedRequest(null);
+    }
+  }, [orderParam, requests]);
 
   // Active / Ongoing Incidents
   const activeRequests = useMemo(() => {
@@ -684,7 +694,15 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     return (
                       <div
                         key={req.id}
-                        onClick={() => setSelectedRequest(isSelected ? null : req)}
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedRequest(null);
+                            setSearchParams(showHistory ? { view: "all" } : {});
+                          } else {
+                            setSelectedRequest(req);
+                            setSearchParams({ order: req.id, ...(showHistory ? { view: "all" } : {}) });
+                          }
+                        }}
                         className={`rounded-2xl p-4 cursor-pointer transition-all duration-200 select-none ${
                           isSelected
                             ? "bg-[#10b981] text-zinc-950 shadow-xl shadow-emerald-500/20 translate-x-1 ring-2 ring-[#10b981]/50"
@@ -749,7 +767,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     <div className="flex items-center gap-3">
                       <button
                         type="button"
-                        onClick={() => setSelectedRequest(null)}
+                        onClick={() => {
+                          setSelectedRequest(null);
+                          setSearchParams(showHistory ? { view: "all" } : {});
+                        }}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#26272e] hover:bg-[#32343e] text-zinc-300 hover:text-white text-xs font-semibold transition-all shadow-xs"
                       >
                         <span>← Close Details</span>
