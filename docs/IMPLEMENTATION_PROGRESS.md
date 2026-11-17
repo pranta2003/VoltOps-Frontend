@@ -1557,29 +1557,21 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
-## Milestone 4.12 — Customer Dashboard Premium Dark B2B Styling & Timeline UI
+## Milestone 4.12 — Customer Dashboard Logistics-Tier Visual Transformation (MSlogistic / Split Workspace)
 
 - **Date**: 17 November 2026
 - **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
-- **Objective**: Elevate Customer Dashboard to high-tier B2B SaaS aesthetic (HeroUI/shadcn tier) with deep-space palette, electric accent tokens, micro-elevation interactions, and horizontal incident tracking timeline.
-- **Key Enhancements**:
-  1. **Palette & Surfaces**:
-     - Deep-space dark canvas (`bg-[#0c0d0e]` / `zinc-950`) with flat raised card surfaces (`bg-[#141518]` / `bg-[#18191d]`).
-     - Replaced generic borders with hairline `border-white/5` (dark) and `border-zinc-200/80` (light).
-     - Micro-elevation cards with smooth hover lift (`hover:-translate-y-0.5 hover:shadow-lg transition-all`).
-  2. **Connected Incident Status Timeline**:
-     - Slide-out detail drawer now renders a connected, 4-stage tracking progress bar (`Logged` → `Triaged` → `En route` → `On site`) with animated pulsing node on current stage and check indicators on completed stages.
-  3. **High-Contrast Accents & Badges**:
-     - Primary actions powered by electric blue (`bg-blue-600 hover:bg-blue-500 shadow-blue-500/20`).
-     - Key SLA targets highlighted with glowing electric cyan telemetry (`text-cyan-400 font-bold`).
-     - Badges restyled: solid vibrant `COMPLETED` (`bg-emerald-400 text-zinc-950`), glowing radar dot `EN ROUTE`, pulsing urgent indicator.
-  4. **Aired-Out Data Architecture**:
-     - Service history table features generous padding (`py-4 px-5`), tracking uppercase headers, and smooth row hover states.
-- **Quality Gates Passed**:
-  - TypeScript: 0 errors (`npx tsc --noEmit`).
-  - Automated tests: 84 / 84 passed (`npm test -- --run`).
-  - Production build: Clean build in 36.15s (`npm run build`). Customer Dashboard bundle: 43.58 kB.
-  - Multi-viewport verified: Desktop (1440px), Tablet (768px), and Detail Drawer.
+- **Objective**: Match high-tier Dribbble/HeroUI logistics aesthetics (reference: MSlogistic & "My Orders: 7" split work UI):
+  1. **Top Metric Summary Cards**: 4 rounded-3xl cards (`#1c1d22`) featuring high-contrast metrics with golden circular icons (`#F9C333`).
+  2. **Split Workspace (Master-Detail)**:
+     - Left Master Column: "My Orders: {count}" with search, filter, and interactive order cards that illuminate in solid golden yellow (`bg-[#F9C333] text-black font-bold`) when selected.
+     - Right Detail Workspace: Live work order card with connected horizontal timeline stepper (`Logged` → `Triage Dispatch` → `Transit` → `On Site`), certified specialist card with direct call/message triggers, order breakdown, and facility address.
+  3. **Sidebar Pill Sync**: Updated shared `Layout.tsx` navigation to feature solid golden yellow pills (`bg-[#F9C333] text-black font-bold rounded-2xl`) for the active route.
+  4. **Quality Gates Passed**:
+     - TypeScript: 0 errors (`npx tsc --noEmit`).
+     - Automated tests: 84 / 84 tests passing (`npm test -- --run`).
+     - Production build: Clean build in 24.32s (`npm run build`). Customer Dashboard bundle: 40.73 kB.
+     - Multi-viewport verified: Desktop (1440px), Tablet (768px), and selection interactions.
 
 ---
 
