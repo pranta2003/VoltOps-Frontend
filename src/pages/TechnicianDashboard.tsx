@@ -379,7 +379,7 @@ export function TechnicianDashboard() {
                 <CheckCircleIcon size={16} />
               </div>
               <div>
-                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">All Emergency Transits Clear</span>
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">All emergency transits clear</span>
                 <p className="text-xs text-[var(--text-muted)]">Completed {completedCount} work orders today. Standby for next dispatch assignment.</p>
               </div>
             </div>
@@ -387,7 +387,7 @@ export function TechnicianDashboard() {
               to="/technician/jobs"
               className="text-xs font-semibold text-[#10b981] hover:underline"
             >
-              Jobs Roster →
+              View roster
             </Link>
           </div>
         )}
@@ -398,10 +398,10 @@ export function TechnicianDashboard() {
           <div className="lg:col-span-7 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2.5">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Today's Dispatch Route
+                <h3 className="text-xs font-medium text-[var(--text-muted)]">
+                  Today's dispatch route
                 </h3>
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-medium">
+                <span className="text-xs font-mono tabular-nums px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-medium">
                   08:00 - 18:00
                 </span>
               </div>
@@ -469,8 +469,8 @@ export function TechnicianDashboard() {
           <div className="lg:col-span-5 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2.5">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Trade Competency
+                <h3 className="text-xs font-semibold text-[var(--text-muted)]">
+                  Trade competency
                 </h3>
                 <span className="text-xs font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded font-bold">
                   Tier 1

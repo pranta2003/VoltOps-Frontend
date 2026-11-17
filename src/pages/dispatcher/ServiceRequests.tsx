@@ -404,7 +404,7 @@ export const ServiceRequests: FC = () => {
                 <col className="w-[85px]" />
               </colgroup>
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-medium text-xs">
                   <th className="py-2.5 px-3">Request ID</th>
                   <th className="py-2.5 px-3">Customer</th>
                   <th className="py-2.5 px-3">Asset / Trade</th>
@@ -505,8 +505,8 @@ export const ServiceRequests: FC = () => {
             {/* Drawer Header */}
             <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                  Request Details
+                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  Request details
                 </span>
                 <h3 id={drawerHeadingId} className="text-sm font-bold text-[var(--text-primary)]">
                   {selectedDetailRequest.id}
@@ -528,8 +528,8 @@ export const ServiceRequests: FC = () => {
             <div className="p-4 space-y-4 flex-1 text-xs">
               {/* Facility & Customer */}
               <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Facility & Contract
+                <span className="text-[10px] font-medium text-[var(--text-muted)]">
+                  Facility & contract
                 </span>
                 <div className="font-semibold text-sm text-[var(--text-primary)]">
                   {selectedDetailRequest.customerName}
@@ -547,8 +547,8 @@ export const ServiceRequests: FC = () => {
 
               {/* Asset & Trade */}
               <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Equipment Inventory
+                <span className="text-[10px] font-medium text-[var(--text-muted)]">
+                  Equipment inventory
                 </span>
                 <div className="font-semibold text-[var(--text-primary)]">
                   {selectedDetailRequest.assetName}
@@ -560,8 +560,8 @@ export const ServiceRequests: FC = () => {
 
               {/* Reported Problem */}
               <div className="space-y-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                  Reported Incident
+                <span className="text-[10px] font-medium text-[var(--text-muted)]">
+                  Reported incident
                 </span>
                 <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2">
                   <div className="font-semibold text-[var(--text-primary)]">
@@ -624,11 +624,11 @@ export const ServiceRequests: FC = () => {
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                  Dispatcher Intake & Work Order Generation
+                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  Dispatcher intake & work order generation
                 </span>
                 <h3 id={modalHeadingId} className="text-base font-bold text-[var(--text-primary)]">
-                  Triage Breakdown: {triageRequest.id}
+                  Triage breakdown: {triageRequest.id}
                 </h3>
               </div>
               <button

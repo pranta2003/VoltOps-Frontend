@@ -110,8 +110,8 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
                 <span className="font-heading font-extrabold text-base tracking-tight text-white group-hover:text-[#10b981] transition-colors block">
                   VoltOps
                 </span>
-                <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                  {role} Portal
+                <span className="block text-[10px] font-medium text-slate-400 capitalize">
+                  {role.toLowerCase()} portal
                 </span>
               </div>
             </Link>
@@ -149,14 +149,14 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-semibold text-white truncate">{user?.name || "User"}</div>
-                <div className="text-[10px] text-slate-400 uppercase tracking-wider truncate">{user?.role}</div>
+                <div className="text-[11px] text-slate-400 capitalize truncate">{role.toLowerCase()}</div>
               </div>
             </div>
             <button
               onClick={logout}
               type="button"
               className="text-[11px] text-slate-400 hover:text-white transition-colors px-2 py-1 rounded-md hover:bg-white/10 shrink-0"
-              title="Sign Out"
+              title="Sign out"
             >
               Sign out
             </button>

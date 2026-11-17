@@ -326,10 +326,10 @@ export function DispatcherManagement() {
         </div>
 
         {/* ── Dispatchers Table ────────────────────────────────────────── */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] uppercase tracking-wider text-[11px] font-semibold">
+              <thead className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] text-[11px] font-semibold">
                 <tr>
                   <th className="py-3 px-4">Dispatcher & ID</th>
                   <th className="py-3 px-4">Branch Hub & Regions</th>
@@ -495,9 +495,9 @@ export function DispatcherManagement() {
               </div>
 
               <div className="space-y-3 text-xs">
-                <div className="grid grid-cols-2 gap-2.5 p-3 rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
+                <div className="grid grid-cols-2 gap-2.5 p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
                   <div>
-                    <span className="text-[var(--text-muted)] block text-[10px] uppercase font-semibold">
+                    <span className="text-[var(--text-muted)] block text-[11px] font-medium">
                       Department
                     </span>
                     <span className="font-medium text-[var(--text-primary)]">
@@ -505,7 +505,7 @@ export function DispatcherManagement() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--text-muted)] block text-[10px] uppercase font-semibold">
+                    <span className="text-[var(--text-muted)] block text-[11px] font-medium">
                       Hub Location
                     </span>
                     <span className="font-medium text-[var(--text-primary)]">
@@ -513,7 +513,7 @@ export function DispatcherManagement() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--text-muted)] block text-[10px] uppercase font-semibold">
+                    <span className="text-[var(--text-muted)] block text-[11px] font-medium">
                       Email Address
                     </span>
                     <span className="font-medium text-[var(--text-primary)]">
@@ -521,7 +521,7 @@ export function DispatcherManagement() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--text-muted)] block text-[10px] uppercase font-semibold">
+                    <span className="text-[var(--text-muted)] block text-[11px] font-medium">
                       Direct Telephone
                     </span>
                     <span className="font-medium text-[var(--text-primary)]">
@@ -529,7 +529,7 @@ export function DispatcherManagement() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--text-muted)] block text-[10px] uppercase font-semibold">
+                    <span className="text-[var(--text-muted)] block text-[11px] font-medium">
                       Shift Status
                     </span>
                     <span className="font-medium text-[var(--text-primary)]">
@@ -537,12 +537,12 @@ export function DispatcherManagement() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--text-muted)] block text-[10px] uppercase font-semibold">
+                    <span className="text-[var(--text-muted)] block text-[11px] font-medium">
                       Account Status
                     </span>
                     <span
-                      className={`font-bold ${
-                        selectedDispatcher.isActive ? "text-emerald-600" : "text-red-500"
+                      className={`font-semibold ${
+                        selectedDispatcher.isActive ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"
                       }`}
                     >
                       {selectedDispatcher.isActive ? "Active (Authorized)" : "Deactivated"}
@@ -550,8 +550,8 @@ export function DispatcherManagement() {
                   </div>
                 </div>
 
-                <div className="p-3 rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1.5">
-                  <span className="text-[var(--text-muted)] block text-[10px] uppercase font-semibold">
+                <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1.5">
+                  <span className="text-[var(--text-muted)] block text-[11px] font-medium">
                     Assigned Dispatch Zones & Facilities
                   </span>
                   <div className="flex flex-wrap gap-1.5">

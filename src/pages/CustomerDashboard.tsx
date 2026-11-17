@@ -402,36 +402,36 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         {/* ── Summary & Subscription Row ─────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Active Requests */}
-          <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)]">
-              <span>Active Requests</span>
+          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-xs">
+            <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
+              <span>Active requests</span>
               <AlertTriangleIcon size={16} className="text-amber-500" />
             </div>
-            <div className="mt-2 text-3xl font-bold font-heading text-[var(--text-primary)]">
+            <div className="mt-2 text-2xl font-bold font-heading tabular-nums text-[var(--text-primary)]">
               {isLoading ? "—" : activeCount}
             </div>
             <div className="mt-1 text-xs text-[var(--text-muted)]">Awaiting inspection or repair</div>
           </div>
 
           {/* Card 2: Field Dispatched */}
-          <div className="p-5 rounded-2xl border border-blue-500/20 bg-blue-500/5 shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-blue-600 dark:text-blue-400">
-              <span>Field Dispatched</span>
+          <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 shadow-xs">
+            <div className="flex items-center justify-between text-xs font-medium text-blue-600 dark:text-blue-400">
+              <span>Field dispatched</span>
               <ClockIcon size={16} className="text-blue-500" />
             </div>
-            <div className="mt-2 text-3xl font-bold font-heading text-blue-600 dark:text-blue-400">
+            <div className="mt-2 text-2xl font-bold font-heading tabular-nums text-blue-600 dark:text-blue-400">
               {isLoading ? "—" : inProgressCount}
             </div>
             <div className="mt-1 text-xs text-blue-600/80 font-medium">Technician en route or on site</div>
           </div>
 
           {/* Card 3: Coverage Plan & SLA */}
-          <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)]">
-              <span>Coverage Plan</span>
+          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-xs">
+            <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
+              <span>Coverage plan</span>
               <ShieldCheckIcon size={16} className="text-[#10b981]" />
             </div>
-            <div className="mt-2 text-lg font-bold font-heading text-[#10b981] truncate">
+            <div className="mt-2 text-base font-bold font-heading text-[#10b981] truncate">
               {subscription.planName}
             </div>
             <div className="mt-1 text-xs text-[var(--text-muted)] truncate">
@@ -448,14 +448,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
 
           {/* Card 4: Service Credits & Allowance */}
-          <div className={`p-5 rounded-2xl border shadow-sm transition-all ${
+          <div className={`p-4 rounded-xl border shadow-xs transition-all ${
             subscription.isExhausted
               ? "border-amber-500/30 bg-amber-500/5"
               : "border-[var(--border)] bg-[var(--bg-surface)]"
           }`}>
-            <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)]">
-              <span>Service Visit Credits</span>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+            <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
+              <span>Service visit credits</span>
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                 subscription.needsConfiguration
                   ? "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20"
                   : subscription.isExhausted
@@ -463,17 +463,17 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   : "bg-emerald-500/10 text-[#10b981] border-emerald-500/20"
               }`}>
                 {subscription.needsConfiguration
-                  ? "NEGOTIATED"
+                  ? "Negotiated"
                   : subscription.isExhausted
-                  ? "ALLOWANCE USED"
-                  : "ACTIVE CYCLE"}
+                  ? "Allowance used"
+                  : "Active cycle"}
               </span>
             </div>
 
             <div className="mt-2 flex items-baseline justify-between">
               {subscription.needsConfiguration ? (
                 <div>
-                  <span className="text-base font-bold font-heading text-[var(--text-primary)]">
+                  <span className="text-sm font-bold font-heading text-[var(--text-primary)]">
                     Allowance to be confirmed
                   </span>
                   <span className="block text-[11px] text-[var(--text-muted)] mt-0.5">
@@ -481,14 +481,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   </span>
                 </div>
               ) : (
-                <span className="text-2xl font-bold font-heading text-[var(--text-primary)]">
+                <span className="text-2xl font-bold font-heading tabular-nums text-[var(--text-primary)]">
                   {subscription.remainingVisits}
                   <span className="text-xs font-normal text-[var(--text-muted)] ml-1">
                     of {subscription.includedVisits} left
                   </span>
                 </span>
               )}
-              <span className="text-[11px] font-mono text-[var(--text-muted)]">
+              <span className="text-[11px] font-mono tabular-nums text-[var(--text-muted)]">
                 {subscription.usedVisits} used
               </span>
             </div>
@@ -517,7 +517,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 <button
                   type="button"
                   onClick={() => setShowQuotationModal(true)}
-                  className="font-bold text-[#10b981] hover:underline"
+                  className="font-semibold text-[#10b981] hover:underline"
                 >
                   Request Pack +
                 </button>
@@ -525,12 +525,12 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 <button
                   type="button"
                   onClick={() => setShowQuotationModal(true)}
-                  className="font-bold text-amber-600 dark:text-amber-400 hover:underline"
+                  className="font-semibold text-amber-600 dark:text-amber-400 hover:underline"
                 >
                   Request Pack +
                 </button>
               ) : (
-                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Included in plan</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-medium">Included in plan</span>
               )}
             </div>
           </div>
@@ -937,7 +937,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-medium text-xs">
                   <th className="py-3 px-4">Request ID</th>
                   <th className="py-3 px-4">Asset & Category</th>
                   <th className="py-3 px-4">Problem Summary</th>

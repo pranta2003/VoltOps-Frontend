@@ -919,10 +919,7 @@ export function LandingPage() {
             variants={heroItemVariants}
             className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[64px] tracking-tight leading-[1.08] text-white max-w-4xl mx-auto drop-shadow-md"
           >
-            One partner.{" "}
-            <span className="font-serif-italic font-normal text-emerald-300">
-              Every facility repair.
-            </span>
+            One partner for every commercial facility repair.
           </motion.h1>
 
           {/* Supporting Text */}

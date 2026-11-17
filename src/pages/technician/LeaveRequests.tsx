@@ -125,14 +125,14 @@ export function LeaveRequests() {
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between">
             <div>
-              <h3 className="font-heading font-semibold text-xs text-[var(--text-primary)] uppercase tracking-wider">
-                My Leave History & Status
+              <h3 className="font-heading font-semibold text-xs text-[var(--text-primary)]">
+                My leave history & status
               </h3>
               <p className="text-[11px] text-[var(--text-muted)]">
-                Approval requires Dispatcher or Admin review before shift rosters update.
+                Approval requires dispatcher or admin review before shift rosters update.
               </p>
             </div>
-            <span className="text-[11px] font-mono font-medium text-[var(--text-muted)]">
+            <span className="text-[11px] font-mono font-medium text-[var(--text-muted)] tabular-nums">
               {requests.length} requests
             </span>
           </div>
@@ -140,7 +140,7 @@ export function LeaveRequests() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-[var(--border)] text-[var(--text-muted)] font-semibold text-[11px]">
                   <th className="py-2.5 px-4">Request ID</th>
                   <th className="py-2.5 px-4">Type</th>
                   <th className="py-2.5 px-4">Dates</th>

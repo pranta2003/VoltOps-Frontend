@@ -132,7 +132,7 @@ export function AdminDashboard() {
             <span className="text-xs text-[var(--text-primary)] font-medium">
               EPZ Industrial Core Hub
             </span>
-            <span className="text-xs text-[var(--text-muted)]">•</span>
+            <span className="text-xs text-[var(--border)]">|</span>
             <span className="text-xs text-[var(--text-muted)]">
               Admin: {user?.name || "System Administrator"}
             </span>
@@ -193,8 +193,8 @@ export function AdminDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                Platform Status
+              <span className="text-xs font-medium text-[var(--text-muted)]">
+                Platform status
               </span>
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
             </div>
@@ -354,8 +354,8 @@ export function AdminDashboard() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30">
-                        PENDING
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                        Pending
                       </span>
                       <Link
                         to="/admin/technicians"

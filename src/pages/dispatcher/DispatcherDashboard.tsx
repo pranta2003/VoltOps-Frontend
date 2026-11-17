@@ -333,11 +333,11 @@ export const DispatcherDashboard: FC = () => {
 
         {/* Subheader & Hub Filter */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-1 border-b border-[var(--border)]">
-          <div className="flex items-center gap-2 text-xs font-medium text-[var(--text-muted)]">
+          <div className="flex items-center gap-3 text-xs font-medium text-[var(--text-muted)]">
             <span className="font-semibold text-[var(--text-primary)]">Operations Hub</span>
-            <span>•</span>
+            <span className="text-[var(--border)]">|</span>
             <span>Shift Lead: Tania Akter</span>
-            <span>•</span>
+            <span className="text-[var(--border)]">|</span>
             <span>7 Trades Managed</span>
           </div>
 
@@ -415,8 +415,8 @@ export const DispatcherDashboard: FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-cyan-900 dark:text-cyan-200">
-                  Pending Completion Reviews ({pendingReviews.length})
+                <h3 className="text-xs font-semibold text-cyan-900 dark:text-cyan-200">
+                  Pending completion reviews ({pendingReviews.length})
                 </h3>
               </div>
               <span className="text-[11px] text-cyan-700 dark:text-cyan-300 font-medium">
@@ -444,12 +444,12 @@ export const DispatcherDashboard: FC = () => {
                     </div>
 
                     <div className="text-xs font-semibold text-[var(--text-primary)] truncate">
-                      {order.customerName} • <span className="font-normal text-[var(--text-muted)]">{order.assetName}</span>
+                      {order.customerName} <span className="text-[var(--border)] mx-1.5">|</span> <span className="font-normal text-[var(--text-muted)]">{order.assetName}</span>
                     </div>
 
                     <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-2">
                       <span>Technician: <strong className="text-[var(--text-primary)]">{order.assignedTechnicianName || "Kamrul Islam"}</strong></span>
-                      <span>•</span>
+                      <span className="text-[var(--border)]">|</span>
                       <span>Submitted: {order.completionReport?.completedAt ? new Date(order.completionReport.completedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Recently"}</span>
                     </div>
                   </div>
@@ -457,9 +457,9 @@ export const DispatcherDashboard: FC = () => {
                   <button
                     type="button"
                     onClick={() => handleOpenReviewModal(order)}
-                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-[#06090e] transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-sm self-start sm:self-auto"
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-[#10b981] hover:bg-[#059669] text-[#06090e] transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-sm self-start sm:self-auto"
                   >
-                    <span>Review Report</span>
+                    <span>Review report</span>
                     <ArrowRightIcon size={12} />
                   </button>
                 </div>
@@ -473,8 +473,8 @@ export const DispatcherDashboard: FC = () => {
           {/* Donut Chart: Lifecycle State Distribution */}
           <div className="lg:col-span-5 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
             <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                Work Orders
+              <h3 className="text-xs font-semibold text-[var(--text-muted)]">
+                Work orders by status
               </h3>
               <span className="text-xs font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
                 Status
@@ -497,16 +497,16 @@ export const DispatcherDashboard: FC = () => {
             {/* Quick Operational Telemetry Strip */}
             <div className="pt-2.5 mt-2 border-t border-[var(--border)] grid grid-cols-3 gap-2 text-center">
               <div className="p-1.5 rounded-lg bg-[var(--bg-surface-2)]">
-                <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">In Field</div>
-                <div className="font-mono text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400">2 Active</div>
+                <div className="text-[10px] font-medium text-[var(--text-muted)]">In field</div>
+                <div className="font-mono tabular-nums text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400">2 Active</div>
               </div>
               <div className="p-1.5 rounded-lg bg-[var(--bg-surface-2)]">
-                <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">SLA Target</div>
-                <div className="font-mono text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400">100% Met</div>
+                <div className="text-[10px] font-medium text-[var(--text-muted)]">SLA target</div>
+                <div className="font-mono tabular-nums text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400">100% Met</div>
               </div>
               <div className="p-1.5 rounded-lg bg-[var(--bg-surface-2)]">
-                <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Avg Transit</div>
-                <div className="font-mono text-xs sm:text-sm font-bold text-[var(--text-primary)]">18 min</div>
+                <div className="text-[10px] font-medium text-[var(--text-muted)]">Avg transit</div>
+                <div className="font-mono tabular-nums text-xs sm:text-sm font-semibold text-[var(--text-primary)]">18 min</div>
               </div>
             </div>
           </div>
@@ -514,11 +514,11 @@ export const DispatcherDashboard: FC = () => {
           {/* Horizontal Bar Chart: 7 Canonical Service Trades Capacity */}
           <div className="lg:col-span-7 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
             <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                Trade Capacity
+              <h3 className="text-xs font-semibold text-[var(--text-muted)]">
+                Trade capacity
               </h3>
               <Link to="/dispatcher/technicians" className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
-                Roster →
+                View roster
               </Link>
             </div>
 
@@ -544,11 +544,11 @@ export const DispatcherDashboard: FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-rose-900 dark:text-rose-200">
-                  Critical Breakdown Queue
+                <h3 className="text-xs font-semibold text-rose-900 dark:text-rose-200">
+                  Critical breakdown queue
                 </h3>
               </div>
-              <span className="text-xs text-rose-700 dark:text-rose-300 font-mono font-medium">
+              <span className="text-xs text-rose-700 dark:text-rose-300 font-mono tabular-nums font-medium">
                 {urgentRequests.length} critical breakdown{urgentRequests.length > 1 ? "s" : ""}
               </span>
             </div>
@@ -561,7 +561,7 @@ export const DispatcherDashboard: FC = () => {
                 >
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono font-bold text-rose-700 dark:text-rose-400">{req.id}</span>
+                      <span className="font-mono tabular-nums font-bold text-rose-700 dark:text-rose-400">{req.id}</span>
                       <span className="text-[10px] font-semibold text-rose-600 dark:text-rose-300 bg-rose-100 dark:bg-rose-950 px-1.5 py-0.5 rounded">
                         {req.coveragePlan === "8hr"
                           ? "Plan A (Window)"
@@ -584,7 +584,7 @@ export const DispatcherDashboard: FC = () => {
                       to="/dispatcher/requests"
                       className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 hover:underline text-[11px]"
                     >
-                      Triage <ArrowRightIcon size={11} />
+                      Triage
                     </Link>
                   </div>
                 </div>
@@ -599,16 +599,16 @@ export const DispatcherDashboard: FC = () => {
             <h2 className="text-sm font-bold text-[var(--text-primary)]">Active Work Orders</h2>
             <Link
               to="/dispatcher/work-orders"
-              className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
             >
-              View All <ArrowRightIcon size={12} />
+              View all
             </Link>
           </div>
 
           <div className="w-full max-w-full overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-[13px]">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-medium text-xs">
                   <th className="py-2.5 px-3.5">Order ID</th>
                   <th className="py-2.5 px-3.5">Customer & Facility</th>
                   <th className="py-2.5 px-3.5">Trade & Asset</th>
@@ -690,10 +690,10 @@ export const DispatcherDashboard: FC = () => {
           {/* Dispatch Activity Volume Timeline */}
           <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] space-y-2.5">
             <div className="flex items-center justify-between border-b border-[var(--border)] pb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                Dispatch Velocity
+              <h3 className="text-xs font-semibold text-[var(--text-muted)]">
+                Dispatch velocity
               </h3>
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
                 Hourly
               </span>
             </div>
@@ -716,8 +716,8 @@ export const DispatcherDashboard: FC = () => {
           {/* Recent Dispatch Ledger */}
           <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] space-y-2.5">
             <div className="flex items-center justify-between border-b border-[var(--border)] pb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                Operational Log
+              <h3 className="text-xs font-semibold text-[var(--text-muted)]">
+                Operational log
               </h3>
               <span className="text-[10px] font-mono text-[var(--text-muted)]">Live</span>
             </div>
@@ -732,7 +732,7 @@ export const DispatcherDashboard: FC = () => {
                       <div className="font-semibold text-[var(--text-primary)] truncate text-[11px]">{evt.summary}</div>
                       <div className="text-[10px] text-[var(--text-muted)] truncate">{evt.actorName}</div>
                     </div>
-                    <span className="text-[10px] text-[var(--text-muted)] font-mono shrink-0">
+                    <span className="text-[10px] text-[var(--text-muted)] font-mono tabular-nums shrink-0">
                       {new Date(evt.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
@@ -755,11 +755,11 @@ export const DispatcherDashboard: FC = () => {
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                  Advisory Matching Engine (SDP-4 Hard Rules)
+                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  Advisory matching engine (SDP-4 rules)
                 </span>
                 <h3 id={assignModalHeadingId} className="text-base font-bold text-[var(--text-primary)]">
-                  Assign Technician — {selectedWorkOrder.id}
+                  Assign technician — {selectedWorkOrder.id}
                 </h3>
               </div>
               <button
@@ -794,9 +794,9 @@ export const DispatcherDashboard: FC = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                  <span>Eligible Candidates (Ranked by Arithmetic Score)</span>
-                  <span className="text-[10px] font-normal text-slate-500">Human Confirmation Required</span>
+                <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
+                  <span>Eligible candidates (ranked by arithmetic score)</span>
+                  <span className="text-[10px] text-slate-500">Human confirmation required</span>
                 </div>
 
                 {isLoadingMatches ? (
@@ -838,13 +838,13 @@ export const DispatcherDashboard: FC = () => {
                             </div>
                             <div className="text-[11px] text-[var(--text-muted)] flex flex-wrap items-center gap-1.5 pt-0.5">
                               <span>{candidate.designation}</span>
-                              <span>•</span>
+                              <span className="text-[var(--border)]">|</span>
                               <span className="text-emerald-600 dark:text-emerald-400 font-medium">✓ Active License</span>
-                              <span>•</span>
+                              <span className="text-[var(--border)]">|</span>
                               <span>{candidate.eligibilityFactors?.standbyAvailable ? "✓ Standby" : `${candidate.activeJobCount} Active Job(s)`}</span>
                               {candidate.eligibilityFactors?.branchMatched && (
                                 <>
-                                  <span>•</span>
+                                  <span className="text-[var(--border)]">|</span>
                                   <span className="text-sky-600 dark:text-sky-400 font-medium">✓ Branch Match</span>
                                 </>
                               )}
@@ -925,7 +925,7 @@ export const DispatcherDashboard: FC = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-bold font-heading text-[var(--text-primary)]">
-                    Technician Completion Report Review
+                    Technician completion report review
                   </h3>
                   <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 border border-cyan-500/20">
                     {reviewingOrder.id}
@@ -962,13 +962,13 @@ export const DispatcherDashboard: FC = () => {
             {/* Summary Grid */}
             <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-[var(--bg-surface-2)] text-xs border border-[var(--border)]">
               <div>
-                <span className="text-[var(--text-muted)] text-[10px] uppercase font-bold tracking-wider block">Customer & Asset</span>
+                <span className="text-[var(--text-muted)] text-[10px] font-medium block">Customer & asset</span>
                 <span className="font-semibold">{reviewingOrder.customerName}</span>
                 <div className="text-[11px] text-[var(--text-muted)] truncate">{reviewingOrder.assetName}</div>
               </div>
 
               <div>
-                <span className="text-[var(--text-muted)] text-[10px] uppercase font-bold tracking-wider block">Technician & Trade</span>
+                <span className="text-[var(--text-muted)] text-[10px] font-medium block">Technician & trade</span>
                 <span className="font-semibold">{reviewingOrder.assignedTechnicianName || "Kamrul Islam"}</span>
                 <div className="text-[11px] text-[var(--text-muted)] truncate">{reviewingOrder.category}</div>
               </div>
@@ -977,8 +977,8 @@ export const DispatcherDashboard: FC = () => {
             {/* Detailed Report Fields */}
             <div className="space-y-3 text-xs">
               <div className="p-3 rounded-xl border border-[var(--border)] space-y-1">
-                <span className="font-bold text-[11px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
-                  Work Performed & Resolution
+                <span className="font-semibold text-xs text-emerald-600 dark:text-emerald-400 block">
+                  Work performed & resolution
                 </span>
                 <p className="text-[var(--text-primary)] leading-relaxed">
                   {reviewingOrder.completionReport?.workPerformed || reviewingOrder.completionReport?.notes || reviewingOrder.workNotes || "Technical diagnostic inspection completed."}
@@ -986,8 +986,8 @@ export const DispatcherDashboard: FC = () => {
               </div>
 
               <div className="p-3 rounded-xl border border-[var(--border)] space-y-1">
-                <span className="font-bold text-[11px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
-                  On-Site Diagnosis & Root Cause
+                <span className="font-semibold text-xs text-blue-600 dark:text-blue-400 block">
+                  On-site diagnosis & root cause
                 </span>
                 <p className="text-[var(--text-primary)] leading-relaxed">
                   {reviewingOrder.completionReport?.diagnosis || "Component failure inspected and verified on site."}
@@ -995,10 +995,10 @@ export const DispatcherDashboard: FC = () => {
               </div>
 
               <div className="p-3 rounded-xl border border-[var(--border)] space-y-1">
-                <span className="font-bold text-[11px] uppercase tracking-wider text-[var(--text-muted)] block">
-                  Materials & Parts Used
+                <span className="font-semibold text-xs text-[var(--text-muted)] block">
+                  Materials & parts used
                 </span>
-                <p className="font-mono text-[11px] text-[var(--text-primary)]">
+                <p className="font-mono tabular-nums text-[11px] text-[var(--text-primary)]">
                   {reviewingOrder.completionReport?.materialsUsed || "Standard diagnostic tooling & equipment consumed."}
                 </p>
               </div>

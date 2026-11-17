@@ -402,7 +402,7 @@ export function MyJobs() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-medium text-xs">
                   <th className="py-3 px-4">Work Order</th>
                   <th className="py-3 px-4">Customer & Facility</th>
                   <th className="py-3 px-4">Target Asset & Trade</th>

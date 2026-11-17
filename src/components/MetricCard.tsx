@@ -28,24 +28,24 @@ export const MetricCard: FC<MetricCardProps> = ({
   const isTextValue = typeof value === "string" && !/\d/.test(value);
   const sizeClasses =
     size === "sm"
-      ? "text-lg sm:text-xl font-bold font-mono"
+      ? "text-lg sm:text-xl font-bold tabular-nums"
       : size === "lg"
-      ? "text-2xl sm:text-3xl font-extrabold"
+      ? "text-2xl sm:text-3xl font-extrabold tabular-nums"
       : isTextValue
       ? "text-lg sm:text-xl font-bold"
-      : "text-xl sm:text-2xl font-bold font-mono";
+      : "text-xl sm:text-2xl font-bold tabular-nums";
 
   return (
     <div
-      className={`border rounded-xl p-4 transition-all duration-200 shadow-[var(--shadow-sm)] hover:border-[var(--border-strong)] relative overflow-hidden ${
+      className={`border rounded-xl p-4 transition-all duration-150 relative overflow-hidden ${
         alert
-          ? "bg-red-500/[0.04] border-red-500/30 dark:bg-red-500/[0.08]"
-          : "bg-[var(--bg-surface)] border-[var(--border)]"
+          ? "bg-rose-500/[0.04] border-rose-500/30 dark:bg-rose-500/[0.08]"
+          : "bg-[var(--bg-surface)] border-[var(--border)] hover:border-[var(--border-strong)]"
       }`}
     >
       {/* Top row: Label & Icon / Badge */}
       <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider truncate">
+        <span className="text-xs font-medium text-[var(--text-muted)] truncate">
           {label}
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -54,7 +54,7 @@ export const MetricCard: FC<MetricCardProps> = ({
             <div
               className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                 alert
-                  ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                  ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
                   : "bg-[var(--bg-surface-2)] text-[var(--text-secondary)]"
               }`}
             >
@@ -71,7 +71,7 @@ export const MetricCard: FC<MetricCardProps> = ({
         </span>
         {trend && (
           <span
-            className={`text-[11px] font-bold font-mono px-1.5 py-0.5 rounded ${
+            className={`text-[11px] font-semibold tabular-nums px-1.5 py-0.5 rounded ${
               trend.direction === "up"
                 ? "text-emerald-700 bg-emerald-500/10 dark:text-emerald-300"
                 : trend.direction === "down"

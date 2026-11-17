@@ -101,8 +101,8 @@ export function SkillPassport() {
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between">
             <div>
-              <h3 className="font-heading font-semibold text-xs text-[var(--text-primary)] uppercase tracking-wider">
-                Government Licenses & Certifications
+              <h3 className="font-heading font-semibold text-xs text-[var(--text-primary)]">
+                Government licenses & certifications
               </h3>
               <p className="text-[11px] text-[var(--text-muted)]">
                 Authoritative credentials validated against Department of Energy standards
@@ -116,9 +116,9 @@ export function SkillPassport() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
-                  <th className="py-2.5 px-4">Credential Name</th>
-                  <th className="py-2.5 px-4">Issuing Authority</th>
+                <tr className="border-b border-[var(--border)] text-[var(--text-muted)] font-semibold text-[11px]">
+                  <th className="py-2.5 px-4">Credential name</th>
+                  <th className="py-2.5 px-4">Issuing authority</th>
                   <th className="py-2.5 px-4">Expiry / Status</th>
                   <th className="py-2.5 px-4 text-right">Verification</th>
                 </tr>
@@ -161,8 +161,8 @@ export function SkillPassport() {
         {/* Competencies & Trade Endorsements */}
         <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-3">
           <div className="border-b border-[var(--border)] pb-2.5">
-            <h3 className="font-heading font-semibold text-xs text-[var(--text-primary)] uppercase tracking-wider">
-              Trade Endorsements & Authorized Equipment
+            <h3 className="font-heading font-semibold text-xs text-[var(--text-primary)]">
+              Trade endorsements & authorized equipment
             </h3>
             <p className="text-[11px] text-[var(--text-muted)]">
               Primary and secondary trade domains where technician is cleared for solo emergency dispatch

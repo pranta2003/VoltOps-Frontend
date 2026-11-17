@@ -600,8 +600,8 @@ export const WorkOrders: FC = () => {
             <div className="p-4 space-y-3.5 flex-1 text-xs">
               {/* Operational Lifecycle Stepper */}
               <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
-                  Lifecycle Status
+                <div className="text-[10px] font-medium text-[var(--text-muted)] mb-2">
+                  Lifecycle status
                 </div>
                 <div className="grid grid-cols-5 gap-1 text-center text-[9px]">
                   <div
@@ -656,25 +656,25 @@ export const WorkOrders: FC = () => {
               <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Facility</span>
+                    <span className="text-[10px] font-medium text-[var(--text-muted)] block">Facility</span>
                     <span className="font-semibold text-[var(--text-primary)]">{inspectOrder.facilityAddress}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Trade Category</span>
+                    <span className="text-[10px] font-medium text-[var(--text-muted)] block">Trade Category</span>
                     <span className="font-semibold text-[var(--text-primary)]">{inspectOrder.category}</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--border)]">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Equipment Asset</span>
+                    <span className="text-[10px] font-medium text-[var(--text-muted)] block">Equipment Asset</span>
                     <span className="font-semibold text-[var(--text-primary)]">{inspectOrder.assetName}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Arrival Target SLA</span>
+                    <span className="text-[10px] font-medium text-[var(--text-muted)] block">Arrival Target SLA</span>
                     <span className="font-semibold text-[var(--text-primary)]">
                       {inspectOrder.slaDeadline ? (
-                        <span className="font-mono">
+                        <span className="font-mono tabular-nums">
                           {new Date(inspectOrder.slaDeadline).toLocaleTimeString()} ({inspectOrder.coveragePlan === "247-priority" ? "20m Rapid" : "40m Standard"})
                         </span>
                       ) : (
@@ -687,20 +687,20 @@ export const WorkOrders: FC = () => {
                 </div>
 
                 <div className="pt-2 border-t border-[var(--border)]">
-                  <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Problem Summary</span>
+                  <span className="text-[10px] font-medium text-[var(--text-muted)] block">Problem Summary</span>
                   <p className="font-medium text-[var(--text-primary)] mt-0.5">{inspectOrder.problemSummary}</p>
                 </div>
 
                 {inspectOrder.workNotes && (
                   <div className="pt-2 border-t border-[var(--border)]">
-                    <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">Dispatch Notes</span>
+                    <span className="text-[10px] font-medium text-[var(--text-muted)] block">Dispatch Notes</span>
                     <p className="text-[11px] text-[var(--text-primary)] mt-0.5">{inspectOrder.workNotes}</p>
                   </div>
                 )}
 
                 {inspectOrder.completionReport && (
                   <div className="pt-2 border-t border-[var(--border)] p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                    <span className="text-[10px] uppercase font-bold text-cyan-700 dark:text-cyan-300 block">
+                    <span className="text-[10px] font-medium text-cyan-700 dark:text-cyan-300 block">
                       Technician Completion Report
                     </span>
                     <p className="text-[11px] text-[var(--text-primary)] mt-0.5 font-medium">
@@ -711,7 +711,7 @@ export const WorkOrders: FC = () => {
                         Materials: {inspectOrder.completionReport.materialsUsed}
                       </p>
                     )}
-                    <div className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 mt-1">
+                    <div className="text-[10px] font-mono tabular-nums text-cyan-600 dark:text-cyan-400 mt-1">
                       Submitted: {new Date(inspectOrder.completionReport.completedAt).toLocaleTimeString()} by {inspectOrder.completionReport.technicianName}
                     </div>
                   </div>
@@ -720,7 +720,7 @@ export const WorkOrders: FC = () => {
 
               {/* Assigned Technician Profile Strip */}
               <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] space-y-1">
-                <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
+                <span className="text-[10px] font-medium text-[var(--text-muted)] block">
                   Dispatched Technician
                 </span>
                 {inspectOrder.assignedTechnicianName ? (

@@ -354,7 +354,7 @@ export function TechnicianVerification() {
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden w-full max-w-full">
           <div className="overflow-x-auto w-full">
             <table className="w-full text-left text-xs sm:text-[13px]">
-              <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] uppercase tracking-wider text-xs font-semibold border-b border-[var(--border)]">
+              <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] text-xs font-semibold border-b border-[var(--border)]">
                 <tr>
                   <th className="py-2.5 px-4">Technician</th>
                   <th className="py-2.5 px-4">Primary Trade</th>

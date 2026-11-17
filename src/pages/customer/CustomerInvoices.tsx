@@ -110,8 +110,8 @@ export function CustomerInvoices() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Left: Invoice Listing */}
             <div className="lg:col-span-4 space-y-3">
-              <div className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-between">
-                <span>Billing Statements</span>
+              <div className="text-xs font-medium text-[var(--text-muted)] flex items-center justify-between">
+                <span>Billing statements</span>
                 <span className="text-[11px] font-normal text-[#10b981]">
                   {invoices.length} Total
                 </span>
@@ -120,16 +120,16 @@ export function CustomerInvoices() {
                 <div
                   key={inv.id}
                   onClick={() => setSelectedInvoice(inv)}
-                  className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                  className={`p-4 rounded-xl border cursor-pointer transition-all ${
                     selectedInvoice?.id === inv.id
-                      ? "border-[#10b981] bg-[var(--bg-surface)] shadow-md ring-1 ring-[#10b981]"
+                      ? "border-[#10b981] bg-[var(--bg-surface)] shadow-xs ring-1 ring-[#10b981]"
                       : "border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:border-[var(--border-strong)]"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-sm text-[var(--text-primary)]">{inv.id}</span>
+                    <span className="font-mono tabular-nums font-bold text-sm text-[var(--text-primary)]">{inv.id}</span>
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                         inv.status === "PAID"
                           ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
                           : inv.status === "PAYMENT_PENDING"
@@ -137,7 +137,7 @@ export function CustomerInvoices() {
                           : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
                       }`}
                     >
-                      {inv.status === "PAID" ? "PAID" : inv.status === "PAYMENT_PENDING" ? "GATEWAY PENDING" : "PAYMENT DUE"}
+                      {inv.status === "PAID" ? "Paid" : inv.status === "PAYMENT_PENDING" ? "Gateway pending" : "Payment due"}
                     </span>
                   </div>
                   <div className="mt-2 text-xs font-medium text-[var(--text-primary)]">
@@ -145,7 +145,7 @@ export function CustomerInvoices() {
                   </div>
                   <div className="mt-1 flex items-center justify-between text-xs text-[var(--text-muted)]">
                     <span>Due {inv.dueDate}</span>
-                    <span className="font-bold text-[var(--text-primary)]">${inv.totalAmount.toFixed(2)}</span>
+                    <span className="font-bold tabular-nums text-[var(--text-primary)]">${inv.totalAmount.toFixed(2)}</span>
                   </div>
                 </div>
               ))}
@@ -153,11 +153,11 @@ export function CustomerInvoices() {
 
             {/* Right: Full Itemized Invoice (Figma Customer invoice Frame) */}
             {selectedInvoice && (
-              <div className="lg:col-span-8 p-6 sm:p-8 rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-6">
+              <div className="lg:col-span-8 p-6 sm:p-8 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-xs space-y-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-6">
                   <div>
-                    <div className="text-xs font-bold uppercase tracking-wider text-[#10b981]">
-                      Commercial Invoice
+                    <div className="text-xs font-semibold text-[#10b981]">
+                      Commercial invoice
                     </div>
                     <h2 className="font-heading font-extrabold text-2xl text-[var(--text-primary)]">
                       {selectedInvoice.id}
@@ -232,10 +232,10 @@ export function CustomerInvoices() {
                 <div className="overflow-x-auto border-t border-[var(--border)] pt-4">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="text-[var(--text-muted)] border-b border-[var(--border)] uppercase tracking-wider text-[10px]">
+                      <tr className="text-[var(--text-muted)] border-b border-[var(--border)] text-[11px] font-semibold">
                         <th className="py-2.5">Description</th>
                         <th className="py-2.5 text-center">Qty</th>
-                        <th className="py-2.5 text-right">Unit Price</th>
+                        <th className="py-2.5 text-right">Unit price</th>
                         <th className="py-2.5 text-right">Total</th>
                       </tr>
                     </thead>

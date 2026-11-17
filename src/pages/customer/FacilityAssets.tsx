@@ -373,23 +373,23 @@ export function FacilityAssets() {
 
         {/* ── Summary KPI Cards ───────────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-              <span>Total Assets</span>
+          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-xs">
+            <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
+              <span>Total assets</span>
               <BuildingIcon size={16} className="text-[#10b981]" />
             </div>
-            <div className="mt-2 text-3xl font-bold font-heading text-[var(--text-primary)]">
+            <div className="mt-2 text-2xl font-bold font-heading tabular-nums text-[var(--text-primary)]">
               {isLoading ? "—" : totalCount}
             </div>
             <div className="mt-1 text-xs text-[var(--text-muted)]">Registered equipment items</div>
           </div>
 
-          <div className="p-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
+          <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 shadow-xs">
+            <div className="flex items-center justify-between text-xs font-medium text-emerald-700 dark:text-emerald-400">
               <span>Operational</span>
               <CheckCircleIcon size={16} className="text-emerald-500" />
             </div>
-            <div className="mt-2 text-3xl font-bold font-heading text-emerald-700 dark:text-emerald-400">
+            <div className="mt-2 text-2xl font-bold font-heading tabular-nums text-emerald-700 dark:text-emerald-400">
               {isLoading ? "—" : operationalCount}
             </div>
             <div className="mt-1 text-xs text-emerald-700/80 dark:text-emerald-400/80 font-medium">
@@ -397,12 +397,12 @@ export function FacilityAssets() {
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 shadow-sm">
-            <div className="flex items-center justify-between text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
-              <span>Service Required</span>
+          <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 shadow-xs">
+            <div className="flex items-center justify-between text-xs font-medium text-amber-700 dark:text-amber-400">
+              <span>Service required</span>
               <AlertTriangleIcon size={16} className="text-amber-500" />
             </div>
-            <div className="mt-2 text-3xl font-bold font-heading text-amber-700 dark:text-amber-400">
+            <div className="mt-2 text-2xl font-bold font-heading tabular-nums text-amber-700 dark:text-amber-400">
               {isLoading ? "—" : attentionCount}
             </div>
             <div className="mt-1 text-xs text-amber-700/80 dark:text-amber-400/80 font-medium">
@@ -511,17 +511,17 @@ export function FacilityAssets() {
         )}
 
         {/* ── Asset Inventory Table (Clean, Proportional, Scannable) ──────── */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
-                  <th className="py-3 px-4">Asset & Tag</th>
+                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold text-[11px]">
+                  <th className="py-3 px-4">Asset & tag</th>
                   <th className="py-3 px-4 hidden sm:table-cell">Category</th>
-                  <th className="py-3 px-4">Facility Location</th>
+                  <th className="py-3 px-4">Facility location</th>
                   <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 hidden md:table-cell">Last Service</th>
-                  <th className="py-3 px-4 hidden lg:table-cell">Active Incident</th>
+                  <th className="py-3 px-4 hidden md:table-cell">Last service</th>
+                  <th className="py-3 px-4 hidden lg:table-cell">Active incident</th>
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>

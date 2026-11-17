@@ -230,7 +230,7 @@ export function NewServiceRequest() {
 
             {/* ── 1. Canonical Service Trade Selection ─────────────────── */}
             <div className="space-y-3">
-              <label className="block text-xs font-bold text-[var(--text-muted)]">
+              <label className="block text-xs font-semibold text-[var(--text-muted)]">
                 1. Service Trade <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
@@ -241,13 +241,13 @@ export function NewServiceRequest() {
                       key={cat}
                       type="button"
                       onClick={() => setSelectedCategory(cat)}
-                      className={`p-3.5 rounded-2xl border text-left text-xs font-semibold transition-all flex items-start gap-2.5 ${
+                      className={`p-3.5 rounded-xl border text-left text-xs font-medium transition-all flex items-start gap-2.5 ${
                         isSelected
-                          ? "border-[#10b981] bg-[#10b981]/10 text-[var(--text-primary)] shadow-sm font-bold ring-1 ring-[#10b981]"
+                          ? "border-[#10b981] bg-[#10b981]/10 text-[var(--text-primary)] shadow-xs font-semibold ring-1 ring-[#10b981]"
                           : "border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:border-[var(--border-strong)]"
                       }`}
                     >
-                      <span className="text-[#10b981] font-bold">⚡</span>
+                      <WrenchIcon size={14} className="text-[#10b981] shrink-0 mt-0.5" />
                       <span>{cat}</span>
                     </button>
                   );

@@ -433,11 +433,11 @@ export const TechnicianRoster: FC = () => {
             {/* Contact Information */}
             <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs grid grid-cols-2 gap-2">
               <div>
-                <span className="text-[var(--text-muted)] block text-[10px] uppercase font-semibold">Phone</span>
+                <span className="text-[var(--text-muted)] block text-[10px] font-medium">Phone</span>
                 <span className="font-mono text-[var(--text-primary)] text-xs">{inspectTech.phone}</span>
               </div>
               <div>
-                <span className="text-[var(--text-muted)] block text-[10px] uppercase font-semibold">Email</span>
+                <span className="text-[var(--text-muted)] block text-[10px] font-medium">Email</span>
                 <span className="font-mono text-[var(--text-primary)] text-xs">{inspectTech.email}</span>
               </div>
             </div>
