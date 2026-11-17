@@ -31,7 +31,6 @@ import {
   SearchIcon,
   RefreshCwIcon,
   ShieldCheckIcon,
-  WrenchIcon,
   EyeIcon,
   StarIcon,
   SendIcon,
@@ -77,12 +76,12 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<CustomerViewRequest | null>(null);
 
-  // Active Tab: 'active' (live repairs) vs 'history' (complete log) vs 'coverage' (plans & receipts)
-  const [activeTab, setActiveTab] = useState<"active" | "history" | "coverage">(
-    viewParam === "all" ? "history" : "active"
+  // View state: 'active' (default operational screen) vs 'history' (progressive disclosure archive)
+  const [showHistory, setShowHistory] = useState<boolean>(
+    initialView === "all" || viewParam === "all"
   );
 
-  // Filter States for History
+  // Filter States for Service History
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [priorityFilter, setPriorityFilter] = useState<string>("ALL");
@@ -133,7 +132,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
     setActiveFeedbackOrder(null);
   };
 
-  // Global keyboard accessibility: Escape closes any open modal safely
+  // Global keyboard accessibility: Escape closes any open modal or drawer safely
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -173,37 +172,31 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
             switch (linkedOrder.status) {
               case "UNASSIGNED":
-                arrivalSlaWindow = "Work order created · Dispatching tech";
+                arrivalSlaWindow = "Work order created · Dispatching";
                 displayStatus = "REVIEWING";
                 break;
               case "ASSIGNED":
-                arrivalSlaWindow = "Tech assigned · Standby";
+                arrivalSlaWindow = "Technician assigned";
                 break;
               case "TRAVELLING":
                 if (r.coveragePlan === "247-priority") {
-                  arrivalSlaWindow = "En route · 20m arrival SLA";
+                  arrivalSlaWindow = "En route · 20m SLA";
                 } else if (r.coveragePlan === "247-standard") {
-                  arrivalSlaWindow = "En route · 40m arrival SLA";
+                  arrivalSlaWindow = "En route · 40m SLA";
                 } else if (r.coveragePlan === "8hr") {
                   arrivalSlaWindow = "En route · Business hours";
-                } else if (r.coveragePlan === "custom") {
-                  arrivalSlaWindow = "En route · Custom SLA";
                 } else {
                   arrivalSlaWindow = "En route";
                 }
                 break;
               case "ON_SITE":
-                arrivalSlaWindow = "Technician on site";
+                arrivalSlaWindow = "On site";
                 break;
               case "WORK_COMPLETED_AWAITING_CONFIRMATION":
-                arrivalSlaWindow = "Work done · Awaiting dispatcher review";
+                arrivalSlaWindow = "Work complete · Dispatcher reviewing";
                 break;
               case "COMPLETED":
-                if (linkedOrder.dispatcherApproved) {
-                  arrivalSlaWindow = "Work completed & dispatcher approved";
-                } else {
-                  arrivalSlaWindow = "Completed & signed off";
-                }
+                arrivalSlaWindow = "Completed & verified";
                 break;
               case "CANCELLED":
                 arrivalSlaWindow = "Cancelled";
@@ -216,13 +209,9 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             } else if (r.status === "NEW") {
               displayStatus = "NEW";
               if (r.coveragePlan === "247-priority") {
-                arrivalSlaWindow = "20m SLA (Pending review)";
+                arrivalSlaWindow = "20m SLA (Pending)";
               } else if (r.coveragePlan === "247-standard") {
-                arrivalSlaWindow = "40m SLA (Pending review)";
-              } else if (r.coveragePlan === "8hr") {
-                arrivalSlaWindow = "Business hours (Pending review)";
-              } else if (r.coveragePlan === "custom") {
-                arrivalSlaWindow = "Custom SLA (Pending review)";
+                arrivalSlaWindow = "40m SLA (Pending)";
               } else {
                 arrivalSlaWindow = "Pending review";
               }
@@ -234,7 +223,6 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             formattedDate = new Date(r.submittedAt).toLocaleDateString("en-GB", {
               day: "numeric",
               month: "short",
-              year: "numeric",
               hour: "2-digit",
               minute: "2-digit",
             });
@@ -286,24 +274,18 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
   useEffect(() => {
     if (viewParam === "all") {
-      setActiveTab("history");
+      setShowHistory(true);
     }
   }, [viewParam]);
 
-  // Active / Ongoing Incidents (The operational core)
+  // Active / Ongoing Incidents (The operational core answering "What is happening at my facility?")
   const activeRequests = useMemo(() => {
     return requests.filter(
       (r) => r.displayStatus !== "COMPLETED" && r.displayStatus !== "CANCELLED"
     );
   }, [requests]);
 
-  const inProgressCount = useMemo(() => {
-    return requests.filter(
-      (r) => r.displayStatus === "ASSIGNED" || r.displayStatus === "TRAVELLING" || r.displayStatus === "ON_SITE"
-    ).length;
-  }, [requests]);
-
-  // Filtered requests for the history archive
+  // Filtered requests for the progressive disclosure archive
   const filteredRequests = useMemo(() => {
     return requests.filter((r) => {
       if (searchQuery.trim()) {
@@ -320,8 +302,6 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
       if (statusFilter !== "ALL") {
         if (statusFilter === "ACTIVE") {
           if (r.displayStatus === "COMPLETED" || r.displayStatus === "CANCELLED") return false;
-        } else if (statusFilter === "IN_PROGRESS") {
-          if (!["ASSIGNED", "TRAVELLING", "ON_SITE"].includes(r.displayStatus)) return false;
         } else if (r.displayStatus !== statusFilter) {
           return false;
         }
@@ -339,6 +319,23 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
     });
   }, [requests, searchQuery, statusFilter, priorityFilter, categoryFilter]);
 
+  // Single Actionable Notification Identification (Only what genuinely needs attention right now)
+  const pendingFeedbackRequest = useMemo(() => {
+    return requests.find(
+      (r) =>
+        r.displayStatus === "COMPLETED" &&
+        r.workOrderId &&
+        !notificationService.hasProvidedFeedback(r.workOrderId) &&
+        !dismissedFeedbackWos.includes(r.workOrderId)
+    );
+  }, [requests, dismissedFeedbackWos]);
+
+  const pendingReviewRequest = useMemo(() => {
+    return requests.find(
+      (r) => r.displayStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION"
+    );
+  }, [requests]);
+
   const clearFilters = () => {
     setSearchQuery("");
     setStatusFilter("ALL");
@@ -346,26 +343,23 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
     setCategoryFilter("ALL");
   };
 
-  const hasActiveFilters =
-    searchQuery !== "" || statusFilter !== "ALL" || priorityFilter !== "ALL" || categoryFilter !== "ALL";
-
-  const getPriorityPill = (priority: PriorityLevel) => {
+  const getPriorityBadge = (priority: PriorityLevel) => {
     switch (priority) {
       case "URGENT":
-        return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
+        return "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20";
       case "HIGH":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+        return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
       case "MEDIUM":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+        return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20";
       case "LOW":
-        return "bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20";
+        return "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20";
     }
   };
 
-  const getStatusPill = (status: CustomerViewRequest["displayStatus"]) => {
+  const getStatusBadge = (status: CustomerViewRequest["displayStatus"]) => {
     switch (status) {
       case "NEW":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+        return "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20";
       case "REVIEWING":
         return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
       case "ASSIGNED":
@@ -383,27 +377,6 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
     }
   };
 
-  // Helper for Stepper Stage in Live Cards
-  const getStageIndex = (status: CustomerViewRequest["displayStatus"]): number => {
-    switch (status) {
-      case "NEW":
-        return 0;
-      case "REVIEWING":
-        return 1;
-      case "ASSIGNED":
-        return 2;
-      case "TRAVELLING":
-        return 2;
-      case "ON_SITE":
-        return 3;
-      case "WORK_COMPLETED_AWAITING_CONFIRMATION":
-      case "COMPLETED":
-        return 4;
-      default:
-        return 0;
-    }
-  };
-
   return (
     <Layout
       title="Facility Operations"
@@ -414,467 +387,224 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             type="button"
             onClick={loadCustomerData}
             disabled={isLoading}
-            className="p-2 rounded-xl text-xs font-medium border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            className="p-2 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
             title="Refresh active status"
           >
             <RefreshCwIcon size={14} className={isLoading ? "animate-spin" : ""} />
           </button>
           <Link
             to="/customer/new-request"
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-sm flex items-center gap-1.5"
+            className="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors shadow-xs flex items-center gap-1.5"
           >
-            <span>+ Report Breakdown</span>
+            <span>+ New Request</span>
           </Link>
         </div>
       }
     >
-      <div className="space-y-5">
-        {/* ── 1. Integrated Operational Command Ribbon (Less Reading, Pure Telemetry) ── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3.5 sm:p-4 shadow-sm">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            {/* Left: Active Facility & Guaranteed SLA */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
-                <ShieldCheckIcon size={20} />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-heading font-semibold text-sm text-[var(--text-primary)]">
-                    {subscription.planName}
-                  </span>
-                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                    {subscription.planId === "247-priority"
-                      ? "20m arrival SLA"
-                      : subscription.planId === "247-standard"
-                      ? "40m arrival SLA"
-                      : "Business hours"}
-                  </span>
-                </div>
-                <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                  Physical arrival of certified technician on site · 7 trades covered
-                </div>
-              </div>
-            </div>
-
-            {/* Center: Real-Time Incident Status Chips */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("active");
-                  setStatusFilter("ALL");
-                }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex items-center gap-2 ${
-                  activeRequests.length > 0
-                    ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300"
-                    : "bg-[var(--bg-surface-2)] border-[var(--border)] text-[var(--text-muted)]"
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                <span>Active repairs:</span>
-                <strong className="tabular-nums font-semibold">{activeRequests.length}</strong>
-              </button>
-
-              <div className="px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
-                <ClockIcon size={13} />
-                <span>In transit / on site:</span>
-                <strong className="tabular-nums font-semibold">{inProgressCount}</strong>
-              </div>
-            </div>
-
-            {/* Right: Compact Service Allowance Gauge */}
-            <div className="flex items-center gap-3 border-t lg:border-t-0 pt-2 lg:pt-0 border-[var(--border)]">
-              <div className="min-w-[140px] text-xs">
-                <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)] mb-1">
-                  <span>Visit allowance</span>
-                  <span className="font-medium text-[var(--text-primary)] tabular-nums">
-                    {subscription.remainingVisits !== null
-                      ? `${subscription.remainingVisits} / ${subscription.includedVisits}`
-                      : "Negotiated"}
-                  </span>
-                </div>
-                <div className="h-1.5 w-full bg-[var(--bg-surface-2)] rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all ${
-                      subscription.isExhausted ? "bg-amber-500" : "bg-emerald-500"
-                    }`}
-                    style={{
-                      width: subscription.needsConfiguration
-                        ? "0%"
-                        : `${Math.min(
-                            100,
-                            (subscription.usedVisits / (subscription.includedVisits || 1)) * 100
-                          )}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              {subscription.isExhausted ? (
-                <button
-                  type="button"
-                  onClick={() => setShowQuotationModal(true)}
-                  className="px-2.5 py-1 text-[11px] font-semibold bg-amber-600 hover:bg-amber-500 text-white rounded-lg transition-colors shrink-0"
-                >
-                  + Pack
-                </button>
-              ) : (
-                <Link
-                  to={subscription.planId ? `/checkout?plan=${subscription.planId}` : "/#packages"}
-                  className="p-1.5 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors shrink-0"
-                  title="Manage coverage & receipts"
-                >
-                  <ArrowRightIcon size={13} />
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ── 2. Action-Required Strip (Customer Sign-Off / Rating / Pack Prompts) ── */}
-        {requests.some(
-          (r) =>
-            r.displayStatus === "COMPLETED" &&
-            r.workOrderId &&
-            !notificationService.hasProvidedFeedback(r.workOrderId) &&
-            !dismissedFeedbackWos.includes(r.workOrderId)
-        ) && (
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in">
-            <div className="flex items-center gap-2.5">
-              <StarIcon size={16} className="text-amber-500 shrink-0" fill="currentColor" />
-              <div>
-                <span className="font-semibold text-[var(--text-primary)]">Work completed & signed off:</span>{" "}
-                <span className="text-[var(--text-muted)]">
-                  Please rate your experience with the technician to close out the operational record.
-                </span>
-              </div>
+      <div className="space-y-4 max-w-5xl">
+        {/* ── 1. Compact Actionable Notification (Only When Genuinely Required) ── */}
+        {pendingFeedbackRequest ? (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3.5 py-2.5 text-xs flex items-center justify-between gap-3 animate-fade-in">
+            <div className="flex items-center gap-2 min-w-0">
+              <StarIcon size={14} className="text-amber-500 shrink-0" fill="currentColor" />
+              <span className="truncate text-[var(--text-primary)]">
+                Service completed on <strong>{pendingFeedbackRequest.asset}</strong> ({pendingFeedbackRequest.id}).
+              </span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
-                onClick={() => {
-                  const target = requests.find(
-                    (r) =>
-                      r.displayStatus === "COMPLETED" &&
-                      r.workOrderId &&
-                      !notificationService.hasProvidedFeedback(r.workOrderId)
-                  );
-                  if (target) handleDismissFeedback(target.workOrderId);
-                }}
-                className="px-2.5 py-1 rounded-lg font-medium text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                onClick={() => handleDismissFeedback(pendingFeedbackRequest.workOrderId)}
+                className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] px-2 py-1"
               >
                 Dismiss
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  const target = requests.find(
-                    (r) =>
-                      r.displayStatus === "COMPLETED" &&
-                      r.workOrderId &&
-                      !notificationService.hasProvidedFeedback(r.workOrderId)
-                  );
-                  if (target) setActiveFeedbackOrder(target);
-                }}
-                className="px-3 py-1 rounded-lg font-semibold text-xs bg-amber-600 hover:bg-amber-500 text-white transition-all shadow-xs"
+                onClick={() => setActiveFeedbackOrder(pendingFeedbackRequest)}
+                className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-amber-600 hover:bg-amber-500 text-white transition-colors"
               >
-                Rate Service (★)
+                Rate service
               </button>
             </div>
           </div>
-        )}
-
-        {/* ── 3. Focused View Navigation Tabs ── */}
-        <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("active");
-                setSearchParams({});
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                activeTab === "active"
-                  ? "bg-emerald-600 text-white shadow-xs"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
-              }`}
-            >
-              <span>Live Breakdown Status</span>
-              {activeRequests.length > 0 && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full tabular-nums ${
-                  activeTab === "active" ? "bg-white/20 text-white" : "bg-amber-500/20 text-amber-700 dark:text-amber-300"
-                }`}>
-                  {activeRequests.length}
-                </span>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("history");
-                setSearchParams({ view: "all" });
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                activeTab === "history"
-                  ? "bg-emerald-600 text-white shadow-xs"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
-              }`}
-            >
-              <span>Service History</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full tabular-nums ${
-                activeTab === "history" ? "bg-white/20 text-white" : "bg-[var(--bg-surface-2)] text-[var(--text-muted)]"
-              }`}>
-                {requests.length}
+        ) : pendingReviewRequest ? (
+          <div className="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-2.5 text-xs flex items-center justify-between gap-3 animate-fade-in">
+            <div className="flex items-center gap-2 min-w-0">
+              <ClockIcon size={14} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
+              <span className="truncate text-[var(--text-primary)]">
+                On-site repair for <strong>{pendingReviewRequest.asset}</strong> completed. Dispatcher review in progress.
               </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelectedRequest(pendingReviewRequest)}
+              className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-cyan-600 hover:bg-cyan-500 text-white shrink-0 transition-colors"
+            >
+              Inspect
             </button>
+          </div>
+        ) : subscription.isExhausted ? (
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3.5 py-2.5 text-xs flex items-center justify-between gap-3 animate-fade-in">
+            <div className="flex items-center gap-2 min-w-0">
+              <AlertTriangleIcon size={14} className="text-amber-500 shrink-0" />
+              <span className="truncate text-[var(--text-primary)]">
+                Monthly visit allowance exhausted ({subscription.includedVisits} of {subscription.includedVisits} used).
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowQuotationModal(true)}
+              className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-amber-600 hover:bg-amber-500 text-white shrink-0 transition-colors"
+            >
+              Request Pack +
+            </button>
+          </div>
+        ) : null}
+
+        {/* ── 2. Active Requests List (Answers: "What is happening at my facility?") ── */}
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-xs">
+          <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="font-heading font-semibold text-xs text-[var(--text-primary)]">
+                Active Requests
+              </h2>
+              <span className="text-[11px] font-mono px-2 py-0.2 rounded-full bg-[var(--bg-surface-2)] text-[var(--text-muted)] border border-[var(--border)]">
+                {activeRequests.length}
+              </span>
+            </div>
 
             <button
               type="button"
               onClick={() => {
-                setActiveTab("coverage");
-                setSearchParams({ view: "coverage" });
+                const next = !showHistory;
+                setShowHistory(next);
+                setSearchParams(next ? { view: "all" } : {});
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                activeTab === "coverage"
-                  ? "bg-emerald-600 text-white shadow-xs"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
-              }`}
+              className="text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
             >
-              <span>Coverage & Receipts</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full tabular-nums ${
-                activeTab === "coverage" ? "bg-white/20 text-white" : "bg-[var(--bg-surface-2)] text-[var(--text-muted)]"
-              }`}>
-                {purchases.length}
-              </span>
+              <span>{showHistory ? "Hide Service History" : "View Service History"}</span>
+              <ArrowRightIcon size={11} className={showHistory ? "rotate-90 transition-transform" : ""} />
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setSupportDefaultId("");
-                setSupportModalOpen(true);
-              }}
-              className="text-xs font-medium text-[var(--text-muted)] hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1 hidden sm:flex"
-            >
-              <SendIcon size={12} />
-              <span>Contact dispatch</span>
-            </button>
-          </div>
-        </div>
-
-        {/* ── TAB 1: LIVE BREAKDOWNS (Purposeful Interactive Cards With Live Steppers) ── */}
-        {activeTab === "active" && (
-          <div className="space-y-3">
-            {isLoading ? (
-              <div className="p-8 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-center text-xs text-[var(--text-muted)]">
-                <RefreshCwIcon size={16} className="inline animate-spin mr-2 text-emerald-500" />
-                Synchronizing live facility telemetry...
+          {/* Active Request Rows */}
+          {isLoading ? (
+            <div className="p-8 text-center text-xs text-[var(--text-muted)]">
+              <RefreshCwIcon size={14} className="inline animate-spin mr-2 text-emerald-500" />
+              Checking facility requests...
+            </div>
+          ) : activeRequests.length === 0 ? (
+            <div className="p-8 text-center space-y-2">
+              <div className="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+                <CheckCircleIcon size={18} />
               </div>
-            ) : activeRequests.length === 0 ? (
-              <div className="p-8 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] text-center space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
-                  <CheckCircleIcon size={24} />
-                </div>
-                <div>
-                  <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
-                    All Facility Systems Operational
-                  </h3>
-                  <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto mt-0.5">
-                    No active breakdown tickets are open. Certified technicians are on standby under your {subscription.planName}.
-                  </p>
-                </div>
-                <Link
-                  to="/customer/new-request"
-                  className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+              <div className="font-semibold text-xs text-[var(--text-primary)]">
+                All facility equipment operational
+              </div>
+              <p className="text-[11px] text-[var(--text-muted)] max-w-xs mx-auto">
+                No active breakdown tickets are open.
+              </p>
+              <Link
+                to="/customer/new-request"
+                className="inline-block mt-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+              >
+                + New Request
+              </Link>
+            </div>
+          ) : (
+            <div className="divide-y divide-[var(--border)]">
+              {activeRequests.map((req) => (
+                <div
+                  key={req.id}
+                  className="px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[var(--bg-surface-2)]/60 transition-colors"
                 >
-                  <span>+ Report New Incident</span>
-                </Link>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-3">
-                {activeRequests.map((req) => {
-                  const stage = getStageIndex(req.displayStatus);
-                  const isUrgent = req.priority === "URGENT";
+                  <div className="flex items-start sm:items-center gap-3 min-w-0">
+                    <span className="font-mono text-xs font-semibold text-[var(--text-primary)] shrink-0 tabular-nums">
+                      {req.id}
+                    </span>
 
-                  return (
-                    <div
-                      key={req.id}
-                      className={`rounded-xl border p-4 bg-[var(--bg-surface)] shadow-xs transition-all ${
-                        isUrgent
-                          ? "border-red-500/30 hover:border-red-500/50"
-                          : "border-[var(--border)] hover:border-emerald-500/30"
-                      }`}
-                    >
-                      {/* Top Header of Card */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--border)]">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-mono font-bold text-xs text-[var(--text-primary)]">
-                            {req.id}
-                          </span>
-                          {req.workOrderId && (
-                            <span className="font-mono text-[11px] text-[var(--text-muted)]">
-                              (WO: {req.workOrderId})
-                            </span>
-                          )}
-                          <span
-                            className={`px-2 py-0.5 rounded-md text-[11px] font-medium border ${getPriorityPill(
-                              req.priority
-                            )}`}
-                          >
-                            {req.priority}
-                          </span>
-                          <span className="text-[11px] text-[var(--text-muted)]">
-                            {req.category}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusPill(
-                              req.displayStatus
-                            )}`}
-                          >
-                            {req.displayStatus.replace("_", " ")}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedRequest(req)}
-                            className="px-2.5 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors flex items-center gap-1"
-                          >
-                            <EyeIcon size={12} />
-                            <span>Inspect</span>
-                          </button>
-                        </div>
+                    <div className="min-w-0">
+                      <div className="font-medium text-xs text-[var(--text-primary)] truncate">
+                        {req.problem}
                       </div>
-
-                      {/* Main Info */}
-                      <div className="py-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="space-y-1">
-                          <div className="font-semibold text-sm text-[var(--text-primary)]">
-                            {req.asset} — {req.problem}
-                          </div>
-                          <div className="text-xs text-[var(--text-muted)]">
-                            {req.description}
-                          </div>
-                          <div className="text-[11px] text-[var(--text-muted)] pt-1 flex items-center gap-3">
-                            <span>Logged: <strong className="text-[var(--text-primary)]">{req.submittedDate}</strong></span>
-                            {req.assignedTech && (
-                              <span>Technician: <strong className="text-[var(--text-primary)]">{req.assignedTech}</strong></span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Arrival Target Window */}
-                        {req.arrivalSlaWindow && (
-                          <div className="p-3 rounded-lg bg-[var(--bg-surface-2)] border border-[var(--border)] md:text-right shrink-0">
-                            <span className="text-[11px] text-[var(--text-muted)] block">Operational target</span>
-                            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 block mt-0.5">
-                              {req.arrivalSlaWindow}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* 4-Stage Operational Stepper */}
-                      <div className="pt-3 border-t border-[var(--border)]">
-                        <div className="grid grid-cols-4 gap-2 text-center text-[11px]">
-                          <div className="space-y-1">
-                            <div className="h-1.5 rounded-full bg-emerald-500" />
-                            <span className="font-medium text-emerald-600 dark:text-emerald-400">1. Logged</span>
-                          </div>
-                          <div className="space-y-1">
-                            <div
-                              className={`h-1.5 rounded-full ${
-                                stage >= 1 ? "bg-emerald-500" : "bg-[var(--border)]"
-                              }`}
-                            />
-                            <span
-                              className={`font-medium ${
-                                stage >= 1 ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--text-muted)]"
-                              }`}
-                            >
-                              2. Triaged
-                            </span>
-                          </div>
-                          <div className="space-y-1">
-                            <div
-                              className={`h-1.5 rounded-full ${
-                                stage >= 2 ? "bg-emerald-500" : "bg-[var(--border)]"
-                              }`}
-                            />
-                            <span
-                              className={`font-medium ${
-                                stage >= 2 ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--text-muted)]"
-                              }`}
-                            >
-                              3. En route
-                            </span>
-                          </div>
-                          <div className="space-y-1">
-                            <div
-                              className={`h-1.5 rounded-full ${
-                                stage >= 3 ? "bg-emerald-500" : "bg-[var(--border)]"
-                              }`}
-                            />
-                            <span
-                              className={`font-medium ${
-                                stage >= 3 ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--text-muted)]"
-                              }`}
-                            >
-                              4. On site
-                            </span>
-                          </div>
-                        </div>
+                      <div className="text-[11px] text-[var(--text-muted)] truncate">
+                        {req.asset} · <span className="text-[var(--text-muted)]">{req.category}</span>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
+                  </div>
 
-        {/* ── TAB 2: SERVICE HISTORY ARCHIVE (Concise, Clean Data List) ── */}
-        {activeTab === "history" && (
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
-            {/* Search and Filters Toolbar */}
-            <div className="p-3.5 border-b border-[var(--border)] bg-[var(--bg-surface-2)]/40 flex flex-col md:flex-row items-center justify-between gap-3">
-              <div className="relative w-full md:w-80">
+                  <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center">
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-medium border ${getPriorityBadge(
+                        req.priority
+                      )}`}
+                    >
+                      {req.priority}
+                    </span>
+
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[11px] font-medium border ${getStatusBadge(
+                        req.displayStatus
+                      )}`}
+                    >
+                      {req.displayStatus === "TRAVELLING" && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse inline-block mr-1.5" />
+                      )}
+                      {req.displayStatus.replace("_", " ")}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedRequest(req)}
+                      className="px-2.5 py-1 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-colors flex items-center gap-1"
+                    >
+                      <span>View details</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── 3. Progressive Disclosure: Service History Archive (Revealed on Demand) ── */}
+        {showHistory && (
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-xs animate-fade-in">
+            <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--bg-surface-2)]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="relative w-full sm:w-72">
                 <SearchIcon
-                  size={13}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
+                  size={12}
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
                 />
                 <input
                   id="dashboard-search"
                   name="search"
                   type="text"
-                  placeholder="Search ID, asset, technician..."
+                  placeholder="Filter by ID, asset, keyword..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-7 py-1.5 rounded-lg text-xs border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="w-full pl-7 pr-6 py-1 rounded-md text-xs border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)]"
                   >
-                    <XIcon size={12} />
+                    <XIcon size={11} />
                   </button>
                 )}
               </div>
 
-              <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto">
+              <div className="flex items-center gap-2 overflow-x-auto">
                 <select
                   id="dashboard-status-filter"
                   name="status"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-2.5 py-1.5 rounded-lg text-xs border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none"
-                  aria-label="Filter by status"
+                  className="px-2 py-1 rounded-md text-xs border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none"
+                  aria-label="Filter status"
                 >
                   <option value="ALL">All Statuses</option>
                   <option value="COMPLETED">Completed</option>
@@ -887,112 +617,78 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   name="priority"
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="px-2.5 py-1.5 rounded-lg text-xs border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none"
-                  aria-label="Filter by priority"
+                  className="px-2 py-1 rounded-md text-xs border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none"
+                  aria-label="Filter priority"
                 >
                   <option value="ALL">All Priorities</option>
                   <option value="URGENT">Urgent</option>
                   <option value="HIGH">High</option>
                   <option value="MEDIUM">Medium</option>
-                  <option value="LOW">Low</option>
                 </select>
 
-                <select
-                  id="dashboard-category-filter"
-                  name="category"
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="px-2.5 py-1.5 rounded-lg text-xs border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none"
-                  aria-label="Filter by trade"
-                >
-                  <option value="ALL">All 7 Trades</option>
-                  {CANONICAL_SERVICE_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-
-                {hasActiveFilters && (
+                {searchQuery || statusFilter !== "ALL" || priorityFilter !== "ALL" ? (
                   <button
                     type="button"
                     onClick={clearFilters}
-                    className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline shrink-0"
+                    className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline shrink-0"
                   >
                     Reset
                   </button>
-                )}
+                ) : null}
               </div>
             </div>
 
-            {/* Structured Table for Historical Scannability */}
+            {/* Scannable Compact Table */}
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-medium text-[11px]">
-                    <th className="py-2.5 px-4">Request ID</th>
-                    <th className="py-2.5 px-4">Asset & Trade</th>
-                    <th className="py-2.5 px-4">Problem</th>
-                    <th className="py-2.5 px-4">Priority</th>
-                    <th className="py-2.5 px-4">Status</th>
-                    <th className="py-2.5 px-4">Serviced Date</th>
-                    <th className="py-2.5 px-4 text-right">Action</th>
+                  <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] text-[11px] font-medium">
+                    <th className="py-2 px-4">ID</th>
+                    <th className="py-2 px-4">Problem</th>
+                    <th className="py-2 px-4">Asset</th>
+                    <th className="py-2 px-4">Status</th>
+                    <th className="py-2 px-4">Date</th>
+                    <th className="py-2 px-4 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
-                  {isLoading ? (
+                  {filteredRequests.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-xs text-[var(--text-muted)]">
-                        Loading service records...
-                      </td>
-                    </tr>
-                  ) : filteredRequests.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="py-8 text-center text-xs text-[var(--text-muted)]">
-                        No service requests match the filter criteria.
+                      <td colSpan={6} className="py-6 text-center text-xs text-[var(--text-muted)]">
+                        No requests found.
                       </td>
                     </tr>
                   ) : (
                     filteredRequests.map((r) => (
-                      <tr key={r.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                        <td className="py-3 px-4 font-mono font-medium text-[var(--text-primary)] tabular-nums">
+                      <tr key={r.id} className="hover:bg-[var(--bg-surface-2)]/50 transition-colors">
+                        <td className="py-2.5 px-4 font-mono font-medium text-[var(--text-primary)] tabular-nums">
                           {r.id}
                         </td>
-                        <td className="py-3 px-4">
-                          <div className="font-semibold text-[var(--text-primary)]">{r.asset}</div>
-                          <div className="text-[11px] text-[var(--text-muted)]">{r.category}</div>
-                        </td>
-                        <td className="py-3 px-4 max-w-xs truncate text-[var(--text-primary)]">
+                        <td className="py-2.5 px-4 text-[var(--text-primary)] font-medium max-w-xs truncate">
                           {r.problem}
                         </td>
-                        <td className="py-3 px-4">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-medium border ${getPriorityPill(
-                              r.priority
-                            )}`}
-                          >
-                            {r.priority}
-                          </span>
+                        <td className="py-2.5 px-4 text-[var(--text-muted)] truncate">
+                          {r.asset}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-2.5 px-4">
                           <span
-                            className={`px-2 py-0.5 rounded-full text-[11px] font-medium border ${getStatusPill(
+                            className={`px-2 py-0.2 rounded-full text-[10px] font-medium border ${getStatusBadge(
                               r.displayStatus
                             )}`}
                           >
                             {r.displayStatus.replace("_", " ")}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-[var(--text-muted)] tabular-nums">
+                        <td className="py-2.5 px-4 text-[var(--text-muted)] tabular-nums text-[11px]">
                           {r.submittedDate}
                         </td>
-                        <td className="py-3 px-4 text-right">
+                        <td className="py-2.5 px-4 text-right">
                           <button
                             type="button"
                             onClick={() => setSelectedRequest(r)}
-                            className="px-2.5 py-1 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
+                            className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
                           >
-                            Inspect
+                            View details
                           </button>
                         </td>
                       </tr>
@@ -1004,111 +700,40 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
         )}
 
-        {/* ── TAB 3: COVERAGE & DEMONSTRATION RECEIPTS ── */}
-        {activeTab === "coverage" && (
-          <div className="space-y-4">
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
-                <div>
-                  <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
-                    Facility Service Level Agreement & Billing
-                  </h3>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                    Plan tier, contracted response commitments, and verified accounting receipts
-                  </p>
-                </div>
-                <Link
-                  to={
-                    subscription.hasActiveSubscription && subscription.planId
-                      ? `/checkout?plan=${subscription.planId}`
-                      : "/#packages"
-                  }
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center gap-1 self-start sm:self-auto"
-                >
-                  <span>Change Plan</span>
-                  <ArrowRightIcon size={12} />
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3">
-                <div className="p-3 rounded-lg bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                  <span className="text-[11px] text-[var(--text-muted)] block">Contracted Tier</span>
-                  <span className="font-semibold text-sm text-[var(--text-primary)] mt-0.5 block">
-                    {subscription.planName}
-                  </span>
-                </div>
-                <div className="p-3 rounded-lg bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                  <span className="text-[11px] text-[var(--text-muted)] block">Physical Arrival Guarantee</span>
-                  <span className="font-semibold text-sm text-emerald-600 dark:text-emerald-400 mt-0.5 block">
-                    {subscription.planId === "247-priority"
-                      ? "20-minute rapid arrival SLA"
-                      : subscription.planId === "247-standard"
-                      ? "40-minute arrival SLA"
-                      : "Business hours coverage"}
-                  </span>
-                </div>
-                <div className="p-3 rounded-lg bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                  <span className="text-[11px] text-[var(--text-muted)] block">Next Billing Cycle</span>
-                  <span className="font-semibold text-sm text-[var(--text-primary)] mt-0.5 block tabular-nums">
-                    Resets {subscription.billingCycleResetDate}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Demonstration Receipts Grid */}
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 shadow-sm space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
-                  Subscription Purchase Receipts ({purchases.length})
-                </h3>
-              </div>
-
-              {purchases.length === 0 ? (
-                <p className="text-xs text-[var(--text-muted)] py-4 text-center">
-                  No purchase records logged yet.
-                </p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {purchases.map((pur) => (
-                    <div
-                      key={pur.purchaseId}
-                      className="p-3.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between gap-3 hover:border-emerald-500/30 transition-colors"
-                    >
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-semibold text-xs text-[var(--text-primary)]">
-                            {pur.receiptId}
-                          </span>
-                          <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
-                            {pur.paymentStatus}
-                          </span>
-                        </div>
-                        <div className="text-[11px] text-[var(--text-muted)] mt-0.5">
-                          {pur.planName} · {pur.billingPeriod}
-                        </div>
-                        <div className="text-xs font-mono font-semibold text-[var(--text-primary)] mt-1 tabular-nums">
-                          {formatBdt(pur.totalAmount)}
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setActiveReceipt(pur)}
-                        className="px-2.5 py-1 rounded-md text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-colors flex items-center gap-1"
-                      >
-                        <EyeIcon size={12} />
-                        <span>Receipt</span>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+        {/* ── 4. Progressive Disclosure Footer: Coverage & Billing Links ── */}
+        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-[var(--text-muted)] border-t border-[var(--border)] gap-2">
+          <div className="flex items-center gap-2">
+            <ShieldCheckIcon size={14} className="text-emerald-600 dark:text-emerald-400" />
+            <span>
+              Plan: <strong className="text-[var(--text-primary)]">{subscription.planName}</strong>
+              {subscription.remainingVisits !== null ? ` · ${subscription.remainingVisits} of ${subscription.includedVisits} visits remaining` : ""}
+            </span>
           </div>
-        )}
 
-        {/* ── 4. Slide-Out Operational Inspection Drawer (Modern, Focused UI) ── */}
+          <div className="flex items-center gap-4">
+            <Link
+              to="/customer/invoices"
+              className="hover:text-[var(--text-primary)] hover:underline flex items-center gap-1"
+            >
+              <span>Invoices & Billing</span>
+              <ArrowRightIcon size={11} />
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => {
+                setSupportDefaultId("");
+                setSupportModalOpen(true);
+              }}
+              className="hover:text-[var(--text-primary)] hover:underline flex items-center gap-1"
+            >
+              <SendIcon size={11} />
+              <span>Contact Support</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ── 5. Slide-Out Operational Detail Drawer (Encapsulates Secondary Information) ── */}
         {selectedRequest && (
           <div
             role="dialog"
@@ -1116,15 +741,16 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             onClick={(e) => {
               if (e.target === e.currentTarget) setSelectedRequest(null);
             }}
-            className="fixed inset-0 z-50 flex items-center justify-end bg-black/50 backdrop-blur-xs animate-fade-in"
+            className="fixed inset-0 z-50 flex items-center justify-end bg-black/40 backdrop-blur-xs animate-fade-in"
           >
-            <div className="w-full max-w-lg h-full bg-[var(--bg-surface)] border-l border-[var(--border)] p-6 shadow-2xl space-y-5 overflow-y-auto">
+            <div className="w-full max-w-md h-full bg-[var(--bg-surface)] border-l border-[var(--border)] p-5 shadow-xl space-y-4 overflow-y-auto">
+              {/* Header */}
               <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
                 <div>
-                  <span className="text-[11px] font-mono text-[var(--text-muted)]">
+                  <div className="text-[11px] font-mono text-[var(--text-muted)]">
                     Ticket {selectedRequest.id}
-                  </span>
-                  <h3 className="font-heading font-semibold text-base text-[var(--text-primary)]">
+                  </div>
+                  <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
                     {selectedRequest.asset}
                   </h3>
                 </div>
@@ -1132,80 +758,83 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   type="button"
                   onClick={() => setSelectedRequest(null)}
                   className="w-7 h-7 rounded-lg border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                  aria-label="Close details"
                 >
-                  <XIcon size={14} />
+                  <XIcon size={13} />
                 </button>
               </div>
 
-              {/* Status and Priority Row */}
+              {/* Status and Urgency */}
               <div className="flex items-center gap-2">
                 <span
-                  className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusPill(
+                  className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(
                     selectedRequest.displayStatus
                   )}`}
                 >
                   {selectedRequest.displayStatus.replace("_", " ")}
                 </span>
                 <span
-                  className={`px-2 py-0.5 rounded text-xs font-medium border ${getPriorityPill(
+                  className={`px-2 py-0.5 rounded text-xs font-medium border ${getPriorityBadge(
                     selectedRequest.priority
                   )}`}
                 >
                   {selectedRequest.priority} Priority
                 </span>
-                <span className="text-xs text-[var(--text-muted)] ml-auto">
+                <span className="text-[11px] text-[var(--text-muted)] ml-auto tabular-nums">
                   {selectedRequest.submittedDate}
                 </span>
               </div>
 
-              {/* Problem Description */}
-              <div className="p-3.5 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1">
-                <div className="text-[11px] font-medium text-[var(--text-muted)]">Reported Problem</div>
+              {/* Problem Statement */}
+              <div className="p-3 rounded-lg bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1">
+                <div className="text-[11px] font-medium text-[var(--text-muted)]">Problem Summary</div>
                 <div className="font-semibold text-xs text-[var(--text-primary)]">
                   {selectedRequest.problem}
                 </div>
-                <p className="text-xs text-[var(--text-muted)] leading-relaxed pt-1">
-                  {selectedRequest.description}
-                </p>
+                {selectedRequest.description && (
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed pt-1">
+                    {selectedRequest.description}
+                  </p>
+                )}
               </div>
 
-              {/* Operational Dispatch Summary */}
-              <div className="grid grid-cols-2 gap-2.5 text-xs">
-                <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                  <span className="text-[11px] text-[var(--text-muted)] block">Trade Domain</span>
-                  <span className="font-medium text-[var(--text-primary)] mt-0.5 block">
+              {/* Operational Metadata */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="p-2.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)]">
+                  <span className="text-[10px] text-[var(--text-muted)] block">Trade Category</span>
+                  <span className="font-medium text-[var(--text-primary)] block mt-0.5">
                     {selectedRequest.category}
                   </span>
                 </div>
-                <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                  <span className="text-[11px] text-[var(--text-muted)] block">Guaranteed SLA</span>
-                  <span className="font-medium text-emerald-600 dark:text-emerald-400 mt-0.5 block">
-                    {getCoveragePlanSlaLabel(selectedRequest.coveragePlan)}
+                <div className="p-2.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)]">
+                  <span className="text-[10px] text-[var(--text-muted)] block">Arrival Target SLA</span>
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400 block mt-0.5">
+                    {selectedRequest.arrivalSlaWindow || getCoveragePlanSlaLabel(selectedRequest.coveragePlan)}
                   </span>
                 </div>
-                <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                  <span className="text-[11px] text-[var(--text-muted)] block">Work Order ID</span>
-                  <span className="font-mono font-medium text-[var(--text-primary)] mt-0.5 block">
+                <div className="p-2.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)]">
+                  <span className="text-[10px] text-[var(--text-muted)] block">Work Order ID</span>
+                  <span className="font-mono text-[var(--text-primary)] block mt-0.5">
                     {selectedRequest.workOrderId || "Pending assignment"}
                   </span>
                 </div>
-                <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                  <span className="text-[11px] text-[var(--text-muted)] block">Assigned Technician</span>
-                  <span className="font-medium text-[var(--text-primary)] mt-0.5 block">
+                <div className="p-2.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)]">
+                  <span className="text-[10px] text-[var(--text-muted)] block">Assigned Technician</span>
+                  <span className="font-medium text-[var(--text-primary)] block mt-0.5">
                     {selectedRequest.assignedTech || "Pending dispatch"}
                   </span>
                 </div>
               </div>
 
-              {/* Completion Report Details (if completed) */}
+              {/* Technician Completion Report (when completed) */}
               {selectedRequest.completionReport && (
-                <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 space-y-2 text-xs">
+                <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 space-y-2 text-xs">
                   <div className="font-semibold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
-                    <CheckCircleIcon size={14} />
+                    <CheckCircleIcon size={13} />
                     <span>Technician Completion Report</span>
                   </div>
                   <div>
-                    <span className="font-medium text-[var(--text-primary)]">Work Performed: </span>
+                    <span className="font-medium text-[var(--text-primary)]">Work Done: </span>
                     <span className="text-[var(--text-muted)]">
                       {selectedRequest.completionReport.workPerformed || selectedRequest.completionReport.notes}
                     </span>
@@ -1234,7 +863,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               )}
 
               {/* Drawer Actions */}
-              <div className="pt-4 border-t border-[var(--border)] flex items-center justify-between">
+              <div className="pt-3 border-t border-[var(--border)] flex items-center justify-between">
                 <button
                   type="button"
                   onClick={() => {
@@ -1245,14 +874,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   }}
                   className="text-xs text-[var(--text-muted)] hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1"
                 >
-                  <SendIcon size={12} />
-                  <span>Report an issue with this ticket</span>
+                  <SendIcon size={11} />
+                  <span>Report issue</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setSelectedRequest(null)}
-                  className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-colors"
+                  className="px-3.5 py-1.5 rounded-md text-xs font-semibold bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-colors"
                 >
                   Close
                 </button>
@@ -1263,10 +892,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
         {/* ── Additional Modals (Preserved Without Mutation) ── */}
         {showQuotationModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fade-in">
-            <div className="w-full max-w-md rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
-                <h3 className="font-heading font-semibold text-sm text-[var(--text-primary)]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
+            <div className="w-full max-w-sm rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-xl space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
+                <h3 className="font-heading font-semibold text-xs text-[var(--text-primary)]">
                   Additional Service Pack
                 </h3>
                 <button
@@ -1277,16 +906,16 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   }}
                   className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
-                  <XIcon size={14} />
+                  <XIcon size={13} />
                 </button>
               </div>
 
               {quotationRequested ? (
-                <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs space-y-2 text-center">
-                  <CheckCircleIcon size={20} className="mx-auto text-emerald-500" />
-                  <div className="font-semibold text-sm">Quotation Request Logged</div>
-                  <p className="text-slate-600 dark:text-slate-300">
-                    A formal quotation for a 5-visit on-demand service pack has been routed to your facility account manager.
+                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs space-y-2 text-center">
+                  <CheckCircleIcon size={18} className="mx-auto text-emerald-500" />
+                  <div className="font-semibold text-xs">Quotation Request Logged</div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-300">
+                    A formal quotation for a 5-visit on-demand service pack has been routed to your facility manager.
                   </p>
                   <button
                     type="button"
@@ -1294,19 +923,19 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                       setShowQuotationModal(false);
                       setQuotationRequested(false);
                     }}
-                    className="mt-2 px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white"
+                    className="mt-1 px-3 py-1 rounded-md text-xs font-semibold bg-emerald-600 text-white"
                   >
                     Done
                   </button>
                 </div>
               ) : (
                 <div className="space-y-3 text-xs">
-                  <p className="text-[var(--text-muted)]">
-                    Your facility has fully utilized included visits for this billing cycle. An on-demand 5-pack can be added immediately.
+                  <p className="text-[var(--text-muted)] text-[11px]">
+                    Your facility has fully utilized included visits for this billing cycle.
                   </p>
-                  <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-1">
+                  <div className="p-2.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-1">
                     <div className="font-semibold text-xs text-[var(--text-primary)]">Enterprise On-Demand 5-Pack</div>
-                    <ul className="space-y-0.5 text-[var(--text-muted)] text-[11px]">
+                    <ul className="space-y-0.5 text-[var(--text-muted)] text-[10px]">
                       <li>• 5 additional certified technician on-site visits</li>
                       <li>• Retains {subscription.planName} arrival SLA commitments</li>
                     </ul>
@@ -1315,14 +944,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     <button
                       type="button"
                       onClick={() => setShowQuotationModal(false)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)]"
+                      className="px-3 py-1 rounded-md text-xs font-medium border border-[var(--border)] text-[var(--text-muted)]"
                     >
                       Cancel
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuotationRequested(true)}
-                      className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors"
+                      className="px-3 py-1 rounded-md text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-500 transition-colors"
                     >
                       Submit Request
                     </button>

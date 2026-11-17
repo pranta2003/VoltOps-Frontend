@@ -1557,6 +1557,31 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
+## Milestone 4.12 — Customer Dashboard Information-Density & UX Redesign
+
+- **Date**: 17 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Rebuild Customer Dashboard information architecture to prioritize scannability and eliminate visual clutter ("Less content on screen").
+- **Key Enhancements**:
+  1. **Answered the 3 Core Operational Questions**:
+     - *What is happening at my facility?* Direct scannable active breakdowns with high-contrast status and SLA pills.
+     - *What needs my attention?* Consolidated single actionable alert banner (shown only when review or feedback is pending).
+     - *Where can I create or inspect a service request?* Clear, single primary `+ New Request` button and row `View details` trigger.
+  2. **Content Removed / Relocated**:
+     - Removed 4 generic KPI metric counter boxes (saved 160px vertical height).
+     - Removed redundant full-width coverage/SLA banner ribbon.
+     - Moved extensive diagnostic details, technician reports, and materials into an accessible slide-over Operational Detail Drawer (`aria-modal="true"`, `Escape` dismiss).
+     - Collapsed historical records into an on-demand filterable Service History drawer/accordion.
+  3. **Performance & Bundle Impact**:
+     - Dropped `CustomerDashboard.tsx` production bundle size from **56.22 kB** to **38.22 kB** (a 32% reduction).
+- **Quality Gates Passed**:
+  - TypeScript: 0 errors (`npx tsc --noEmit`).
+  - Automated tests: 84 / 84 passed (`npm test -- --run`).
+  - Production build: Succeeded in 21.89s with 0 errors (`npm run build`).
+  - Multi-viewport verified: Desktop (1440px), Tablet (768px), Mobile (390px).
+
+---
+
 ## Milestone 4.11 — GitHub Actions CI Fix, Lockfile Synchronization & Node 24 Alignment
 
 - **Date**: 15 November 2026
