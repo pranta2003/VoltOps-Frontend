@@ -80,7 +80,38 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
-## Milestone 4.1: Business Logic Integrity, Data Safety & Integration Boundaries ✅
+## Milestone 4.25: Customer Portal Dual-Theme Support & Light Mode Parity ✅
+- **Date Completed**: 19 November 2026
+- **Branch**: `feature/project-wide-design-transformation`
+- **Scope**: Implemented full high-contrast, dual-theme Light Mode support across all four customer portal pages (`CustomerDashboard.tsx`, `NewServiceRequest.tsx`, `FacilityAssets.tsx`, `CustomerInvoices.tsx`) and the shared shell (`Layout.tsx`), while preserving 100% of the approved Signal Emerald / Zinc-950 Dark Mode styling. Resolved customer isolation in facility assets to ensure truthful unfulfilled request tracking.
+- **Accomplishments**:
+  1. **Dual-Theme Design Token Harmonization**:
+     - Converted hardcoded dark-only surfaces (`bg-zinc-900`, `bg-zinc-950`, `border-white/5`, `text-white`) into paired light/dark tokens (`bg-white dark:bg-zinc-900`, `bg-zinc-50 dark:bg-zinc-950`, `border-zinc-200 dark:border-white/5`, `text-zinc-900 dark:text-zinc-50`).
+     - Light mode page canvas: `bg-zinc-50 dark:bg-zinc-950`; card containers: `bg-white dark:bg-zinc-900 shadow-sm dark:shadow-md`.
+     - Inputs and selection wells: `bg-zinc-50 dark:bg-zinc-950 border-zinc-300 dark:border-white/10 text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-500`.
+  2. **Layout & Banner Contrast Fixes (`Layout.tsx`)**:
+     - Elevated Developer Preview banner with `bg-emerald-50 dark:bg-emerald-500/10 border-b border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-400`.
+     - Fixed `Exit Preview` button contrast in Light Mode (`bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border-emerald-300 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 dark:text-emerald-300 dark:border-emerald-500/30`).
+  3. **New Service Request Dual-Theme Styling (`NewServiceRequest.tsx`)**:
+     - Form container, trade selector buttons, urgency cards, guidance sidebar, and submit actions fully styled for both Light and Dark themes.
+     - Preserved single active request lock and local preview simulation.
+  4. **Customer-Scoped Request Lock Fix & Dual-Theme (`FacilityAssets.tsx`)**:
+     - Fixed false active-request lock bug: scoped `activeRequests` memo filter to `r.customerId === user.id`. In 0 active requests state, `Report Breakdown` and `Report` buttons are properly unlocked.
+     - Updated table headers, row hover states (`hover:bg-zinc-50 dark:hover:bg-white/[0.02]`), search input, category dropdown, and modal sheets for high WCAG AA contrast.
+  5. **Commercial B2B SaaS Invoices Dual-Theme (`CustomerInvoices.tsx`)**:
+     - Updated summary cards, billing history list, and invoice statement viewer.
+     - Fixed inactive statement cards (`INV-4088`, `INV-4075`) in Light Mode to crisp `bg-white` cards with `border-zinc-200` and dark readable typography.
+     - Purged yellow emoji: replaced with an emerald indicator dot.
+  6. **Customer Dashboard Single-Pane-of-Glass Dual-Theme (`CustomerDashboard.tsx`)**:
+     - Preserved exact unified master-detail single-page layout without changing architecture or structure.
+     - Enhanced metric cards, visit gauge SVG strokes, category bar tracks, request card list, 4-step timeline stepper, specialist card, and service history archive table.
+  7. **Quality Gates & Verification**:
+     - `npx tsc --noEmit`: 0 errors.
+     - `npm test`: 84/84 tests passing.
+     - `npm run build`: Production build cleanly completed in 8.79s.
+     - Verified with `chrome-devtools-mcp` across Light and Dark modes with 1440x900 desktop screenshots captured for all 4 views.
+
+---
 - **Date Completed**: 12 November 2026
 - **Branch**: `pranta` (frontend only)
 - **Scope**: Rigorous business logic audit and correction across all four portals. Decoupled request urgency from physical arrival SLA guarantees; enforced the four approved canonical VoltOps coverage plans (8-Hour Daily Window, 24/7 Standard 40m, 24/7 Priority 20m, Custom Enterprise). Corrected invoice payment semantics by strictly separating payment initiation (`PAYMENT_PENDING`) from confirmation, prohibiting frontend simulation of PAID status without backend gateway webhooks. Hardened technician availability logic to account for remaining active assignments, multi-job capacity, and off-duty statuses (`ON_LEAVE`). Fortified the client-side operational store against corrupted or malformed `sessionStorage` structures with runtime type guards. Implemented route-level code splitting across all dashboards reducing initial JS bundle by ~40% (785 kB down to 471 kB).

@@ -170,18 +170,18 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
         {isPreview && (
           <aside
             aria-label="Developer Preview Notice"
-            className="shrink-0 bg-emerald-500/10 border-b border-emerald-500/20 px-3.5 py-1.5 flex items-center justify-between text-xs text-emerald-400 font-medium select-none z-20"
+            className="shrink-0 bg-emerald-50 dark:bg-emerald-500/10 border-b border-emerald-200 dark:border-emerald-500/20 px-3.5 py-1.5 flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-400 font-medium select-none z-20"
           >
             <div className="flex items-center gap-2 truncate">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-              <span className="font-bold tracking-tight text-xs uppercase">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse shrink-0" />
+              <span className="font-bold tracking-tight text-xs uppercase text-emerald-800 dark:text-emerald-400">
                 LOCAL PREVIEW · {role}
               </span>
             </div>
             <button
               type="button"
               onClick={exitPreview}
-              className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition-colors shrink-0"
+              className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 dark:text-emerald-300 dark:border-emerald-500/30 transition-colors shrink-0"
             >
               Exit Preview
             </button>
@@ -292,7 +292,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
         )}
 
         {/* Scrollable Dashboard Body */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 lg:p-6 w-full min-w-0">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 lg:p-6 w-full min-w-0 bg-zinc-50 dark:bg-zinc-950">
           <div className="max-w-7xl mx-auto space-y-4 w-full min-w-0">
             {children}
           </div>
