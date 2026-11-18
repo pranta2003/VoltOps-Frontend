@@ -1844,3 +1844,30 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build in 8.28s (`npm run build`). Customer Dashboard bundle: 43.86 kB.
+
+---
+
+## Milestone 4.22 — Customer Dashboard UI/UX Pro Max Transformation, Single Active Request Rule & Text Minimalism
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Execute the `ui-ux-pro-max` standard design transformation, implement the Single Active Request Limit workflow rule, apply ruthless text minimalism, and deploy high-polish truthful visual charts:
+  1. **Single Active Request Limit**:
+     - Enforced business rule: A customer cannot submit a new service request while an active, unfulfilled request exists (status not `COMPLETED` and not `CANCELLED`).
+     - Disabled `+ New Request` action and rendered locked badge: `Active request open` with `LockIcon` (`src/components/Icons.tsx`).
+  2. **Ruthless Text Minimalism**:
+     - Top Preview Banner: Shortened to `LOCAL PREVIEW · CUSTOMER`.
+     - Top Navbar: Removed facility address subtitle, polished `Facility Operations` typography (`font-heading font-semibold text-base sm:text-lg text-[var(--text-primary)] tracking-tight`).
+     - Bottom Footer Bar: Purged duplicate plan text; kept minimal copyright, invoice link, and support button.
+     - Left Request Cards: Strictly capped at 2 lines per card: Line 1 (`SR-xxxx` + status badge) & Line 2 (incident title truncated). Stripped timestamps, asset names, and SLA labels from card tiles.
+     - Right Detail Workspace: Deleted `OPERATIONAL SERVICE REQUEST` kicker; simplified 4-step stepper to crisp single-word labels (`Logged` → `Triaged` → `En Route` → `On Site`) without sub-captions; shortened technician subtitle to `Electrical & HVAC`; eliminated `Included` text and renamed `Visit Allowance Credit` → `Visit Credit`; deleted redundant bottom facility location card.
+  3. **High-Polish Truthful Visual Cards (Replacing 4 Small Cards)**:
+     - Card 1 (Visit Allowance Gauge): Animated SVG circular ring gauge with authentic remaining/total visits (`27 / 30 left`), plan badge (`24/7 PRIORITY COVERAGE`), and physical arrival SLA (`20m Physical Arrival SLA`).
+     - Card 2 (Facility Service Breakdown): Proportional multi-segmented progress bar computed strictly from real incident counts (Active Cyan `#06b6d4` + Completed Emerald `#10b981`), with micro legend counters (`Active (2)`, `Completed (1)`, `Total Logged (3)`).
+  4. **Visual System & Zero Yellow**:
+     - Deep space dark mode (`bg-zinc-950`), cards (`bg-zinc-900 border border-white/5`).
+     - Palette: Signal Emerald (`#10b981`), Cyan (`#06b6d4`), Berry Plum (`#b8287a`). Zero yellow or amber tokens.
+  5. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.15s (`npm run build`). Customer Dashboard bundle: 42.99 kB.

@@ -174,9 +174,8 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
           >
             <div className="flex items-center gap-2 truncate">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-              <span className="font-bold tracking-tight">LOCAL PREVIEW</span>
-              <span className="hidden sm:inline text-emerald-300/80 font-normal">
-                — Offline Demonstration Mode ({role}). Backend APIs bypassed.
+              <span className="font-bold tracking-tight text-xs uppercase">
+                LOCAL PREVIEW · {role}
               </span>
             </div>
             <button
@@ -203,7 +202,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
             </button>
 
             <div className="min-w-0">
-              <h1 className="font-heading font-bold text-base sm:text-lg lg:text-xl text-[var(--text-primary)] tracking-tight truncate">
+              <h1 className="font-heading font-semibold text-base sm:text-lg text-[var(--text-primary)] tracking-tight truncate">
                 {title}
               </h1>
               {subtitle && (

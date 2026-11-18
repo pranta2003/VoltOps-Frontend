@@ -31,9 +31,7 @@ import {
   ShieldCheckIcon,
   StarIcon,
   SendIcon,
-  WrenchIcon,
-  BuildingIcon,
-  RadioIcon,
+  LockIcon,
 } from "../components/Icons";
 
 export interface CustomerViewRequest {
@@ -471,16 +469,43 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const activeRequestObj = selectedRequest || activeRequests[0] || requests[0];
   const activeStep = activeRequestObj ? getTimelineStepIndex(activeRequestObj.displayStatus) : 0;
   const timelineSteps = [
-    { label: "1. LOGGED", sub: "Ticket Created" },
-    { label: "2. TRIAGED", sub: "Dispatcher Assigned" },
-    { label: "3. EN ROUTE", sub: "Specialist In Transit" },
-    { label: "4. ON SITE", sub: "Facility Arrival" },
+    { label: "Logged" },
+    { label: "Triaged" },
+    { label: "En Route" },
+    { label: "On Site" },
   ];
+
+  // ── Single Active Request Rule & Telemetry Metrics ──
+  const hasActiveRequest = activeRequests.length > 0;
+  const remainingVisits = subscription.remainingVisits ?? 27;
+  const includedVisits = subscription.includedVisits ?? 30;
+  const allowancePct = Math.min(
+    100,
+    Math.max(0, Math.round((remainingVisits / includedVisits) * 100))
+  );
+
+  const slaLabel = useMemo(() => {
+    switch (subscription.planId) {
+      case "247-priority":
+        return "20m Physical Arrival SLA";
+      case "247-standard":
+        return "40m Physical Arrival SLA";
+      case "8hr":
+        return "8-Hour Operational Window";
+      default:
+        return "Negotiated SLA";
+    }
+  }, [subscription.planId]);
+
+  const completedIncidentsCount = useMemo(
+    () => requests.filter((r) => r.displayStatus === "COMPLETED").length,
+    [requests]
+  );
+  const activeIncidentsCount = activeRequests.length;
 
   return (
     <Layout
       title="Facility Operations"
-      subtitle={`${user?.company || "Apex Spinning & Weaving Mills"} · Savar Commercial Complex`}
       action={
         <div className="flex items-center gap-3">
           <button
@@ -492,99 +517,126 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           >
             <RefreshCwIcon size={15} className={isLoading ? "animate-spin text-[#10b981]" : ""} />
           </button>
-          <Link
-            to="/customer/new-request"
-            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-zinc-950 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 active:scale-[0.98]"
-          >
-            <span className="font-extrabold text-sm">+</span>
-            <span>New Request</span>
-          </Link>
+          {hasActiveRequest ? (
+            <div
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-zinc-800/80 text-zinc-400 border border-white/5 flex items-center gap-1.5 cursor-not-allowed select-none"
+              title="Active request open. You must complete or resolve your current request before submitting a new one."
+            >
+              <LockIcon size={13} className="text-zinc-500" />
+              <span>Active request open</span>
+            </div>
+          ) : (
+            <Link
+              to="/customer/new-request"
+              className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-zinc-950 transition-all shadow-md flex items-center gap-1.5 active:scale-[0.98]"
+            >
+              <span className="font-extrabold text-sm">+</span>
+              <span>New Request</span>
+            </Link>
+          )}
         </div>
       }
     >
       <div className="space-y-6 max-w-6xl">
-        {/* ── 1. Top Truthful Operational KPI Cards ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Total Requests (real count) */}
-          <div className="bg-zinc-900 rounded-xl p-5 space-y-3 border border-white/5 shadow-md hover:-translate-y-0.5 transition-all">
-            <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-medium">
-              <div className="w-8 h-8 rounded-lg bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
-                <WrenchIcon size={16} />
-              </div>
-              <span className="truncate">Total Requests</span>
-            </div>
-            <div className="text-3xl font-extrabold text-white tracking-tight">
-              {requests.length}
-            </div>
-          </div>
-
-          {/* Card 2: Active Incidents (real count) */}
-          <div className="bg-zinc-900 rounded-xl p-5 space-y-3 border border-white/5 shadow-md hover:-translate-y-0.5 transition-all">
-            <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-medium">
-              <div className="w-8 h-8 rounded-lg bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
-                <ShieldCheckIcon size={16} />
-              </div>
-              <span className="truncate">Active Incidents</span>
-            </div>
-            <div className="text-3xl font-extrabold text-white tracking-tight">
-              {activeRequests.length}
-            </div>
-          </div>
-
-          {/* Card 3: Physical Arrival SLA (real plan target) */}
-          <div className="bg-zinc-900 rounded-xl p-5 space-y-3 border border-white/5 shadow-md hover:-translate-y-0.5 transition-all">
-            <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-medium">
-              <div className="w-8 h-8 rounded-lg bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
-                <ClockIcon size={16} />
-              </div>
-              <span className="truncate">Physical Arrival SLA</span>
-            </div>
-            <div className="text-3xl font-extrabold text-[#10b981] tracking-tight">
-              {subscription.planId === "247-priority"
-                ? "20m"
-                : subscription.planId === "247-standard"
-                ? "40m"
-                : subscription.planId === "8hr"
-                ? "8h"
-                : "Custom"}{" "}
-              <span className="text-sm font-semibold text-zinc-400">
-                {subscription.planId === "8hr" || subscription.planId === "custom" ? "Window" : "Target"}
-              </span>
-            </div>
-          </div>
-
-          {/* Card 4: Service Visit Credits (real subscription allowance with progress bar) */}
-          <div className="bg-zinc-900 rounded-xl p-5 space-y-3 border border-white/5 shadow-md hover:-translate-y-0.5 transition-all">
-            <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-medium">
-              <div className="w-8 h-8 rounded-lg bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
-                <RadioIcon size={16} />
-              </div>
-              <span className="truncate">Service Visit Credits</span>
-            </div>
-            <div className="space-y-2">
-              <div className="text-2xl font-extrabold text-white tracking-tight flex items-baseline gap-1.5">
-                <span>{subscription.remainingVisits !== null ? subscription.remainingVisits : 27}</span>
-                <span className="text-xs font-semibold text-zinc-400">
-                  of {subscription.includedVisits !== null ? subscription.includedVisits : 30} left
+        {/* ── 1. Sleek 2-Card Visual Strip (Truthful VoltOps Telemetry) ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Card 1: Visit Allowance Gauge */}
+          <div className="bg-zinc-900 rounded-xl p-5 border border-white/5 shadow-md flex items-center gap-5">
+            {/* Animated SVG Ring Gauge */}
+            <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 84 84">
+                <circle
+                  cx="42"
+                  cy="42"
+                  r="34"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.06)"
+                  strokeWidth="7"
+                />
+                <circle
+                  cx="42"
+                  cy="42"
+                  r="34"
+                  fill="none"
+                  stroke="#10b981"
+                  strokeWidth="7"
+                  strokeLinecap="round"
+                  strokeDasharray={213.63}
+                  strokeDashoffset={213.63 - (allowancePct / 100) * 213.63}
+                  className="transition-all duration-700 ease-out"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span className="text-base font-extrabold text-white leading-none tracking-tight">
+                  {remainingVisits}
+                </span>
+                <span className="text-[9px] font-semibold text-zinc-500 mt-0.5">
+                  /{includedVisits} left
                 </span>
               </div>
-              <div className="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
-                <div
-                  className="bg-[#10b981] h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      Math.max(
-                        0,
-                        Math.round(
-                          ((subscription.remainingVisits ?? 27) /
-                            (subscription.includedVisits ?? 30)) *
-                            100
-                        )
-                      )
-                    )}%`,
-                  }}
-                />
+            </div>
+
+            {/* Plan Info & SLA Window */}
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30">
+                  {subscription.planName || "24/7 Priority Plan"}
+                </span>
+              </div>
+              <div className="text-sm font-bold text-white tracking-tight">
+                {remainingVisits} of {includedVisits} Visits Remaining
+              </div>
+              <div className="text-xs text-zinc-400 flex items-center gap-1.5">
+                <ClockIcon size={12} className="text-[#10b981] shrink-0" />
+                <span className="truncate">{slaLabel}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Facility Service Breakdown */}
+          <div className="bg-zinc-900 rounded-xl p-5 border border-white/5 shadow-md flex flex-col justify-between space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-white tracking-tight">Facility Service Breakdown</span>
+              <span className="text-zinc-400 font-medium">{requests.length} Total Incidents</span>
+            </div>
+
+            {/* Segmented Proportional Bar */}
+            <div className="space-y-1.5">
+              <div className="w-full h-2 rounded-full bg-zinc-800 flex overflow-hidden gap-0.5">
+                {activeIncidentsCount > 0 && (
+                  <div
+                    className="bg-[#06b6d4] h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${(activeIncidentsCount / (requests.length || 1)) * 100}%`,
+                    }}
+                    title={`${activeIncidentsCount} Active`}
+                  />
+                )}
+                {completedIncidentsCount > 0 && (
+                  <div
+                    className="bg-[#10b981] h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${(completedIncidentsCount / (requests.length || 1)) * 100}%`,
+                    }}
+                    title={`${completedIncidentsCount} Completed`}
+                  />
+                )}
+              </div>
+
+              {/* Legend & Status Counts */}
+              <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#06b6d4]" />
+                  <span>Active ({activeIncidentsCount})</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#10b981]" />
+                  <span>Completed ({completedIncidentsCount})</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-zinc-600" />
+                  <span>Total Logged ({requests.length})</span>
+                </div>
               </div>
             </div>
           </div>
@@ -694,46 +746,30 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                       <div
                         key={req.id}
                         onClick={() => setSelectedRequest(req)}
-                        className={`rounded-xl p-4 cursor-pointer transition-all duration-200 select-none border ${
+                        className={`rounded-xl p-3 cursor-pointer transition-all duration-150 select-none border ${
                           isSelected
-                            ? "bg-[#10b981] text-zinc-950 border-[#10b981] shadow-lg shadow-emerald-500/20 translate-x-1"
-                            : "bg-zinc-800/60 hover:bg-zinc-800 text-white border-white/5 shadow-xs"
+                            ? "bg-[#10b981] text-zinc-950 border-[#10b981] shadow-md shadow-emerald-500/10"
+                            : "bg-zinc-800/60 hover:bg-zinc-800 text-white border-white/5"
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <div className="flex items-center justify-between gap-2">
                           <span
-                            className={`font-mono text-xs font-extrabold tracking-wide ${
-                              isSelected ? "text-zinc-950" : "text-white"
+                            className={`font-mono text-xs font-bold tracking-tight ${
+                              isSelected ? "text-zinc-950" : "text-zinc-300"
                             }`}
                           >
-                            Request {req.id}
+                            {req.id}
                           </span>
                           {renderStatusBadge(req.displayStatus, isSelected)}
                         </div>
 
                         <div
-                          className={`text-xs font-bold truncate mt-1 ${
-                            isSelected ? "text-zinc-900" : "text-zinc-200"
+                          className={`text-xs font-medium truncate mt-1 ${
+                            isSelected ? "text-zinc-900 font-semibold" : "text-zinc-300"
                           }`}
+                          title={req.problem}
                         >
                           {req.problem}
-                        </div>
-
-                        <div
-                          className={`text-[11px] truncate mt-0.5 ${
-                            isSelected ? "text-zinc-800" : "text-zinc-400"
-                          }`}
-                        >
-                          {req.asset} · {req.category}
-                        </div>
-
-                        <div
-                          className={`text-[10px] mt-2 font-mono flex items-center justify-between ${
-                            isSelected ? "text-zinc-800/90" : "text-zinc-500"
-                          }`}
-                        >
-                          <span>{req.submittedDate}</span>
-                          <span className="font-semibold">{req.arrivalSlaWindow}</span>
                         </div>
                       </div>
                     );
@@ -751,12 +787,12 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 <div className="bg-zinc-900 rounded-xl p-5 space-y-5 border border-white/5 shadow-md">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-                        Operational Service Request
-                      </span>
-                      <h3 className="text-base font-extrabold text-white mt-0.5">
+                      <h3 className="text-base font-extrabold text-white">
                         Request {activeRequestObj.workOrderId || activeRequestObj.id}
                       </h3>
+                      <div className="text-xs text-zinc-400 mt-0.5">
+                        {activeRequestObj.asset} · Savar Commercial Complex
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -778,7 +814,6 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   <div className="flex items-center justify-between text-xs pt-1">
                     <div>
                       <div className="text-[11px] text-zinc-400">{activeRequestObj.submittedDate}</div>
-                      <div className="font-bold text-white text-sm">Savar Commercial Complex</div>
                     </div>
 
                     <div className="text-center">
@@ -793,7 +828,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     </div>
                   </div>
 
-                  {/* Connected Horizontal Timeline Node Stepper: 1. LOGGED -> 2. TRIAGED -> 3. EN ROUTE -> 4. ON SITE */}
+                  {/* Connected Horizontal Timeline Node Stepper: Logged -> Triaged -> En Route -> On Site */}
                   <div className="relative pt-3 pb-2">
                     {/* Background Bar */}
                     <div className="absolute top-5 left-4 right-4 h-1 bg-zinc-800 -translate-y-1/2 z-0 rounded-full" />
@@ -824,7 +859,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                               {isCompleted ? "✓" : idx + 1}
                             </div>
                             <span
-                              className={`mt-2 text-[10px] font-bold uppercase tracking-wider ${
+                              className={`mt-2 text-[10px] font-bold tracking-wider ${
                                 isCurrent
                                   ? "text-[#10b981]"
                                   : isCompleted
@@ -833,9 +868,6 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                               }`}
                             >
                               {step.label}
-                            </span>
-                            <span className="text-[9px] text-zinc-400 mt-0.5">
-                              {step.sub}
                             </span>
                           </div>
                         );
@@ -861,7 +893,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                         {activeRequestObj.assignedTech || "Tanvir Ahmed"}
                       </div>
                       <div className="text-xs text-zinc-400 mt-0.5">
-                        Lead Field Engineer · Certified Electrical & HVAC
+                        Electrical & HVAC
                       </div>
                     </div>
                   </div>
@@ -901,12 +933,9 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   <h4 className="text-sm font-extrabold text-white">Incident Details</h4>
 
                   <div className="space-y-3 text-xs">
-                    <div className="flex items-start justify-between gap-4 pb-3 border-b border-white/[0.06]">
-                      <div>
-                        <div className="font-bold text-white text-xs">{activeRequestObj.problem}</div>
-                        <div className="text-zinc-400 text-[11px] mt-0.5">{activeRequestObj.description || "Routine breakdown maintenance and electrical diagnostics."}</div>
-                      </div>
-                      <div className="font-extrabold text-white text-sm shrink-0">Included</div>
+                    <div className="pb-3 border-b border-white/[0.06]">
+                      <div className="font-bold text-white text-xs">{activeRequestObj.problem}</div>
+                      <div className="text-zinc-400 text-[11px] mt-0.5">{activeRequestObj.description || "Routine breakdown maintenance and electrical diagnostics."}</div>
                     </div>
 
                     <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
@@ -920,30 +949,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     </div>
 
                     <div className="flex items-center justify-between pt-1">
-                      <div className="font-bold text-white">Visit Allowance Credit</div>
+                      <div className="font-bold text-white">Visit Credit</div>
                       <div className="font-extrabold text-[#10b981] text-sm">
-                        1 Visit Deducted <span className="text-zinc-400 font-normal">({subscription.remainingVisits !== null ? subscription.remainingVisits : 27} left)</span>
+                        1 Visit Deducted <span className="text-zinc-400 font-normal">({remainingVisits} left)</span>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* ── Detail Card 4: Facility Location ── */}
-                <div className="bg-zinc-900 rounded-xl p-5 flex items-center justify-between border border-white/5 shadow-md">
-                  <div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                      Facility Location
-                    </div>
-                    <div className="font-bold text-white text-xs mt-0.5">
-                      {activeRequestObj.asset}
-                    </div>
-                    <div className="text-[11px] text-zinc-400">
-                      Savar Commercial Complex, Sector 4 · Unit Block B
-                    </div>
-                  </div>
-
-                  <div className="p-2.5 rounded-lg bg-zinc-800 text-[#10b981] border border-white/5">
-                    <BuildingIcon size={18} />
                   </div>
                 </div>
 
@@ -1093,10 +1103,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-3 border-t border-white/[0.06]">
           <div className="flex items-center gap-2">
             <ShieldCheckIcon size={14} className="text-[#10b981]" />
-            <span>
-              Plan: <strong className="text-zinc-300">{subscription.planName}</strong> ·{" "}
-              {subscription.remainingVisits !== null ? subscription.remainingVisits : 27} of {subscription.includedVisits} visits remaining
-            </span>
+            <span>VoltOps Commercial Operations Platform</span>
           </div>
 
           <div className="flex items-center gap-4">
