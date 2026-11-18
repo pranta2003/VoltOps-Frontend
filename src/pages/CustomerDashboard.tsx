@@ -69,47 +69,25 @@ interface CustomerDashboardProps {
   initialView?: "recent" | "all";
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MSlogistic Historical Dispatch Activity Data (Image 3 Reference)
-// ─────────────────────────────────────────────────────────────────────────────
-const DISPATCH_ACTIVITY_DAYS = [
-  { date: "15.04", arrived: 35, delivered: 85, dispatched: 40 },
-  { date: "16.04", arrived: 50, delivered: 130, dispatched: 35 },
-  { date: "17.04", arrived: 28, delivered: 110, dispatched: 45 },
-  { date: "18.04", arrived: 45, delivered: 80, dispatched: 40 },
-  { date: "19.04", arrived: 20, delivered: 55, dispatched: 30 },
-  { date: "20.04", arrived: 25, delivered: 45, dispatched: 28 },
-  { date: "21.04", arrived: 15, delivered: 20, dispatched: 22 },
-  { date: "22.04", arrived: 12, delivered: 25, dispatched: 20 },
-  { date: "23.04", arrived: 55, delivered: 90, dispatched: 50 },
-  { date: "25.04", arrived: 38, delivered: 50, dispatched: 28 },
-  { date: "26.04", arrived: 18, delivered: 30, dispatched: 24 },
-  { date: "27.04", arrived: 22, delivered: 35, dispatched: 25 },
-  { date: "28.04", arrived: 15, delivered: 22, dispatched: 18 },
-  { date: "29.04", arrived: 20, delivered: 28, dispatched: 20 },
-  { date: "30.04", arrived: 25, delivered: 40, dispatched: 25 },
-  { date: "01.05", arrived: 10, delivered: 15, dispatched: 12 },
-  { date: "02.05", arrived: 8, delivered: 12, dispatched: 10 },
-  { date: "03.05", arrived: 48, delivered: 75, dispatched: 38 },
-  { date: "04.05", arrived: 15, delivered: 35, dispatched: 20 },
-  { date: "06.05", arrived: 18, delivered: 38, dispatched: 22 },
-];
-
 export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const viewParam = searchParams.get("view");
-  const tabParam = searchParams.get("tab");
 
   const [requests, setRequests] = useState<CustomerViewRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<CustomerViewRequest | null>(null);
 
-  // Active View Switcher: "analytics" (Image 3: Fleet Overview & Animated Charts) vs "orders" (Image 4: My Orders Split Workspace)
-  const [activeTab, setActiveTab] = useState<"orders" | "analytics">(
-    tabParam === "orders" ? "orders" : "analytics"
-  );
+  // Auto-select first active request by default when loaded
+  useEffect(() => {
+    if (!selectedRequest && requests.length > 0) {
+      const firstActive = requests.find(
+        (r) => r.displayStatus !== "COMPLETED" && r.displayStatus !== "CANCELLED"
+      );
+      setSelectedRequest(firstActive || requests[0]);
+    }
+  }, [requests, selectedRequest]);
 
   // View state: 'active' (default operational screen) vs 'history' (progressive disclosure archive)
   const [showHistory, setShowHistory] = useState<boolean>(
@@ -121,9 +99,6 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [priorityFilter, setPriorityFilter] = useState<string>("ALL");
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
-
-  // Chart Tooltip Hover State
-  const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
 
   // Subscription Credit State
   const [subscription, setSubscription] = useState<SubscriptionEntitlement>(() =>
@@ -499,10 +474,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const activeRequestObj = selectedRequest || activeRequests[0] || requests[0];
   const activeStep = activeRequestObj ? getTimelineStepIndex(activeRequestObj.displayStatus) : 0;
   const timelineSteps = [
-    { label: "Hartford", sub: "Ticket Logged" },
-    { label: "Triage Dispatch", sub: "Dispatcher Assigned" },
-    { label: "Transit", sub: "En Route to Site" },
-    { label: "New York", sub: "On-Site Facility" },
+    { label: "1. Logged", sub: "Ticket Created" },
+    { label: "2. Triaged", sub: "Dispatcher Assigned" },
+    { label: "3. En Route", sub: "Specialist In Transit" },
+    { label: "4. On Site", sub: "Facility Arrival" },
   ];
 
   return (
@@ -511,47 +486,6 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
       subtitle={`${user?.company || "Apex Spinning & Weaving Mills"} · Savar Commercial Complex`}
       action={
         <div className="flex items-center gap-3">
-          {/* View Mode Switcher: Analytics (Image 3) vs My Orders (Image 4) */}
-          <div className="flex items-center p-1 rounded-2xl bg-[#1c1d22] border border-white/[0.08]">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("analytics");
-                setSearchParams({ tab: "analytics" });
-              }}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                activeTab === "analytics"
-                  ? "bg-[#10b981] text-zinc-950 shadow-md shadow-emerald-500/20"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <rect x="3" y="12" width="4" height="9" rx="1" />
-                <rect x="10" y="7" width="4" height="14" rx="1" />
-                <rect x="17" y="3" width="4" height="18" rx="1" />
-              </svg>
-              <span>Analytics</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("orders");
-                setSearchParams({ tab: "orders" });
-              }}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                activeTab === "orders"
-                  ? "bg-[#10b981] text-zinc-950 shadow-md shadow-emerald-500/20"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                <rect x="8" y="2" width="8" height="4" rx="1" />
-              </svg>
-              <span>My Orders</span>
-            </button>
-          </div>
-
           <button
             type="button"
             onClick={loadCustomerData}
@@ -572,9 +506,9 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
       }
     >
       <div className="space-y-6 max-w-6xl">
-        {/* ── 1. Top Operational Stat Cards (MSlogistic Reference Style) ── */}
+        {/* ── 1. Top Truthful Operational KPI Cards ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Total Incidents */}
+          {/* Card 1: Total Requests (real count) */}
           <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-3 shadow-md hover:-translate-y-0.5 transition-all">
             <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-medium">
               <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
@@ -583,11 +517,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <span className="truncate">Total Requests</span>
             </div>
             <div className="text-3xl font-extrabold text-white tracking-tight">
-              {requests.length > 0 ? requests.length : 274}
+              {requests.length}
             </div>
           </div>
 
-          {/* Card 2: Active Facility Incidents */}
+          {/* Card 2: Active Incidents (real count) */}
           <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-3 shadow-md hover:-translate-y-0.5 transition-all">
             <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-medium">
               <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
@@ -596,11 +530,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <span className="truncate">Active Incidents</span>
             </div>
             <div className="text-3xl font-extrabold text-white tracking-tight">
-              {activeRequests.length > 0 ? activeRequests.length : 75}
+              {activeRequests.length}
             </div>
           </div>
 
-          {/* Card 3: Dispatched Specialists */}
+          {/* Card 3: Physical Arrival SLA (real plan target) */}
           <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-3 shadow-md hover:-translate-y-0.5 transition-all">
             <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-medium">
               <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
@@ -609,22 +543,55 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <span className="truncate">Physical Arrival SLA</span>
             </div>
             <div className="text-3xl font-extrabold text-[#10b981] tracking-tight">
-              20m <span className="text-sm font-semibold text-zinc-400">Target</span>
+              {subscription.planId === "247-priority"
+                ? "20m"
+                : subscription.planId === "247-standard"
+                ? "40m"
+                : subscription.planId === "8hr"
+                ? "8h"
+                : "Custom"}{" "}
+              <span className="text-sm font-semibold text-zinc-400">
+                {subscription.planId === "8hr" || subscription.planId === "custom" ? "Window" : "Target"}
+              </span>
             </div>
           </div>
 
-          {/* Card 4: Technicians on Duty / Coverage */}
+          {/* Card 4: Service Visit Credits (real subscription allowance with progress bar) */}
           <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-3 shadow-md hover:-translate-y-0.5 transition-all">
             <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-medium">
               <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
                 <RadioIcon size={16} />
               </div>
-              <span className="truncate">Technicians on Duty</span>
+              <span className="truncate">Service Visit Credits</span>
             </div>
-            <div className="text-3xl font-extrabold text-white tracking-tight truncate">
-              313
+            <div className="space-y-2">
+              <div className="text-2xl font-extrabold text-white tracking-tight">
+                {subscription.remainingVisits !== null ? subscription.remainingVisits : 27}{" "}
+                <span className="text-sm font-semibold text-zinc-400">
+                  of {subscription.includedVisits !== null ? subscription.includedVisits : 30} left
+                </span>
+              </div>
+              <div className="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="bg-[#10b981] h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      Math.max(
+                        0,
+                        Math.round(
+                          ((subscription.remainingVisits ?? 27) /
+                            (subscription.includedVisits ?? 30)) *
+                            100
+                        )
+                      )
+                    )}%`,
+                  }}
+                />
+              </div>
             </div>
           </div>
+        </div>
         </div>
 
         {/* ── Actionable Alerts (When Genuinely Required) ── */}
@@ -655,31 +622,28 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
         )}
 
-        {/* ─────────────────────────────────────────────────────────────────────
-            MODE A: LIVE WORK ORDER WORKSPACE (Image 4 Reference — "My Orders: 7")
-           ───────────────────────────────────────────────────────────────────── */}
-        {activeTab === "orders" && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fade-in">
-            {/* ── Left Column: Master Service Requests List (45%) ── */}
-            <div className="lg:col-span-5 space-y-4">
-              <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-4 shadow-md">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-white tracking-tight">
-                    My Orders: {requests.length > 0 ? requests.length : 7}
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const next = !showHistory;
-                      setShowHistory(next);
-                      setSearchParams({ tab: "orders", ...(next ? { view: "all" } : {}) });
-                    }}
-                    className="text-xs font-bold text-[#10b981] hover:underline flex items-center gap-1"
-                  >
-                    <span>{showHistory ? "Hide Table" : "Archive Table"}</span>
-                    <ArrowRightIcon size={12} className={showHistory ? "rotate-90 transition-transform" : "transition-transform"} />
-                  </button>
-                </div>
+        {/* ── 2. Unified Single-Page Workspace: Service Requests (35%) & Work Order Detail (65%) ── */}
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
+          {/* ── Left Column: Service Requests List (35% width) ── */}
+          <div className="w-full lg:w-[35%] space-y-4 shrink-0">
+            <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-4 shadow-md">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-extrabold text-white tracking-tight">
+                  Service Requests
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !showHistory;
+                    setShowHistory(next);
+                    setSearchParams(next ? { view: "all" } : {});
+                  }}
+                  className="text-xs font-bold text-[#10b981] hover:underline flex items-center gap-1"
+                >
+                  <span>{showHistory ? "Hide Table" : "Archive Table"}</span>
+                  <ArrowRightIcon size={12} className={showHistory ? "rotate-90 transition-transform" : "transition-transform"} />
+                </button>
+              </div>
 
                 {/* Search Bar with Filter Icon */}
                 <div className="relative">
@@ -783,58 +747,58 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               </div>
             </div>
 
-            {/* ── Right Column: Live Work Order Inspection Workspace (55%) ── */}
-            <div className="lg:col-span-7 space-y-4">
-              {activeRequestObj ? (
-                <>
-                  {/* ── Detail Card 1: Order ID, Route & Connected Horizontal Timeline ── */}
-                  <div className="bg-[#1c1d22] rounded-3xl p-6 space-y-5 shadow-md">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-                          Operational Work Order
-                        </span>
-                        <h3 className="text-base font-extrabold text-white mt-0.5">
-                          Order ID Nº{activeRequestObj.workOrderId || activeRequestObj.id}
-                        </h3>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSupportDefaultId(activeRequestObj.workOrderId || activeRequestObj.id);
-                            setSupportModalOpen(true);
-                          }}
-                          className="w-8 h-8 rounded-xl bg-[#292a30] text-[#10b981] hover:bg-[#34353d] flex items-center justify-center transition-all"
-                          title="Contact Support or Report Issue"
-                        >
-                          <SendIcon size={13} />
-                        </button>
-                      </div>
+          {/* ── Right Column: Operational Work Order Workspace (65% width) ── */}
+          <div className="w-full lg:w-[65%] space-y-4 min-w-0">
+            {activeRequestObj ? (
+              <>
+                {/* ── Detail Card 1: Order ID, Route & Connected Horizontal Timeline ── */}
+                <div className="bg-[#1c1d22] rounded-3xl p-6 space-y-5 shadow-md">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                        Operational Work Order
+                      </span>
+                      <h3 className="text-base font-extrabold text-white mt-0.5">
+                        Order ID Nº{activeRequestObj.workOrderId || activeRequestObj.id}
+                      </h3>
                     </div>
 
-                    {/* Date & Destination Banner */}
-                    <div className="flex items-center justify-between text-xs pt-1">
-                      <div>
-                        <div className="text-[11px] text-zinc-400">{activeRequestObj.submittedDate}</div>
-                        <div className="font-bold text-white text-sm">Savar Complex</div>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSupportDefaultId(activeRequestObj.workOrderId || activeRequestObj.id);
+                          setSupportModalOpen(true);
+                        }}
+                        className="w-8 h-8 rounded-xl bg-[#292a30] text-[#10b981] hover:bg-[#34353d] flex items-center justify-center transition-all"
+                        title="Contact Support or Report Issue"
+                      >
+                        <SendIcon size={13} />
+                      </button>
+                    </div>
+                  </div>
 
-                      <div className="text-center">
-                        {renderStatusBadge(activeRequestObj.displayStatus)}
-                      </div>
-
-                      <div className="text-right">
-                        <div className="text-[11px] text-zinc-400">Target Arrival SLA</div>
-                        <div className="font-extrabold text-[#10b981] text-sm">
-                          {activeRequestObj.arrivalSlaWindow}
-                        </div>
-                      </div>
+                  {/* Date & Destination Banner */}
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <div>
+                      <div className="text-[11px] text-zinc-400">{activeRequestObj.submittedDate}</div>
+                      <div className="font-bold text-white text-sm">Savar Commercial Complex</div>
                     </div>
 
-                    {/* Connected Horizontal Timeline Node Stepper (Hartford -> NY Style) */}
-                    <div className="relative pt-3 pb-2">
+                    <div className="text-center">
+                      {renderStatusBadge(activeRequestObj.displayStatus)}
+                    </div>
+
+                    <div className="text-right">
+                      <div className="text-[11px] text-zinc-400">Target Arrival SLA</div>
+                      <div className="font-extrabold text-[#10b981] text-sm">
+                        {activeRequestObj.arrivalSlaWindow || (subscription.planId === "247-priority" ? "20m Target" : "40m Target")}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Connected Horizontal Timeline Node Stepper: 1. Logged -> 2. Triaged -> 3. En Route -> 4. On Site */}
+                  <div className="relative pt-3 pb-2">
                       {/* Background Bar */}
                       <div className="absolute top-5 left-4 right-4 h-1 bg-[#2c2d35] -translate-y-1/2 z-0 rounded-full" />
                       {/* Active Emerald Line */}
@@ -1021,392 +985,6 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               )}
             </div>
           </div>
-        )}
-
-        {/* ─────────────────────────────────────────────────────────────────────
-            MODE B: MSLOGISTIC ANALYTICS & CHARTS (Image 3 Reference)
-           ───────────────────────────────────────────────────────────────────── */}
-        {activeTab === "analytics" && (
-          <div className="space-y-6 animate-fade-in">
-            {/* Top Row of Section: Circular Gauges (Left) & Stacked Dispatched Activity Bar Chart (Right) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-              {/* Left Column (3 Stacked Circular Rings / Gauges: Finished, Success, Annual Boost) */}
-              <div className="lg:col-span-4 flex flex-col justify-between gap-4">
-                {/* Gauge 1: Finished Truck Rides / Work Orders */}
-                <div className="bg-[#1c1d22] rounded-3xl p-5 flex flex-col justify-between shadow-md flex-1 hover:shadow-lg transition-all">
-                  <div className="text-xs font-bold text-zinc-300 tracking-wide">
-                    Finished Work Orders
-                  </div>
-                  <div className="flex items-center justify-center my-2">
-                    <div className="relative w-28 h-28 flex items-center justify-center">
-                      <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="38"
-                          fill="transparent"
-                          stroke="#2c2d35"
-                          strokeWidth="11"
-                        />
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="38"
-                          fill="transparent"
-                          stroke="#10b981"
-                          strokeWidth="11"
-                          strokeDasharray={2 * Math.PI * 38}
-                          strokeDashoffset={2 * Math.PI * 38 * (1 - 0.88)}
-                          strokeLinecap="round"
-                          className="animate-ring-fill transition-all duration-1000"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-sm font-extrabold text-white tracking-tight">2748/3100</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Gauge 2: Success Truck Rides / SLA */}
-                <div className="bg-[#1c1d22] rounded-3xl p-5 flex flex-col justify-between shadow-md flex-1 hover:shadow-lg transition-all">
-                  <div className="text-xs font-bold text-zinc-300 tracking-wide">
-                    Success Service Rides
-                  </div>
-                  <div className="flex items-center justify-center my-2">
-                    <div className="relative w-28 h-28 flex items-center justify-center">
-                      <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="38"
-                          fill="transparent"
-                          stroke="#2c2d35"
-                          strokeWidth="11"
-                        />
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="38"
-                          fill="transparent"
-                          stroke="#06b6d4"
-                          strokeWidth="11"
-                          strokeDasharray={2 * Math.PI * 38}
-                          strokeDashoffset={2 * Math.PI * 38 * (1 - 0.75)}
-                          strokeLinecap="round"
-                          className="animate-ring-fill transition-all duration-1000"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xl font-extrabold text-white tracking-tight">75%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Gauge 3: Annual Orders Boost */}
-                <div className="bg-[#1c1d22] rounded-3xl p-5 flex flex-col justify-between shadow-md flex-1 hover:shadow-lg transition-all">
-                  <div className="text-xs font-bold text-zinc-300 tracking-wide">
-                    Annual Orders Boost
-                  </div>
-                  <div className="flex items-center justify-center my-2">
-                    <div className="relative w-28 h-28 flex items-center justify-center">
-                      <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="38"
-                          fill="transparent"
-                          stroke="#2c2d35"
-                          strokeWidth="11"
-                        />
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="38"
-                          fill="transparent"
-                          stroke="#b8287a"
-                          strokeWidth="11"
-                          strokeDasharray={2 * Math.PI * 38}
-                          strokeDashoffset={2 * Math.PI * 38 * (1 - 0.33)}
-                          strokeLinecap="round"
-                          className="animate-ring-fill transition-all duration-1000"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xl font-extrabold text-white tracking-tight">33%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column (Stacked Bar Chart: Arrived and Dispatched Vehicles) */}
-              <div className="lg:col-span-8 bg-[#1c1d22] rounded-3xl p-6 shadow-md flex flex-col justify-between">
-                {/* Header with Date Selector */}
-                <div className="flex items-center justify-between pb-6">
-                  <div>
-                    <h3 className="text-sm font-extrabold text-white tracking-tight">
-                      Arrived and Dispatched Vehicles
-                    </h3>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#26272e] text-xs text-zinc-300 font-semibold">
-                      <ClockIcon size={13} className="text-zinc-400" />
-                      <span>15 Apr – 6 May, 2024</span>
-                    </div>
-                    <button
-                      type="button"
-                      className="w-7 h-7 rounded-xl bg-[#26272e] text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
-                      title="Previous Period"
-                    >
-                      &lt;
-                    </button>
-                    <button
-                      type="button"
-                      className="w-7 h-7 rounded-xl bg-[#26272e] text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
-                      title="Next Period"
-                    >
-                      &gt;
-                    </button>
-                  </div>
-                </div>
-
-                {/* Stacked Bar Graphic Display */}
-                <div className="relative pt-4 pb-2">
-                  {/* Y-Axis Grid Lines & Labels */}
-                  <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20 text-[10px] font-mono text-zinc-400">
-                    <div className="border-b border-white w-full flex justify-between"><span>250</span></div>
-                    <div className="border-b border-white w-full flex justify-between"><span>200</span></div>
-                    <div className="border-b border-white w-full flex justify-between"><span>150</span></div>
-                    <div className="border-b border-white w-full flex justify-between"><span>100</span></div>
-                    <div className="border-b border-white w-full flex justify-between"><span>50</span></div>
-                    <div className="border-b border-white w-full flex justify-between"><span>0</span></div>
-                  </div>
-
-                  {/* 20 Bars */}
-                  <div className="relative z-10 flex items-end justify-between gap-1.5 h-56 pt-2 px-6">
-                    {DISPATCH_ACTIVITY_DAYS.map((day, idx) => {
-                      const total = day.arrived + day.delivered + day.dispatched;
-                      const maxScale = 250;
-                      const heightPercent = Math.min(100, (total / maxScale) * 100);
-                      const arrivedH = (day.arrived / total) * 100;
-                      const deliveredH = (day.delivered / total) * 100;
-                      const dispatchedH = (day.dispatched / total) * 100;
-
-                      return (
-                        <div
-                          key={day.date}
-                          onMouseEnter={() => setHoveredBarIndex(idx)}
-                          onMouseLeave={() => setHoveredBarIndex(null)}
-                          className="flex-1 flex flex-col items-center h-full justify-end group cursor-pointer relative"
-                        >
-                          {/* Tooltip on Hover */}
-                          {hoveredBarIndex === idx && (
-                            <div className="absolute -top-12 z-20 bg-zinc-900 border border-white/10 px-2.5 py-1 rounded-xl text-[10px] text-white whitespace-nowrap shadow-xl">
-                              <span className="font-bold text-[#10b981]">{day.date}</span>: {day.delivered} Delivered · {day.dispatched} Dispatched
-                            </div>
-                          )}
-
-                          {/* Stacked Bar Column */}
-                          <div
-                            className="w-full max-w-[16px] rounded-t-md overflow-hidden flex flex-col justify-end transition-all duration-300 group-hover:brightness-125 group-hover:scale-y-105 origin-bottom animate-bar-rise"
-                            style={{ height: `${heightPercent}%`, animationDelay: `${idx * 25}ms` }}
-                          >
-                            {/* Dispatched (Top: Dark Slate) */}
-                            <div
-                              style={{ height: `${dispatchedH}%` }}
-                              className="bg-[#3a4454] w-full"
-                            />
-                            {/* Delivered (Middle: VoltOps Emerald) */}
-                            <div
-                              style={{ height: `${deliveredH}%` }}
-                              className="bg-[#10b981] w-full"
-                            />
-                            {/* Arrived (Bottom: Berry/Plum) */}
-                            <div
-                              style={{ height: `${arrivedH}%` }}
-                              className="bg-[#b8287a] w-full"
-                            />
-                          </div>
-
-                          {/* Date Label */}
-                          <span className="text-[9px] text-zinc-500 font-mono mt-2 truncate">
-                            {day.date}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Legend */}
-                <div className="flex items-center justify-center gap-6 pt-5 border-t border-white/[0.06] text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#3a4454]" />
-                    <span className="text-zinc-400">Dispatched Vehicles</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#10b981]" />
-                    <span className="text-zinc-400">Delivered Vehicles</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#b8287a]" />
-                    <span className="text-zinc-400">Arrived Vehicles</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Row of Section: Donut Resolution Breakdown & Top Certified Technicians */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-              {/* Donut Chart Card (Left 7 Cols) */}
-              <div className="lg:col-span-7 bg-[#1c1d22] rounded-3xl p-6 shadow-md flex items-center justify-between">
-                {/* SVG Donut */}
-                <div className="relative w-44 h-44 flex items-center justify-center shrink-0">
-                  <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                    {/* Ring 1: Cancelled 9% (Plum) */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="36"
-                      fill="transparent"
-                      stroke="#b8287a"
-                      strokeWidth="14"
-                      strokeDasharray={`${(9 / 100) * 2 * Math.PI * 36} ${2 * Math.PI * 36}`}
-                      strokeDashoffset="0"
-                    />
-                    {/* Ring 2: In Progress 36% (Emerald) */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="36"
-                      fill="transparent"
-                      stroke="#10b981"
-                      strokeWidth="14"
-                      strokeDasharray={`${(36 / 100) * 2 * Math.PI * 36} ${2 * Math.PI * 36}`}
-                      strokeDashoffset={`-${(9 / 100) * 2 * Math.PI * 36}`}
-                    />
-                    {/* Ring 3: Not Finished 15% (Cyan) */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="36"
-                      fill="transparent"
-                      stroke="#06b6d4"
-                      strokeWidth="14"
-                      strokeDasharray={`${(15 / 100) * 2 * Math.PI * 36} ${2 * Math.PI * 36}`}
-                      strokeDashoffset={`-${((9 + 36) / 100) * 2 * Math.PI * 36}`}
-                    />
-                    {/* Ring 4: Success Rides 40% (Teal Green) */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="36"
-                      fill="transparent"
-                      stroke="#059669"
-                      strokeWidth="14"
-                      strokeDasharray={`${(40 / 100) * 2 * Math.PI * 36} ${2 * Math.PI * 36}`}
-                      strokeDashoffset={`-${((9 + 36 + 15) / 100) * 2 * Math.PI * 36}`}
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-extrabold text-white tracking-tight">77%</span>
-                  </div>
-                </div>
-
-                {/* Donut Legend */}
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-xs ml-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#b8287a]" />
-                      <span className="text-zinc-300 font-semibold">Cancelled Orders</span>
-                    </div>
-                    <div className="text-sm font-extrabold text-white ml-4.5 mt-0.5">9%</div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#10b981]" />
-                      <span className="text-zinc-300 font-semibold">In Progress</span>
-                    </div>
-                    <div className="text-sm font-extrabold text-white ml-4.5 mt-0.5">36%</div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#06b6d4]" />
-                      <span className="text-zinc-300 font-semibold">Not Finished</span>
-                    </div>
-                    <div className="text-sm font-extrabold text-white ml-4.5 mt-0.5">15%</div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#059669]" />
-                      <span className="text-zinc-300 font-semibold">Success Rides</span>
-                    </div>
-                    <div className="text-sm font-extrabold text-white ml-4.5 mt-0.5">40%</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Top Technicians on Duty (Right 5 Cols) */}
-              <div className="lg:col-span-5 bg-[#1c1d22] rounded-3xl p-6 shadow-md flex flex-col justify-between">
-                <div className="flex items-center justify-between pb-3">
-                  <h4 className="text-sm font-extrabold text-white tracking-tight">
-                    Top Drivers
-                  </h4>
-                  <span className="text-xs font-bold text-[#10b981] cursor-pointer hover:underline">
-                    See all &rarr;
-                  </span>
-                </div>
-
-                <div className="space-y-3.5 pt-1">
-                  {/* Specialist 1 */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-2xl bg-[#292a30] text-[#10b981] font-bold text-xs flex items-center justify-center border border-[#10b981]/30">
-                        CW
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white">Cameron Williamson</div>
-                        <div className="text-[11px] text-zinc-400">460 rides</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Specialist 2 */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-2xl bg-[#292a30] text-[#10b981] font-bold text-xs flex items-center justify-center border border-[#10b981]/30">
-                        BS
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white">Brooklyn Simmons</div>
-                        <div className="text-[11px] text-zinc-400">351 rides</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Specialist 3 */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-2xl bg-[#292a30] text-[#10b981] font-bold text-xs flex items-center justify-center border border-[#10b981]/30">
-                        JJ
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-white">Jacob Jones</div>
-                        <div className="text-[11px] text-zinc-400">328 rides</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ── 3. Progressive Disclosure: Service History Table (When Toggled) ── */}
         {showHistory && (
@@ -1500,7 +1078,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           type="button"
                           onClick={() => {
                             setSelectedRequest(req);
-                            setActiveTab("orders");
+                            window.scrollTo({ top: 0, behavior: "smooth" });
                           }}
                           className="text-xs font-bold text-[#10b981] hover:underline"
                         >
@@ -1544,7 +1122,6 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </button>
           </div>
         </div>
-      </div>
 
       {/* ── All Modals (Preserved 100% Functionality) ── */}
       {activeReceipt && (

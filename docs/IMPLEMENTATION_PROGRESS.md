@@ -1795,3 +1795,28 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build in 8.87s (`npm run build`). Customer Dashboard bundle: 56.84 kB.
+
+
+---
+
+## Milestone 4.20 — Customer Dashboard Single-Page Master-Detail Unification & Truthful VoltOps Data Enforcement
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Purge all fake MSlogistic courier metrics and tab switches; unify into a Single-Pane-of-Glass Master-Detail layout with 100% authentic VoltOps operational data:
+  1. **Purged Foreign Logistics Data & Tab Switchers**:
+     - Removed `[ Analytics | My Orders ]` tab switch completely.
+     - Deleted fake MSlogistic vehicle charts (`Arrived and Dispatched Vehicles`), ring gauges (`2748/3100`, `75%`, `33%`), donut breakdown (`77%`), `Top Drivers` list, and placeholders (`313 Technicians on Duty`, `Hartford`, `New York`, `Cameron Williamson`).
+  2. **Truthful 4-Card Top KPI Metric Row**:
+     - `Total Requests`: authentic count (`requests.length`)
+     - `Active Incidents`: authentic count (`activeRequests.length`)
+     - `Physical Arrival SLA`: authentic target (`20m Target` for Plan C, `40m Target` for Plan B, `8h Window` for Plan A)
+     - `Service Visit Credits`: subscription allowance progress (`{remaining} of {included} left` with emerald progress bar).
+  3. **Unified Single-Page Master-Detail Workspace**:
+     - Left Column (35%): "Service Requests", search filter, request card list with active solid emerald highlight (`bg-[#10b981] text-zinc-950`).
+     - Right Column (65%): Operational Work Order workspace with Order ID, Savar Commercial Complex facility, canonical 4-step VoltOps lifecycle (`1. Logged` -> `2. Triaged` -> `3. En Route` -> `4. On Site`), assigned specialist card (`Tanvir Ahmed`), itemized order breakdown, and facility asset card.
+     - Auto-selects the first active request upon load so workspace is never empty.
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.83s (`npm run build`). Customer Dashboard bundle: 43.20 kB (down from 56.84 kB).
