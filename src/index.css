@@ -9,17 +9,17 @@
 
 /* ── CSS Custom Properties: VoltOps Enterprise Design Tokens ────────── */
 :root {
-  /* Surface colors — Light Mode (Clean Architectural Canvas) */
-  --bg-base: #f8f9fa;        /* Crisp off-white neutral canvas */
+  /* Surface colors — Light Mode (Clean Slate Architectural Canvas) */
+  --bg-base: #f1f5f9;        /* Slate-100 canvas for card elevation */
   --bg-surface: #ffffff;     /* Pure white card and panel surface */
-  --bg-surface-2: #f1f3f5;   /* Secondary surface, inputs, subtle wells */
-  --bg-surface-3: #e9ecef;   /* Raised controls / active interactive states */
-  --bg-overlay: rgba(248, 249, 250, 0.90); /* Modal and drawer backdrop */
+  --bg-surface-2: #f8fafc;   /* Slate-50 secondary surface, inputs, subtle wells */
+  --bg-surface-3: #e2e8f0;   /* Raised controls / active interactive states */
+  --bg-overlay: rgba(241, 245, 249, 0.90); /* Modal and drawer backdrop */
 
   /* Structural Hairline Borders */
-  --border: #e2e5e9;         /* 1px crisp structural division */
-  --border-strong: #cbd0d6;  /* Focused / elevated border definition */
-  --border-subtle: #edf0f2;  /* Quiet internal row dividers */
+  --border: #e2e8f0;         /* Slate-200 1px crisp structural division */
+  --border-strong: #cbd5e1;  /* Slate-300 focused / elevated border definition */
+  --border-subtle: #f1f5f9;  /* Slate-100 quiet internal row dividers */
 
   /* Typography Hierarchy (WCAG 2.2 AA compliant across all surfaces) */
   --text-primary: #0f172a;   /* Slate 900 headings and primary values (16.5:1) */

@@ -120,63 +120,76 @@ export function CustomerInvoices() {
         {/* Top Billing Summary Strip (3 Compact Cards) */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           {/* Card 1: Outstanding Balance */}
-          <div className="p-4 rounded-xl border border-zinc-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-1">
-            <span className="text-zinc-600 dark:text-zinc-400 text-[11px] font-semibold block">
-              Outstanding Balance
-            </span>
-            <div className="text-2xl font-bold font-heading tabular-nums text-zinc-950 dark:text-zinc-100">
+          <div className="p-4 rounded-xl border border-slate-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-1 border-l-4 border-l-rose-500">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">
+                Outstanding Balance
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-transparent">
+                Settlement Due
+              </span>
+            </div>
+            <div className="text-2xl font-bold font-heading tabular-nums text-slate-950 dark:text-zinc-100">
               ${outstandingBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-[11px] text-zinc-700 dark:text-zinc-400 font-medium">
+            <div className="text-[11px] text-slate-700 dark:text-zinc-400 font-medium">
               Across {dueInvoicesCount} pending statement{dueInvoicesCount === 1 ? "" : "s"}
             </div>
           </div>
 
           {/* Card 2: Active Subscription */}
-          <div className="p-4 rounded-xl border border-zinc-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-1">
+          <div className="p-4 rounded-xl border border-slate-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-1 border-l-4 border-l-emerald-500">
             <div className="flex items-center justify-between">
-              <span className="text-zinc-600 dark:text-zinc-400 text-[11px] font-semibold block">
+              <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">
                 Active Subscription
               </span>
-              <span className="w-2 h-2 rounded-full bg-[#10b981]" />
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-[#10b981] dark:border-transparent flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
+                <span>Active</span>
+              </span>
             </div>
-            <div className="text-lg font-bold font-heading text-zinc-950 dark:text-zinc-100 truncate">
+            <div className="text-lg font-bold font-heading text-slate-950 dark:text-zinc-100 truncate">
               {subscription.planName}
             </div>
-            <div className="text-[11px] text-zinc-700 dark:text-zinc-400 font-medium">
+            <div className="text-[11px] text-slate-700 dark:text-zinc-400 font-medium">
               Billing cycle resets {subscription.billingCycleResetDate}
             </div>
           </div>
 
           {/* Card 3: Invoices Due */}
-          <div className="p-4 rounded-xl border border-zinc-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-1">
-            <span className="text-zinc-600 dark:text-zinc-400 text-[11px] font-semibold block">
-              Invoices Due
-            </span>
+          <div className="p-4 rounded-xl border border-slate-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-1 border-l-4 border-l-[#b8287a]">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">
+                Invoices Due
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#b8287a]/10 text-[#9d1d66] border border-[#b8287a]/25 dark:bg-[#b8287a]/20 dark:text-[#f472b6] dark:border-transparent">
+                {dueInvoicesCount > 0 ? "Pending" : "Current"}
+              </span>
+            </div>
             <div className={`text-2xl font-bold font-heading tabular-nums ${
-              dueInvoicesCount > 0 ? "text-[#8a1858] dark:text-[#f472b6]" : "text-emerald-800 dark:text-[#10b981]"
+              dueInvoicesCount > 0 ? "text-[#8a1858] dark:text-[#f472b6]" : "text-emerald-700 dark:text-[#10b981]"
             }`}>
               {dueInvoicesCount}
             </div>
-            <div className="text-[11px] text-zinc-700 dark:text-zinc-400 font-medium">
+            <div className="text-[11px] text-slate-700 dark:text-zinc-400 font-medium">
               {dueInvoicesCount > 0 ? "Settlement requested prior to due date" : "All statements current"}
             </div>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="p-12 text-center text-xs text-zinc-600 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200/90 dark:border-white/5">
+          <div className="p-12 text-center text-xs text-slate-600 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-white/5">
             Loading commercial invoices and itemized statements…
           </div>
         ) : invoices.length === 0 ? (
-          <div className="p-12 text-center text-xs text-zinc-600 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200/90 dark:border-white/5 space-y-3">
-            <div className="text-base font-bold text-zinc-950 dark:text-zinc-100">No Billing Statements Available</div>
-            <p className="max-w-md mx-auto text-zinc-700 dark:text-zinc-400 font-medium">
+          <div className="p-12 text-center text-xs text-slate-600 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-white/5 space-y-3">
+            <div className="text-base font-bold text-slate-950 dark:text-zinc-100">No Billing Statements Available</div>
+            <p className="max-w-md mx-auto text-slate-700 dark:text-zinc-400 font-medium">
               Invoices are automatically generated upon technician completion and verification of on-site work orders.
             </p>
             <Link
               to="/customer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-zinc-950"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#10b981] dark:text-zinc-950 shadow-sm"
             >
               <span>View Service Requests</span>
               <ArrowRightIcon size={12} />
@@ -186,9 +199,9 @@ export function CustomerInvoices() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left: Invoice Listing (Master) */}
             <div className="lg:col-span-4 space-y-2.5">
-              <div className="text-xs font-semibold text-zinc-700 dark:text-zinc-400 flex items-center justify-between px-1">
+              <div className="text-xs font-semibold text-slate-700 dark:text-zinc-400 flex items-center justify-between px-1">
                 <span>Billing Statements</span>
-                <span className="font-mono tabular-nums text-xs font-bold text-emerald-800 dark:text-[#10b981]">
+                <span className="font-mono tabular-nums text-xs font-bold text-emerald-700 dark:text-[#10b981]">
                   {invoices.length} Total
                 </span>
               </div>
@@ -203,12 +216,12 @@ export function CustomerInvoices() {
                       onClick={() => setSelectedInvoice(inv)}
                       className={`w-full text-left p-3.5 rounded-xl border transition-all ${
                         isSelected
-                          ? "border-[#10b981] bg-emerald-50/60 dark:bg-zinc-900 shadow-sm ring-1 ring-[#10b981]"
-                          : "border-zinc-200/90 dark:border-white/5 bg-white dark:bg-zinc-900/60 text-zinc-800 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-white/10 hover:text-zinc-950 dark:hover:text-zinc-200 shadow-2xs"
+                          ? "bg-emerald-50/70 border-2 border-emerald-500 text-slate-900 shadow-sm dark:border-[#10b981] dark:bg-zinc-900 dark:shadow-sm dark:ring-1 dark:ring-[#10b981]"
+                          : "border border-slate-200/90 bg-white dark:bg-zinc-900/60 text-slate-800 dark:text-zinc-400 hover:border-slate-300 dark:hover:border-white/10 hover:text-slate-950 dark:hover:text-zinc-200 shadow-2xs"
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-mono tabular-nums font-bold text-xs text-zinc-950 dark:text-zinc-100">{inv.id}</span>
+                        <span className="font-mono tabular-nums font-bold text-xs text-slate-950 dark:text-zinc-100">{inv.id}</span>
                         <span
                           className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${getStatusBadge(
                             inv.status
@@ -221,12 +234,12 @@ export function CustomerInvoices() {
                             : "Payment Due"}
                         </span>
                       </div>
-                      <div className="mt-1.5 text-xs font-semibold text-zinc-950 dark:text-zinc-200 truncate">
+                      <div className="mt-1.5 text-xs font-semibold text-slate-950 dark:text-zinc-200 truncate">
                         {inv.assetName}
                       </div>
-                      <div className="mt-1 flex items-center justify-between text-[11px] text-zinc-600 dark:text-zinc-400">
+                      <div className="mt-1 flex items-center justify-between text-[11px] text-slate-600 dark:text-zinc-400">
                         <span className="font-medium">Due {inv.dueDate}</span>
-                        <span className="font-mono font-bold text-zinc-950 dark:text-zinc-100 tabular-nums">
+                        <span className="font-mono font-bold text-slate-950 dark:text-zinc-100 tabular-nums">
                           ${inv.totalAmount.toFixed(2)}
                         </span>
                       </div>
@@ -238,19 +251,19 @@ export function CustomerInvoices() {
 
             {/* Right: Full Itemized Invoice Detail */}
             {selectedInvoice && (
-              <div className="lg:col-span-8 p-6 sm:p-7 rounded-xl border border-zinc-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-zinc-200/90 dark:border-white/5 pb-5">
+              <div className="lg:col-span-8 p-6 sm:p-7 rounded-xl border border-slate-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/5 pb-5">
                   <div>
-                    <div className="flex items-center gap-1.5 mb-1 text-[11px] font-mono font-bold text-emerald-800 dark:text-[#10b981] uppercase tracking-wider">
+                    <div className="flex items-center gap-1.5 mb-1 text-[11px] font-mono font-bold text-emerald-700 dark:text-[#10b981] uppercase tracking-wider">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
                       <span>VoltOps Commercial Operations</span>
                     </div>
-                    <h2 className="font-heading font-extrabold text-2xl text-zinc-950 dark:text-zinc-50 tracking-tight">
+                    <h2 className="font-heading font-extrabold text-2xl text-slate-950 dark:text-zinc-50 tracking-tight">
                       {selectedInvoice.id}
                     </h2>
-                    <div className="text-xs text-zinc-700 dark:text-zinc-400 mt-1 font-medium">
+                    <div className="text-xs text-slate-700 dark:text-zinc-400 mt-1 font-medium">
                       Work Order:{" "}
-                      <span className="font-mono font-semibold text-zinc-950 dark:text-zinc-200">
+                      <span className="font-mono font-semibold text-slate-950 dark:text-zinc-200">
                         {selectedInvoice.workOrderId}
                       </span>{" "}
                       · {selectedInvoice.assetName}
@@ -273,7 +286,7 @@ export function CustomerInvoices() {
                     <button
                       type="button"
                       onClick={() => window.print()}
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium border border-zinc-300 dark:border-white/10 bg-zinc-100 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all flex items-center gap-1.5 shadow-2xs"
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-white/10 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 shadow-xs dark:bg-zinc-950 dark:text-zinc-300 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1.5"
                       title="Print invoice or save as PDF"
                     >
                       <PrinterIcon size={13} />
@@ -285,7 +298,7 @@ export function CustomerInvoices() {
                         type="button"
                         onClick={handlePayNow}
                         disabled={isPaying}
-                        className="px-4 py-1.5 rounded-lg text-xs font-bold bg-[#10b981] text-zinc-950 hover:bg-[#34d399] transition-all shadow-sm disabled:opacity-50"
+                        className="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#10b981] dark:text-zinc-950 dark:hover:bg-[#34d399] transition-all shadow-sm disabled:opacity-50"
                       >
                         {isPaying ? "Connecting Gateway…" : "Initiate Payment"}
                       </button>
@@ -307,52 +320,52 @@ export function CustomerInvoices() {
 
                 {/* Metadata Grid (Generous spacing, no awkward truncation) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                  <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200/90 dark:border-white/5">
-                    <span className="text-zinc-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Customer Account</span>
-                    <span className="font-semibold text-zinc-950 dark:text-zinc-200 block mt-1 leading-snug">
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-950/60 border border-slate-200 dark:border-white/5">
+                    <span className="text-slate-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Customer Account</span>
+                    <span className="font-semibold text-slate-950 dark:text-zinc-200 block mt-1 leading-snug">
                       {selectedInvoice.customerName}
                     </span>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200/90 dark:border-white/5">
-                    <span className="text-zinc-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Billing Date</span>
-                    <span className="font-semibold text-zinc-950 dark:text-zinc-200 block mt-1 tabular-nums">
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-950/60 border border-slate-200 dark:border-white/5">
+                    <span className="text-slate-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Billing Date</span>
+                    <span className="font-semibold text-slate-950 dark:text-zinc-200 block mt-1 tabular-nums">
                       {selectedInvoice.billingDate}
                     </span>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200/90 dark:border-white/5">
-                    <span className="text-zinc-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Payment Due</span>
-                    <span className="font-semibold text-zinc-950 dark:text-zinc-200 block mt-1 tabular-nums">
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-950/60 border border-slate-200 dark:border-white/5">
+                    <span className="text-slate-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Payment Due</span>
+                    <span className="font-semibold text-slate-950 dark:text-zinc-200 block mt-1 tabular-nums">
                       {selectedInvoice.dueDate}
                     </span>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200/90 dark:border-white/5">
-                    <span className="text-zinc-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Coverage Plan</span>
-                    <span className="font-semibold text-emerald-800 dark:text-[#10b981] block mt-1">
+                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-950/60 border border-slate-200 dark:border-white/5">
+                    <span className="text-slate-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Coverage Plan</span>
+                    <span className="font-semibold text-emerald-700 dark:text-[#10b981] block mt-1">
                       {subscription.planName}
                     </span>
                   </div>
                 </div>
 
                 {/* Itemized Table */}
-                <div className="border border-zinc-200/90 dark:border-white/5 rounded-xl overflow-hidden bg-zinc-50/50 dark:bg-zinc-950/40">
+                <div className="border border-slate-200 dark:border-white/5 rounded-xl overflow-hidden bg-slate-50/50 dark:bg-zinc-950/40">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="text-zinc-600 dark:text-zinc-400 border-b border-zinc-200/90 dark:border-white/5 bg-zinc-100/90 dark:bg-zinc-950/80 text-[11px] font-semibold">
+                      <tr className="text-slate-600 dark:text-zinc-400 border-b border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-zinc-950/80 text-[11px] font-semibold">
                         <th className="py-3 px-4">Line Item Description</th>
                         <th className="py-3 px-3 text-center w-20">Qty</th>
                         <th className="py-3 px-3 text-right w-28">Unit Price</th>
                         <th className="py-3 px-4 text-right w-28">Total</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-200/90 dark:divide-white/5">
+                    <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                       {selectedInvoice.items.map((item) => (
-                        <tr key={item.id} className="hover:bg-zinc-100/60 dark:hover:bg-zinc-800/20 transition-colors">
-                          <td className="py-3.5 px-4 font-medium text-zinc-950 dark:text-zinc-200">{item.description}</td>
-                          <td className="py-3.5 px-3 text-center text-zinc-700 dark:text-zinc-400 font-medium tabular-nums">{item.quantity}</td>
-                          <td className="py-3.5 px-3 text-right text-zinc-700 dark:text-zinc-400 font-medium tabular-nums">
+                        <tr key={item.id} className="hover:bg-slate-100/70 dark:hover:bg-zinc-800/20 transition-colors">
+                          <td className="py-3.5 px-4 font-medium text-slate-950 dark:text-zinc-200">{item.description}</td>
+                          <td className="py-3.5 px-3 text-center text-slate-700 dark:text-zinc-400 font-medium tabular-nums">{item.quantity}</td>
+                          <td className="py-3.5 px-3 text-right text-slate-700 dark:text-zinc-400 font-medium tabular-nums">
                             ${item.unitPrice.toFixed(2)}
                           </td>
-                          <td className="py-3.5 px-4 text-right font-bold text-zinc-950 dark:text-zinc-100 tabular-nums">
+                          <td className="py-3.5 px-4 text-right font-bold text-slate-950 dark:text-zinc-100 tabular-nums">
                             ${item.totalPrice.toFixed(2)}
                           </td>
                         </tr>
@@ -363,28 +376,28 @@ export function CustomerInvoices() {
 
                 {/* Totals Breakdown */}
                 <div className="flex flex-col items-end text-xs space-y-2 pt-1">
-                  <div className="flex justify-between w-64 text-zinc-700 dark:text-zinc-400">
+                  <div className="flex justify-between w-64 text-slate-700 dark:text-zinc-400">
                     <span className="font-medium">Subtotal:</span>
-                    <span className="font-mono tabular-nums font-semibold text-zinc-950 dark:text-zinc-200">
+                    <span className="font-mono tabular-nums font-semibold text-slate-950 dark:text-zinc-200">
                       ${selectedInvoice.subtotal.toFixed(2)}
                     </span>
                   </div>
-                  <div className="flex justify-between w-64 text-zinc-700 dark:text-zinc-400">
+                  <div className="flex justify-between w-64 text-slate-700 dark:text-zinc-400">
                     <span className="font-medium">VAT / Tax ({(selectedInvoice.taxRate * 100).toFixed(0)}%):</span>
-                    <span className="font-mono tabular-nums font-semibold text-zinc-950 dark:text-zinc-200">
+                    <span className="font-mono tabular-nums font-semibold text-slate-950 dark:text-zinc-200">
                       ${selectedInvoice.taxAmount.toFixed(2)}
                     </span>
                   </div>
-                  <div className="flex justify-between w-64 font-heading font-extrabold text-base text-zinc-950 dark:text-zinc-100 border-t border-zinc-200/90 dark:border-white/10 pt-2.5">
+                  <div className="flex justify-between w-64 font-heading font-extrabold text-base text-slate-950 dark:text-zinc-100 border-t border-slate-200 dark:border-white/10 pt-2.5">
                     <span>Total Amount:</span>
-                    <span className="text-emerald-800 dark:text-[#10b981] font-mono tabular-nums">
+                    <span className="text-emerald-700 dark:text-[#10b981] font-mono tabular-nums">
                       ${selectedInvoice.totalAmount.toFixed(2)}
                     </span>
                   </div>
                 </div>
 
                 {/* Truthful Preview Disclaimer */}
-                <div className="text-[11px] text-zinc-600 dark:text-zinc-500 border-t border-zinc-200/90 dark:border-white/5 pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="text-[11px] text-slate-600 dark:text-zinc-500 border-t border-slate-200 dark:border-white/5 pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <span>UI preview only · No live banking transaction processed</span>
                   {selectedInvoice.paymentNotice && (
                     <span className="italic">{selectedInvoice.paymentNotice}</span>

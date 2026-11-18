@@ -96,7 +96,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
     : "VO";
 
   return (
-    <div className="flex h-screen w-full max-w-full overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)]">
+    <div className="flex h-screen w-full max-w-full overflow-hidden bg-slate-100 dark:bg-[var(--bg-base)] text-[var(--text-primary)]">
       {/* ── Desktop Sidebar (Linear / Vercel Neutral Slate: 256px wide) ──── */}
       <aside className="hidden lg:flex w-64 shrink-0 flex-col justify-between border-r border-slate-800/80 bg-[#0b1117] text-slate-300 select-none">
         <div>
@@ -189,7 +189,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
         )}
 
         {/* Top Header Bar */}
-        <header className="h-14 shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 sm:px-6 flex items-center justify-between gap-3 min-w-0 w-full">
+        <header className="h-14 shrink-0 border-b border-slate-200 dark:border-[var(--border)] bg-white dark:bg-[var(--bg-surface)] shadow-xs dark:shadow-none px-4 sm:px-6 flex items-center justify-between gap-3 min-w-0 w-full">
           <div className="flex items-center gap-2.5 min-w-0">
             {/* Mobile menu trigger */}
             <button
@@ -292,7 +292,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
         )}
 
         {/* Scrollable Dashboard Body */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 lg:p-6 w-full min-w-0 bg-zinc-50 dark:bg-zinc-950">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 lg:p-6 w-full min-w-0 bg-slate-100 dark:bg-zinc-950">
           <div className="max-w-7xl mx-auto space-y-4 w-full min-w-0">
             {children}
           </div>

@@ -262,7 +262,7 @@ export function FacilityAssets() {
             type="button"
             onClick={loadAssets}
             disabled={isLoading}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-zinc-300 dark:border-white/5 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1.5 shadow-xs"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-400 hover:text-slate-950 dark:hover:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all flex items-center gap-1.5 shadow-xs"
             title="Refresh assets"
           >
             <RefreshCwIcon size={12} className={isLoading ? "animate-spin text-[#10b981]" : ""} />
@@ -270,14 +270,14 @@ export function FacilityAssets() {
           </button>
 
           {hasActiveRequest ? (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-zinc-100 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 border border-zinc-300 dark:border-white/5 cursor-not-allowed">
-              <LockIcon className="w-3.5 h-3.5 text-zinc-500" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border border-slate-300 dark:border-white/5 cursor-not-allowed">
+              <LockIcon className="w-3.5 h-3.5 text-slate-500" />
               <span>Active request open</span>
             </div>
           ) : (
             <Link
               to="/customer/new-request"
-              className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#10b981] text-zinc-950 hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#10b981] dark:text-zinc-950 dark:hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5"
             >
               <WrenchIcon size={13} />
               <span>Report Breakdown</span>
@@ -288,7 +288,7 @@ export function FacilityAssets() {
     >
       <div className="space-y-4 max-w-6xl mx-auto pb-24">
         {/* Compact Summary & Filter Pills Toolbar */}
-        <div className="p-4 rounded-xl border border-zinc-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-3.5">
+        <div className="p-4 rounded-xl border border-slate-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-3.5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             {/* Inline Filter Pills */}
             <div className="flex items-center gap-2 flex-wrap">
@@ -297,8 +297,8 @@ export function FacilityAssets() {
                 onClick={() => setStatusFilter("ALL")}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                   statusFilter === "ALL"
-                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 border border-zinc-300 dark:border-white/10 shadow-xs font-semibold"
-                    : "bg-zinc-50 dark:bg-zinc-950 text-zinc-700 dark:text-zinc-400 border border-zinc-200/90 dark:border-white/5 hover:text-zinc-950 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-white/10"
+                    ? "bg-slate-100 dark:bg-zinc-800 text-slate-950 dark:text-zinc-100 border border-slate-300 dark:border-white/10 shadow-xs font-semibold"
+                    : "bg-slate-50 dark:bg-zinc-950 text-slate-700 dark:text-zinc-400 border border-slate-200 dark:border-white/5 hover:text-slate-950 dark:hover:text-zinc-200 hover:border-slate-300 dark:hover:border-white/10"
                 }`}
               >
                 <span>All Assets</span>
@@ -310,8 +310,8 @@ export function FacilityAssets() {
                 onClick={() => setStatusFilter("OPERATIONAL")}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                   statusFilter === "OPERATIONAL"
-                    ? "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-[#10b981]/15 dark:text-[#10b981] dark:border-[#10b981]/30 shadow-xs font-semibold"
-                    : "bg-zinc-50 dark:bg-zinc-950 text-zinc-700 dark:text-zinc-400 border border-zinc-200/90 dark:border-white/5 hover:text-emerald-800 dark:hover:text-[#10b981] hover:border-emerald-300 dark:hover:border-[#10b981]/20"
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-[#10b981]/15 dark:text-[#10b981] dark:border-[#10b981]/30 shadow-xs font-semibold"
+                    : "bg-slate-50 dark:bg-zinc-950 text-slate-700 dark:text-zinc-400 border border-slate-200 dark:border-white/5 hover:text-emerald-800 dark:hover:text-[#10b981] hover:border-emerald-300 dark:hover:border-[#10b981]/20"
                 }`}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
@@ -324,8 +324,8 @@ export function FacilityAssets() {
                 onClick={() => setStatusFilter("NEEDS_SERVICE")}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                   statusFilter === "NEEDS_SERVICE"
-                    ? "bg-[#b8287a]/10 text-[#8a1858] border-[#b8287a]/30 dark:bg-[#b8287a]/20 dark:text-[#f472b6] dark:border-[#b8287a]/40 shadow-xs font-semibold"
-                    : "bg-zinc-50 dark:bg-zinc-950 text-zinc-700 dark:text-zinc-400 border border-zinc-200/90 dark:border-white/5 hover:text-[#8a1858] dark:hover:text-[#f472b6] hover:border-[#b8287a]/30"
+                    ? "bg-[#b8287a]/10 text-[#8a1858] border border-[#b8287a]/30 dark:bg-[#b8287a]/20 dark:text-[#f472b6] dark:border-[#b8287a]/40 shadow-xs font-semibold"
+                    : "bg-slate-50 dark:bg-zinc-950 text-slate-700 dark:text-zinc-400 border border-slate-200 dark:border-white/5 hover:text-[#8a1858] dark:hover:text-[#f472b6] hover:border-[#b8287a]/30"
                 }`}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#b8287a]" />
@@ -335,16 +335,16 @@ export function FacilityAssets() {
             </div>
 
             {/* Total Indicator */}
-            <div className="text-xs text-zinc-700 dark:text-zinc-400 font-medium">
-              Showing <span className="font-bold text-zinc-950 dark:text-zinc-200 tabular-nums">{filteredAssets.length}</span> of{" "}
-              <span className="font-bold text-zinc-950 dark:text-zinc-200 tabular-nums">{assets.length}</span>
+            <div className="text-xs text-slate-700 dark:text-zinc-400 font-medium">
+              Showing <span className="font-bold text-slate-950 dark:text-zinc-200 tabular-nums">{filteredAssets.length}</span> of{" "}
+              <span className="font-bold text-slate-950 dark:text-zinc-200 tabular-nums">{assets.length}</span>
             </div>
           </div>
 
           {/* Search Box & Category Select */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1">
             <div className="sm:col-span-8 relative">
-              <SearchIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <SearchIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 id="assets-search"
                 name="search"
@@ -352,13 +352,13 @@ export function FacilityAssets() {
                 placeholder="Search asset name, serial tag, or facility location…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-xl text-xs border border-zinc-300 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-100 placeholder:text-zinc-500 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#10b981] transition-colors"
+                className="w-full pl-9 pr-8 py-2 rounded-xl text-xs border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 shadow-xs focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-colors"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-zinc-300"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 dark:text-zinc-500 dark:hover:text-zinc-300"
                 >
                   <XIcon size={13} />
                 </button>
@@ -371,7 +371,7 @@ export function FacilityAssets() {
                 name="category"
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl text-xs border border-zinc-300 dark:border-white/10 bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-200 focus:outline-none focus:ring-1 focus:ring-[#10b981] transition-colors font-medium"
+                className="w-full px-3 py-2 rounded-xl text-xs border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-200 shadow-xs focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-colors font-medium"
                 aria-label="Filter by trade category"
               >
                 <option value="ALL">All Categories</option>
@@ -403,10 +403,10 @@ export function FacilityAssets() {
         )}
 
         {/* Asset Inventory Table (Proportional, Desktop Fit, Zero Horizontal Scroll) */}
-        <div className="rounded-xl border border-zinc-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
+        <div className="rounded-xl border border-slate-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-zinc-950/60 text-zinc-600 dark:text-zinc-400 font-semibold text-[11px]">
+              <tr className="border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-zinc-950/60 text-slate-600 dark:text-zinc-400 font-semibold text-[11px]">
                 <th className="py-3 px-3.5">Asset & Tag</th>
                 <th className="py-3 px-3 hidden sm:table-cell">Category</th>
                 <th className="py-3 px-3 hidden md:table-cell">Location</th>
@@ -416,7 +416,7 @@ export function FacilityAssets() {
                 <th className="py-3 px-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200 dark:divide-white/5">
+            <tbody className="divide-y divide-slate-200 dark:divide-white/5">
               {isLoading ? (
                 <tr>
                   <td colSpan={7} className="py-16 text-center text-xs text-zinc-500 space-y-2">
@@ -527,7 +527,7 @@ export function FacilityAssets() {
                             <button
                               type="button"
                               onClick={() => setSelectedAsset(asset)}
-                              className="px-2 py-1 rounded-lg text-xs font-medium border border-zinc-300 dark:border-white/5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1"
+                              className="px-2 py-1 rounded-lg text-xs font-medium border border-slate-300 dark:border-white/5 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 shadow-xs dark:bg-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1"
                               title="View specs"
                             >
                               <EyeIcon size={12} />
@@ -538,7 +538,7 @@ export function FacilityAssets() {
                               <button
                                 type="button"
                                 disabled
-                                className="px-2 py-1 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-zinc-800/40 text-zinc-500 dark:text-zinc-500 border border-zinc-200 dark:border-white/5 cursor-not-allowed flex items-center gap-1"
+                                className="px-2 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-zinc-800/40 text-slate-400 dark:text-zinc-500 border border-slate-200 dark:border-white/5 cursor-not-allowed flex items-center gap-1"
                                 title="Active request open"
                               >
                                 <LockIcon size={11} />
@@ -561,7 +561,7 @@ export function FacilityAssets() {
 
                       {/* Expandable Technical Passport Details */}
                       {isExpanded && (
-                        <tr className="bg-zinc-50 dark:bg-zinc-950/40 border-b border-zinc-200 dark:border-white/5">
+                        <tr className="bg-slate-50/70 dark:bg-zinc-950/40 border-b border-slate-200 dark:border-white/5">
                           <td colSpan={7} className="px-5 py-3.5">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                               <div>
