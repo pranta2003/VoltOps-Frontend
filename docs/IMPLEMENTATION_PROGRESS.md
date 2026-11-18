@@ -1602,7 +1602,35 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
-## Milestone 4.12 — Customer Dashboard Logistics-Tier Visual Transformation (MSlogistic / Split Workspace)
+## Milestone 4.15 — Truthful Customer Dashboard Package Usage & Field Service Operational Architecture
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Customer Dashboard functional correction, truthful visit allowance, elimination of misleading logistics analytics, and alignment with VoltOps field service architecture:
+  1. **Prominent Package Usage & Entitlement Section (Highest Priority)**:
+     - Real subscription binding via `customerService.getSubscription(user?.id)`.
+     - Displays plan badge (`PLAN C`, `PLAN B`, `PLAN A`, `PLAN D`), package name (`24/7 Priority Coverage`), and monthly billing cycle reset date (`1 Dec 2026`).
+     - Truthful visit allowance counter: `${subscription.remainingVisits} of ${subscription.includedVisits} visits remaining` (or `"Allowance to be confirmed"` for bespoke Plan D).
+     - Live progress bar reflecting exact percentage of package utilized.
+     - Exhausted allowance alert banner warning the user when all visits are used, pausing standard requests, and offering supplementary pack purchase (`+ Extra Visits` modal).
+  2. **Elimination of Transportation/Logistics Relics**:
+     - Removed hardcoded `313 Techs on Duty` and fallback `274 Total Requests`.
+     - Completely removed `DISPATCH_ACTIVITY_DAYS` and the 20-bar vehicle stacked bar chart.
+     - Removed `2748/3100 Finished Work Orders`, `75% Success Service Rides`, and `33% Annual Orders Boost` gauges.
+     - Removed fake 4-segment resolution donut chart and `Top Drivers` roster (`Cameron Williamson`, `Brooklyn Simmons`, `Jacob Jones`).
+     - Removed courier/delivery badges (`DELIVERED`, `RECEIVED`, `ON THE WAY`) and replaced with canonical field-service statuses (`NEW`, `TRIAGING`, `ASSIGNED`, `EN ROUTE`, `ON SITE`, `AWAITING SIGN-OFF`, `COMPLETED`, `CANCELLED`).
+  3. **Truthful Facility Operational Health & Asset Inventory in State A**:
+     - 7 Canonical Service Trades breakdown with active vs total requests.
+     - Registered Facility Assets & Equipment snapshot connected to `customerService.getAssets()` showing equipment name, tag number, location, and operational health status.
+  4. **Refined Service Request Workspace (State B)**:
+     - Authentic 5-stage field-service timeline: `Request Logged` → `Dispatcher Triage` → `Specialist En Route` → `On-Site Maintenance` → `Verified & Sign-Off`.
+     - Verified technician assignment card, diagnostic scope, and package deduction statement.
+  5. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build (`npm run build`). Customer Dashboard bundle: 53.50 kB.
+     - Visual inspection verified via Chrome DevTools in both State A (Default Overview) and State B (Selected Request).
+
 
 - **Date**: 17 November 2026
 - **Branch**: `feature/project-wide-design-transformation` (Target: `main`)

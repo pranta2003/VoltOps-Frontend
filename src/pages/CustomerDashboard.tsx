@@ -8,16 +8,14 @@ import {
   ServiceCategory,
   CoveragePlanId,
   CANONICAL_SERVICE_CATEGORIES,
-  getCoveragePlanSlaLabel,
   WorkOrderCompletionReport,
   CustomerPurchase,
+  CustomerAsset,
 } from "../types";
 import { customerService } from "../services/customerService";
 import { operationalStore } from "../services/operationalStore";
-import {
-  SubscriptionEntitlement,
-} from "../services/subscriptionService";
-import { formatBdt } from "../config/coveragePricing";
+import { SubscriptionEntitlement } from "../services/subscriptionService";
+import { COVERAGE_PLANS, formatBdt } from "../config/coveragePricing";
 import { DemonstrationReceiptModal } from "../components/DemonstrationReceiptModal";
 import { CustomerFeedbackModal } from "../components/CustomerFeedbackModal";
 import { CustomerSupportModal } from "../components/CustomerSupportModal";
@@ -31,12 +29,12 @@ import {
   SearchIcon,
   RefreshCwIcon,
   ShieldCheckIcon,
-  EyeIcon,
   StarIcon,
   SendIcon,
   WrenchIcon,
   BuildingIcon,
   RadioIcon,
+  ZapIcon,
 } from "../components/Icons";
 
 export interface CustomerViewRequest {
@@ -69,32 +67,6 @@ interface CustomerDashboardProps {
   initialView?: "recent" | "all";
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MSlogistic Historical Dispatch Activity Data (Reference Stacked Chart)
-// ─────────────────────────────────────────────────────────────────────────────
-const DISPATCH_ACTIVITY_DAYS = [
-  { date: "15.04", arrived: 35, delivered: 85, dispatched: 40 },
-  { date: "16.04", arrived: 50, delivered: 130, dispatched: 35 },
-  { date: "17.04", arrived: 28, delivered: 110, dispatched: 45 },
-  { date: "18.04", arrived: 45, delivered: 80, dispatched: 40 },
-  { date: "19.04", arrived: 20, delivered: 55, dispatched: 30 },
-  { date: "20.04", arrived: 25, delivered: 45, dispatched: 28 },
-  { date: "21.04", arrived: 15, delivered: 20, dispatched: 22 },
-  { date: "22.04", arrived: 12, delivered: 25, dispatched: 20 },
-  { date: "23.04", arrived: 55, delivered: 90, dispatched: 50 },
-  { date: "25.04", arrived: 38, delivered: 50, dispatched: 28 },
-  { date: "26.04", arrived: 18, delivered: 30, dispatched: 24 },
-  { date: "27.04", arrived: 22, delivered: 35, dispatched: 25 },
-  { date: "28.04", arrived: 15, delivered: 22, dispatched: 18 },
-  { date: "29.04", arrived: 20, delivered: 28, dispatched: 20 },
-  { date: "30.04", arrived: 25, delivered: 40, dispatched: 25 },
-  { date: "01.05", arrived: 10, delivered: 15, dispatched: 12 },
-  { date: "02.05", arrived: 8, delivered: 12, dispatched: 10 },
-  { date: "03.05", arrived: 48, delivered: 75, dispatched: 38 },
-  { date: "04.05", arrived: 15, delivered: 35, dispatched: 20 },
-  { date: "06.05", arrived: 18, delivered: 38, dispatched: 22 },
-];
-
 export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -102,10 +74,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const orderParam = searchParams.get("order");
 
   const [requests, setRequests] = useState<CustomerViewRequest[]>([]);
+  const [facilityAssets, setFacilityAssets] = useState<CustomerAsset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Dynamic Workspace State: null = State A (Analytics Overview); non-null = State B (Order Details)
+  // Dynamic Workspace State: null = State A (Overview); non-null = State B (Service Request Details)
   const [selectedRequest, setSelectedRequest] = useState<CustomerViewRequest | null>(null);
 
   // Archive Table Progressive Disclosure
@@ -113,16 +86,13 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
     initialView === "all" || viewParam === "all"
   );
 
-  // Filter States for Service History
+  // Filter States for Service History & Search
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [priorityFilter, setPriorityFilter] = useState<string>("ALL");
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
 
-  // Chart Tooltip Hover State
-  const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
-
-  // Subscription Credit State
+  // Subscription Entitlement & Package State
   const [subscription, setSubscription] = useState<SubscriptionEntitlement>(() =>
     customerService.getSubscription(user?.id)
   );
@@ -186,17 +156,19 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
     setIsLoading(true);
     setError(null);
 
-    customerService
-      .getRequests(user?.id)
-      .then((res) => {
-        const rawRequests: ServiceRequest[] = res.data;
+    Promise.all([
+      customerService.getRequests(user?.id),
+      customerService.getAssets(user?.id).catch(() => ({ data: operationalStore.getAssets() })),
+    ])
+      .then(([reqRes, assetRes]) => {
+        const rawRequests: ServiceRequest[] = reqRes.data;
         const workOrders = operationalStore.getWorkOrders();
 
         const mapped: CustomerViewRequest[] = rawRequests.map((r) => {
           const linkedOrder = workOrders.find((w) => w.id === r.workOrderId || w.requestId === r.id);
 
           let displayStatus: CustomerViewRequest["displayStatus"] = "NEW";
-          let arrivalSlaWindow = "Pending review";
+          let arrivalSlaWindow = "Pending triage";
           let assignedTech = undefined;
           let workNotes = undefined;
 
@@ -207,11 +179,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
             switch (linkedOrder.status) {
               case "UNASSIGNED":
-                arrivalSlaWindow = "Work order created · Dispatching";
+                arrivalSlaWindow = "Triaging · Awaiting dispatch";
                 displayStatus = "REVIEWING";
                 break;
               case "ASSIGNED":
-                arrivalSlaWindow = "Technician assigned";
+                arrivalSlaWindow = "Specialist assigned";
                 break;
               case "TRAVELLING":
                 if (r.coveragePlan === "247-priority") {
@@ -221,14 +193,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 } else if (r.coveragePlan === "8hr") {
                   arrivalSlaWindow = "En route · Business hours";
                 } else {
-                  arrivalSlaWindow = "En route";
+                  arrivalSlaWindow = "En route to facility";
                 }
                 break;
               case "ON_SITE":
-                arrivalSlaWindow = "On site";
+                arrivalSlaWindow = "Specialist on site";
                 break;
               case "WORK_COMPLETED_AWAITING_CONFIRMATION":
-                arrivalSlaWindow = "Work complete · Dispatcher reviewing";
+                arrivalSlaWindow = "Work complete · Sign-off pending";
                 break;
               case "COMPLETED":
                 arrivalSlaWindow = "Completed & verified";
@@ -240,15 +212,15 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           } else {
             if (r.status === "REVIEWING") {
               displayStatus = "REVIEWING";
-              arrivalSlaWindow = "Reviewing candidates";
+              arrivalSlaWindow = "Triaging candidates";
             } else if (r.status === "NEW") {
               displayStatus = "NEW";
               if (r.coveragePlan === "247-priority") {
-                arrivalSlaWindow = "20m SLA (Pending)";
+                arrivalSlaWindow = "20m Physical SLA (Pending)";
               } else if (r.coveragePlan === "247-standard") {
-                arrivalSlaWindow = "40m SLA (Pending)";
+                arrivalSlaWindow = "40m Physical SLA (Pending)";
               } else {
-                arrivalSlaWindow = "Pending review";
+                arrivalSlaWindow = "Pending triage review";
               }
             }
           }
@@ -285,6 +257,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         });
 
         setRequests(mapped);
+        setFacilityAssets(assetRes.data || []);
 
         // Keep selected request synchronized if one was already active
         setSelectedRequest((prev) => (prev ? mapped.find((m) => m.id === prev.id) || null : null));
@@ -295,7 +268,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         setPurchases(operationalStore.getPurchases(user?.id));
       })
       .catch((err) => {
-        setError(err.message || "Failed to load service requests.");
+        setError(err.message || "Failed to load facility service requests.");
       })
       .finally(() => {
         setIsLoading(false);
@@ -325,11 +298,34 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
     }
   }, [orderParam, requests]);
 
-  // Active / Ongoing Incidents
+  // Active / Ongoing Facility Breakdown Incidents
   const activeRequests = useMemo(() => {
     return requests.filter(
       (r) => r.displayStatus !== "COMPLETED" && r.displayStatus !== "CANCELLED"
     );
+  }, [requests]);
+
+  const completedRequests = useMemo(() => {
+    return requests.filter((r) => r.displayStatus === "COMPLETED");
+  }, [requests]);
+
+  // Plan pricing config for the active subscription
+  const activePlanConfig = useMemo(() => {
+    return (subscription.planId && COVERAGE_PLANS[subscription.planId]) || COVERAGE_PLANS["247-priority"];
+  }, [subscription.planId]);
+
+  // Requests grouped by canonical service trade
+  const tradeDistribution = useMemo(() => {
+    const counts: Record<string, number> = {};
+    CANONICAL_SERVICE_CATEGORIES.forEach((cat) => {
+      counts[cat] = 0;
+    });
+    requests.forEach((r) => {
+      if (counts[r.category] !== undefined) {
+        counts[r.category]++;
+      }
+    });
+    return Object.entries(counts).filter(([_, count]) => count > 0);
   }, [requests]);
 
   // Filtered requests for the left column and service history archive
@@ -384,37 +380,39 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
     setCategoryFilter("ALL");
   };
 
-  // Helper for timeline progress calculation
+  // Helper for timeline progress calculation across 5 authentic stages
   const getTimelineStepIndex = (status: CustomerViewRequest["displayStatus"]) => {
     switch (status) {
       case "NEW":
-        return 0; // Logged
+        return 0; // Request Logged
       case "REVIEWING":
       case "ASSIGNED":
-        return 1; // Triaged & Assigned
+        return 1; // Dispatcher Triage
       case "TRAVELLING":
-        return 2; // En Route
+        return 2; // Specialist En Route
       case "ON_SITE":
+        return 3; // On-Site Maintenance
       case "WORK_COMPLETED_AWAITING_CONFIRMATION":
       case "COMPLETED":
-        return 3; // On Site / Complete
+        return 4; // Verified & Sign-Off
       case "CANCELLED":
       default:
         return 0;
     }
   };
 
-  // High-Contrast Status Badges: VoltOps Emerald & Berry Plum Pills (NO YELLOW)
+  // Authentic Field-Service Status Badges (Strictly Field Service Terminology)
   const renderStatusBadge = (status: CustomerViewRequest["displayStatus"], isSelected: boolean = false) => {
     switch (status) {
       case "COMPLETED":
         return (
           <span
             className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              isSelected ? "bg-black text-[#10b981]" : "bg-[#b8287a] text-white shadow-xs"
+              isSelected ? "bg-black text-[#10b981]" : "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30"
             }`}
           >
-            DELIVERED
+            <CheckCircleIcon size={11} className="inline" />
+            COMPLETED
           </span>
         );
       case "TRAVELLING":
@@ -425,16 +423,17 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping inline-block" />
-            ON THE WAY
+            EN ROUTE
           </span>
         );
       case "ON_SITE":
         return (
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              isSelected ? "bg-black text-[#10b981]" : "bg-[#b8287a] text-white"
+              isSelected ? "bg-black text-[#10b981]" : "bg-cyan-500/20 text-cyan-300 ring-1 ring-cyan-500/30"
             }`}
           >
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
             ON SITE
           </span>
         );
@@ -442,21 +441,40 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         return (
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              isSelected ? "bg-black text-[#10b981]" : "bg-[#10b981] text-zinc-950 font-extrabold"
+              isSelected ? "bg-black text-[#10b981]" : "bg-amber-500/20 text-amber-300 ring-1 ring-amber-500/30"
             }`}
           >
-            SIGN-OFF
+            AWAITING SIGN-OFF
           </span>
         );
       case "ASSIGNED":
+        return (
+          <span
+            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              isSelected ? "bg-black text-[#10b981]" : "bg-[#10b981]/20 text-[#10b981] ring-1 ring-[#10b981]/30 font-extrabold"
+            }`}
+          >
+            ASSIGNED
+          </span>
+        );
       case "REVIEWING":
         return (
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              isSelected ? "bg-black text-[#10b981]" : "bg-[#10b981] text-zinc-950 font-extrabold"
+              isSelected ? "bg-black text-[#10b981]" : "bg-purple-500/20 text-purple-300 ring-1 ring-purple-500/30"
             }`}
           >
-            ASSIGNED
+            TRIAGING
+          </span>
+        );
+      case "CANCELLED":
+        return (
+          <span
+            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              isSelected ? "bg-black text-zinc-400" : "bg-zinc-800 text-zinc-400"
+            }`}
+          >
+            CANCELLED
           </span>
         );
       case "NEW":
@@ -464,10 +482,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         return (
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              isSelected ? "bg-black/40 text-black font-extrabold" : "bg-[#10b981] text-zinc-950 font-extrabold"
+              isSelected ? "bg-black/40 text-black font-extrabold" : "bg-blue-500/20 text-blue-300 ring-1 ring-blue-500/30 font-extrabold"
             }`}
           >
-            RECEIVED
+            NEW
           </span>
         );
     }
@@ -500,11 +518,18 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
   const activeStep = selectedRequest ? getTimelineStepIndex(selectedRequest.displayStatus) : 0;
   const timelineSteps = [
-    { label: "Hartford", sub: "Ticket Logged" },
-    { label: "Triage Dispatch", sub: "Dispatcher Assigned" },
-    { label: "Transit", sub: "En Route to Site" },
-    { label: "New York", sub: "On-Site Facility" },
+    { label: "Request Logged", sub: "Ticket Logged" },
+    { label: "Dispatcher Triage", sub: "SLA Verified" },
+    { label: "Specialist En Route", sub: "Travelling to Site" },
+    { label: "On-Site Maintenance", sub: "Active Field Repair" },
+    { label: "Verified & Sign-Off", sub: "Signed Off & Closed" },
   ];
+
+  // Calculate usage percentage
+  const usagePercentage =
+    subscription.includedVisits && subscription.includedVisits > 0
+      ? Math.min(100, Math.round((subscription.usedVisits / subscription.includedVisits) * 100))
+      : 0;
 
   return (
     <Layout
@@ -517,7 +542,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             onClick={loadCustomerData}
             disabled={isLoading}
             className="p-2.5 rounded-2xl border-0 bg-[#1c1d22] text-zinc-300 hover:text-white hover:bg-[#25262c] transition-all shadow-sm"
-            title="Refresh active status"
+            title="Refresh facility status"
           >
             <RefreshCwIcon size={15} className={isLoading ? "animate-spin text-[#10b981]" : ""} />
           </button>
@@ -532,22 +557,9 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
       }
     >
       <div className="space-y-6 max-w-7xl">
-        {/* ── 1. Top Row: 4 KPI Metric Cards (Always Visible) ── */}
+        {/* ── 1. Top Row: 4 Authentic Field-Service KPI Metric Cards (Always Visible) ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: Total Requests */}
-          <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-2 shadow-md hover:-translate-y-0.5 transition-all">
-            <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-semibold uppercase tracking-wider">
-              <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
-                <WrenchIcon size={16} />
-              </div>
-              <span className="truncate">Total Requests</span>
-            </div>
-            <div className="text-3xl font-extrabold text-white tracking-tight">
-              {requests.length > 0 ? requests.length : 274}
-            </div>
-          </div>
-
-          {/* Card 2: Active Facility Incidents */}
+          {/* Card 1: Active Facility Incidents */}
           <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-2 shadow-md hover:-translate-y-0.5 transition-all">
             <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-semibold uppercase tracking-wider">
               <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
@@ -556,11 +568,39 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <span className="truncate">Active Incidents</span>
             </div>
             <div className="text-3xl font-extrabold text-white tracking-tight">
-              {activeRequests.length > 0 ? activeRequests.length : 75}
+              {activeRequests.length}
+            </div>
+            <div className="text-[11px] text-zinc-400">
+              {requests.length} logged lifetime · {completedRequests.length} completed
             </div>
           </div>
 
-          {/* Card 3: Target Arrival SLA */}
+          {/* Card 2: Visit Allowance (Highest Priority) */}
+          <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-2 shadow-md hover:-translate-y-0.5 transition-all">
+            <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-semibold uppercase tracking-wider">
+              <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
+                <WrenchIcon size={16} />
+              </div>
+              <span className="truncate">Visit Allowance</span>
+            </div>
+            <div className="text-3xl font-extrabold text-white tracking-tight">
+              {subscription.remainingVisits !== null ? (
+                <>
+                  {subscription.remainingVisits}{" "}
+                  <span className="text-sm font-semibold text-zinc-400">
+                    / {subscription.includedVisits}
+                  </span>
+                </>
+              ) : (
+                <span className="text-xl font-bold text-zinc-300">Custom</span>
+              )}
+            </div>
+            <div className="text-[11px] text-zinc-400 truncate">
+              {subscription.usedVisits} used this cycle · Resets {subscription.billingCycleResetDate || "1 Dec 2026"}
+            </div>
+          </div>
+
+          {/* Card 3: Guaranteed Physical Arrival SLA */}
           <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-2 shadow-md hover:-translate-y-0.5 transition-all">
             <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-semibold uppercase tracking-wider">
               <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
@@ -569,31 +609,68 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <span className="truncate">Physical Arrival SLA</span>
             </div>
             <div className="text-3xl font-extrabold text-[#10b981] tracking-tight">
-              20m <span className="text-sm font-semibold text-zinc-400">Target</span>
+              {activePlanConfig.arrivalSlaMinutes ? (
+                <>
+                  {activePlanConfig.arrivalSlaMinutes}m{" "}
+                  <span className="text-sm font-semibold text-zinc-400">On-Site Target</span>
+                </>
+              ) : activePlanConfig.id === "8hr" ? (
+                <span className="text-xl font-bold text-zinc-200">No SLA</span>
+              ) : (
+                <span className="text-xl font-bold text-zinc-200">Negotiated</span>
+              )}
+            </div>
+            <div className="text-[11px] text-zinc-400 truncate">
+              {activePlanConfig.arrivalSlaLabel}
             </div>
           </div>
 
-          {/* Card 4: Technicians on Duty */}
+          {/* Card 4: Contract Coverage Window */}
           <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-2 shadow-md hover:-translate-y-0.5 transition-all">
             <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-semibold uppercase tracking-wider">
               <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
                 <RadioIcon size={16} />
               </div>
-              <span className="truncate">Techs on Duty</span>
+              <span className="truncate">Coverage Window</span>
             </div>
-            <div className="text-3xl font-extrabold text-white tracking-tight truncate">
-              313
+            <div className="text-2xl font-extrabold text-white tracking-tight truncate">
+              {activePlanConfig.id === "8hr" ? "08:00 – 17:00" : activePlanConfig.id === "custom" ? "Negotiated" : "24/7 Priority"}
+            </div>
+            <div className="text-[11px] text-zinc-400 truncate">
+              {activePlanConfig.name} ({activePlanConfig.code})
             </div>
           </div>
         </div>
 
-        {/* ── Actionable Alert (When Genuinely Required) ── */}
+        {/* ── Exhausted Allowance Alert Banner (When Applicable) ── */}
+        {subscription.isExhausted && (
+          <div className="rounded-2xl border-0 bg-rose-500/20 px-5 py-4 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-white shadow-md">
+            <div className="flex items-center gap-3">
+              <AlertTriangleIcon size={20} className="text-rose-400 shrink-0" />
+              <div>
+                <strong className="font-bold text-rose-200">Monthly Visit Allowance Reached.</strong>{" "}
+                <span className="text-zinc-300">
+                  You have utilized all {subscription.includedVisits} included visits for this billing cycle. Standard requests are paused. Purchase a supplemental visit block or request an on-demand quote.
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowQuotationModal(true)}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-500 text-white hover:bg-rose-600 transition-all shrink-0 shadow-sm"
+            >
+              Request Extra Visits
+            </button>
+          </div>
+        )}
+
+        {/* ── Actionable Completion Sign-Off & Feedback Notification ── */}
         {pendingFeedbackRequest && (
           <div className="rounded-2xl border-0 bg-[#b8287a]/20 px-5 py-3.5 text-xs flex items-center justify-between gap-3 text-white shadow-md animate-fade-in">
             <div className="flex items-center gap-3 min-w-0">
               <StarIcon size={18} className="text-[#10b981] shrink-0" fill="currentColor" />
               <span className="truncate">
-                Service completed on <strong className="font-bold text-[#10b981]">{pendingFeedbackRequest.asset}</strong> ({pendingFeedbackRequest.id}).
+                Maintenance completed on <strong className="font-bold text-[#10b981]">{pendingFeedbackRequest.asset}</strong> ({pendingFeedbackRequest.id}).
               </span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -609,7 +686,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 onClick={() => setActiveFeedbackOrder(pendingFeedbackRequest)}
                 className="px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-zinc-950 transition-all shadow-md"
               >
-                Rate service
+                Rate Service
               </button>
             </div>
           </div>
@@ -618,17 +695,17 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         {/* ── 2. Unified Master-Detail Section (2-Column Grid: 30% / 70%) ── */}
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 items-start">
           {/* ─────────────────────────────────────────────────────────────────
-              Left Column (30% Width): Scrollable Order Cards
+              Left Column (30% Width): Scrollable Service Requests
              ───────────────────────────────────────────────────────────────── */}
           <div className="lg:col-span-3 space-y-4">
             <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-4 shadow-md">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-bold text-white tracking-tight">
-                    My Orders
+                    Service Requests
                   </h2>
                   <span className="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-white/[0.08] text-zinc-300">
-                    {requests.length > 0 ? requests.length : 7}
+                    {filteredRequests.length}
                   </span>
                 </div>
                 <button
@@ -640,17 +717,17 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   }}
                   className="text-xs font-bold text-[#10b981] hover:underline flex items-center gap-1"
                 >
-                  <span>{showHistory ? "Hide Table" : "Archive"}</span>
+                  <span>{showHistory ? "Hide Archive" : "Archive Table"}</span>
                   <ArrowRightIcon size={11} className={showHistory ? "rotate-90 transition-transform" : "transition-transform"} />
                 </button>
               </div>
 
-              {/* Search Bar with Filter Icon */}
+              {/* Search Bar with Instant Filter */}
               <div className="relative">
                 <SearchIcon size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
                 <input
                   type="text"
-                  placeholder="Search orders..."
+                  placeholder="Search requests or assets..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-9 pr-9 py-2.5 rounded-2xl bg-[#26272e] text-white text-xs placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]/40 transition-all"
@@ -677,16 +754,16 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 )}
               </div>
 
-              {/* Scrollable Order Cards List */}
+              {/* Scrollable Requests List */}
               <div className="space-y-2.5 max-h-[calc(100vh-320px)] overflow-y-auto pr-0.5">
                 {isLoading ? (
                   <div className="p-8 text-center text-xs text-zinc-400">
                     <RefreshCwIcon size={16} className="inline animate-spin mr-2 text-[#10b981]" />
-                    Loading orders...
+                    Loading facility requests...
                   </div>
                 ) : filteredRequests.length === 0 ? (
                   <div className="p-8 text-center text-xs text-zinc-500">
-                    No matching orders.
+                    No matching service requests found.
                   </div>
                 ) : (
                   filteredRequests.map((req) => {
@@ -715,7 +792,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                               isSelected ? "text-zinc-950" : "text-white"
                             }`}
                           >
-                            Order ID Nº{req.id}
+                            {req.id}
                           </span>
                           {renderStatusBadge(req.displayStatus, isSelected)}
                         </div>
@@ -754,14 +831,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
           {/* ─────────────────────────────────────────────────────────────────
               Right Column (70% Width) - DYNAMIC WORKSPACE
-              State A: Analytics Overview (When selectedRequest === null)
-              State B: Order Details Workspace (When selectedRequest !== null)
+              State A: Package Usage & Facility Operations Overview (selectedRequest === null)
+              State B: Service Request Workspace (selectedRequest !== null)
              ───────────────────────────────────────────────────────────────── */}
           <div className="lg:col-span-7 space-y-5">
             {selectedRequest ? (
-              /* ── STATE B: Live Order Details Workspace ── */
+              /* ── STATE B: Live Service Request Workspace ── */
               <div className="space-y-4 animate-fade-in">
-                {/* ── Top Bar: Close Details & Order Title ── */}
+                {/* ── Top Bar: Close Details & Request Title ── */}
                 <div className="bg-[#1c1d22] rounded-3xl p-6 space-y-5 shadow-md">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -773,10 +850,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                         }}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#26272e] hover:bg-[#32343e] text-zinc-300 hover:text-white text-xs font-semibold transition-all shadow-xs"
                       >
-                        <span>← Close Details</span>
+                        <span>← Back to Overview</span>
                       </button>
                       <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-                        Operational Work Order
+                        Operational Service Request
                       </span>
                     </div>
 
@@ -788,20 +865,20 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           setSupportModalOpen(true);
                         }}
                         className="w-8 h-8 rounded-xl bg-[#292a30] text-[#10b981] hover:bg-[#34353d] flex items-center justify-center transition-all"
-                        title="Contact Support or Report Issue"
+                        title="Contact Dispatcher Desk"
                       >
                         <SendIcon size={13} />
                       </button>
                     </div>
                   </div>
 
-                  {/* Order ID & Route Origin/Destination */}
+                  {/* Request ID & Facility Site */}
                   <div className="flex items-center justify-between text-xs pt-1">
                     <div>
                       <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">
-                        Order ID Nº{selectedRequest.workOrderId || selectedRequest.id}
+                        Request ID {selectedRequest.id} · Work Order {selectedRequest.workOrderId || "Pending"}
                       </div>
-                      <div className="font-bold text-white text-sm mt-0.5">Savar Complex</div>
+                      <div className="font-bold text-white text-sm mt-0.5">Savar Commercial Complex</div>
                       <div className="text-[11px] text-zinc-400">{selectedRequest.submittedDate}</div>
                     </div>
 
@@ -810,22 +887,24 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     </div>
 
                     <div className="text-right">
-                      <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">Target Arrival SLA</div>
+                      <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">
+                        Arrival SLA Guarantee
+                      </div>
                       <div className="font-extrabold text-[#10b981] text-sm mt-0.5">
                         {selectedRequest.arrivalSlaWindow}
                       </div>
                     </div>
                   </div>
 
-                  {/* Connected Horizontal Timeline Node Stepper (Hartford -> NY Style) */}
-                  <div className="relative pt-3 pb-2">
+                  {/* Connected Horizontal Timeline Node Stepper (5 Authentic Stages) */}
+                  <div className="relative pt-4 pb-2">
                     {/* Background Bar */}
-                    <div className="absolute top-5 left-4 right-4 h-1 bg-[#2c2d35] -translate-y-1/2 z-0 rounded-full" />
+                    <div className="absolute top-6 left-6 right-6 h-1 bg-[#2c2d35] -translate-y-1/2 z-0 rounded-full" />
                     {/* Active Emerald Line */}
                     <div
-                      className="absolute top-5 left-4 h-1 bg-[#10b981] -translate-y-1/2 z-0 rounded-full transition-all duration-500"
+                      className="absolute top-6 left-6 h-1 bg-[#10b981] -translate-y-1/2 z-0 rounded-full transition-all duration-500"
                       style={{
-                        width: `${Math.min(94, (activeStep / (timelineSteps.length - 1)) * 92)}%`,
+                        width: `${Math.min(96, (activeStep / (timelineSteps.length - 1)) * 95)}%`,
                       }}
                     />
 
@@ -858,7 +937,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                             >
                               {step.label}
                             </span>
-                            <span className="text-[9px] text-zinc-400 mt-0.5">
+                            <span className="text-[9px] text-zinc-400 mt-0.5 max-w-[80px]">
                               {step.sub}
                             </span>
                           </div>
@@ -868,7 +947,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   </div>
                 </div>
 
-                {/* ── Detail Card 2: Assigned Certified Specialist (Driver/Courier Style) ── */}
+                {/* ── Detail Card 2: Assigned Certified Specialist ── */}
                 <div className="bg-[#1c1d22] rounded-3xl p-5 flex items-center justify-between shadow-md">
                   <div className="flex items-center gap-3.5">
                     <div className="w-12 h-12 rounded-2xl bg-[#292a30] border-2 border-[#10b981] flex items-center justify-center font-bold text-sm text-[#10b981] shadow-md">
@@ -898,7 +977,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                         setSupportModalOpen(true);
                       }}
                       className="p-3 rounded-2xl bg-[#292a30] text-[#10b981] hover:bg-[#34353d] transition-all shadow-sm"
-                      title="Contact Dispatcher / Technician"
+                      title="Contact Dispatcher / Field Engineer"
                     >
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
@@ -911,7 +990,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                         setSupportModalOpen(true);
                       }}
                       className="p-3 rounded-2xl bg-[#292a30] text-[#10b981] hover:bg-[#34353d] transition-all shadow-sm"
-                      title="Send Message"
+                      title="Send Message to Dispatch Desk"
                     >
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -920,17 +999,21 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   </div>
                 </div>
 
-                {/* ── Detail Card 3: Order Details (Item / Service Price Breakdown) ── */}
+                {/* ── Detail Card 3: Breakdown Details & Diagnostics ── */}
                 <div className="bg-[#1c1d22] rounded-3xl p-6 space-y-4 shadow-md">
-                  <h4 className="text-sm font-extrabold text-white">Order Details</h4>
+                  <h4 className="text-sm font-extrabold text-white">Diagnostic & Service Scope</h4>
 
                   <div className="space-y-3 text-xs">
                     <div className="flex items-start justify-between gap-4 pb-3 border-b border-white/[0.06]">
                       <div>
                         <div className="font-bold text-white text-xs">{selectedRequest.problem}</div>
-                        <div className="text-zinc-400 text-[11px] mt-0.5">{selectedRequest.description || "Routine breakdown maintenance and electrical diagnostics."}</div>
+                        <div className="text-zinc-400 text-[11px] mt-0.5">
+                          {selectedRequest.description || "Routine breakdown maintenance and electrical diagnostics."}
+                        </div>
                       </div>
-                      <div className="font-extrabold text-white text-sm shrink-0">Included</div>
+                      <div className="font-extrabold text-[#10b981] text-xs px-2.5 py-1 rounded-full bg-[#10b981]/15 shrink-0">
+                        Covered under {subscription.planName}
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
@@ -946,13 +1029,16 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     <div className="flex items-center justify-between pt-1">
                       <div className="font-bold text-white">Visit Allowance Credit</div>
                       <div className="font-extrabold text-[#10b981] text-sm">
-                        1 Visit Deducted <span className="text-zinc-400 font-normal">({subscription.remainingVisits !== null ? subscription.remainingVisits : 27} left)</span>
+                        1 Visit Deducted{" "}
+                        <span className="text-zinc-400 font-normal">
+                          ({subscription.remainingVisits !== null ? `${subscription.remainingVisits} remaining` : "Custom Contract"})
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* ── Detail Card 4: Shipment / Facility Location ── */}
+                {/* ── Detail Card 4: Facility Location ── */}
                 <div className="bg-[#1c1d22] rounded-3xl p-5 flex items-center justify-between shadow-md">
                   <div>
                     <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
@@ -997,374 +1083,246 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 )}
               </div>
             ) : (
-              /* ── STATE A: MSlogistic Analytics Overview (Default) ── */
+              /* ── STATE A: Truthful Package Usage & Facility Operations Overview (Default) ── */
               <div className="space-y-5 animate-fade-in">
-                {/* ── 3 Circular SVG Progress Gauges in a Row ── */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {/* Gauge 1: Finished Work Orders */}
-                  <div className="bg-[#1c1d22] rounded-3xl p-5 flex flex-col justify-between shadow-md">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                      Finished Work Orders
-                    </div>
-                    <div className="flex items-center justify-center my-3">
-                      <div className="relative w-24 h-24 flex items-center justify-center">
-                        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                          <circle
-                            cx="50"
-                            cy="50"
-                            r="38"
-                            fill="transparent"
-                            stroke="#2c2d35"
-                            strokeWidth="11"
-                          />
-                          <circle
-                            cx="50"
-                            cy="50"
-                            r="38"
-                            fill="transparent"
-                            stroke="#10b981"
-                            strokeWidth="11"
-                            strokeDasharray={2 * Math.PI * 38}
-                            strokeDashoffset={2 * Math.PI * 38 * (1 - 0.88)}
-                            strokeLinecap="round"
-                            className="transition-all duration-1000"
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-xs font-extrabold text-white">2748/3100</span>
-                        </div>
+                {/* ── 1. Prominent Package Usage & Entitlement Section (Highest Priority) ── */}
+                <div className="bg-[#1c1d22] rounded-3xl p-6 shadow-md space-y-5 border border-white/[0.04]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-[#10b981] text-zinc-950 uppercase tracking-wider">
+                        {activePlanConfig.code}
+                      </span>
+                      <div>
+                        <h3 className="text-base font-extrabold text-white tracking-tight">
+                          {activePlanConfig.name}
+                        </h3>
+                        <p className="text-xs text-zinc-400">{activePlanConfig.tagline}</p>
                       </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowQuotationModal(true)}
+                        className="px-4 py-2 rounded-xl text-xs font-bold bg-[#292a30] text-[#10b981] hover:bg-[#34353d] transition-all shadow-xs"
+                      >
+                        + Extra Visits
+                      </button>
+                      <Link
+                        to="/customer/invoices"
+                        className="px-4 py-2 rounded-xl text-xs font-bold bg-[#26272e] text-zinc-300 hover:text-white transition-all shadow-xs"
+                      >
+                        Billing &rarr;
+                      </Link>
                     </div>
                   </div>
 
-                  {/* Gauge 2: Success Service Rides */}
-                  <div className="bg-[#1c1d22] rounded-3xl p-5 flex flex-col justify-between shadow-md">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                      Success Service Rides
-                    </div>
-                    <div className="flex items-center justify-center my-3">
-                      <div className="relative w-24 h-24 flex items-center justify-center">
-                        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                          <circle
-                            cx="50"
-                            cy="50"
-                            r="38"
-                            fill="transparent"
-                            stroke="#2c2d35"
-                            strokeWidth="11"
-                          />
-                          <circle
-                            cx="50"
-                            cy="50"
-                            r="38"
-                            fill="transparent"
-                            stroke="#10b981"
-                            strokeWidth="11"
-                            strokeDasharray={2 * Math.PI * 38}
-                            strokeDashoffset={2 * Math.PI * 38 * (1 - 0.75)}
-                            strokeLinecap="round"
-                            className="transition-all duration-1000"
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-lg font-extrabold text-white">75%</span>
+                  {/* Prominent Visit Allowance Metric & Progress Bar */}
+                  <div className="p-5 rounded-2xl bg-[#25262c] space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+                      <div>
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                          Remaining Breakdown Service Allowance
+                        </div>
+                        <div className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
+                          {subscription.remainingVisits !== null ? (
+                            <>
+                              <span className="text-[#10b981]">{subscription.remainingVisits}</span> of{" "}
+                              {subscription.includedVisits} visits remaining
+                            </>
+                          ) : (
+                            <span className="text-xl font-bold text-zinc-200">
+                              Allowance to be confirmed
+                            </span>
+                          )}
                         </div>
                       </div>
+
+                      <div className="text-xs text-zinc-400 sm:text-right">
+                        {subscription.includedVisits !== null ? (
+                          <>
+                            <strong className="text-white font-extrabold">
+                              {subscription.usedVisits} used
+                            </strong>{" "}
+                            this billing cycle · Renews{" "}
+                            <span className="text-zinc-300 font-semibold">
+                              {subscription.billingCycleResetDate || "1 Dec 2026"}
+                            </span>
+                          </>
+                        ) : (
+                          <span>Negotiated enterprise SLA contract</span>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Progress Bar (Truthful calculation) */}
+                    {subscription.includedVisits !== null && (
+                      <div className="space-y-1.5">
+                        <div className="w-full h-3 rounded-full bg-[#1c1d22] overflow-hidden p-0.5">
+                          <div
+                            className={`h-full rounded-full transition-all duration-700 ${
+                              subscription.isExhausted
+                                ? "bg-rose-500"
+                                : subscription.remainingVisits && subscription.remainingVisits <= 3
+                                ? "bg-amber-500"
+                                : "bg-[#10b981]"
+                            }`}
+                            style={{
+                              width: `${Math.max(4, 100 - usagePercentage)}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-[10px] text-zinc-500 font-mono">
+                          <span>0 used</span>
+                          <span>{usagePercentage}% allowance utilized</span>
+                          <span>{subscription.includedVisits} total visits</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Gauge 3: Annual Orders Boost */}
-                  <div className="bg-[#1c1d22] rounded-3xl p-5 flex flex-col justify-between shadow-md">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                      Annual Orders Boost
-                    </div>
-                    <div className="flex items-center justify-center my-3">
-                      <div className="relative w-24 h-24 flex items-center justify-center">
-                        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                          <circle
-                            cx="50"
-                            cy="50"
-                            r="38"
-                            fill="transparent"
-                            stroke="#2c2d35"
-                            strokeWidth="11"
-                          />
-                          <circle
-                            cx="50"
-                            cy="50"
-                            r="38"
-                            fill="transparent"
-                            stroke="#10b981"
-                            strokeWidth="11"
-                            strokeDasharray={2 * Math.PI * 38}
-                            strokeDashoffset={2 * Math.PI * 38 * (1 - 0.33)}
-                            strokeLinecap="round"
-                            className="transition-all duration-1000"
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-lg font-extrabold text-white">33%</span>
-                        </div>
+                  {/* Plan Features & SLA Commitments */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
+                    <div className="p-3 rounded-2xl bg-[#26272e] space-y-1">
+                      <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">
+                        Arrival SLA Guarantee
                       </div>
+                      <div className="font-extrabold text-[#10b981] truncate">
+                        {activePlanConfig.arrivalSlaLabel}
+                      </div>
+                      <div className="text-[10px] text-zinc-500">Physical technician on site</div>
+                    </div>
+
+                    <div className="p-3 rounded-2xl bg-[#26272e] space-y-1">
+                      <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">
+                        Operational Window
+                      </div>
+                      <div className="font-extrabold text-white truncate">
+                        {activePlanConfig.coverageWindow}
+                      </div>
+                      <div className="text-[10px] text-zinc-500">Priority dispatcher queue</div>
+                    </div>
+
+                    <div className="p-3 rounded-2xl bg-[#26272e] space-y-1">
+                      <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">
+                        Contract Status
+                      </div>
+                      <div className="font-extrabold text-emerald-400 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>Active & Verified</span>
+                      </div>
+                      <div className="text-[10px] text-zinc-500">Auto-renews monthly</div>
                     </div>
                   </div>
                 </div>
 
-                {/* ── Main Stacked Bar Chart: Arrived & Dispatched Vehicles ── */}
+                {/* ── 2. Facility Operational Health & Service Trades Distribution ── */}
                 <div className="bg-[#1c1d22] rounded-3xl p-6 shadow-md space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-sm font-extrabold text-white tracking-tight">
-                        Arrived and Dispatched Vehicles
+                        Facility Trade & Breakdown Distribution
                       </h3>
+                      <p className="text-xs text-zinc-400">
+                        Operational breakdown across all 7 canonical facility trades
+                      </p>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#26272e] text-[11px] text-zinc-300 font-semibold">
-                        <ClockIcon size={12} className="text-zinc-400" />
-                        <span>15 Apr – 6 May, 2024</span>
-                      </div>
-                      <button
-                        type="button"
-                        className="w-6 h-6 rounded-lg bg-[#26272e] text-zinc-400 hover:text-white flex items-center justify-center text-xs transition-colors"
-                        title="Previous Period"
-                      >
-                        &lt;
-                      </button>
-                      <button
-                        type="button"
-                        className="w-6 h-6 rounded-lg bg-[#26272e] text-zinc-400 hover:text-white flex items-center justify-center text-xs transition-colors"
-                        title="Next Period"
-                      >
-                        &gt;
-                      </button>
-                    </div>
+                    <span className="text-xs font-bold text-[#10b981] px-2.5 py-1 rounded-full bg-[#10b981]/10">
+                      {tradeDistribution.length} Active Trades
+                    </span>
                   </div>
 
-                  {/* Stacked Bars Display */}
-                  <div className="relative pt-4 pb-2">
-                    {/* Y-Axis Grid Lines & Labels */}
-                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-20 text-[10px] font-mono text-zinc-400">
-                      <div className="border-b border-white w-full flex justify-between"><span>250</span></div>
-                      <div className="border-b border-white w-full flex justify-between"><span>200</span></div>
-                      <div className="border-b border-white w-full flex justify-between"><span>150</span></div>
-                      <div className="border-b border-white w-full flex justify-between"><span>100</span></div>
-                      <div className="border-b border-white w-full flex justify-between"><span>50</span></div>
-                      <div className="border-b border-white w-full flex justify-between"><span>0</span></div>
-                    </div>
+                  {/* Canonical Trade Breakdown Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+                    {CANONICAL_SERVICE_CATEGORIES.map((trade) => {
+                      const count = requests.filter((r) => r.category === trade).length;
+                      const activeCount = requests.filter(
+                        (r) =>
+                          r.category === trade &&
+                          r.displayStatus !== "COMPLETED" &&
+                          r.displayStatus !== "CANCELLED"
+                      ).length;
 
-                    {/* 20 Stacked Bars */}
-                    <div className="relative z-10 flex items-end justify-between gap-1.5 h-48 pt-2 px-6">
-                      {DISPATCH_ACTIVITY_DAYS.map((day, idx) => {
-                        const total = day.arrived + day.delivered + day.dispatched;
-                        const maxScale = 250;
-                        const heightPercent = Math.min(100, (total / maxScale) * 100);
-                        const arrivedH = (day.arrived / total) * 100;
-                        const deliveredH = (day.delivered / total) * 100;
-                        const dispatchedH = (day.dispatched / total) * 100;
-
-                        return (
-                          <div
-                            key={day.date}
-                            onMouseEnter={() => setHoveredBarIndex(idx)}
-                            onMouseLeave={() => setHoveredBarIndex(null)}
-                            className="flex-1 flex flex-col items-center h-full justify-end group cursor-pointer relative"
-                          >
-                            {/* Tooltip on Hover */}
-                            {hoveredBarIndex === idx && (
-                              <div className="absolute -top-12 z-20 bg-zinc-900 border border-white/10 px-2 py-1 rounded-xl text-[10px] text-white whitespace-nowrap shadow-xl">
-                                <span className="font-bold text-[#10b981]">{day.date}</span>: {day.delivered} Delivered · {day.dispatched} Dispatched
-                              </div>
-                            )}
-
-                            {/* Stacked Bar Column */}
-                            <div
-                              className="w-full max-w-[14px] rounded-t-sm overflow-hidden flex flex-col justify-end transition-all duration-300 group-hover:brightness-110"
-                              style={{ height: `${heightPercent}%` }}
-                            >
-                              {/* Dispatched (Top: Dark Slate) */}
-                              <div
-                                style={{ height: `${dispatchedH}%` }}
-                                className="bg-[#3a4454] w-full"
-                              />
-                              {/* Delivered (Middle: VoltOps Emerald) */}
-                              <div
-                                style={{ height: `${deliveredH}%` }}
-                                className="bg-[#10b981] w-full"
-                              />
-                              {/* Arrived (Bottom: Berry/Plum) */}
-                              <div
-                                style={{ height: `${arrivedH}%` }}
-                                className="bg-[#b8287a] w-full"
-                              />
-                            </div>
-
-                            {/* Date Label */}
-                            <span className="text-[9px] text-zinc-500 font-mono mt-1.5 truncate">
-                              {day.date}
+                      return (
+                        <div
+                          key={trade}
+                          className={`p-3.5 rounded-2xl border transition-all ${
+                            count > 0
+                              ? "bg-[#25262c] border-white/[0.08]"
+                              : "bg-[#202127]/60 border-white/[0.02] opacity-60"
+                          }`}
+                        >
+                          <div className="text-[11px] font-bold text-white truncate">{trade}</div>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-[10px] text-zinc-400">
+                              {count === 0 ? "No requests" : `${count} total`}
                             </span>
+                            {activeCount > 0 && (
+                              <span className="text-[10px] font-extrabold text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full">
+                                {activeCount} active
+                              </span>
+                            )}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Legend */}
-                  <div className="flex items-center justify-center gap-6 pt-3 border-t border-white/[0.06] text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#3a4454]" />
-                      <span className="text-zinc-400 text-[11px]">Dispatched Vehicles</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#10b981]" />
-                      <span className="text-zinc-400 text-[11px]">Delivered Vehicles</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#b8287a]" />
-                      <span className="text-zinc-400 text-[11px]">Arrived Vehicles</span>
-                    </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
-                {/* ── Bottom Section: Donut Resolution & Top Drivers ── */}
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-stretch">
-                  {/* Donut Chart Card (7 Cols) */}
-                  <div className="sm:col-span-7 bg-[#1c1d22] rounded-3xl p-5 shadow-md flex items-center justify-between">
-                    <div className="relative w-36 h-36 flex items-center justify-center shrink-0">
-                      <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                        {/* Ring 1: Cancelled 9% (Plum) */}
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="36"
-                          fill="transparent"
-                          stroke="#b8287a"
-                          strokeWidth="14"
-                          strokeDasharray={`${(9 / 100) * 2 * Math.PI * 36} ${2 * Math.PI * 36}`}
-                          strokeDashoffset="0"
-                        />
-                        {/* Ring 2: In Progress 36% (Emerald) */}
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="36"
-                          fill="transparent"
-                          stroke="#10b981"
-                          strokeWidth="14"
-                          strokeDasharray={`${(36 / 100) * 2 * Math.PI * 36} ${2 * Math.PI * 36}`}
-                          strokeDashoffset={`-${(9 / 100) * 2 * Math.PI * 36}`}
-                        />
-                        {/* Ring 3: Not Finished 15% (Cyan) */}
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="36"
-                          fill="transparent"
-                          stroke="#06b6d4"
-                          strokeWidth="14"
-                          strokeDasharray={`${(15 / 100) * 2 * Math.PI * 36} ${2 * Math.PI * 36}`}
-                          strokeDashoffset={`-${((9 + 36) / 100) * 2 * Math.PI * 36}`}
-                        />
-                        {/* Ring 4: Success Rides 40% (Teal Green) */}
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="36"
-                          fill="transparent"
-                          stroke="#059669"
-                          strokeWidth="14"
-                          strokeDasharray={`${(40 / 100) * 2 * Math.PI * 36} ${2 * Math.PI * 36}`}
-                          strokeDashoffset={`-${((9 + 36 + 15) / 100) * 2 * Math.PI * 36}`}
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-2xl font-extrabold text-white tracking-tight">77%</span>
-                      </div>
+                {/* ── 3. Registered Facility Assets Snapshot ── */}
+                <div className="bg-[#1c1d22] rounded-3xl p-6 shadow-md space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-extrabold text-white tracking-tight">
+                        Registered Facility Assets & Equipment
+                      </h3>
+                      <p className="text-xs text-zinc-400">
+                        Critical equipment covered under {activePlanConfig.name}
+                      </p>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs ml-3">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-[#b8287a]" />
-                          <span className="text-zinc-300 text-[11px] font-semibold">Cancelled</span>
-                        </div>
-                        <div className="text-xs font-extrabold text-white ml-3.5 mt-0.5">9%</div>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-[#10b981]" />
-                          <span className="text-zinc-300 text-[11px] font-semibold">In Progress</span>
-                        </div>
-                        <div className="text-xs font-extrabold text-white ml-3.5 mt-0.5">36%</div>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-[#06b6d4]" />
-                          <span className="text-zinc-300 text-[11px] font-semibold">Not Finished</span>
-                        </div>
-                        <div className="text-xs font-extrabold text-white ml-3.5 mt-0.5">15%</div>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-[#059669]" />
-                          <span className="text-zinc-300 text-[11px] font-semibold">Success</span>
-                        </div>
-                        <div className="text-xs font-extrabold text-white ml-3.5 mt-0.5">40%</div>
-                      </div>
-                    </div>
+                    <Link
+                      to="/customer/assets"
+                      className="text-xs font-bold text-[#10b981] hover:underline flex items-center gap-1"
+                    >
+                      <span>Manage Assets</span>
+                      <ArrowRightIcon size={12} />
+                    </Link>
                   </div>
 
-                  {/* Top Drivers (5 Cols) */}
-                  <div className="sm:col-span-5 bg-[#1c1d22] rounded-3xl p-5 shadow-md flex flex-col justify-between">
-                    <div className="flex items-center justify-between pb-2">
-                      <h4 className="text-xs font-extrabold text-white tracking-tight">
-                        Top Drivers
-                      </h4>
-                      <span className="text-[11px] font-bold text-[#10b981] cursor-pointer hover:underline">
-                        See all &rarr;
-                      </span>
-                    </div>
-
-                    <div className="space-y-3 pt-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-[#292a30] text-[#10b981] font-bold text-xs flex items-center justify-center border border-[#10b981]/30">
-                            CW
-                          </div>
-                          <div>
-                            <div className="text-xs font-bold text-white">Cameron Williamson</div>
-                            <div className="text-[10px] text-zinc-400">460 rides</div>
+                  {/* Asset List */}
+                  <div className="divide-y divide-white/[0.04]">
+                    {facilityAssets.slice(0, 4).map((asset) => (
+                      <div
+                        key={asset.id}
+                        className="py-3 flex items-center justify-between text-xs gap-3"
+                      >
+                        <div className="min-w-0">
+                          <div className="font-bold text-white truncate">{asset.name}</div>
+                          <div className="text-[11px] text-zinc-400 truncate">
+                            Tag: <span className="font-mono text-zinc-300">{asset.tagNumber}</span> ·{" "}
+                            {asset.location}
                           </div>
                         </div>
-                      </div>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-[#292a30] text-[#10b981] font-bold text-xs flex items-center justify-center border border-[#10b981]/30">
-                            BS
-                          </div>
-                          <div>
-                            <div className="text-xs font-bold text-white">Brooklyn Simmons</div>
-                            <div className="text-[10px] text-zinc-400">351 rides</div>
-                          </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              asset.status === "OPERATIONAL"
+                                ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30"
+                                : asset.status === "NEEDS_SERVICE"
+                                ? "bg-amber-500/20 text-amber-300 ring-1 ring-amber-500/30"
+                                : "bg-rose-500/20 text-rose-300 ring-1 ring-rose-500/30"
+                            }`}
+                          >
+                            {asset.status === "NEEDS_SERVICE"
+                              ? "NEEDS SERVICE"
+                              : asset.status === "OPERATIONAL"
+                              ? "OPERATIONAL"
+                              : "OUT OF ORDER"}
+                          </span>
                         </div>
                       </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-xl bg-[#292a30] text-[#10b981] font-bold text-xs flex items-center justify-center border border-[#10b981]/30">
-                            JJ
-                          </div>
-                          <div>
-                            <div className="text-xs font-bold text-white">Jacob Jones</div>
-                            <div className="text-[10px] text-zinc-400">328 rides</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -1399,11 +1357,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 <option value="ALL">All Statuses</option>
                 <option value="ACTIVE">All Active</option>
                 <option value="NEW">New</option>
-                <option value="REVIEWING">Reviewing</option>
+                <option value="REVIEWING">Triaging</option>
                 <option value="ASSIGNED">Assigned</option>
-                <option value="TRAVELLING">Travelling</option>
+                <option value="TRAVELLING">En Route</option>
                 <option value="ON_SITE">On Site</option>
-                <option value="WORK_COMPLETED_AWAITING_CONFIRMATION">Awaiting Confirmation</option>
+                <option value="WORK_COMPLETED_AWAITING_CONFIRMATION">Awaiting Sign-off</option>
                 <option value="COMPLETED">Completed</option>
                 <option value="CANCELLED">Cancelled</option>
               </select>
@@ -1481,8 +1439,15 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           <div className="flex items-center gap-2">
             <ShieldCheckIcon size={14} className="text-[#10b981]" />
             <span>
-              Plan: <strong className="text-zinc-300">{subscription.planName}</strong> ·{" "}
-              {subscription.remainingVisits !== null ? subscription.remainingVisits : 27} of {subscription.includedVisits} visits remaining
+              Plan: <strong className="text-zinc-300">{activePlanConfig.name}</strong> ·{" "}
+              {subscription.remainingVisits !== null ? (
+                <>
+                  <strong className="text-white">{subscription.remainingVisits}</strong> of{" "}
+                  {subscription.includedVisits} visits remaining
+                </>
+              ) : (
+                "Custom visit allowance"
+              )}
             </span>
           </div>
 
@@ -1549,7 +1514,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             ) : (
               <div className="space-y-4 text-xs">
                 <p className="text-zinc-300">
-                  Your contract tier includes {subscription.includedVisits} routine breakdown visits per month. You may purchase supplementary visit blocks at the standardized tariff.
+                  Your contract tier includes {subscription.includedVisits || "negotiated"} routine breakdown visits per cycle. You may purchase supplementary visit blocks at the standardized tariff.
                 </p>
                 <div className="p-4 rounded-2xl bg-[#26272e] flex items-center justify-between">
                   <span className="text-zinc-400">5-Visit Supplemental Pack</span>
