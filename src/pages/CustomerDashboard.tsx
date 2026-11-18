@@ -106,9 +106,9 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<CustomerViewRequest | null>(null);
 
-  // Active View Switcher: "orders" (Image 4: My Orders Split Workspace) vs "analytics" (Image 3: MSlogistic Fleet Overview)
+  // Active View Switcher: "analytics" (Image 3: Fleet Overview & Animated Charts) vs "orders" (Image 4: My Orders Split Workspace)
   const [activeTab, setActiveTab] = useState<"orders" | "analytics">(
-    tabParam === "analytics" ? "analytics" : "orders"
+    tabParam === "orders" ? "orders" : "analytics"
   );
 
   // View state: 'active' (default operational screen) vs 'history' (progressive disclosure archive)
@@ -511,35 +511,44 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
       subtitle={`${user?.company || "Apex Spinning & Weaving Mills"} · Savar Commercial Complex`}
       action={
         <div className="flex items-center gap-3">
-          {/* View Mode Switcher: Orders vs Analytics (Image 4 vs Image 3) */}
+          {/* View Mode Switcher: Analytics (Image 3) vs My Orders (Image 4) */}
           <div className="flex items-center p-1 rounded-2xl bg-[#1c1d22] border border-white/[0.08]">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveTab("orders");
-                setSearchParams({ tab: "orders" });
-              }}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                activeTab === "orders"
-                  ? "bg-[#10b981] text-zinc-950 shadow-md shadow-emerald-500/20"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              My Orders
-            </button>
             <button
               type="button"
               onClick={() => {
                 setActiveTab("analytics");
                 setSearchParams({ tab: "analytics" });
               }}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 activeTab === "analytics"
                   ? "bg-[#10b981] text-zinc-950 shadow-md shadow-emerald-500/20"
                   : "text-zinc-400 hover:text-white"
               }`}
             >
-              Analytics
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <rect x="3" y="12" width="4" height="9" rx="1" />
+                <rect x="10" y="7" width="4" height="14" rx="1" />
+                <rect x="17" y="3" width="4" height="18" rx="1" />
+              </svg>
+              <span>Analytics</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("orders");
+                setSearchParams({ tab: "orders" });
+              }}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeTab === "orders"
+                  ? "bg-[#10b981] text-zinc-950 shadow-md shadow-emerald-500/20"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                <rect x="8" y="2" width="8" height="4" rx="1" />
+              </svg>
+              <span>My Orders</span>
             </button>
           </div>
 
@@ -1024,8 +1033,8 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               {/* Left Column (3 Stacked Circular Rings / Gauges: Finished, Success, Annual Boost) */}
               <div className="lg:col-span-4 flex flex-col justify-between gap-4">
                 {/* Gauge 1: Finished Truck Rides / Work Orders */}
-                <div className="bg-[#1c1d22] rounded-3xl p-5 flex flex-col justify-between shadow-md flex-1">
-                  <div className="text-xs font-bold text-zinc-300">
+                <div className="bg-[#1c1d22] rounded-3xl p-5 flex flex-col justify-between shadow-md flex-1 hover:shadow-lg transition-all">
+                  <div className="text-xs font-bold text-zinc-300 tracking-wide">
                     Finished Work Orders
                   </div>
                   <div className="flex items-center justify-center my-2">
@@ -1049,19 +1058,19 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           strokeDasharray={2 * Math.PI * 38}
                           strokeDashoffset={2 * Math.PI * 38 * (1 - 0.88)}
                           strokeLinecap="round"
-                          className="transition-all duration-1000"
+                          className="animate-ring-fill transition-all duration-1000"
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-sm font-extrabold text-white">2748/3100</span>
+                        <span className="text-sm font-extrabold text-white tracking-tight">2748/3100</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Gauge 2: Success Truck Rides / SLA */}
-                <div className="bg-[#1c1d22] rounded-3xl p-5 flex flex-col justify-between shadow-md flex-1">
-                  <div className="text-xs font-bold text-zinc-300">
+                <div className="bg-[#1c1d22] rounded-3xl p-5 flex flex-col justify-between shadow-md flex-1 hover:shadow-lg transition-all">
+                  <div className="text-xs font-bold text-zinc-300 tracking-wide">
                     Success Service Rides
                   </div>
                   <div className="flex items-center justify-center my-2">
@@ -1080,24 +1089,24 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           cy="50"
                           r="38"
                           fill="transparent"
-                          stroke="#10b981"
+                          stroke="#06b6d4"
                           strokeWidth="11"
                           strokeDasharray={2 * Math.PI * 38}
                           strokeDashoffset={2 * Math.PI * 38 * (1 - 0.75)}
                           strokeLinecap="round"
-                          className="transition-all duration-1000"
+                          className="animate-ring-fill transition-all duration-1000"
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xl font-extrabold text-white">75%</span>
+                        <span className="text-xl font-extrabold text-white tracking-tight">75%</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Gauge 3: Annual Orders Boost */}
-                <div className="bg-[#1c1d22] rounded-3xl p-5 flex flex-col justify-between shadow-md flex-1">
-                  <div className="text-xs font-bold text-zinc-300">
+                <div className="bg-[#1c1d22] rounded-3xl p-5 flex flex-col justify-between shadow-md flex-1 hover:shadow-lg transition-all">
+                  <div className="text-xs font-bold text-zinc-300 tracking-wide">
                     Annual Orders Boost
                   </div>
                   <div className="flex items-center justify-center my-2">
@@ -1116,16 +1125,16 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           cy="50"
                           r="38"
                           fill="transparent"
-                          stroke="#10b981"
+                          stroke="#b8287a"
                           strokeWidth="11"
                           strokeDasharray={2 * Math.PI * 38}
                           strokeDashoffset={2 * Math.PI * 38 * (1 - 0.33)}
                           strokeLinecap="round"
-                          className="transition-all duration-1000"
+                          className="animate-ring-fill transition-all duration-1000"
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xl font-extrabold text-white">33%</span>
+                        <span className="text-xl font-extrabold text-white tracking-tight">33%</span>
                       </div>
                     </div>
                   </div>
@@ -1202,8 +1211,8 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
                           {/* Stacked Bar Column */}
                           <div
-                            className="w-full max-w-[16px] rounded-t-md overflow-hidden flex flex-col justify-end transition-all duration-300 group-hover:brightness-110"
-                            style={{ height: `${heightPercent}%` }}
+                            className="w-full max-w-[16px] rounded-t-md overflow-hidden flex flex-col justify-end transition-all duration-300 group-hover:brightness-125 group-hover:scale-y-105 origin-bottom animate-bar-rise"
+                            style={{ height: `${heightPercent}%`, animationDelay: `${idx * 25}ms` }}
                           >
                             {/* Dispatched (Top: Dark Slate) */}
                             <div

@@ -170,19 +170,19 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
         {isPreview && (
           <aside
             aria-label="Developer Preview Notice"
-            className="shrink-0 bg-amber-500/15 border-b border-amber-500/30 px-3.5 py-1.5 flex items-center justify-between text-xs text-amber-700 dark:text-amber-300 font-medium select-none z-20"
+            className="shrink-0 bg-emerald-500/10 border-b border-emerald-500/20 px-3.5 py-1.5 flex items-center justify-between text-xs text-emerald-400 font-medium select-none z-20"
           >
             <div className="flex items-center gap-2 truncate">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
               <span className="font-bold tracking-tight">LOCAL PREVIEW</span>
-              <span className="hidden sm:inline text-amber-600/80 dark:text-amber-400/80 font-normal">
+              <span className="hidden sm:inline text-emerald-300/80 font-normal">
                 — Offline Demonstration Mode ({role}). Backend APIs bypassed.
               </span>
             </div>
             <button
               type="button"
               onClick={exitPreview}
-              className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 border border-amber-500/40 transition-colors shrink-0"
+              className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition-colors shrink-0"
             >
               Exit Preview
             </button>

@@ -185,6 +185,33 @@ h1, h2, h3, h4, .font-heading {
   animation: fadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ── Chart & Metric Graphics Animations ─────────────────────────────── */
+@keyframes barRise {
+  from {
+    transform: scaleY(0);
+    opacity: 0.4;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.animate-bar-rise {
+  transform-origin: bottom;
+  animation: barRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes ringFill {
+  from {
+    stroke-dashoffset: 250;
+  }
+}
+
+.animate-ring-fill {
+  animation: ringFill 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 .btn-press {
   transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.1s ease;
 }

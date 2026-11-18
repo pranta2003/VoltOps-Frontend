@@ -26,7 +26,7 @@ export const ThemeToggle: FC<ThemeToggleProps> = ({ className = "" }) => {
       ) : (
         <SunIcon
           size={16}
-          className="text-amber-400 group-hover:rotate-45 transition-transform duration-200"
+          className="text-zinc-300 group-hover:text-white group-hover:rotate-45 transition-transform duration-200"
         />
       )}
     </button>
