@@ -1900,3 +1900,33 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build in 8.80s (`npm run build`). FacilityAssets bundle dropped to 24.72 kB.
+
+---
+
+## Milestone 4.24 — Customer Portal Demo State Unlock (0 Active Requests) & SaaS Invoices Portal Polish
+
+- **Date**: 19 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Set local preview demo state to 0 active requests to immediately unlock the New Service Request portal in offline demo mode, and furnish Invoices & Billing into a world-class commercial B2B SaaS portal without modifying `CustomerDashboard.tsx`:
+  1. **Demo Seed Data: 0 Active Requests**:
+     - `src/services/mockDispatcherData.ts`: Converted initial demo requests (`SR-1001`, `SR-1006`, `SR-1008`) to completed work orders (`WO-3006`, `WO-3007`, `WO-3008`) with realistic completion reports, customer confirmations, and `slaRemainingMinutes: null`.
+     - `src/services/operationalStore.ts`: Bumped cache key to `voltops_operational_state_v3` to ensure immediate fresh load across existing client sessions; updated initial asset statuses to `OPERATIONAL`.
+     - Added realistic customer invoices (`INV-4091` $682.50 due, `INV-4088` $987.00 due, `INV-4075` $472.50 paid), summing to an exact `$1,669.50` outstanding balance.
+     - Verified `src/pages/customer/NewServiceRequest.tsx` immediately renders its full interactive submission form in local preview, and once a request is created, the Single Active Request lock dynamically engages.
+  2. **Furnished Invoices & Billing Portal (`src/pages/customer/CustomerInvoices.tsx`)**:
+     - **Top Billing Summary Strip (3 compact cards)**:
+       1. `Outstanding Balance`: `$1,669.50` in crisp `tabular-nums` with pending statement count.
+       2. `Active Subscription`: `24/7 Priority Coverage` with live reset date (`1 Dec 2026`).
+       3. `Invoices Due`: `2` statements with settlement notice.
+     - **Polished Commercial Invoice Document (Right Panel)**:
+       - Modern document header with `⚡ VOLTOPS COMMERCIAL OPERATIONS` kicker, statement number, status pill, `window.print()` trigger (`Print / PDF` with `PrinterIcon`), and clean payment CTA.
+       - High-contrast metadata grid: Account (`Apex Spinning & Weaving Mills`), Billing Date, Due Date, and Coverage Plan.
+       - Itemized service breakdown with right-aligned unit prices, centered quantities, and bold currency totals in `tabular-nums`.
+       - Truthful preview notice (`UI preview only · No live banking transaction processed`) and `pb-24` bottom clearance for floating chat widget.
+  3. **Strict Policy Compliance**:
+     - **CRITICAL LOCK ENFORCED**: `src/pages/CustomerDashboard.tsx` had 0 edits.
+     - Zero yellow/amber across all screens.
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.64s (`npm run build`). CustomerInvoices bundle: 11.57 kB.
