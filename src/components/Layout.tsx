@@ -126,13 +126,13 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs transition-all ${
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                     isActive
-                      ? "bg-[#10b981] text-zinc-950 font-bold shadow-md shadow-emerald-500/20"
-                      : "text-zinc-400 hover:text-white hover:bg-white/[0.06] font-medium"
+                      ? "bg-white/[0.12] text-white font-semibold shadow-sm"
+                      : "text-slate-400 hover:text-white hover:bg-white/[0.06]"
                   }`}
                 >
-                  <Icon size={17} className={`shrink-0 ${isActive ? "text-zinc-950" : "text-zinc-400"}`} />
+                  <Icon size={16} className={`shrink-0 ${isActive ? "text-[#10b981]" : "text-slate-400"}`} />
                   <span className="truncate">{item.label}</span>
                 </Link>
               );
@@ -264,13 +264,13 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
                         key={item.path}
                         to={item.path}
                         onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs transition-all ${
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium ${
                           isActive
-                            ? "bg-[#10b981] text-zinc-950 font-bold shadow-md shadow-emerald-500/20"
-                            : "text-zinc-400 hover:text-white hover:bg-white/[0.06] font-medium"
+                            ? "bg-white/15 text-white font-semibold"
+                            : "text-slate-400 hover:text-white hover:bg-white/[0.06]"
                         }`}
                       >
-                        <Icon size={16} className={isActive ? "text-zinc-950" : "text-zinc-400"} />
+                        <Icon size={15} className={isActive ? "text-[#10b981]" : "text-slate-400"} />
                         <span>{item.label}</span>
                       </Link>
                     );

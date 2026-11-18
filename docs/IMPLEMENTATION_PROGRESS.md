@@ -1602,7 +1602,20 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
-## Milestone 4.15 — Truthful Customer Dashboard Package Usage & Field Service Operational Architecture
+## Milestone 4.16 — Complete Revert of Customer Dashboard Redesign Iterations & Restoration of Stable Working State
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Action**: Completely reverted all subsequent Customer Dashboard redesign and refactor experiments (`c274a22` through `88ac04e`).
+- **Restored Source Commit**: `6e891b1` (`feat(design): apply project-wide frontend design system transformation`).
+- **Files Restored**:
+  - `src/pages/CustomerDashboard.tsx` — Restored to exact previous working state with standard 4-card operational overview (Active requests, Field dispatched, Coverage plan & SLA, Service visit credits), active facility coverage & demonstration receipts section, full recent service requests table with dual view toggles (Recent / All History), search, category/priority/lifecycle filters, sliding inspection drawer, multi-party completion confirmation, customer feedback rating modal, support ticket modal, and supplemental quote modal.
+  - `src/components/Layout.tsx` — Restored sidebar navigation pill styling.
+- **Quality Gates Passed**:
+  - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+  - Automated test suite: 84 / 84 tests passing (100%).
+  - Visual verification: Verified in Chrome DevTools against local preview. No reset, no force-push.
+
 
 - **Date**: 18 November 2026
 - **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
