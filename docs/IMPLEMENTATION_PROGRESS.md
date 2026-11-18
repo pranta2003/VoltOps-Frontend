@@ -1725,3 +1725,25 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build in 13.33s (`npm run build`). Customer Dashboard bundle: 50.25 kB.
+
+
+---
+
+## Milestone 4.17 — Customer Dashboard Workspace Containment & KPI Grid Polish
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Restore compact KPI cards immediately below header, encapsulate the table workspace in an elevated container card, and refine micro-components:
+  1. **Immediate KPI Grid**:
+     - Configured 4 compact metric cards (`bg-zinc-900 rounded-xl border border-white/5 p-4 shadow-sm`) right beneath the page header.
+     - Preserved Active Requests, Field Dispatched, Arrival SLA, and Service Visit Credits.
+  2. **Contained Workspace Card**:
+     - Encapsulated the entire table and filter bar within `bg-zinc-900 rounded-xl border border-white/10 shadow-lg overflow-hidden`.
+     - Page canvas background provides stark depth with `bg-zinc-950`.
+  3. **Micro-Components & Balanced Spacing**:
+     - Upgraded table action buttons to solid, subtle fills: `bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg border-none transition-colors`.
+     - Balanced cell padding to `py-3 px-4` across headers and data rows with smooth row hover states (`hover:bg-zinc-800/50`).
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.18s (`npm run build`). Customer Dashboard bundle: 50.20 kB.

@@ -399,45 +399,45 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
       }
     >
       <div className="space-y-6 max-w-7xl">
-        {/* ── 1. Top Row: 4 Metric Cards (Clean, Flat Elevated Surfaces) ─────────────────────────── */}
+        {/* ── 1. Top Row: 4 Minimal KPI Cards (Immediate Below Page Header) ─────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Active Requests */}
-          <div className="p-5 rounded-2xl border border-white/5 bg-zinc-900 shadow-sm hover:border-white/10 transition-colors">
+          <div className="bg-zinc-900 rounded-xl border border-white/5 p-4 shadow-sm hover:border-white/10 transition-colors">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
               <span>Active requests</span>
-              <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                <AlertTriangleIcon size={15} className="text-amber-400" />
+              <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                <AlertTriangleIcon size={14} className="text-amber-400" />
               </div>
             </div>
-            <div className="mt-3 text-3xl font-extrabold text-zinc-50 tracking-tight font-mono">
+            <div className="mt-2 text-3xl font-extrabold text-zinc-50 tracking-tight font-mono">
               {isLoading ? "—" : activeCount}
             </div>
             <div className="mt-1 text-xs text-zinc-400">Awaiting inspection or repair</div>
           </div>
 
           {/* Card 2: Field Dispatched */}
-          <div className="p-5 rounded-2xl border border-white/5 bg-zinc-900 shadow-sm hover:border-white/10 transition-colors">
+          <div className="bg-zinc-900 rounded-xl border border-white/5 p-4 shadow-sm hover:border-white/10 transition-colors">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
               <span>Field dispatched</span>
-              <div className="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center">
-                <ClockIcon size={15} className="text-sky-400" />
+              <div className="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center">
+                <ClockIcon size={14} className="text-sky-400" />
               </div>
             </div>
-            <div className="mt-3 text-3xl font-extrabold text-sky-400 tracking-tight font-mono">
+            <div className="mt-2 text-3xl font-extrabold text-sky-400 tracking-tight font-mono">
               {isLoading ? "—" : inProgressCount}
             </div>
             <div className="mt-1 text-xs text-zinc-400">Technician en route or on site</div>
           </div>
 
           {/* Card 3: Target Arrival SLA */}
-          <div className="p-5 rounded-2xl border border-white/5 bg-zinc-900 shadow-sm hover:border-white/10 transition-colors">
+          <div className="bg-zinc-900 rounded-xl border border-white/5 p-4 shadow-sm hover:border-white/10 transition-colors">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
-              <span>Target arrival SLA</span>
-              <div className="w-8 h-8 rounded-xl bg-[#10b981]/10 border border-[#10b981]/20 flex items-center justify-center">
-                <ShieldCheckIcon size={15} className="text-[#10b981]" />
+              <span>Arrival SLA</span>
+              <div className="w-8 h-8 rounded-lg bg-[#10b981]/10 border border-[#10b981]/20 flex items-center justify-center">
+                <ShieldCheckIcon size={14} className="text-[#10b981]" />
               </div>
             </div>
-            <div className="mt-3 text-3xl font-extrabold text-[#10b981] tracking-tight font-mono">
+            <div className="mt-2 text-3xl font-extrabold text-[#10b981] tracking-tight font-mono">
               {subscription.planId === "247-priority"
                 ? "20m"
                 : subscription.planId === "247-standard"
@@ -451,10 +451,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </div>
           </div>
 
-          {/* Card 4: Visit Allowance */}
-          <div className="p-5 rounded-2xl border border-white/5 bg-zinc-900 shadow-sm hover:border-white/10 transition-colors">
+          {/* Card 4: Service Visit Credits */}
+          <div className="bg-zinc-900 rounded-xl border border-white/5 p-4 shadow-sm hover:border-white/10 transition-colors">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
-              <span>Visit allowance</span>
+              <span>Service visit credits</span>
               <span
                 className={`text-[10px] font-bold px-2 py-0.5 rounded-full ring-1 ring-inset ${
                   subscription.needsConfiguration
@@ -472,7 +472,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               </span>
             </div>
 
-            <div className="mt-3 flex items-baseline justify-between">
+            <div className="mt-2 flex items-baseline justify-between">
               {subscription.needsConfiguration ? (
                 <div>
                   <span className="text-sm font-bold text-zinc-50">
@@ -493,7 +493,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </div>
 
             {/* Sleek Progress Bar */}
-            <div className="mt-3 h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+            <div className="mt-2.5 h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
               <div
                 className={`h-full transition-all duration-500 rounded-full ${
                   subscription.needsConfiguration
@@ -512,7 +512,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               />
             </div>
 
-            <div className="mt-2.5 flex items-center justify-between text-[11px] text-zinc-400">
+            <div className="mt-2 flex items-center justify-between text-[11px] text-zinc-400">
               <span>Resets {subscription.billingCycleResetDate || "1 Dec 2026"}</span>
               {subscription.needsConfiguration || subscription.isExhausted ? (
                 <button
@@ -641,8 +641,8 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </div>
           ))}
 
-        {/* ── 2. Central Service Requests Table & Filter Toolbar ─────────────── */}
-        <div className="rounded-2xl border border-white/5 bg-zinc-900 overflow-hidden shadow-sm space-y-0">
+        {/* ── 2. Central Service Requests Table & Filter Toolbar (Contained Workspace) ─────────────── */}
+        <div className="bg-zinc-900 rounded-xl border border-white/10 shadow-lg overflow-hidden space-y-0">
           {/* Header & View Mode Switcher */}
           <div className="p-4 sm:p-5 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-2.5">
@@ -837,18 +837,18 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </div>
           )}
 
-          {/* ── Request Table (Airy, Flat, High-Contrast) ──────────────────── */}
+          {/* ── Request Table (Contained, Balanced Spacing, High-Contrast) ── */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm">
               <thead>
                 <tr className="border-b border-white/5 bg-zinc-950/60 text-zinc-400 font-bold uppercase tracking-wider text-xs">
-                  <th className="py-4 px-5">Request ID</th>
-                  <th className="py-4 px-5">Asset & Category</th>
-                  <th className="py-4 px-5">Problem Summary</th>
-                  <th className="py-4 px-5">Priority</th>
-                  <th className="py-4 px-5">Status</th>
-                  <th className="py-4 px-5">SLA & Technician</th>
-                  <th className="py-4 px-5 text-right">Action</th>
+                  <th className="py-3 px-4">Request ID</th>
+                  <th className="py-3 px-4">Asset & Category</th>
+                  <th className="py-3 px-4">Problem Summary</th>
+                  <th className="py-3 px-4">Priority</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">SLA & Technician</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -891,7 +891,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 ) : (
                   displayedRequests.map((r) => (
                     <tr key={r.id} className="hover:bg-zinc-800/50 transition-colors">
-                      <td className="py-4 px-5 font-mono font-bold text-zinc-50">
+                      <td className="py-3 px-4 font-mono font-bold text-zinc-50">
                         {r.id}
                         {r.workOrderId && (
                           <div className="text-[10px] font-mono text-zinc-400">
@@ -899,15 +899,15 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           </div>
                         )}
                       </td>
-                      <td className="py-4 px-5">
+                      <td className="py-3 px-4">
                         <div className="font-semibold text-zinc-50">{r.asset}</div>
                         <div className="text-[11px] text-zinc-400">{r.category}</div>
                       </td>
-                      <td className="py-4 px-5 max-w-xs">
+                      <td className="py-3 px-4 max-w-xs">
                         <div className="text-zinc-200 font-medium truncate">{r.problem}</div>
                         <div className="text-[11px] text-zinc-400">{r.submittedDate}</div>
                       </td>
-                      <td className="py-4 px-5">
+                      <td className="py-3 px-4">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] ${getPriorityBadge(
                             r.priority
@@ -916,7 +916,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           {r.priority}
                         </span>
                       </td>
-                      <td className="py-4 px-5">
+                      <td className="py-3 px-4">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] ${getStatusBadge(
                             r.displayStatus
@@ -925,7 +925,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           {r.displayStatus.replace("_", " ")}
                         </span>
                       </td>
-                      <td className="py-4 px-5 text-xs">
+                      <td className="py-3 px-4 text-xs">
                         {r.arrivalSlaWindow ? (
                           <div>
                             <span className="font-semibold text-sky-400 block">
@@ -941,11 +941,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           <span className="text-zinc-500">—</span>
                         )}
                       </td>
-                      <td className="py-4 px-5 text-right">
+                      <td className="py-3 px-4 text-right">
                         <button
                           type="button"
                           onClick={() => setSelectedRequest(r)}
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.09] text-zinc-300 hover:text-white border border-white/5 transition-all flex items-center gap-1.5 ml-auto shadow-xs"
+                          className="bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg border-none transition-colors px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 ml-auto"
                         >
                           <EyeIcon size={12} />
                           <span>Inspect</span>
