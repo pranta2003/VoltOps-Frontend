@@ -13,10 +13,8 @@ import {
   CustomerPurchase,
 } from "../types";
 import { customerService } from "../services/customerService";
-import { technicianService } from "../services/technicianService";
 import { operationalStore } from "../services/operationalStore";
 import {
-  getSubscriptionEntitlement,
   SubscriptionEntitlement,
 } from "../services/subscriptionService";
 import { formatBdt } from "../config/coveragePricing";
@@ -33,7 +31,6 @@ import {
   SearchIcon,
   RefreshCwIcon,
   ShieldCheckIcon,
-  WrenchIcon,
   EyeIcon,
   StarIcon,
   SendIcon,
@@ -351,96 +348,105 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
   const hasActiveFilters = searchQuery !== "" || statusFilter !== "ALL" || priorityFilter !== "ALL" || categoryFilter !== "ALL";
 
+  // Modern, soft-tinted status badges with subtle inset ring
   const getStatusBadge = (status: CustomerViewRequest["displayStatus"]) => {
     switch (status) {
       case "NEW":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+        return "bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/25";
       case "REVIEWING":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+        return "bg-purple-500/10 text-purple-400 ring-1 ring-inset ring-purple-500/25";
       case "ASSIGNED":
-        return "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20";
+        return "bg-[#10b981]/15 text-[#10b981] ring-1 ring-inset ring-[#10b981]/30 font-semibold";
       case "TRAVELLING":
-        return "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20 font-bold animate-pulse";
+        return "bg-cyan-500/10 text-cyan-400 ring-1 ring-inset ring-cyan-500/25 font-bold animate-pulse";
       case "ON_SITE":
-        return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20 font-bold";
+        return "bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/25 font-bold";
       case "COMPLETED":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 font-semibold";
+        return "bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/25 font-semibold";
       case "CANCELLED":
-        return "bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20";
+        return "bg-zinc-800 text-zinc-400 ring-1 ring-inset ring-zinc-700/50";
     }
   };
 
+  // Modern, soft-tinted priority badges with subtle inset ring
   const getPriorityBadge = (priority: PriorityLevel) => {
     switch (priority) {
       case "URGENT":
-        return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20 font-bold";
+        return "bg-rose-500/10 text-rose-400 ring-1 ring-inset ring-rose-500/25 font-bold";
       case "HIGH":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+        return "bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/25 font-semibold";
       case "MEDIUM":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+        return "bg-sky-500/10 text-sky-400 ring-1 ring-inset ring-sky-500/25";
       case "LOW":
-        return "bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20";
+      default:
+        return "bg-zinc-800 text-zinc-400 ring-1 ring-inset ring-zinc-700/40";
     }
   };
 
   return (
     <Layout
-      title="Dashboard"
-      subtitle={`${user?.company || "Apex Spinning & Weaving Mills"} · Savar Facility`}
+      title="Facility Operations"
+      subtitle={`${user?.company || "Apex Spinning & Weaving Mills"} · Savar Commercial Complex`}
       action={
         <div className="flex items-center gap-2">
           <Link
             to="/customer/new-request"
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-zinc-950 transition-all shadow-md shadow-emerald-500/15 flex items-center gap-1.5 active:scale-[0.98]"
           >
             <span>+ New Service Request</span>
           </Link>
         </div>
       }
     >
-      <div className="space-y-6">
-        {/* ── Summary & Subscription Row ─────────────────────────────────── */}
+      <div className="space-y-6 max-w-7xl">
+        {/* ── 1. Top Row: 4 Metric Cards (Clean, Elevated Surfaces) ─────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Active Requests */}
-          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-xs">
-            <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
+          <div className="p-5 rounded-2xl border border-white/[0.07] bg-zinc-900/90 shadow-sm hover:border-white/[0.12] transition-colors">
+            <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
               <span>Active requests</span>
-              <AlertTriangleIcon size={16} className="text-amber-500" />
+              <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                <AlertTriangleIcon size={15} className="text-amber-400" />
+              </div>
             </div>
-            <div className="mt-2 text-2xl font-bold font-heading tabular-nums text-[var(--text-primary)]">
+            <div className="mt-3 text-3xl font-extrabold text-zinc-50 tracking-tight font-mono">
               {isLoading ? "—" : activeCount}
             </div>
-            <div className="mt-1 text-xs text-[var(--text-muted)]">Awaiting inspection or repair</div>
+            <div className="mt-1 text-xs text-zinc-400">Awaiting inspection or repair</div>
           </div>
 
           {/* Card 2: Field Dispatched */}
-          <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-500/5 shadow-xs">
-            <div className="flex items-center justify-between text-xs font-medium text-blue-600 dark:text-blue-400">
+          <div className="p-5 rounded-2xl border border-white/[0.07] bg-zinc-900/90 shadow-sm hover:border-white/[0.12] transition-colors">
+            <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
               <span>Field dispatched</span>
-              <ClockIcon size={16} className="text-blue-500" />
+              <div className="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center">
+                <ClockIcon size={15} className="text-sky-400" />
+              </div>
             </div>
-            <div className="mt-2 text-2xl font-bold font-heading tabular-nums text-blue-600 dark:text-blue-400">
+            <div className="mt-3 text-3xl font-extrabold text-sky-400 tracking-tight font-mono">
               {isLoading ? "—" : inProgressCount}
             </div>
-            <div className="mt-1 text-xs text-blue-600/80 font-medium">Technician en route or on site</div>
+            <div className="mt-1 text-xs text-zinc-400">Technician en route or on site</div>
           </div>
 
           {/* Card 3: Coverage Plan & SLA */}
-          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-xs">
-            <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
+          <div className="p-5 rounded-2xl border border-white/[0.07] bg-zinc-900/90 shadow-sm hover:border-white/[0.12] transition-colors">
+            <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
               <span>Coverage plan</span>
-              <ShieldCheckIcon size={16} className="text-[#10b981]" />
+              <div className="w-8 h-8 rounded-xl bg-[#10b981]/10 border border-[#10b981]/20 flex items-center justify-center">
+                <ShieldCheckIcon size={15} className="text-[#10b981]" />
+              </div>
             </div>
-            <div className="mt-2 text-base font-bold font-heading text-[#10b981] truncate">
+            <div className="mt-3 text-base font-extrabold text-[#10b981] truncate">
               {subscription.planName}
             </div>
-            <div className="mt-1 text-xs text-[var(--text-muted)] truncate">
+            <div className="mt-1 text-xs text-zinc-400 truncate">
               {subscription.planId === "247-priority"
-                ? "20-minute arrival SLA guaranteed"
+                ? "20-minute physical arrival SLA"
                 : subscription.planId === "247-standard"
-                ? "40-minute arrival SLA guaranteed"
+                ? "40-minute physical arrival SLA"
                 : subscription.planId === "8hr"
-                ? "8-Hour daily window (08:00 - 16:00)"
+                ? "8-Hour daily window (08:00 – 17:00)"
                 : subscription.hasActiveSubscription
                 ? "Negotiated operational terms"
                 : "Active subscription required"}
@@ -448,20 +454,18 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
 
           {/* Card 4: Service Credits & Allowance */}
-          <div className={`p-4 rounded-xl border shadow-xs transition-all ${
-            subscription.isExhausted
-              ? "border-amber-500/30 bg-amber-500/5"
-              : "border-[var(--border)] bg-[var(--bg-surface)]"
-          }`}>
-            <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
+          <div className="p-5 rounded-2xl border border-white/[0.07] bg-zinc-900/90 shadow-sm hover:border-white/[0.12] transition-colors">
+            <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
               <span>Service visit credits</span>
-              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-                subscription.needsConfiguration
-                  ? "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20"
-                  : subscription.isExhausted
-                  ? "bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/30"
-                  : "bg-emerald-500/10 text-[#10b981] border-emerald-500/20"
-              }`}>
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ring-1 ring-inset ${
+                  subscription.needsConfiguration
+                    ? "bg-zinc-800 text-zinc-300 ring-zinc-700/50"
+                    : subscription.isExhausted
+                    ? "bg-amber-500/10 text-amber-400 ring-amber-500/25"
+                    : "bg-emerald-500/10 text-[#10b981] ring-emerald-500/25"
+                }`}
+              >
                 {subscription.needsConfiguration
                   ? "Negotiated"
                   : subscription.isExhausted
@@ -470,36 +474,38 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               </span>
             </div>
 
-            <div className="mt-2 flex items-baseline justify-between">
+            <div className="mt-3 flex items-baseline justify-between">
               {subscription.needsConfiguration ? (
                 <div>
-                  <span className="text-sm font-bold font-heading text-[var(--text-primary)]">
+                  <span className="text-sm font-bold text-zinc-50">
                     Allowance to be confirmed
                   </span>
-                  <span className="block text-[11px] text-[var(--text-muted)] mt-0.5">
-                    Configured per enterprise contract
+                  <span className="block text-[11px] text-zinc-400 mt-0.5">
+                    Configured per contract
                   </span>
                 </div>
               ) : (
-                <span className="text-2xl font-bold font-heading tabular-nums text-[var(--text-primary)]">
+                <div className="text-3xl font-extrabold text-zinc-50 tracking-tight font-mono">
                   {subscription.remainingVisits}
-                  <span className="text-xs font-normal text-[var(--text-muted)] ml-1">
-                    of {subscription.includedVisits} left
+                  <span className="text-xs font-normal text-zinc-400 ml-1.5 font-sans">
+                    / {subscription.includedVisits} left
                   </span>
-                </span>
+                </div>
               )}
-              <span className="text-[11px] font-mono tabular-nums text-[var(--text-muted)]">
+              <span className="text-xs font-mono text-zinc-400">
                 {subscription.usedVisits} used
               </span>
             </div>
 
-            {/* Progress Bar */}
-            <div className="mt-2.5 h-1.5 w-full bg-[var(--bg-surface-2)] rounded-full overflow-hidden">
+            {/* Sleek Progress Bar */}
+            <div className="mt-3 h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
               <div
-                className={`h-full transition-all duration-300 rounded-full ${
+                className={`h-full transition-all duration-500 rounded-full ${
                   subscription.needsConfiguration
-                    ? "bg-slate-400"
+                    ? "bg-zinc-600"
                     : subscription.isExhausted
+                    ? "bg-rose-500"
+                    : subscription.remainingVisits && subscription.remainingVisits <= 3
                     ? "bg-amber-500"
                     : "bg-[#10b981]"
                 }`}
@@ -511,26 +517,18 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               />
             </div>
 
-            <div className="mt-2 flex items-center justify-between text-[10px] text-[var(--text-muted)]">
-              <span>Resets {subscription.billingCycleResetDate}</span>
-              {subscription.needsConfiguration ? (
+            <div className="mt-2.5 flex items-center justify-between text-[11px] text-zinc-400">
+              <span>Resets {subscription.billingCycleResetDate || "1 Dec 2026"}</span>
+              {subscription.needsConfiguration || subscription.isExhausted ? (
                 <button
                   type="button"
                   onClick={() => setShowQuotationModal(true)}
-                  className="font-semibold text-[#10b981] hover:underline"
-                >
-                  Request Pack +
-                </button>
-              ) : subscription.isExhausted ? (
-                <button
-                  type="button"
-                  onClick={() => setShowQuotationModal(true)}
-                  className="font-semibold text-amber-600 dark:text-amber-400 hover:underline"
+                  className="font-bold text-[#10b981] hover:underline"
                 >
                   Request Pack +
                 </button>
               ) : (
-                <span className="text-emerald-600 dark:text-emerald-400 font-medium">Included in plan</span>
+                <span className="text-emerald-400 font-medium">Included in plan</span>
               )}
             </div>
           </div>
@@ -538,40 +536,39 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
         {/* ── Exhausted or Unconfigured Allowance Warning Banner ──────────────────────────── */}
         {subscription.needsConfiguration ? (
-          <div className="p-4 rounded-2xl bg-slate-500/10 border border-slate-500/20 text-slate-800 dark:text-slate-300 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fade-in">
+          <div className="p-4 rounded-2xl bg-zinc-900 border border-white/[0.08] text-zinc-200 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md animate-fade-in">
             <div className="flex items-start gap-2.5">
-              <AlertTriangleIcon size={16} className="text-amber-500 shrink-0 mt-0.5" />
+              <AlertTriangleIcon size={16} className="text-amber-400 shrink-0 mt-0.5" />
               <div>
-                <strong className="font-bold">Negotiated Visit Allowance Awaiting Confirmation:</strong>{" "}
-                <span>
-                  Your commercial plan uses a negotiated visit allowance that is awaiting confirmation. Included usage cannot be calculated until your negotiated allowance is configured. Standard requests are submitted as additional quotation packs.
+                <strong className="font-bold text-zinc-100">Negotiated Visit Allowance Awaiting Confirmation:</strong>{" "}
+                <span className="text-zinc-400">
+                  Your commercial plan uses a negotiated visit allowance awaiting confirmation. Included usage cannot be calculated until configured. Standard requests are submitted as additional quotation packs.
                 </span>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setShowQuotationModal(true)}
-              className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-[#10b981] hover:bg-[#059669] text-[#06090e] transition-all shrink-0 shadow-sm"
+              className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-[#10b981] hover:bg-[#059669] text-zinc-950 transition-all shrink-0 shadow-sm"
             >
               Request Service Pack
             </button>
           </div>
         ) : subscription.isExhausted ? (
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fade-in">
+          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/25 text-rose-200 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md animate-fade-in">
             <div className="flex items-start gap-2.5">
-              <AlertTriangleIcon size={16} className="text-amber-500 shrink-0 mt-0.5" />
+              <AlertTriangleIcon size={16} className="text-rose-400 shrink-0 mt-0.5" />
               <div>
-                <strong className="font-bold">Subscription Service Allowance Exhausted:</strong>{" "}
-                <span>
-                  Your commercial plan allowance ({subscription.includedVisits} of {subscription.includedVisits} visits) has been utilized for this billing cycle.
-                  Additional emergency visits require an approved service quotation pack.
+                <strong className="font-bold text-rose-100">Subscription Service Allowance Exhausted:</strong>{" "}
+                <span className="text-zinc-300">
+                  Your commercial plan allowance ({subscription.includedVisits} of {subscription.includedVisits} visits) has been utilized for this billing cycle. Additional emergency visits require an approved service quotation pack.
                 </span>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setShowQuotationModal(true)}
-              className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white transition-all shrink-0 shadow-sm"
+              className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-rose-500 hover:bg-rose-600 text-white transition-all shrink-0 shadow-sm"
             >
               Request Additional Pack
             </button>
@@ -584,15 +581,15 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           .map((pReq) => (
             <div
               key={`pending-comp-${pReq.id}`}
-              className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fade-in"
+              className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/25 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md animate-fade-in"
             >
               <div className="flex items-start gap-2.5">
-                <ClockIcon size={18} className="text-cyan-600 dark:text-cyan-400 shrink-0 mt-0.5" />
+                <ClockIcon size={18} className="text-cyan-400 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="font-bold text-[var(--text-primary)]">On-Site Work Reported Complete:</strong>{" "}
-                  <span className="text-[var(--text-muted)]">
+                  <strong className="font-bold text-zinc-100">On-Site Work Reported Complete:</strong>{" "}
+                  <span className="text-zinc-300">
                     Technician {pReq.assignedTech || "on site"} has completed work for Request{" "}
-                    <span className="font-mono font-bold text-[var(--text-primary)]">{pReq.id}</span> ({pReq.category} ·{" "}
+                    <span className="font-mono font-bold text-cyan-300">{pReq.id}</span> ({pReq.category} ·{" "}
                     {pReq.asset}). Awaiting senior dispatcher review and sign-off.
                   </span>
                 </div>
@@ -619,14 +616,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           .map((cReq) => (
             <div
               key={`feedback-prompt-${cReq.id}`}
-              className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fade-in"
+              className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md animate-fade-in"
             >
               <div className="flex items-start gap-2.5">
-                <StarIcon size={18} className="text-amber-500 shrink-0 mt-0.5" fill="currentColor" />
+                <StarIcon size={18} className="text-amber-400 shrink-0 mt-0.5" fill="currentColor" />
                 <div>
-                  <strong className="font-bold text-[var(--text-primary)]">Work Completed & Dispatcher Approved:</strong>{" "}
-                  <span className="text-[var(--text-muted)]">
-                    Service for Request <span className="font-mono font-bold text-[var(--text-primary)]">{cReq.id}</span> ({cReq.asset}) is complete. How was your experience with technician {cReq.assignedTech || "on site"}?
+                  <strong className="font-bold text-zinc-100">Work Completed & Dispatcher Approved:</strong>{" "}
+                  <span className="text-zinc-300">
+                    Service for Request <span className="font-mono font-bold text-amber-300">{cReq.id}</span> ({cReq.asset}) is complete. How was your experience with technician {cReq.assignedTech || "on site"}?
                   </span>
                 </div>
               </div>
@@ -634,14 +631,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 <button
                   type="button"
                   onClick={() => handleDismissFeedback(cReq.workOrderId)}
-                  className="px-2.5 py-1.5 rounded-xl font-medium text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
+                  className="px-2.5 py-1.5 rounded-xl font-medium text-xs text-zinc-400 hover:text-zinc-200 transition-all"
                 >
                   Maybe later
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveFeedbackOrder(cReq)}
-                  className="px-4 py-1.5 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white transition-all shadow-sm"
+                  className="px-4 py-1.5 rounded-xl font-bold text-xs bg-amber-500 hover:bg-amber-600 text-zinc-950 transition-all shadow-sm"
                 >
                   Rate Service (★)
                 </button>
@@ -649,28 +646,28 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </div>
           ))}
 
-        {/* ── Subscribed Plan & Demonstration Purchase Receipts ─────────── */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-3.5">
+        {/* ── 2. Subscribed Plan & Demonstration Purchase Receipts ─────────── */}
+        <div className="rounded-2xl border border-white/[0.07] bg-zinc-900/90 p-5 sm:p-6 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-heading font-bold text-base text-[var(--text-primary)]">
+              <div className="flex items-center gap-2.5">
+                <h2 className="font-bold text-base text-zinc-50 tracking-tight">
                   Active Facility Coverage & Purchases
                 </h2>
                 {subscription.hasActiveSubscription ? (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/25">
                     {subscription.planName}
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/25">
                     No Active Subscription
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              <p className="text-xs text-zinc-400 mt-1">
                 {subscription.hasActiveSubscription ? (
                   <>
-                    Physical arrival commitment: <strong>{subscription.planId === "247-priority" ? "20-minute rapid arrival SLA" : subscription.planId === "247-standard" ? "40-minute arrival SLA" : subscription.planId === "8hr" ? "8-Hour daily window" : "Negotiated terms"}</strong> • {subscription.remainingVisits !== null ? `${subscription.remainingVisits} of ${subscription.includedVisits} service visits available` : "Negotiated allowance"}
+                    Physical arrival commitment: <strong className="text-zinc-200">{subscription.planId === "247-priority" ? "20-minute rapid arrival SLA" : subscription.planId === "247-standard" ? "40-minute arrival SLA" : subscription.planId === "8hr" ? "8-Hour daily window" : "Negotiated terms"}</strong> • {subscription.remainingVisits !== null ? `${subscription.remainingVisits} of ${subscription.includedVisits} service visits available` : "Negotiated allowance"}
                   </>
                 ) : (
                   <span>An active subscription plan is required to submit on-site dispatch requests and receive guaranteed arrival SLAs.</span>
@@ -680,7 +677,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
             <Link
               to={subscription.hasActiveSubscription && subscription.planId ? `/checkout?plan=${subscription.planId}` : "/#packages"}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[var(--bg-surface-2)] hover:bg-[var(--border)] border border-[var(--border)] text-[var(--text-primary)] transition-all flex items-center gap-1.5 self-start sm:self-auto"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-zinc-200 hover:text-white transition-all flex items-center gap-1.5 self-start sm:self-auto shadow-xs"
             >
               <span>{subscription.hasActiveSubscription ? "Change Plan / Checkout" : "Subscribe to a Plan"}</span>
               <ArrowRightIcon size={12} />
@@ -688,31 +685,31 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
 
           {/* Receipts List */}
-          <div className="space-y-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block">
+          <div className="space-y-2.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block">
               Demonstration Receipts ({purchases.length})
             </span>
 
             {purchases.length === 0 ? (
-              <p className="text-xs text-[var(--text-muted)] italic">No purchases recorded yet.</p>
+              <p className="text-xs text-zinc-500 italic">No purchases recorded yet.</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {purchases.map((pur) => (
                   <div
                     key={pur.purchaseId}
-                    className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between gap-3 hover:border-emerald-500/40 transition-colors"
+                    className="p-4 rounded-xl border border-white/[0.06] bg-zinc-950/60 flex items-center justify-between gap-3 hover:border-emerald-500/40 transition-colors"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-xs text-[var(--text-primary)]">{pur.receiptId}</span>
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600">
+                        <span className="font-mono font-bold text-xs text-zinc-100">{pur.receiptId}</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/25">
                           {pur.paymentStatus}
                         </span>
                       </div>
-                      <div className="text-[11px] text-[var(--text-muted)] mt-0.5">
+                      <div className="text-[11px] text-zinc-400 mt-1">
                         {pur.planName} • {new Date(pur.date).toLocaleDateString("en-BD", { month: "short", day: "numeric", year: "numeric" })}
                       </div>
-                      <div className="text-xs font-mono font-bold text-[var(--text-primary)] mt-1">
+                      <div className="text-xs font-mono font-bold text-zinc-200 mt-1">
                         {formatBdt(pur.totalAmount)} ({pur.billingPeriod})
                       </div>
                     </div>
@@ -720,7 +717,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     <button
                       type="button"
                       onClick={() => setActiveReceipt(pur)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all flex items-center gap-1 shrink-0"
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all flex items-center gap-1 shrink-0"
                     >
                       <EyeIcon size={13} />
                       <span>View Receipt</span>
@@ -732,27 +729,27 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
         </div>
 
-        {/* ── Central Service Requests & History Section ───────────────────── */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm space-y-0">
+        {/* ── 3. Central Service Requests Table & Filter Toolbar ─────────────── */}
+        <div className="rounded-2xl border border-white/[0.07] bg-zinc-900/90 overflow-hidden shadow-sm space-y-0">
           {/* Header & View Mode Switcher */}
-          <div className="p-4 sm:p-5 border-b border-[var(--border)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="p-4 sm:p-5 border-b border-white/[0.06] flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2.5">
-                <h2 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                <h2 className="font-bold text-base text-zinc-50 tracking-tight">
                   {viewMode === "recent" ? "Recent Service Requests" : "Complete Request History"}
                 </h2>
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
+                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-white/[0.08] bg-white/[0.04] text-zinc-300 font-mono">
                   {filteredRequests.length} total
                 </span>
               </div>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+              <p className="text-xs text-zinc-400 mt-0.5">
                 Real-time dispatch milestones, technician status, and on-site repair progress
               </p>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              {/* View Mode Toggle */}
-              <div className="p-0.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center text-xs">
+              {/* Sleek Segmented Control */}
+              <div className="p-1 rounded-xl border border-white/[0.08] bg-zinc-950/80 flex items-center text-xs">
                 <button
                   type="button"
                   onClick={() => {
@@ -761,8 +758,8 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   }}
                   className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
                     viewMode === "recent"
-                      ? "bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                      ? "bg-zinc-800 text-zinc-50 shadow-xs"
+                      : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
                   Recent
@@ -775,8 +772,8 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   }}
                   className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
                     viewMode === "all"
-                      ? "bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                      ? "bg-zinc-800 text-zinc-50 shadow-xs"
+                      : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
                   All History
@@ -787,10 +784,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 type="button"
                 onClick={loadCustomerData}
                 disabled={isLoading}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-white/[0.08] bg-zinc-950/80 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5"
                 title="Refresh service requests"
               >
-                <RefreshCwIcon size={12} className={isLoading ? "animate-spin" : ""} />
+                <RefreshCwIcon size={12} className={isLoading ? "animate-spin text-[#10b981]" : ""} />
                 <span className="hidden sm:inline">Refresh</span>
               </button>
 
@@ -800,16 +797,16 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   setSupportDefaultId("");
                   setSupportModalOpen(true);
                 }}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-white/[0.08] bg-zinc-950/80 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5"
                 title="Contact VoltOps Operations Support"
               >
-                <SendIcon size={12} className="text-emerald-500" />
+                <SendIcon size={12} className="text-[#10b981]" />
                 <span className="hidden sm:inline">Contact Support</span>
               </button>
 
               <Link
                 to="/customer/new-request"
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-zinc-950 transition-all shadow-sm flex items-center gap-1"
               >
                 <span>+ Report Breakdown</span>
               </Link>
@@ -817,11 +814,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
 
           {/* ── Search & Filter Toolbar ────────────────────────────────────── */}
-          <div className="p-4 border-b border-[var(--border)] bg-[var(--bg-surface-2)]/40 space-y-3">
+          <div className="p-4 border-b border-white/[0.06] bg-zinc-950/40 space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
               {/* Search Box */}
               <div className="relative">
-                <SearchIcon size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+                <SearchIcon size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
                   id="dashboard-search"
                   name="search"
@@ -829,13 +826,13 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   placeholder="Search ID, asset, problem..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-7 py-2 rounded-xl text-xs border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[#10b981]"
+                  className="w-full pl-8 pr-7 py-2 rounded-xl text-xs border border-white/[0.08] bg-zinc-950/80 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] transition-all"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
                   >
                     <XIcon size={12} />
                   </button>
@@ -849,7 +846,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   name="status"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[#10b981]"
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-white/[0.08] bg-zinc-950/80 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] transition-all"
                   aria-label="Filter by lifecycle status"
                 >
                   <option value="ALL">All Statuses</option>
@@ -872,7 +869,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   name="priority"
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[#10b981]"
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-white/[0.08] bg-zinc-950/80 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] transition-all"
                   aria-label="Filter by priority urgency"
                 >
                   <option value="ALL">All Priorities</option>
@@ -890,7 +887,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   name="category"
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[#10b981]"
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-white/[0.08] bg-zinc-950/80 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] transition-all"
                   aria-label="Filter by trade category"
                 >
                   <option value="ALL">All Service Trades</option>
@@ -904,9 +901,9 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </div>
 
             {hasActiveFilters && (
-              <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pt-1">
+              <div className="flex items-center justify-between text-xs text-zinc-400 pt-1">
                 <span>
-                  Showing <strong className="text-[var(--text-primary)]">{displayedRequests.length}</strong> matching requests
+                  Showing <strong className="text-zinc-100">{displayedRequests.length}</strong> matching requests
                 </span>
                 <button
                   type="button"
@@ -921,7 +918,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
 
           {error && (
-            <div className="p-4 bg-red-500/10 border-b border-red-500/20 text-red-700 dark:text-red-400 text-xs flex items-center justify-between">
+            <div className="p-4 bg-rose-500/10 border-b border-rose-500/20 text-rose-300 text-xs flex items-center justify-between">
               <span>{error}</span>
               <button
                 type="button"
@@ -937,46 +934,46 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-medium text-xs">
-                  <th className="py-3 px-4">Request ID</th>
-                  <th className="py-3 px-4">Asset & Category</th>
-                  <th className="py-3 px-4">Problem Summary</th>
-                  <th className="py-3 px-4">Priority</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">SLA & Technician</th>
-                  <th className="py-3 px-4 text-right">Action</th>
+                <tr className="border-b border-white/[0.08] bg-zinc-950/60 text-zinc-400 font-bold uppercase tracking-wider text-xs">
+                  <th className="py-3.5 px-4">Request ID</th>
+                  <th className="py-3.5 px-4">Asset & Category</th>
+                  <th className="py-3.5 px-4">Problem Summary</th>
+                  <th className="py-3.5 px-4">Priority</th>
+                  <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4">SLA & Technician</th>
+                  <th className="py-3.5 px-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-white/[0.05]">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={7} className="py-12 text-center text-xs text-zinc-400">
                       <RefreshCwIcon size={16} className="inline animate-spin mr-2 text-[#10b981]" />
                       Loading service requests...
                     </td>
                   </tr>
                 ) : displayedRequests.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-xs text-[var(--text-muted)] space-y-2">
+                    <td colSpan={7} className="py-12 text-center text-xs text-zinc-400 space-y-2">
                       {hasActiveFilters ? (
                         <>
-                          <p className="font-semibold text-sm text-[var(--text-primary)]">No matching requests found</p>
-                          <p>Try resetting filters or adjusting search keywords.</p>
+                          <p className="font-semibold text-sm text-zinc-100">No matching requests found</p>
+                          <p className="text-zinc-500">Try resetting filters or adjusting search keywords.</p>
                           <button
                             type="button"
                             onClick={clearFilters}
-                            className="inline-block px-4 py-2 rounded-xl text-xs font-bold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-colors"
+                            className="inline-block px-4 py-2 rounded-xl text-xs font-bold border border-white/[0.08] bg-zinc-800 text-zinc-200 hover:text-white transition-colors"
                           >
                             Clear Filters
                           </button>
                         </>
                       ) : (
                         <>
-                          <p className="font-semibold text-sm text-[var(--text-primary)]">No breakdown requests logged yet</p>
-                          <p>Submit your first breakdown request to dispatch a certified technician.</p>
+                          <p className="font-semibold text-sm text-zinc-100">No breakdown requests logged yet</p>
+                          <p className="text-zinc-500">Submit your first breakdown request to dispatch a certified technician.</p>
                           <Link
                             to="/customer/new-request"
-                            className="inline-block px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e]"
+                            className="inline-block px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-zinc-950 shadow-md"
                           >
                             + Submit First Request
                           </Link>
@@ -986,26 +983,26 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   </tr>
                 ) : (
                   displayedRequests.map((r) => (
-                    <tr key={r.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-[var(--text-primary)]">
+                    <tr key={r.id} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-zinc-50">
                         {r.id}
                         {r.workOrderId && (
-                          <div className="text-[10px] font-mono text-[var(--text-muted)]">
+                          <div className="text-[10px] font-mono text-zinc-400">
                             WO: {r.workOrderId}
                           </div>
                         )}
                       </td>
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-[var(--text-primary)]">{r.asset}</div>
-                        <div className="text-[11px] text-[var(--text-muted)]">{r.category}</div>
+                        <div className="font-semibold text-zinc-100">{r.asset}</div>
+                        <div className="text-[11px] text-zinc-400">{r.category}</div>
                       </td>
                       <td className="py-3.5 px-4 max-w-xs">
-                        <div className="text-[var(--text-primary)] font-medium truncate">{r.problem}</div>
-                        <div className="text-[11px] text-[var(--text-muted)]">{r.submittedDate}</div>
+                        <div className="text-zinc-200 font-medium truncate">{r.problem}</div>
+                        <div className="text-[11px] text-zinc-500">{r.submittedDate}</div>
                       </td>
                       <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] border ${getPriorityBadge(
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] ${getPriorityBadge(
                             r.priority
                           )}`}
                         >
@@ -1014,7 +1011,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                       </td>
                       <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] border ${getStatusBadge(
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] ${getStatusBadge(
                             r.displayStatus
                           )}`}
                         >
@@ -1024,24 +1021,24 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                       <td className="py-3.5 px-4 text-xs">
                         {r.arrivalSlaWindow ? (
                           <div>
-                            <span className="font-semibold text-blue-600 dark:text-blue-400 block">
+                            <span className="font-semibold text-sky-400 block">
                               {r.arrivalSlaWindow}
                             </span>
                             {r.assignedTech && (
-                              <div className="text-[11px] text-[var(--text-muted)] truncate max-w-xs mt-0.5">
+                              <div className="text-[11px] text-zinc-400 truncate max-w-xs mt-0.5">
                                 Tech: {r.assignedTech}
                               </div>
                             )}
                           </div>
                         ) : (
-                          <span className="text-[var(--text-muted)]">—</span>
+                          <span className="text-zinc-500">—</span>
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <button
                           type="button"
                           onClick={() => setSelectedRequest(r)}
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all flex items-center gap-1 ml-auto"
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.09] text-zinc-300 hover:text-white border border-white/[0.07] transition-all flex items-center gap-1.5 ml-auto shadow-xs"
                         >
                           <EyeIcon size={12} />
                           <span>Inspect</span>
@@ -1056,7 +1053,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
           {/* View Mode Footer (when in recent view with more available) */}
           {viewMode === "recent" && filteredRequests.length > 5 && (
-            <div className="p-3 border-t border-[var(--border)] bg-[var(--bg-surface-2)]/30 text-center">
+            <div className="p-3.5 border-t border-white/[0.06] bg-zinc-950/30 text-center">
               <button
                 type="button"
                 onClick={() => {
@@ -1072,7 +1069,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           )}
         </div>
 
-        {/* ── Inspection Detail Modal ────────────────────────────────────── */}
+        {/* ── 4. Inspection Detail Modal / Flattened Drawer (Anti-Nesting) ───── */}
         {selectedRequest && (
           <div
             role="dialog"
@@ -1080,166 +1077,196 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             onClick={(e) => {
               if (e.target === e.currentTarget) setSelectedRequest(null);
             }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
           >
-            <div className="w-full max-w-xl rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+            <div className="w-full max-w-xl rounded-3xl border border-white/[0.08] bg-zinc-900 p-6 sm:p-7 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-white/[0.06]">
                 <div>
-                  <span className="text-[11px] font-mono font-bold text-[var(--text-muted)]">
+                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block font-mono">
                     Service Request Details
                   </span>
-                  <h3 className="font-heading font-bold text-xl text-[var(--text-primary)]">
+                  <h3 className="font-bold text-xl text-zinc-50 mt-0.5 tracking-tight">
                     {selectedRequest.id} · {selectedRequest.asset}
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedRequest(null)}
-                  className="w-8 h-8 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="w-8 h-8 rounded-full border border-white/[0.08] bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
                 >
                   <XIcon size={14} />
                 </button>
               </div>
 
-              <div className="space-y-3 text-xs">
-                <div className="p-3.5 rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1">
-                  <div className="text-[var(--text-muted)] font-semibold text-[10px]">Problem Summary</div>
-                  <div className="font-bold text-sm text-[var(--text-primary)]">{selectedRequest.problem}</div>
-                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed pt-1">{selectedRequest.description}</p>
+              {/* Flattened Single-Surface Body */}
+              <div className="space-y-5 text-xs">
+                {/* Problem Summary (Flat section) */}
+                <div className="pb-4 border-b border-white/[0.06] space-y-1">
+                  <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block">
+                    Problem Summary
+                  </span>
+                  <div className="font-bold text-sm text-zinc-50">{selectedRequest.problem}</div>
+                  <p className="text-zinc-300 leading-relaxed pt-1">
+                    {selectedRequest.description || "Routine breakdown maintenance and diagnostic check."}
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Trade Category</span>
-                    <span className="font-semibold text-[var(--text-primary)]">{selectedRequest.category}</span>
+                {/* Clean Label / Value Grid (No nested box-within-a-box) */}
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3.5 pb-4 border-b border-white/[0.06]">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block mb-1">
+                      Trade Category
+                    </span>
+                    <span className="font-semibold text-zinc-100 text-xs">{selectedRequest.category}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Urgency</span>
-                    <span className="font-bold text-red-600 dark:text-red-400">{selectedRequest.priority}</span>
+
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block mb-1">
+                      Urgency
+                    </span>
+                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] ${getPriorityBadge(selectedRequest.priority)}`}>
+                      {selectedRequest.priority}
+                    </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Coverage SLA</span>
-                    <span className="font-bold text-[#10b981]">{getCoveragePlanSlaLabel(selectedRequest.coveragePlan)}</span>
+
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block mb-1">
+                      Coverage SLA
+                    </span>
+                    <span className="font-semibold text-[#10b981] text-xs">
+                      {getCoveragePlanSlaLabel(selectedRequest.coveragePlan)}
+                    </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Status</span>
-                    <span className="font-bold text-[#10b981]">{selectedRequest.displayStatus.replace("_", " ")}</span>
+
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block mb-1">
+                      Status
+                    </span>
+                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] ${getStatusBadge(selectedRequest.displayStatus)}`}>
+                      {selectedRequest.displayStatus.replace("_", " ")}
+                    </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Work Order</span>
-                    <span className="font-mono font-bold text-[var(--text-primary)]">{selectedRequest.workOrderId || "Pending"}</span>
+
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block mb-1">
+                      Work Order
+                    </span>
+                    <span className="font-mono font-bold text-zinc-200 text-xs">
+                      {selectedRequest.workOrderId || "Pending"}
+                    </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Submitted</span>
-                    <span className="font-semibold text-[var(--text-primary)]">{selectedRequest.submittedDate}</span>
+
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block mb-1">
+                      Submitted
+                    </span>
+                    <span className="font-semibold text-zinc-200 text-xs">{selectedRequest.submittedDate}</span>
                   </div>
                 </div>
 
+                {/* Assigned Technician (Flat divider block) */}
                 {selectedRequest.assignedTech && (
-                  <div className="p-3.5 rounded-2xl border border-blue-500/30 bg-blue-500/10 space-y-1">
-                    <div className="font-bold text-blue-700 dark:text-blue-300">Assigned Technician:</div>
-                    <div className="font-semibold text-[var(--text-primary)]">{selectedRequest.assignedTech}</div>
-                    <div className="text-[11px] text-blue-600 dark:text-blue-400">{selectedRequest.arrivalSlaWindow}</div>
+                  <div className="pb-4 border-b border-white/[0.06] flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block mb-1">
+                        Assigned Specialist
+                      </span>
+                      <div className="font-bold text-sm text-zinc-50">{selectedRequest.assignedTech}</div>
+                      <div className="text-xs text-sky-400 font-medium mt-0.5">{selectedRequest.arrivalSlaWindow}</div>
+                    </div>
+                    <div className="w-10 h-10 rounded-2xl bg-[#10b981]/15 text-[#10b981] font-bold text-xs flex items-center justify-center border border-[#10b981]/30">
+                      {selectedRequest.assignedTech.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                    </div>
                   </div>
                 )}
 
+                {/* Technician Sign-Off Notes */}
                 {selectedRequest.workNotes && (
-                  <div className="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 space-y-1">
-                    <div className="font-bold text-emerald-800 dark:text-emerald-300">Technician Sign-Off Notes:</div>
-                    <p className="text-slate-800 dark:text-slate-200">{selectedRequest.workNotes}</p>
+                  <div className="pb-4 border-b border-white/[0.06] space-y-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block">
+                      Technician Sign-Off Notes
+                    </span>
+                    <p className="text-zinc-200 leading-relaxed">{selectedRequest.workNotes}</p>
                   </div>
                 )}
 
-                {/* ── State 1: Work Reported Complete — Awaiting Dispatcher Review ── */}
+                {/* State 1: Work Reported Complete — Awaiting Dispatcher Review */}
                 {selectedRequest.displayStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION" && (
-                  <div className="p-4 rounded-2xl border border-cyan-500/30 bg-cyan-500/10 space-y-3">
+                  <div className="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/25 space-y-3">
                     <div className="flex items-center gap-2">
-                      <ClockIcon size={18} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
+                      <ClockIcon size={18} className="text-cyan-400 shrink-0" />
                       <div>
-                        <div className="font-bold text-sm text-[var(--text-primary)]">
+                        <div className="font-bold text-sm text-zinc-50">
                           Technician Submitted Work Completion
                         </div>
-                        <div className="text-xs text-[var(--text-muted)]">
-                          Work has been performed on-site by technician {selectedRequest.assignedTech || "assigned"}. Currently queued for senior dispatcher review and sign-off.
+                        <div className="text-xs text-zinc-300">
+                          Work performed on-site by technician {selectedRequest.assignedTech || "assigned"}. Queued for senior dispatcher review and sign-off.
                         </div>
                       </div>
                     </div>
+
                     {selectedRequest.completionReport && (
-                      <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs space-y-1.5">
-                        <div className="font-semibold text-[var(--text-primary)]">Work Performed & Diagnostic:</div>
-                        <p className="text-[var(--text-muted)]">
+                      <div className="pt-2 border-t border-cyan-500/20 text-xs space-y-1.5">
+                        <div className="font-semibold text-zinc-100">Work Performed:</div>
+                        <p className="text-zinc-300">
                           {selectedRequest.completionReport.workPerformed || selectedRequest.completionReport.notes}
                         </p>
                         {selectedRequest.completionReport.diagnosis && (
-                          <div className="pt-1 text-[11px] text-[var(--text-muted)]">
-                            <span className="font-semibold text-[var(--text-primary)]">Diagnosis: </span>
+                          <div className="text-zinc-400">
+                            <span className="font-semibold text-zinc-200">Diagnosis: </span>
                             {selectedRequest.completionReport.diagnosis}
                           </div>
                         )}
-                        {selectedRequest.completionReport.materialsUsed && (
-                          <div className="pt-1 text-[11px] text-[var(--text-muted)]">
-                            <span className="font-semibold text-[var(--text-primary)]">Materials Used: </span>
-                            {selectedRequest.completionReport.materialsUsed}
-                          </div>
-                        )}
-                        <div className="pt-1 text-[10px] font-mono text-cyan-600 dark:text-cyan-400">
-                          Submitted by {selectedRequest.completionReport.technicianName}
-                        </div>
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* ── State 2: Work Completed and Approved by Dispatcher ────────── */}
+                {/* State 2: Work Completed and Approved by Dispatcher */}
                 {selectedRequest.displayStatus === "COMPLETED" && (
-                  <div className="p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 space-y-3">
+                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                       <div className="flex items-center gap-2">
-                        <CheckCircleIcon size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
-                        <span className="font-bold text-sm text-emerald-800 dark:text-emerald-300">
+                        <CheckCircleIcon size={18} className="text-emerald-400 shrink-0" />
+                        <span className="font-bold text-sm text-emerald-300">
                           OK — Work completed and dispatcher approved
                         </span>
                       </div>
                       {selectedRequest.completionReport?.dispatcherApprovedAt && (
-                        <span className="text-[10px] text-emerald-700/80 dark:text-emerald-400 font-mono">
+                        <span className="text-[10px] text-emerald-400/80 font-mono">
                           Approved: {new Date(selectedRequest.completionReport.dispatcherApprovedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       )}
                     </div>
 
                     {selectedRequest.completionReport && (
-                      <div className="p-3.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-xs space-y-2">
+                      <div className="pt-2 border-t border-emerald-500/20 text-xs space-y-1.5">
                         <div>
-                          <span className="font-semibold text-[var(--text-primary)]">Work Performed: </span>
-                          <span className="text-[var(--text-muted)]">
+                          <span className="font-semibold text-zinc-100">Work Performed: </span>
+                          <span className="text-zinc-300">
                             {selectedRequest.completionReport.workPerformed || selectedRequest.completionReport.notes}
                           </span>
                         </div>
                         {selectedRequest.completionReport.diagnosis && (
                           <div>
-                            <span className="font-semibold text-[var(--text-primary)]">Diagnosis & Root Cause: </span>
-                            <span className="text-[var(--text-muted)]">{selectedRequest.completionReport.diagnosis}</span>
+                            <span className="font-semibold text-zinc-100">Diagnosis: </span>
+                            <span className="text-zinc-300">{selectedRequest.completionReport.diagnosis}</span>
                           </div>
                         )}
-                        {selectedRequest.completionReport.materialsUsed && (
-                          <div>
-                            <span className="font-semibold text-[var(--text-primary)]">Materials / Components: </span>
-                            <span className="text-[var(--text-muted)]">{selectedRequest.completionReport.materialsUsed}</span>
-                          </div>
-                        )}
-                        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-[var(--text-muted)] border-t border-[var(--border)]">
-                          <span>Technician: <strong className="text-[var(--text-primary)]">{selectedRequest.completionReport.technicianName}</strong></span>
-                          <span>Reviewer: <strong className="text-[var(--text-primary)]">{selectedRequest.completionReport.dispatcherApprovedBy || "Tania Akter (Senior Dispatcher)"}</strong></span>
+                        <div className="pt-2 flex items-center justify-between text-[11px] text-zinc-400 border-t border-emerald-500/15">
+                          <span>Specialist: <strong className="text-zinc-200">{selectedRequest.completionReport.technicianName}</strong></span>
+                          <span>Reviewer: <strong className="text-zinc-200">{selectedRequest.completionReport.dispatcherApprovedBy || "Tania Akter (Senior Dispatcher)"}</strong></span>
                         </div>
                       </div>
                     )}
 
                     {/* Customer Feedback Action inside Modal */}
                     {selectedRequest.workOrderId && (
-                      <div className="pt-1 flex items-center justify-between text-xs">
+                      <div className="pt-2 flex items-center justify-between text-xs">
                         {notificationService.hasProvidedFeedback(selectedRequest.workOrderId) ? (
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                            <span className="text-xs font-semibold text-emerald-400">
                               Your Rating:
                             </span>
                             <div className="flex items-center gap-0.5 text-amber-400">
@@ -1251,7 +1278,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                                     key={s}
                                     size={13}
                                     fill={s <= r ? "currentColor" : "none"}
-                                    className={s <= r ? "text-amber-400" : "text-gray-300 dark:text-gray-600"}
+                                    className={s <= r ? "text-amber-400" : "text-zinc-700"}
                                   />
                                 );
                               })}
@@ -1265,7 +1292,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                               setSelectedRequest(null);
                               setActiveFeedbackOrder(target);
                             }}
-                            className="px-3 py-1.5 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white transition-all shadow-sm flex items-center gap-1.5"
+                            className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-amber-500 hover:bg-amber-600 text-zinc-950 transition-all shadow-sm flex items-center gap-1.5"
                           >
                             <StarIcon size={14} fill="currentColor" />
                             <span>Rate This Service (★)</span>
@@ -1277,7 +1304,8 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 )}
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
+              {/* Modal Footer Actions */}
+              <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
                 <button
                   type="button"
                   onClick={() => {
@@ -1286,16 +1314,16 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     setSupportDefaultId(id);
                     setSupportModalOpen(true);
                   }}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex items-center gap-1.5"
                 >
-                  <SendIcon size={11} className="text-emerald-500" />
+                  <SendIcon size={12} className="text-[#10b981]" />
                   <span>Report an Issue</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setSelectedRequest(null)}
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-colors"
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-zinc-800 hover:bg-zinc-700 border border-white/[0.08] text-zinc-100 transition-colors"
                 >
                   Close
                 </button>
@@ -1304,14 +1332,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
         )}
 
-        {/* ── Additional Service Pack Quotation Modal (Demo Mode) ─────────── */}
+        {/* ── 5. Additional Service Pack Quotation Modal (Demo Mode) ─────────── */}
         {showQuotationModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-md rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+            <div className="w-full max-w-md rounded-3xl border border-white/[0.08] bg-zinc-900 p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
                 <div className="flex items-center gap-2">
                   <ShieldCheckIcon size={18} className="text-[#10b981]" />
-                  <h3 className="font-heading font-bold text-lg text-[var(--text-primary)]">
+                  <h3 className="font-bold text-lg text-zinc-50">
                     Additional Service Pack
                   </h3>
                 </div>
@@ -1321,17 +1349,17 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     setShowQuotationModal(false);
                     setQuotationRequested(false);
                   }}
-                  className="w-8 h-8 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="w-8 h-8 rounded-full border border-white/[0.08] bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
                 >
                   <XIcon size={14} />
                 </button>
               </div>
 
               {quotationRequested ? (
-                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs space-y-2 text-center animate-fade-in">
-                  <CheckCircleIcon size={24} className="mx-auto text-emerald-500" />
-                  <div className="font-bold text-sm">Quotation Request Logged (Demo Mode)</div>
-                  <p className="text-slate-600 dark:text-slate-300">
+                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs space-y-2 text-center animate-fade-in">
+                  <CheckCircleIcon size={24} className="mx-auto text-emerald-400" />
+                  <div className="font-bold text-sm text-zinc-50">Quotation Request Logged (Demo Mode)</div>
+                  <p className="text-zinc-300">
                     A formal quotation for a 5-visit on-demand service pack has been dispatched to your facility account manager.
                     No monetary transaction or automated billing was triggered.
                   </p>
@@ -1341,42 +1369,42 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                       setShowQuotationModal(false);
                       setQuotationRequested(false);
                     }}
-                    className="mt-2 px-4 py-1.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e]"
+                    className="mt-2 px-5 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-zinc-950 hover:bg-[#059669] transition-all"
                   >
                     Done
                   </button>
                 </div>
               ) : (
-                <div className="space-y-3 text-xs">
-                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                <div className="space-y-4 text-xs">
+                  <p className="text-zinc-300 leading-relaxed">
                     Your facility has fully utilized the included <strong>{subscription.includedVisits} on-site visits</strong> for the current billing cycle.
                   </p>
 
-                  <div className="p-3.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2">
-                    <div className="font-bold text-sm text-[var(--text-primary)]">Enterprise On-Demand 5-Pack</div>
-                    <ul className="space-y-1 text-slate-600 dark:text-slate-300">
+                  <div className="p-4 rounded-2xl border border-white/[0.06] bg-zinc-950/60 space-y-2">
+                    <div className="font-bold text-sm text-zinc-100">Enterprise On-Demand 5-Pack</div>
+                    <ul className="space-y-1.5 text-zinc-300">
                       <li>• 5 additional certified technician on-site visits</li>
                       <li>• Retains {subscription.planName} arrival SLA commitments</li>
                       <li>• Commercial facility invoice generated post-signoff</li>
                     </ul>
                   </div>
 
-                  <div className="p-3 rounded-xl border border-amber-500/20 bg-amber-500/5 text-[11px] text-amber-700 dark:text-amber-400">
+                  <div className="p-3 rounded-xl border border-amber-500/20 bg-amber-500/5 text-[11px] text-amber-300">
                     <em>Prototype Notice:</em> Quotation requests are simulated locally. No real banking session or monetary charge will occur.
                   </div>
 
-                  <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
+                  <div className="flex justify-end gap-2 pt-2 border-t border-white/[0.06]">
                     <button
                       type="button"
                       onClick={() => setShowQuotationModal(false)}
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 border border-white/[0.08] text-zinc-300 hover:text-white"
                     >
                       Cancel
                     </button>
                     <button
                       type="button"
                       onClick={() => setQuotationRequested(true)}
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-zinc-950 transition-all shadow-sm"
                     >
                       Submit Quotation Request
                     </button>
@@ -1386,6 +1414,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </div>
           </div>
         )}
+
         {/* Active Demonstration Receipt Modal */}
         {activeReceipt && (
           <DemonstrationReceiptModal

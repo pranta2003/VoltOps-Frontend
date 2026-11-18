@@ -1679,3 +1679,26 @@ This document tracks all completed implementation milestones, verified files, co
   - TypeScript: 0 errors (`npx tsc --noEmit`).
   - Automated tests: 84 / 84 passed (`npm test`).
   - Production build: Succeeded in 8.72s (`npm run build`).
+
+
+---
+
+## Milestone 4.15 — Customer Dashboard Premium Dark Mode & Flattened Surfaces Refactor (Truthful Baseline)
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Apply high-contrast deep space dark mode and flattened surfaces to the truthful baseline of `CustomerDashboard.tsx`:
+  1. **High-Contrast Deep Space Dark Palette**:
+     - Applied deep zinc / obsidian surfaces (`bg-zinc-950` canvas, `bg-zinc-900/90` and `bg-zinc-900` cards) with fine translucent borders (`border-white/[0.07]`).
+     - Typography hierarchy: Crisp high-contrast values/headings (`text-zinc-50`), secondary subtitles (`text-zinc-300`), and muted labels (`text-zinc-400`).
+  2. **Anti-Nesting Drawer Architecture**:
+     - Flattened the slide-out inspection drawer into a clean single surface without nested card boxes.
+     - Divided sections using subtle horizontal rules (`border-white/[0.06]`) and aligned Label / Value pairs.
+  3. **Strict Truthful Domain Alignment**:
+     - Preserved all 4 operational KPI metrics (Active Requests, Field Dispatched, Coverage Plan, Service Visit Credits).
+     - Retained canonical 7 service trades and deterministic arrival SLA logic.
+     - Excluded any fabricated transportation charts, driver leaderboards, or vehicle metrics.
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build (`npm run build`). Customer Dashboard bundle: 54.38 kB.
