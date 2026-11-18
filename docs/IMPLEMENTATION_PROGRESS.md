@@ -1871,3 +1871,32 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build in 8.15s (`npm run build`). Customer Dashboard bundle: 42.99 kB.
+
+---
+
+## Milestone 4.23 — Customer Portal Complete Transformation: New Request, Facility Assets & Invoices
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Apply Vercel `web-design-guidelines` alongside VoltOps minimal design system across the remaining three customer portal pages without touching `CustomerDashboard.tsx`:
+  1. **New Service Request (`src/pages/customer/NewServiceRequest.tsx`)**:
+     - Enforced Single Active Request Rule: Renders focused locked blocker card (`Active Service Request In Progress`) with active ticket details and direct `View Active Request →` CTA when an active request is open.
+     - Stripped redundancy: Removed navbar subtitle, purged bulky coverage plan green box, removed operational severity helper above Urgency Level, and embedded compact 1-line plan SLA summary alongside the Submit button.
+     - Upgraded surfaces and inputs to `bg-zinc-900`/`bg-zinc-950` with `border-white/10` and emerald focus rings. Zero yellow/amber (High urgency uses Berry Plum `#b8287a`). Added `pb-24` chat clearance.
+  2. **Facility Assets (`src/pages/customer/FacilityAssets.tsx`)**:
+     - Deleted duplicated top `"Subscription Visit Allowance"` coverage card.
+     - Replaced 3 bulky KPI cards with a sleek interactive summary & filter pill toolbar: `All Assets (9)`, `Operational (7)`, `Needs Service (2)`.
+     - Eliminated table horizontal scrollbar on desktop by optimizing column widths and cell padding.
+     - Purged all yellow/amber: used Berry Plum `#b8287a` for `Needs Service` / active incident tags and Signal Emerald `#10b981` for `Operational`.
+     - Integrated Single Active Request check: disables `Report Breakdown` in header and row actions with locked `Active request open` state. Added `pb-24` clearance.
+  3. **Invoices & Billing (`src/pages/customer/CustomerInvoices.tsx`)**:
+     - Preserved 2-column Master-Detail layout; tightened left billing statement cards with crisp emerald active selection.
+     - Upgraded surfaces to `bg-zinc-900 rounded-xl border border-white/5` on `bg-zinc-950`. Removed navbar subtitle.
+     - Fixed line-item table column widths with right-aligned numbers and `tabular-nums`.
+     - Standardized zero-yellow status badges (Signal Emerald for `PAID`, Cyan for `PAYMENT_PENDING`, Berry Plum / Rose for `PAYMENT_DUE`).
+     - Kept concise truthful preview disclaimer and added `pb-24` bottom padding for floating chat widget clearance.
+  4. **Quality Gates Passed**:
+     - CustomerDashboard untouched: `src/pages/CustomerDashboard.tsx` had 0 edits.
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.80s (`npm run build`). FacilityAssets bundle dropped to 24.72 kB.

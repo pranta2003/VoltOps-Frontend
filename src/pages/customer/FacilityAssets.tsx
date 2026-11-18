@@ -19,10 +19,10 @@ import {
   CheckCircleIcon,
   RefreshCwIcon,
   BuildingIcon,
-  ShieldCheckIcon,
   EyeIcon,
   ArrowRightIcon,
   ChevronDownIcon,
+  LockIcon,
 } from "../../components/Icons";
 
 export function FacilityAssets() {
@@ -39,7 +39,7 @@ export function FacilityAssets() {
   const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
 
-  // Step 3: Asset-Specific Report Breakdown Modal State
+  // Breakdown Report Modal State
   const [reportingAsset, setReportingAsset] = useState<CustomerAsset | null>(null);
   const [reportTitle, setReportTitle] = useState("");
   const [reportDescription, setReportDescription] = useState("");
@@ -50,7 +50,7 @@ export function FacilityAssets() {
   const [reportSuccessId, setReportSuccessId] = useState<string | null>(null);
   const [reportError, setReportError] = useState<string | null>(null);
 
-  // Available technicians for customer preference
+  // Available technicians
   const technicians = useMemo<TechnicianProfile[]>(() => {
     return operationalStore.getTechnicians();
   }, []);
@@ -84,14 +84,16 @@ export function FacilityAssets() {
   const activeRequests = useMemo(() => {
     const workOrders = operationalStore.getWorkOrders();
     return operationalStore.getRequests().filter((r) => {
-      if (r.status === "CANCELLED") return false;
-      if (r.status === "CONVERTED") {
+      if (r.status === "CANCELLED" || r.status === "RESOLVED") return false;
+      if (r.status === "CONVERTED" || r.workOrderId) {
         const wo = workOrders.find((w) => w.id === r.workOrderId || w.requestId === r.id);
         return wo ? wo.status !== "COMPLETED" && wo.status !== "CANCELLED" : false;
       }
       return true;
     });
   }, [assets]);
+
+  const hasActiveRequest = activeRequests.length > 0;
 
   const getLinkedRequest = (assetName: string) => {
     return activeRequests.find((r) => r.assetName === assetName);
@@ -114,15 +116,19 @@ export function FacilityAssets() {
         return false;
       }
 
-      if (statusFilter !== "ALL" && asset.status !== statusFilter) {
-        return false;
+      if (statusFilter !== "ALL") {
+        if (statusFilter === "NEEDS_SERVICE") {
+          if (asset.status !== "NEEDS_SERVICE" && asset.status !== "OUT_OF_ORDER") return false;
+        } else if (asset.status !== statusFilter) {
+          return false;
+        }
       }
 
       return true;
     });
   }, [assets, searchQuery, categoryFilter, statusFilter]);
 
-  // KPI Calculations
+  // Counts
   const totalCount = assets.length;
   const operationalCount = assets.filter((a) => a.status === "OPERATIONAL").length;
   const attentionCount = assets.filter((a) => a.status === "NEEDS_SERVICE" || a.status === "OUT_OF_ORDER").length;
@@ -130,13 +136,12 @@ export function FacilityAssets() {
   const getStatusBadge = (status: CustomerAsset["status"]) => {
     switch (status) {
       case "OPERATIONAL":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
+        return "bg-emerald-500/10 text-[#10b981] border-emerald-500/20";
       case "NEEDS_SERVICE":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
       case "OUT_OF_ORDER":
-        return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20 font-bold";
+        return "bg-[#b8287a]/15 text-[#f472b6] border-[#b8287a]/30 font-semibold";
       default:
-        return "bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20";
+        return "bg-zinc-800 text-zinc-400 border-white/5";
     }
   };
 
@@ -147,11 +152,9 @@ export function FacilityAssets() {
   };
 
   const hasActiveFilters = searchQuery !== "" || categoryFilter !== "ALL" || statusFilter !== "ALL";
-
-  // Check subscription entitlement
   const subscription = customerService.getSubscription(user?.id);
 
-  // Relevant technicians matching the reporting asset's category
+  // Relevant technicians
   const relevantTechnicians = useMemo(() => {
     if (!reportingAsset) return [];
     const cat = reportingAsset.category.toLowerCase();
@@ -164,8 +167,8 @@ export function FacilityAssets() {
     return matched.length > 0 ? matched : technicians.filter((t) => t.status === "AVAILABLE" || t.status === "ON_JOB");
   }, [reportingAsset, technicians]);
 
-  // Open asset report breakdown modal
   const openReportModal = (asset: CustomerAsset) => {
+    if (hasActiveRequest) return;
     setReportingAsset(asset);
     setReportTitle(`Breakdown on ${asset.name}`);
     setReportDescription("");
@@ -185,10 +188,14 @@ export function FacilityAssets() {
     setIsSubmittingReport(false);
   };
 
-  // Handle asset-specific breakdown submission
   const handleReportSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!reportingAsset || isSubmittingReport) return;
+
+    if (hasActiveRequest) {
+      setReportError("An active service request is already in progress.");
+      return;
+    }
 
     if (!reportTitle.trim()) {
       setReportError("Please specify what's wrong.");
@@ -228,7 +235,6 @@ export function FacilityAssets() {
         }
       );
 
-      // Update asset status to NEEDS_SERVICE if previously OPERATIONAL
       if (reportingAsset.status === "OPERATIONAL") {
         const allAssets = operationalStore.getAssets();
         const updated = allAssets.map((a) =>
@@ -255,199 +261,119 @@ export function FacilityAssets() {
             type="button"
             onClick={loadAssets}
             disabled={isLoading}
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-white/5 bg-zinc-900 text-zinc-400 hover:text-zinc-200 transition-all flex items-center gap-1.5"
             title="Refresh assets"
           >
-            <RefreshCwIcon size={13} className={isLoading ? "animate-spin" : ""} />
+            <RefreshCwIcon size={12} className={isLoading ? "animate-spin" : ""} />
             <span className="hidden sm:inline">Refresh</span>
           </button>
-          <Link
-            to="/customer/new-request"
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5"
-          >
-            <WrenchIcon size={14} />
-            <span>Report Breakdown</span>
-          </Link>
+
+          {hasActiveRequest ? (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-zinc-800/80 text-zinc-400 border border-white/5 cursor-not-allowed">
+              <LockIcon className="w-3.5 h-3.5 text-zinc-500" />
+              <span>Active request open</span>
+            </div>
+          ) : (
+            <Link
+              to="/customer/new-request"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#10b981] text-zinc-950 hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5"
+            >
+              <WrenchIcon size={13} />
+              <span>Report Breakdown</span>
+            </Link>
+          )}
         </div>
       }
     >
-      <div className="space-y-6">
-        {/* ── Subscription Service Allowance Summary ────────────────────── */}
-        <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-3.5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--border)] pb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold font-heading text-[var(--text-primary)]">
-                Subscription Visit Allowance
-              </span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                {subscription.planName}
-              </span>
+      <div className="space-y-4 max-w-6xl mx-auto pb-24">
+        {/* Compact Summary & Filter Pills Toolbar */}
+        <div className="p-4 rounded-xl border border-white/5 bg-zinc-900 shadow-sm space-y-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            {/* Inline Filter Pills */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setStatusFilter("ALL")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                  statusFilter === "ALL"
+                    ? "bg-zinc-800 text-zinc-100 border border-white/10 shadow-xs"
+                    : "bg-zinc-950 text-zinc-400 border border-white/5 hover:text-zinc-200 hover:border-white/10"
+                }`}
+              >
+                <span>All Assets</span>
+                <span className="font-mono tabular-nums text-[11px] opacity-75">({totalCount})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStatusFilter("OPERATIONAL")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                  statusFilter === "OPERATIONAL"
+                    ? "bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30 shadow-xs"
+                    : "bg-zinc-950 text-zinc-400 border border-white/5 hover:text-[#10b981] hover:border-[#10b981]/20"
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
+                <span>Operational</span>
+                <span className="font-mono tabular-nums text-[11px] opacity-75">({operationalCount})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStatusFilter("NEEDS_SERVICE")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                  statusFilter === "NEEDS_SERVICE"
+                    ? "bg-[#b8287a]/20 text-[#f472b6] border border-[#b8287a]/40 shadow-xs"
+                    : "bg-zinc-950 text-zinc-400 border border-white/5 hover:text-[#f472b6] hover:border-[#b8287a]/30"
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#b8287a]" />
+                <span>Needs Service</span>
+                <span className="font-mono tabular-nums text-[11px] opacity-75">({attentionCount})</span>
+              </button>
             </div>
-            <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-2">
-              <span>Billing Cycle: Resets {subscription.billingCycleResetDate}</span>
-              {subscription.hasActiveSubscription && (
-                <Link
-                  to={`/checkout?plan=${subscription.planId || "247-priority"}`}
-                  className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
-                >
-                  Manage Plan &rarr;
-                </Link>
-              )}
+
+            {/* Total Indicator */}
+            <div className="text-xs text-zinc-400">
+              Showing <span className="font-semibold text-zinc-200 tabular-nums">{filteredAssets.length}</span> of{" "}
+              <span className="font-semibold text-zinc-200 tabular-nums">{assets.length}</span>
             </div>
           </div>
 
-          {/* 3 Balanced Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Card 1: Monthly Included Visits */}
-            <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
-              <span className="text-xs font-medium text-[var(--text-muted)] block">
-                Monthly Included Visits
-              </span>
-              <div className="mt-1.5 text-2xl font-bold font-heading text-[var(--text-primary)]">
-                {subscription.needsConfiguration ? (
-                  <span className="text-sm font-semibold text-[var(--text-muted)]">Negotiated</span>
-                ) : subscription.includedVisits !== null ? (
-                  subscription.includedVisits
-                ) : (
-                  <span className="text-sm font-semibold text-[var(--text-muted)]">Unavailable</span>
-                )}
-              </div>
-              <span className="text-[11px] text-[var(--text-muted)] mt-0.5 block">
-                {subscription.planId === "8hr" ? "Plan A (Daily)" : subscription.planId === "247-standard" ? "Plan B (Standard)" : subscription.planId === "247-priority" ? "Plan C (Priority)" : "Plan D (Custom)"} allocation
-              </span>
-            </div>
-
-            {/* Card 2: Visits Used */}
-            <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
-              <span className="text-xs font-medium text-[var(--text-muted)] block">
-                Visits Used
-              </span>
-              <div className="mt-1.5 text-2xl font-bold font-heading text-[var(--text-primary)]">
-                {subscription.usedVisits}
-              </div>
-              <span className="text-[11px] text-[var(--text-muted)] mt-0.5 block">
-                Approved non-cancelled dispatches
-              </span>
-            </div>
-
-            {/* Card 3: Visits Remaining (Emerald) */}
-            <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
-              <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400 block">
-                Visits Remaining
-              </span>
-              <div className="mt-1.5 text-2xl font-bold font-heading text-[#10b981]">
-                {subscription.needsConfiguration ? (
-                  <span className="text-sm font-semibold text-slate-500">To be confirmed</span>
-                ) : subscription.remainingVisits !== null ? (
-                  subscription.remainingVisits
-                ) : (
-                  <span className="text-sm font-semibold text-slate-500">—</span>
-                )}
-              </div>
-              <span className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 mt-0.5 block font-medium">
-                {subscription.isExhausted ? "Allowance exhausted this cycle" : "Available for emergency dispatch"}
-              </span>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          {!subscription.needsConfiguration && subscription.includedVisits !== null && (
-            <div className="space-y-1 pt-1">
-              <div className="h-2 w-full bg-[var(--bg-surface-2)] rounded-full overflow-hidden">
-                <div
-                  className={`h-full transition-all duration-300 rounded-full ${
-                    subscription.isExhausted ? "bg-amber-500" : "bg-[#10b981]"
-                  }`}
-                  style={{
-                    width: `${Math.min(100, (subscription.usedVisits / (subscription.includedVisits || 1)) * 100)}%`,
-                  }}
-                />
-              </div>
-              <div className="flex justify-between text-[10px] text-[var(--text-muted)]">
-                <span>{subscription.usedVisits} of {subscription.includedVisits} visits utilized ({Math.round((subscription.usedVisits / subscription.includedVisits) * 100)}%)</span>
-                <span>{subscription.remainingVisits} remaining</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── Summary KPI Cards ───────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-xs">
-            <div className="flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
-              <span>Total assets</span>
-              <BuildingIcon size={16} className="text-[#10b981]" />
-            </div>
-            <div className="mt-2 text-2xl font-bold font-heading tabular-nums text-[var(--text-primary)]">
-              {isLoading ? "—" : totalCount}
-            </div>
-            <div className="mt-1 text-xs text-[var(--text-muted)]">Registered equipment items</div>
-          </div>
-
-          <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 shadow-xs">
-            <div className="flex items-center justify-between text-xs font-medium text-emerald-700 dark:text-emerald-400">
-              <span>Operational</span>
-              <CheckCircleIcon size={16} className="text-emerald-500" />
-            </div>
-            <div className="mt-2 text-2xl font-bold font-heading tabular-nums text-emerald-700 dark:text-emerald-400">
-              {isLoading ? "—" : operationalCount}
-            </div>
-            <div className="mt-1 text-xs text-emerald-700/80 dark:text-emerald-400/80 font-medium">
-              Normal operating parameters
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 shadow-xs">
-            <div className="flex items-center justify-between text-xs font-medium text-amber-700 dark:text-amber-400">
-              <span>Service required</span>
-              <AlertTriangleIcon size={16} className="text-amber-500" />
-            </div>
-            <div className="mt-2 text-2xl font-bold font-heading tabular-nums text-amber-700 dark:text-amber-400">
-              {isLoading ? "—" : attentionCount}
-            </div>
-            <div className="mt-1 text-xs text-amber-700/80 dark:text-amber-400/80 font-medium">
-              Needs inspection or repair
-            </div>
-          </div>
-        </div>
-
-        {/* ── Toolbar: Search & Filters ───────────────────────────────────── */}
-        <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Search Box */}
-            <div className="relative">
-              <SearchIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
+          {/* Search Box & Category Select */}
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1">
+            <div className="sm:col-span-8 relative">
+              <SearchIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
               <input
                 id="assets-search"
                 name="search"
                 type="text"
-                placeholder="Search asset, tag, or location..."
+                placeholder="Search asset name, serial tag, or facility location…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-xl text-xs border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-[#10b981]"
+                className="w-full pl-9 pr-8 py-2 rounded-xl text-xs border border-white/10 bg-zinc-950 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#10b981] transition-colors"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
                 >
                   <XIcon size={13} />
                 </button>
               )}
             </div>
 
-            {/* Trade Category Filter */}
-            <div>
+            <div className="sm:col-span-4">
               <select
                 id="assets-category-filter"
                 name="category"
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl text-xs border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[#10b981]"
+                className="w-full px-3 py-2 rounded-xl text-xs border border-white/10 bg-zinc-950 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-[#10b981] transition-colors"
                 aria-label="Filter by trade category"
               >
-                <option value="ALL">All Equipment Categories</option>
+                <option value="ALL">All Categories</option>
                 {CANONICAL_SERVICE_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
                     {cat}
@@ -455,321 +381,284 @@ export function FacilityAssets() {
                 ))}
               </select>
             </div>
-
-            {/* Status Filter */}
-            <div>
-              <select
-                id="assets-status-filter"
-                name="status"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl text-xs border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[#10b981]"
-                aria-label="Filter by operational status"
-              >
-                <option value="ALL">All Operational Statuses</option>
-                <option value="OPERATIONAL">Operational</option>
-                <option value="NEEDS_SERVICE">Needs Service</option>
-                <option value="OUT_OF_ORDER">Out of Order</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Counts & Clear Action */}
-          <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pt-1 flex-wrap gap-2">
-            <div>
-              Displaying <span className="font-bold text-[var(--text-primary)]">{filteredAssets.length}</span> of{" "}
-              <span className="font-bold text-[var(--text-primary)]">{assets.length}</span> assets
-            </div>
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="text-xs font-semibold text-[#10b981] hover:underline flex items-center gap-1"
-              >
-                <span>Reset filters</span>
-                <XIcon size={12} />
-              </button>
-            )}
           </div>
         </div>
 
-        {/* ── Error Banner ────────────────────────────────────────────────── */}
+        {/* Error Banner */}
         {error && (
-          <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 text-xs flex items-center justify-between shadow-sm">
+          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <AlertTriangleIcon size={16} className="text-red-500 shrink-0" />
+              <AlertTriangleIcon size={15} className="text-rose-400 shrink-0" />
               <span>{error}</span>
             </div>
             <button
               type="button"
               onClick={loadAssets}
-              className="px-3 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-700 dark:text-red-300 font-bold transition-colors"
+              className="px-2.5 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 font-semibold transition-colors"
             >
               Retry
             </button>
           </div>
         )}
 
-        {/* ── Asset Inventory Table (Clean, Proportional, Scannable) ──────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm">
-              <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold text-[11px]">
-                  <th className="py-3 px-4">Asset & tag</th>
-                  <th className="py-3 px-4 hidden sm:table-cell">Category</th>
-                  <th className="py-3 px-4">Facility location</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 hidden md:table-cell">Last service</th>
-                  <th className="py-3 px-4 hidden lg:table-cell">Active incident</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+        {/* Asset Inventory Table (Proportional, Desktop Fit, Zero Horizontal Scroll) */}
+        <div className="rounded-xl border border-white/5 bg-zinc-900 overflow-hidden shadow-sm">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-white/5 bg-zinc-950/60 text-zinc-400 font-semibold text-[11px]">
+                <th className="py-3 px-3.5">Asset & Tag</th>
+                <th className="py-3 px-3 hidden sm:table-cell">Category</th>
+                <th className="py-3 px-3 hidden md:table-cell">Location</th>
+                <th className="py-3 px-3">Status</th>
+                <th className="py-3 px-3 hidden lg:table-cell">Last Service</th>
+                <th className="py-3 px-3">Active Incident</th>
+                <th className="py-3 px-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="py-16 text-center text-xs text-zinc-500 space-y-2">
+                    <div className="inline-block animate-spin mb-2">
+                      <RefreshCwIcon size={18} className="text-[#10b981]" />
+                    </div>
+                    <p>Loading facility assets…</p>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={7} className="py-16 text-center text-xs text-[var(--text-muted)] space-y-2">
-                      <div className="inline-block animate-spin mb-2">
-                        <RefreshCwIcon size={20} className="text-[#10b981]" />
-                      </div>
-                      <p>Loading facility assets...</p>
-                    </td>
-                  </tr>
-                ) : filteredAssets.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="py-16 text-center text-xs text-[var(--text-muted)] space-y-3">
-                      <div className="w-12 h-12 rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border)] mx-auto flex items-center justify-center text-[var(--text-muted)]">
-                        <WrenchIcon size={24} />
-                      </div>
-                      {hasActiveFilters ? (
-                        <>
-                          <p className="font-semibold text-sm text-[var(--text-primary)]">No assets match your filter</p>
-                          <p>Try clearing your search query or choosing another trade category.</p>
-                          <button
-                            type="button"
-                            onClick={clearFilters}
-                            className="inline-block px-4 py-2 rounded-xl text-xs font-bold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-colors"
-                          >
-                            Clear Filters
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <p className="font-semibold text-sm text-[var(--text-primary)]">No equipment assets registered</p>
-                          <p>Register facility equipment assets to enable one-click incident reporting.</p>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredAssets.map((asset) => {
-                    const linkedReq = getLinkedRequest(asset.name);
-                    const isExpanded = expandedAssetId === asset.id;
+              ) : filteredAssets.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-16 text-center text-xs text-zinc-500 space-y-3">
+                    <div className="w-10 h-10 rounded-xl bg-zinc-950 border border-white/5 mx-auto flex items-center justify-center text-zinc-500">
+                      <WrenchIcon size={20} />
+                    </div>
+                    <p className="font-semibold text-sm text-zinc-300">No assets match your search</p>
+                    {hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={clearFilters}
+                        className="inline-block px-3 py-1.5 rounded-lg text-xs font-semibold border border-white/10 bg-zinc-950 text-zinc-300 hover:bg-zinc-800 transition-colors"
+                      >
+                        Reset filters
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ) : (
+                filteredAssets.map((asset) => {
+                  const linkedReq = getLinkedRequest(asset.name);
+                  const isExpanded = expandedAssetId === asset.id;
 
-                    return (
-                      <Fragment key={asset.id}>
-                        <tr
-                          className={`hover:bg-[var(--bg-surface-2)] transition-colors ${
-                            isExpanded ? "bg-[var(--bg-surface-2)]/50" : ""
-                          }`}
-                        >
-                          <td className="py-3 px-4 min-w-[190px]">
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => setExpandedAssetId(isExpanded ? null : asset.id)}
-                                className="p-1 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
-                                title={isExpanded ? "Collapse details" : "Expand full location and specifications"}
-                                aria-expanded={isExpanded}
-                              >
-                                <ChevronDownIcon
-                                  size={13}
-                                  className={`transition-transform duration-200 ${
-                                    isExpanded ? "rotate-180" : ""
-                                  }`}
-                                />
-                              </button>
-                              <div>
-                                <div className="font-semibold text-[var(--text-primary)] leading-snug">
-                                  {asset.name}
-                                </div>
-                                <div className="font-mono text-[11px] text-[var(--text-muted)] mt-0.5">
-                                  Tag: {asset.tagNumber}
-                                </div>
+                  return (
+                    <Fragment key={asset.id}>
+                      <tr
+                        className={`hover:bg-zinc-800/40 transition-colors ${
+                          isExpanded ? "bg-zinc-800/30" : ""
+                        }`}
+                      >
+                        <td className="py-3 px-3.5">
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setExpandedAssetId(isExpanded ? null : asset.id)}
+                              className="p-1 rounded text-zinc-500 hover:text-zinc-200 transition-colors"
+                              title={isExpanded ? "Collapse details" : "Expand specifications"}
+                              aria-expanded={isExpanded}
+                            >
+                              <ChevronDownIcon
+                                size={12}
+                                className={`transition-transform duration-200 ${
+                                  isExpanded ? "rotate-180" : ""
+                                }`}
+                              />
+                            </button>
+                            <div>
+                              <div className="font-semibold text-zinc-100 leading-snug">
+                                {asset.name}
+                              </div>
+                              <div className="font-mono text-[11px] text-zinc-500 mt-0.5">
+                                Tag: {asset.tagNumber}
                               </div>
                             </div>
-                          </td>
+                          </div>
+                        </td>
 
-                          <td className="py-3 px-4 text-[var(--text-muted)] hidden sm:table-cell whitespace-nowrap">
-                            {asset.category}
-                          </td>
+                        <td className="py-3 px-3 text-zinc-400 hidden sm:table-cell">
+                          {asset.category}
+                        </td>
 
-                          <td className="py-3 px-4 min-w-[180px]">
-                            <span className="text-[var(--text-primary)] font-medium block leading-snug">
-                              {asset.location}
-                            </span>
-                          </td>
+                        <td className="py-3 px-3 text-zinc-300 hidden md:table-cell">
+                          <span className="truncate block max-w-[200px]" title={asset.location}>
+                            {asset.location}
+                          </span>
+                        </td>
 
-                          <td className="py-3 px-4 whitespace-nowrap">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] border font-semibold ${getStatusBadge(
-                                asset.status
-                              )}`}
+                        <td className="py-3 px-3 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] border font-semibold ${getStatusBadge(
+                              asset.status
+                            )}`}
+                          >
+                            {asset.status.replace(/_/g, " ")}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-3 text-xs hidden lg:table-cell whitespace-nowrap text-zinc-400">
+                          {asset.lastServiceDate ? (
+                            <span className="tabular-nums">{asset.lastServiceDate}</span>
+                          ) : (
+                            <span className="text-zinc-600">—</span>
+                          )}
+                        </td>
+
+                        <td className="py-3 px-3 text-xs whitespace-nowrap">
+                          {linkedReq ? (
+                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#b8287a]/15 text-[#f472b6] border border-[#b8287a]/30">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#b8287a]" />
+                              <span>{linkedReq.id}</span>
+                            </div>
+                          ) : (
+                            <span className="text-zinc-500 text-[11px]">None active</span>
+                          )}
+                        </td>
+
+                        <td className="py-3 px-3.5 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedAsset(asset)}
+                              className="px-2 py-1 rounded-lg text-xs font-medium border border-white/5 bg-zinc-950 text-zinc-400 hover:text-zinc-100 transition-all flex items-center gap-1"
+                              title="View specs"
                             >
-                              {asset.status.replace(/_/g, " ")}
-                            </span>
-                          </td>
+                              <EyeIcon size={12} />
+                              <span className="hidden sm:inline">Specs</span>
+                            </button>
 
-                          <td className="py-3 px-4 text-xs hidden md:table-cell whitespace-nowrap">
-                            {asset.lastServiceDate ? (
-                              <span className="text-[var(--text-primary)] font-medium block">
-                                {asset.lastServiceDate}
-                              </span>
-                            ) : (
-                              <span className="text-[var(--text-muted)]">—</span>
-                            )}
-                          </td>
-
-                          <td className="py-3 px-4 text-xs hidden lg:table-cell whitespace-nowrap">
-                            {linkedReq ? (
-                              <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-semibold">
-                                <AlertTriangleIcon size={12} className="shrink-0" />
-                                <span>{linkedReq.id} ({linkedReq.priority})</span>
-                              </div>
-                            ) : (
-                              <span className="text-slate-400 dark:text-slate-500 font-normal">None active</span>
-                            )}
-                          </td>
-
-                          <td className="py-3 px-4 text-right whitespace-nowrap">
-                            <div className="flex items-center justify-end gap-1.5">
+                            {hasActiveRequest ? (
                               <button
                                 type="button"
-                                onClick={() => setSelectedAsset(asset)}
-                                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all flex items-center gap-1"
-                                title="View technical passport specifications"
+                                disabled
+                                className="px-2 py-1 rounded-lg text-xs font-medium bg-zinc-800/40 text-zinc-500 border border-white/5 cursor-not-allowed flex items-center gap-1"
+                                title="Active request open"
                               >
-                                <EyeIcon size={12} />
-                                <span className="hidden sm:inline">Specs</span>
+                                <LockIcon size={11} />
+                                <span>Report</span>
                               </button>
+                            ) : (
                               <button
                                 type="button"
                                 onClick={() => openReportModal(asset)}
-                                className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#10b981]/15 text-[#10b981] hover:bg-[#10b981]/25 transition-all flex items-center gap-1"
+                                className="px-2 py-1 rounded-lg text-xs font-bold bg-[#10b981]/15 text-[#10b981] hover:bg-[#10b981]/25 transition-all flex items-center gap-1"
                                 title={`Report breakdown for ${asset.name}`}
                               >
-                                <WrenchIcon size={12} />
+                                <WrenchIcon size={11} />
                                 <span>Report</span>
                               </button>
-                            </div>
-                          </td>
-                        </tr>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
 
-                        {/* Expandable Detail View for Long Addresses & Specifications */}
-                        {isExpanded && (
-                          <tr className="bg-[var(--bg-surface-2)]/50 border-b border-[var(--border)]">
-                            <td colSpan={7} className="px-6 py-4 space-y-3">
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                                <div>
-                                  <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
-                                    Full Facility Placement & Address
-                                  </span>
-                                  <span className="font-semibold text-[var(--text-primary)] block mt-0.5">
-                                    {asset.location}
-                                  </span>
-                                  <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
-                                    Apex Spinning & Weaving Mills · Savar Industrial EPZ Hub
-                                  </span>
-                                </div>
-
-                                <div>
-                                  <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
-                                    Equipment Identification
-                                  </span>
-                                  <span className="font-semibold text-[var(--text-primary)] block mt-0.5">
-                                    {asset.name}
-                                  </span>
-                                  <span className="text-[11px] font-mono text-[var(--text-muted)] block mt-0.5">
-                                    Category: {asset.category} · Tag: {asset.tagNumber}
-                                  </span>
-                                </div>
-
-                                <div>
-                                  <span className="text-[10px] uppercase font-bold text-[var(--text-muted)] block">
-                                    Maintenance & Service Cycle
-                                  </span>
-                                  <span className="font-medium text-[var(--text-primary)] block mt-0.5">
-                                    Installed: {asset.installedDate || "2021-03-15"}
-                                  </span>
-                                  <span className="text-[11px] text-[var(--text-muted)] block mt-0.5">
-                                    Last Service: {asset.lastServiceDate || "None recorded"} · Quarterly Preventive Inspection
-                                  </span>
-                                </div>
+                      {/* Expandable Technical Passport Details */}
+                      {isExpanded && (
+                        <tr className="bg-zinc-950/40 border-b border-white/5">
+                          <td colSpan={7} className="px-5 py-3.5">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-zinc-500 block">
+                                  Full Placement Location
+                                </span>
+                                <span className="font-semibold text-zinc-200 block mt-0.5">
+                                  {asset.location}
+                                </span>
+                                <span className="text-[11px] text-zinc-400 block mt-0.5">
+                                  Apex Spinning & Weaving Mills · Savar Commercial Complex
+                                </span>
                               </div>
 
-                              {linkedReq && (
-                                <div className="p-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-xs flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <AlertTriangleIcon size={14} className="text-amber-500 shrink-0" />
-                                    <span className="font-semibold text-[var(--text-primary)]">
-                                      Active Service Incident: {linkedReq.id} — {linkedReq.problemTitle}
-                                    </span>
-                                  </div>
-                                  <Link to="/customer" className="font-bold text-[#10b981] hover:underline">
-                                    View on Dashboard →
-                                  </Link>
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        )}
-                      </Fragment>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-zinc-500 block">
+                                  Equipment Identification
+                                </span>
+                                <span className="font-semibold text-zinc-200 block mt-0.5">
+                                  {asset.name}
+                                </span>
+                                <span className="text-[11px] font-mono text-zinc-400 block mt-0.5">
+                                  Category: {asset.category} · Tag: {asset.tagNumber}
+                                </span>
+                              </div>
+
+                              <div>
+                                <span className="text-[10px] uppercase font-bold text-zinc-500 block">
+                                  Maintenance Schedule
+                                </span>
+                                <span className="font-medium text-zinc-300 block mt-0.5">
+                                  Installed: {asset.installedDate || "2021-03-15"}
+                                </span>
+                                <span className="text-[11px] text-zinc-400 block mt-0.5">
+                                  Last Service: {asset.lastServiceDate || "None recorded"}
+                                </span>
+                              </div>
+                            </div>
+
+                            {linkedReq && (
+                              <div className="mt-2.5 p-2 rounded-lg border border-[#b8287a]/30 bg-[#b8287a]/10 text-xs flex items-center justify-between">
+                                <span className="font-medium text-[#f472b6]">
+                                  Active Incident: {linkedReq.id} — {linkedReq.problemTitle}
+                                </span>
+                                <Link to="/customer" className="font-bold text-[#10b981] hover:underline">
+                                  View on Dashboard →
+                                </Link>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* ── Asset Specifications Modal (Secondary Details) ──────────────── */}
+        {/* Asset Specifications Modal */}
         {selectedAsset && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-lg rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-2xl space-y-5">
-              <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+            <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-900 p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
                 <div>
-                  <span className="text-[11px] font-mono font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                    Asset Specifications
+                  <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-wider">
+                    Technical Specifications
                   </span>
-                  <h3 className="font-heading font-bold text-xl text-[var(--text-primary)]">
+                  <h3 className="font-heading font-bold text-lg text-zinc-50">
                     {selectedAsset.name}
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedAsset(null)}
-                  className="w-8 h-8 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="w-7 h-7 rounded-lg border border-white/10 flex items-center justify-center text-zinc-400 hover:text-zinc-100"
                 >
                   <XIcon size={14} />
                 </button>
               </div>
 
               <div className="space-y-3 text-xs">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Asset Tag</span>
-                    <span className="font-mono font-bold text-[var(--text-primary)]">{selectedAsset.tagNumber}</span>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="p-3 rounded-xl bg-zinc-950 border border-white/5">
+                    <span className="text-[10px] font-semibold text-zinc-400 block">Asset Tag</span>
+                    <span className="font-mono font-bold text-zinc-100">{selectedAsset.tagNumber}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Trade Category</span>
-                    <span className="font-semibold text-[var(--text-primary)]">{selectedAsset.category}</span>
+                  <div className="p-3 rounded-xl bg-zinc-950 border border-white/5">
+                    <span className="text-[10px] font-semibold text-zinc-400 block">Category</span>
+                    <span className="font-semibold text-zinc-100">{selectedAsset.category}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Facility Location</span>
-                    <span className="font-semibold text-[var(--text-primary)]">{selectedAsset.location}</span>
+                  <div className="p-3 rounded-xl bg-zinc-950 border border-white/5">
+                    <span className="text-[10px] font-semibold text-zinc-400 block">Placement</span>
+                    <span className="font-semibold text-zinc-100">{selectedAsset.location}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Status</span>
+                  <div className="p-3 rounded-xl bg-zinc-950 border border-white/5">
+                    <span className="text-[10px] font-semibold text-zinc-400 block">Status</span>
                     <span
                       className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] border font-bold ${getStatusBadge(
                         selectedAsset.status
@@ -778,47 +667,54 @@ export function FacilityAssets() {
                       {selectedAsset.status.replace(/_/g, " ")}
                     </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Installed Date</span>
-                    <span className="font-semibold text-[var(--text-primary)]">{selectedAsset.installedDate || "Not recorded"}</span>
+                  <div className="p-3 rounded-xl bg-zinc-950 border border-white/5">
+                    <span className="text-[10px] font-semibold text-zinc-400 block">Installed</span>
+                    <span className="font-semibold text-zinc-100">{selectedAsset.installedDate || "Not recorded"}</span>
                   </div>
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                    <span className="text-[10px] font-semibold text-[var(--text-muted)] block">Last Service</span>
-                    <span className="font-semibold text-[var(--text-primary)]">{selectedAsset.lastServiceDate || "None"}</span>
+                  <div className="p-3 rounded-xl bg-zinc-950 border border-white/5">
+                    <span className="text-[10px] font-semibold text-zinc-400 block">Last Service</span>
+                    <span className="font-semibold text-zinc-100">{selectedAsset.lastServiceDate || "None"}</span>
                   </div>
                 </div>
 
                 {getLinkedRequest(selectedAsset.name) ? (
-                  <div className="p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 space-y-1">
-                    <div className="font-bold text-amber-700 dark:text-amber-300">Active Incident:</div>
-                    <div className="text-[11px] text-[var(--text-primary)]">
+                  <div className="p-3 rounded-xl border border-[#b8287a]/30 bg-[#b8287a]/10 space-y-1">
+                    <div className="font-bold text-[#f472b6]">Active Incident:</div>
+                    <div className="text-[11px] text-zinc-200">
                       {getLinkedRequest(selectedAsset.name)?.id} — {getLinkedRequest(selectedAsset.name)?.problemTitle}
                     </div>
                   </div>
                 ) : (
-                  <div className="p-3.5 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 text-xs">
+                  <div className="p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-[#10b981] text-xs">
                     No active breakdown tickets open for this asset.
                   </div>
                 )}
               </div>
 
-              <div className="flex justify-between items-center pt-3 border-t border-[var(--border)]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const toReport = selectedAsset;
-                    setSelectedAsset(null);
-                    openReportModal(toReport);
-                  }}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all flex items-center gap-1.5"
-                >
-                  <WrenchIcon size={13} />
-                  <span>Report Breakdown</span>
-                </button>
+              <div className="flex justify-between items-center pt-3 border-t border-white/5">
+                {!hasActiveRequest ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const toReport = selectedAsset;
+                      setSelectedAsset(null);
+                      openReportModal(toReport);
+                    }}
+                    className="px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-zinc-950 hover:bg-[#34d399] transition-all flex items-center gap-1.5"
+                  >
+                    <WrenchIcon size={13} />
+                    <span>Report Breakdown</span>
+                  </button>
+                ) : (
+                  <div className="text-[11px] text-zinc-400 flex items-center gap-1">
+                    <LockIcon size={12} className="text-zinc-500" />
+                    <span>Active request open</span>
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => setSelectedAsset(null)}
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--border)] transition-colors"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-800 border border-white/10 text-zinc-200 hover:bg-zinc-700 transition-colors"
                 >
                   Close
                 </button>
@@ -827,19 +723,18 @@ export function FacilityAssets() {
           </div>
         )}
 
-        {/* ── STEP 1: Compact, Professional Breakdown Report Modal ────────────────── */}
-        {reportingAsset && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-xl space-y-4">
-              {/* Modal Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
-                <h3 className="font-heading font-bold text-lg text-[var(--text-primary)]">
+        {/* Breakdown Report Modal */}
+        {reportingAsset && !hasActiveRequest && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+            <div className="w-full max-w-md rounded-2xl border border-white/10 bg-zinc-900 p-5 sm:p-6 shadow-xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
+                <h3 className="font-heading font-bold text-lg text-zinc-50">
                   Report a Breakdown
                 </h3>
                 <button
                   type="button"
                   onClick={closeReportModal}
-                  className="w-7 h-7 rounded-lg border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="w-7 h-7 rounded-lg border border-white/10 flex items-center justify-center text-zinc-400 hover:text-zinc-100"
                   title="Close modal"
                 >
                   <XIcon size={14} />
@@ -847,17 +742,16 @@ export function FacilityAssets() {
               </div>
 
               {reportSuccessId ? (
-                /* Success Confirmation State */
                 <div className="py-4 text-center space-y-3 animate-fade-in">
-                  <div className="w-12 h-12 rounded-xl bg-[#10b981] text-[#06090e] font-extrabold text-xl mx-auto flex items-center justify-center shadow-md">
+                  <div className="w-12 h-12 rounded-xl bg-[#10b981] text-zinc-950 font-extrabold text-xl mx-auto flex items-center justify-center shadow-md">
                     ✓
                   </div>
                   <div>
-                    <h4 className="font-heading font-bold text-base text-[var(--text-primary)]">
+                    <h4 className="font-heading font-bold text-base text-zinc-100">
                       Breakdown Reported
                     </h4>
-                    <p className="text-xs text-[var(--text-muted)] mt-1">
-                      Request submitted and awaiting dispatcher review.
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Request submitted and awaiting dispatcher triage.
                     </p>
                   </div>
 
@@ -865,25 +759,20 @@ export function FacilityAssets() {
                     Tracking ID: {reportSuccessId}
                   </div>
 
-                  <p className="text-[11px] text-[var(--text-muted)]">
-                    Local preview: Asset marked as Needs Service. Final technician assignment is confirmed by the dispatcher.
-                  </p>
-
                   <div className="pt-2">
                     <button
                       type="button"
                       onClick={closeReportModal}
-                      className="px-5 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all"
+                      className="px-5 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-zinc-950 hover:bg-[#34d399] transition-all"
                     >
                       Done
                     </button>
                   </div>
                 </div>
               ) : (
-                /* Report Breakdown Form */
                 <form onSubmit={handleReportSubmit} className="space-y-3.5 text-xs">
                   {reportError && (
-                    <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 flex items-center justify-between">
+                    <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-between">
                       <span>{reportError}</span>
                       <button
                         type="button"
@@ -895,50 +784,44 @@ export function FacilityAssets() {
                     </div>
                   )}
 
-                  {/* Compact Selected Asset Identification Row */}
-                  <div className="px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-                    <span className="font-semibold text-[var(--text-primary)]">{reportingAsset.name}</span>
-                    <span className="text-[var(--text-muted)]">•</span>
-                    <span className="font-mono text-[var(--text-muted)]">{reportingAsset.tagNumber}</span>
-                    <span className="text-[var(--text-muted)]">•</span>
-                    <span className="text-[var(--text-muted)]">{reportingAsset.location}</span>
+                  <div className="px-3 py-2 rounded-xl border border-white/5 bg-zinc-950 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                    <span className="font-semibold text-zinc-200">{reportingAsset.name}</span>
+                    <span className="text-zinc-600">•</span>
+                    <span className="font-mono text-zinc-400">{reportingAsset.tagNumber}</span>
                   </div>
 
-                  {/* 1. What's wrong? */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-semibold text-[var(--text-primary)]">
-                      What's wrong? <span className="text-red-500">*</span>
+                    <label className="block text-xs font-semibold text-zinc-300">
+                      What's wrong? <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Unusual noise, power trip, or sensor alarm"
+                      placeholder="e.g. Unusual noise, power trip, or sensor alarm…"
                       value={reportTitle}
                       onChange={(e) => setReportTitle(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-xs focus:ring-1 focus:ring-[#10b981] outline-none"
+                      className="w-full px-3 py-2 rounded-xl border border-white/10 bg-zinc-950 text-zinc-100 text-xs focus:ring-1 focus:ring-[#10b981] outline-none"
                     />
                   </div>
 
-                  {/* 2. Additional details (optional) */}
                   <div className="space-y-1">
                     <div className="flex items-center justify-between">
-                      <label className="block text-xs font-semibold text-[var(--text-primary)]">
+                      <label className="block text-xs font-semibold text-zinc-300">
                         Additional details
                       </label>
-                      <span className="text-[10px] text-[var(--text-muted)]">Optional</span>
+                      <span className="text-[10px] text-zinc-500">Optional</span>
                     </div>
                     <textarea
                       rows={2}
-                      placeholder="Describe symptoms, visible alarms, or operational impact..."
+                      placeholder="Describe symptoms, visible alarms, or operational impact…"
                       value={reportDescription}
                       onChange={(e) => setReportDescription(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-xs focus:ring-1 focus:ring-[#10b981] outline-none"
+                      className="w-full px-3 py-2 rounded-xl border border-white/10 bg-zinc-950 text-zinc-100 text-xs focus:ring-1 focus:ring-[#10b981] outline-none"
                     />
                   </div>
 
-                  {/* 3. Priority */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-semibold text-[var(--text-primary)]">
+                    <label className="block text-xs font-semibold text-zinc-300">
                       Priority
                     </label>
                     <div className="grid grid-cols-4 gap-1.5">
@@ -950,9 +833,11 @@ export function FacilityAssets() {
                           className={`py-1.5 px-2 rounded-lg border text-center font-bold text-[11px] transition-all ${
                             reportPriority === p
                               ? p === "URGENT"
-                                ? "bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/40 ring-1 ring-red-500"
+                                ? "bg-rose-500/20 text-rose-300 border-rose-500/40 ring-1 ring-rose-500"
+                                : p === "HIGH"
+                                ? "bg-[#b8287a]/20 text-[#f472b6] border-[#b8287a]/40 ring-1 ring-[#b8287a]"
                                 : "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/40 ring-1 ring-[#10b981]"
-                              : "border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                              : "border-white/5 bg-zinc-950 text-zinc-400 hover:text-zinc-200"
                           }`}
                         >
                           {p}
@@ -961,19 +846,18 @@ export function FacilityAssets() {
                     </div>
                   </div>
 
-                  {/* 4. Preferred technician (optional, only if relevant technicians are available) */}
                   {relevantTechnicians.length > 0 && (
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
-                        <label className="block text-xs font-semibold text-[var(--text-primary)]">
+                        <label className="block text-xs font-semibold text-zinc-300">
                           Preferred technician
                         </label>
-                        <span className="text-[10px] text-[var(--text-muted)]">Optional</span>
+                        <span className="text-[10px] text-zinc-500">Optional</span>
                       </div>
                       <select
                         value={reportPreferredTechId}
                         onChange={(e) => setReportPreferredTechId(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-xs focus:ring-1 focus:ring-[#10b981] outline-none"
+                        className="w-full px-3 py-2 rounded-xl border border-white/10 bg-zinc-950 text-zinc-200 text-xs focus:ring-1 focus:ring-[#10b981] outline-none"
                       >
                         <option value="">No preference</option>
                         {relevantTechnicians.map((t) => (
@@ -985,29 +869,23 @@ export function FacilityAssets() {
                     </div>
                   )}
 
-                  {/* Short Note */}
-                  <p className="text-[11px] text-[var(--text-muted)]">
-                    Technician assignment is confirmed by the dispatcher.
-                  </p>
-
-                  {/* Modal Actions */}
-                  <div className="flex justify-end gap-2 pt-2 border-t border-[var(--border)]">
+                  <div className="flex justify-end gap-2 pt-2 border-t border-white/5">
                     <button
                       type="button"
                       onClick={closeReportModal}
                       disabled={isSubmittingReport}
-                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all"
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold border border-white/10 bg-zinc-950 text-zinc-400 hover:text-zinc-200 transition-all"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmittingReport || (subscription.isExhausted && !reportAsQuotation)}
-                      className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                      className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#10b981] text-zinc-950 hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
                     >
                       <span>
                         {isSubmittingReport
-                          ? "Submitting..."
+                          ? "Submitting…"
                           : subscription.isExhausted && !reportAsQuotation
                           ? "Allowance Exhausted"
                           : "Submit Report"}

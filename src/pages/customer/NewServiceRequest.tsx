@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { useAuth } from "../../context/AuthContext";
@@ -8,8 +8,10 @@ import {
   PriorityLevel,
   CoveragePlanId,
   APPROVED_COVERAGE_PLANS,
+  ServiceRequest,
 } from "../../types";
 import { customerService } from "../../services/customerService";
+import { operationalStore } from "../../services/operationalStore";
 import {
   AlertTriangleIcon,
   CheckCircleIcon,
@@ -17,6 +19,7 @@ import {
   WrenchIcon,
   ArrowRightIcon,
   ShieldCheckIcon,
+  LockIcon,
 } from "../../components/Icons";
 
 const CUSTOMER_ASSETS = [
@@ -34,9 +37,49 @@ export function NewServiceRequest() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // Active requests state for Single Active Request Rule
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [isLoadingRequests, setIsLoadingRequests] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchRequests = () => {
+      customerService
+        .getRequests(user?.id)
+        .then((res) => {
+          if (mounted) {
+            setRequests(res.data);
+            setIsLoadingRequests(false);
+          }
+        })
+        .catch(() => {
+          if (mounted) setIsLoadingRequests(false);
+        });
+    };
+
+    fetchRequests();
+    const unsubscribe = operationalStore.subscribe(fetchRequests);
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, [user?.id]);
+
+  const workOrders = operationalStore.getWorkOrders();
+  const activeRequest = requests.find((r) => {
+    if (r.status === "CANCELLED" || r.status === "RESOLVED") return false;
+    if (r.status === "CONVERTED" || r.workOrderId) {
+      const wo = workOrders.find((w) => w.id === r.workOrderId || w.requestId === r.id);
+      return wo ? wo.status !== "COMPLETED" && wo.status !== "CANCELLED" : false;
+    }
+    return true;
+  });
+  const hasActiveRequest = Boolean(activeRequest);
+
   // Subscription Allowance state - automatically inherits customer's active plan
   const subscription = customerService.getSubscription(user?.id);
   const activePlan = subscription.planId;
+  const planInfo = activePlan ? APPROVED_COVERAGE_PLANS[activePlan] : null;
 
   // Form states
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory>("Electrical and power systems");
@@ -55,6 +98,11 @@ export function NewServiceRequest() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
+
+    if (hasActiveRequest) {
+      setErrorMessage("Cannot submit while an active service request is in progress.");
+      return;
+    }
 
     if (!subscription.hasActiveSubscription || !activePlan) {
       setErrorMessage(
@@ -122,28 +170,73 @@ export function NewServiceRequest() {
     }
   };
 
-  const planInfo = activePlan ? APPROVED_COVERAGE_PLANS[activePlan] : null;
+  const slaSummary =
+    activePlan === "247-priority"
+      ? "24/7 Priority · 20m Arrival SLA"
+      : activePlan === "247-standard"
+      ? "24/7 Standard · 40m Arrival SLA"
+      : activePlan === "8hr"
+      ? "Plan A · 8h Daily Window"
+      : `${subscription.planName} · Negotiated SLA`;
 
   return (
-    <Layout
-      title="New Service Request"
-      subtitle="Log a facility service request"
-    >
-      <div className="max-w-4xl mx-auto">
-        {submittedSuccess ? (
-          <div className="p-8 rounded-3xl border border-emerald-500/30 bg-emerald-500/10 text-center space-y-4 animate-fade-in">
-            <div className="w-16 h-16 rounded-2xl bg-[#10b981] text-[#06090e] font-extrabold text-2xl mx-auto flex items-center justify-center">
+    <Layout title="New Service Request">
+      <div className="max-w-4xl mx-auto pb-24">
+        {hasActiveRequest && activeRequest ? (
+          /* Focused Single Active Request Blocker Card */
+          <div className="p-8 rounded-xl border border-white/5 bg-zinc-900 shadow-lg text-center space-y-5">
+            <div className="w-14 h-14 rounded-xl bg-zinc-800/80 border border-white/10 text-zinc-400 mx-auto flex items-center justify-center">
+              <LockIcon size={24} className="text-zinc-400" />
+            </div>
+
+            <div className="space-y-1.5">
+              <h2 className="font-heading font-bold text-xl text-zinc-50 tracking-tight">
+                Active Service Request In Progress
+              </h2>
+              <p className="text-xs text-zinc-400 max-w-md mx-auto leading-relaxed">
+                To guarantee rapid technician dispatch and strict physical SLA compliance, each facility is limited to one active request at a time.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-zinc-950/80 border border-white/5 text-left text-xs space-y-2 max-w-md mx-auto">
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-bold text-[#10b981]">{activeRequest.id}</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  {activeRequest.status.replace(/_/g, " ")}
+                </span>
+              </div>
+              <div className="font-medium text-zinc-200 truncate">
+                {activeRequest.problemTitle}
+              </div>
+              <div className="text-[11px] text-zinc-400 truncate">
+                Asset: {activeRequest.assetName} · {activeRequest.category}
+              </div>
+            </div>
+
+            <div className="pt-2 flex items-center justify-center">
+              <Link
+                to="/customer"
+                className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-zinc-950 hover:bg-[#34d399] transition-all shadow-sm"
+              >
+                <span>View Active Request</span>
+                <ArrowRightIcon size={14} />
+              </Link>
+            </div>
+          </div>
+        ) : submittedSuccess ? (
+          <div className="p-8 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-center space-y-4 animate-fade-in">
+            <div className="w-16 h-16 rounded-2xl bg-[#10b981] text-zinc-950 font-extrabold text-2xl mx-auto flex items-center justify-center">
               ✓
             </div>
-            <h2 className="font-heading font-bold text-2xl text-[var(--text-primary)]">
+            <h2 className="font-heading font-bold text-2xl text-zinc-50">
               Service Request Logged Successfully
             </h2>
             <div className="inline-block px-4 py-1.5 rounded-full font-mono font-bold text-sm bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/30">
               Assigned Tracking ID: {createdRequestId || "SR-NEW"}
             </div>
-            <p className="text-sm text-[var(--text-muted)] max-w-md mx-auto">
+            <p className="text-sm text-zinc-400 max-w-md mx-auto">
               Routed to active dispatcher queue under{" "}
-              <strong className="text-[var(--text-primary)] font-semibold">
+              <strong className="text-zinc-100 font-semibold">
                 {planInfo ? planInfo.name : "Active Coverage"}
               </strong>.{" "}
               {planInfo?.isGuaranteedSla
@@ -151,16 +244,16 @@ export function NewServiceRequest() {
                 : "Scheduled under active facility coverage."}
             </p>
             <div className="pt-2 text-xs font-semibold text-[#10b981]">
-              Redirecting to request tracker...
+              Redirecting to request tracker…
             </div>
           </div>
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="p-6 sm:p-8 rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-8"
+            className="p-6 sm:p-8 rounded-xl border border-white/5 bg-zinc-900 shadow-sm space-y-7"
           >
             {errorMessage && (
-              <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 text-xs flex items-center justify-between">
+              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center justify-between">
                 <span>{errorMessage}</span>
                 <button
                   type="button"
@@ -172,14 +265,14 @@ export function NewServiceRequest() {
               </div>
             )}
 
-            {/* ── Subscription Service-Credit Policy Banner ─────────────── */}
+            {/* Subscription Service-Credit Policy Banner */}
             {subscription.needsConfiguration && (
-              <div className="p-4 rounded-2xl border border-slate-500/30 bg-slate-500/10 text-xs space-y-2">
-                <div className="flex items-start gap-2 text-slate-800 dark:text-slate-300 font-bold">
-                  <AlertTriangleIcon size={16} className="text-amber-500 shrink-0 mt-0.5" />
+              <div className="p-4 rounded-xl border border-zinc-700/60 bg-zinc-950/60 text-xs space-y-2">
+                <div className="flex items-start gap-2 text-zinc-200 font-bold">
+                  <AlertTriangleIcon size={16} className="text-[#b8287a] shrink-0 mt-0.5" />
                   <span>Negotiated Visit Allowance Awaiting Confirmation</span>
                 </div>
-                <p className="text-slate-700 dark:text-slate-300">
+                <p className="text-zinc-400">
                   Your commercial plan uses a negotiated visit allowance that is awaiting confirmation. Included usage cannot be calculated until your negotiated allowance is configured. Standard submissions are held, but you can proceed immediately by submitting an additional on-demand service quotation pack.
                 </p>
                 <div className="pt-1">
@@ -191,7 +284,7 @@ export function NewServiceRequest() {
                     <button
                       type="button"
                       onClick={() => setRequestAsQuotation(true)}
-                      className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-[#10b981] hover:bg-[#059669] text-[#06090e] transition-all shadow-sm"
+                      className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-[#10b981] hover:bg-[#059669] text-zinc-950 transition-all shadow-sm"
                     >
                       Request Additional Service Pack (Quotation Mode)
                     </button>
@@ -201,12 +294,12 @@ export function NewServiceRequest() {
             )}
 
             {subscription.isExhausted && !subscription.needsConfiguration && (
-              <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-xs space-y-2">
-                <div className="flex items-start gap-2 text-amber-800 dark:text-amber-300 font-bold">
-                  <AlertTriangleIcon size={16} className="text-amber-500 shrink-0 mt-0.5" />
+              <div className="p-4 rounded-xl border border-[#b8287a]/40 bg-[#b8287a]/10 text-xs space-y-2">
+                <div className="flex items-start gap-2 text-[#f472b6] font-bold">
+                  <AlertTriangleIcon size={16} className="text-[#b8287a] shrink-0 mt-0.5" />
                   <span>Monthly Service Visit Allowance Exhausted ({subscription.includedVisits} of {subscription.includedVisits} Used)</span>
                 </div>
-                <p className="text-slate-700 dark:text-slate-300">
+                <p className="text-zinc-300">
                   Standard included service requests are locked for the remainder of this cycle (resets {subscription.billingCycleResetDate}).
                   You can proceed by submitting an additional on-demand service quotation pack.
                 </p>
@@ -219,7 +312,7 @@ export function NewServiceRequest() {
                     <button
                       type="button"
                       onClick={() => setRequestAsQuotation(true)}
-                      className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-amber-600 hover:bg-amber-500 text-white transition-all shadow-sm"
+                      className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-[#b8287a] hover:bg-[#991b65] text-white transition-all shadow-sm"
                     >
                       Request Additional Service Pack (Quotation Mode)
                     </button>
@@ -228,10 +321,10 @@ export function NewServiceRequest() {
               </div>
             )}
 
-            {/* ── 1. Canonical Service Trade Selection ─────────────────── */}
-            <div className="space-y-3">
-              <label className="block text-xs font-semibold text-[var(--text-muted)]">
-                1. Service Trade <span className="text-red-500">*</span>
+            {/* 1. Canonical Service Trade Selection */}
+            <div className="space-y-2.5">
+              <label className="block text-xs font-semibold text-zinc-400">
+                1. Service Trade <span className="text-rose-500">*</span>
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 {CANONICAL_SERVICE_CATEGORIES.map((cat) => {
@@ -243,8 +336,8 @@ export function NewServiceRequest() {
                       onClick={() => setSelectedCategory(cat)}
                       className={`p-3.5 rounded-xl border text-left text-xs font-medium transition-all flex items-start gap-2.5 ${
                         isSelected
-                          ? "border-[#10b981] bg-[#10b981]/10 text-[var(--text-primary)] shadow-xs font-semibold ring-1 ring-[#10b981]"
-                          : "border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:border-[var(--border-strong)]"
+                          ? "border-[#10b981] bg-[#10b981]/10 text-zinc-50 shadow-xs font-semibold ring-1 ring-[#10b981]"
+                          : "border-white/5 bg-zinc-950 text-zinc-400 hover:border-white/10 hover:text-zinc-200"
                       }`}
                     >
                       <WrenchIcon size={14} className="text-[#10b981] shrink-0 mt-0.5" />
@@ -255,148 +348,82 @@ export function NewServiceRequest() {
               </div>
             </div>
 
-            {/* ── 2. Facility Asset Selector ────────────────────────────── */}
+            {/* 2. Facility Asset Selector */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-[var(--text-muted)]">
-                2. Facility Asset <span className="text-red-500">*</span>
+              <label htmlFor="asset-select" className="block text-xs font-semibold text-zinc-400">
+                2. Facility Asset <span className="text-rose-500">*</span>
               </label>
               <select
+                id="asset-select"
                 value={selectedAsset}
                 onChange={(e) => setSelectedAsset(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-sm focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none"
+                className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-zinc-950 text-zinc-100 text-xs sm:text-sm focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none transition-colors"
               >
                 {CUSTOMER_ASSETS.map((asset) => (
-                  <option key={asset} value={asset}>
+                  <option key={asset} value={asset} className="bg-zinc-900 text-zinc-100">
                     {asset}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* ── 3. Problem Summary & Description ──────────────────────── */}
+            {/* 3. Problem Summary & Description */}
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-[var(--text-muted)]">
-                  3. Problem Summary <span className="text-red-500">*</span>
+                <label htmlFor="problem-title" className="block text-xs font-semibold text-zinc-400">
+                  3. Problem Summary <span className="text-rose-500">*</span>
                 </label>
                 <input
+                  id="problem-title"
                   type="text"
                   required
-                  placeholder="e.g. Overheating Transformer & Severe Voltage Fluctuation"
+                  placeholder="e.g. Overheating Transformer & Severe Voltage Fluctuation…"
                   value={problemTitle}
                   onChange={(e) => setProblemTitle(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-sm focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-zinc-950 text-zinc-100 text-xs sm:text-sm placeholder-zinc-600 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none transition-colors"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-[var(--text-muted)]">
-                  Description & Symptoms <span className="text-red-500">*</span>
+                <label htmlFor="problem-desc" className="block text-xs font-semibold text-zinc-400">
+                  Description & Symptoms <span className="text-rose-500">*</span>
                 </label>
                 <textarea
+                  id="problem-desc"
                   rows={4}
                   required
-                  placeholder="Describe visible alarms, temperatures, tripping breakers, or operational impact on your facility..."
+                  placeholder="Describe visible alarms, temperatures, tripping breakers, or operational impact on your facility…"
                   value={problemDescription}
                   onChange={(e) => setProblemDescription(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-sm focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none leading-relaxed"
+                  className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-zinc-950 text-zinc-100 text-xs sm:text-sm placeholder-zinc-600 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none leading-relaxed transition-colors"
                 />
               </div>
             </div>
 
-            {/* ── 4. Active Subscription Coverage (Inherited Automatically) ── */}
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-[var(--text-muted)]">
-                4. Facility Coverage Plan
+            {/* 4. Urgency Level (Operational Severity Subtitle Purged) */}
+            <div className="space-y-2.5">
+              <label className="block text-xs font-semibold text-zinc-400">
+                4. Urgency Level <span className="text-rose-500">*</span>
               </label>
-              {subscription.hasActiveSubscription && activePlan ? (
-                <div className="p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-                      <ShieldCheckIcon size={18} className="text-[#10b981]" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold font-heading text-[var(--text-primary)]">
-                          Active Coverage: {subscription.planName}
-                        </span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                          {activePlan === "247-priority"
-                            ? "20-minute arrival SLA"
-                            : activePlan === "247-standard"
-                            ? "40-minute arrival SLA"
-                            : activePlan === "8hr"
-                            ? "8-Hour daily window"
-                            : "Negotiated SLA"}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-[var(--text-muted)] mt-0.5">
-                        Guaranteed arrival window automatically inherited from your facility subscription.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="sm:text-right shrink-0">
-                    <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 block">
-                      {subscription.remainingVisits !== null
-                        ? `${subscription.remainingVisits} of ${subscription.includedVisits} visits remaining`
-                        : "Negotiated Allowance"}
-                    </span>
-                    <span className="text-[10px] text-[var(--text-muted)]">
-                      Resets {subscription.billingCycleResetDate}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <AlertTriangleIcon size={18} className="text-amber-500 shrink-0" />
-                    <div>
-                      <span className="text-xs font-bold text-amber-800 dark:text-amber-300 block">
-                        Subscription Required
-                      </span>
-                      <p className="text-[11px] text-amber-700/80 dark:text-amber-400/80 mt-0.5">
-                        An active commercial coverage plan is required to submit a service request.
-                      </p>
-                    </div>
-                  </div>
-                  <Link
-                    to="/#packages"
-                    className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shrink-0 self-start sm:self-auto shadow-sm"
-                  >
-                    Choose a Plan
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* ── 5. Urgency Level ──────────────────────────────────────── */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="block text-xs font-bold text-[var(--text-muted)]">
-                  5. Urgency Level <span className="text-red-500">*</span>
-                </label>
-                <span className="text-[11px] text-[var(--text-muted)]">Operational severity</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
                 {[
-                  { level: "URGENT", label: "Urgent", sub: "Critical outage / halted", color: "border-red-500 bg-red-500/10 text-red-700 dark:text-red-300" },
-                  { level: "HIGH", label: "High", sub: "Impending shutdown risk", color: "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300" },
-                  { level: "MEDIUM", label: "Medium", sub: "Operational disruption", color: "border-blue-500 bg-blue-500/10 text-blue-700 dark:text-blue-300" },
-                  { level: "LOW", label: "Low", sub: "Routine check / non-urgent", color: "border-slate-500 bg-slate-500/10 text-slate-700 dark:text-slate-300" },
+                  { level: "URGENT", label: "Urgent", sub: "Critical outage / halted", color: "border-rose-500/40 bg-rose-500/10 text-rose-300 ring-1 ring-rose-500" },
+                  { level: "HIGH", label: "High", sub: "Impending shutdown risk", color: "border-[#b8287a]/40 bg-[#b8287a]/10 text-[#f472b6] ring-1 ring-[#b8287a]" },
+                  { level: "MEDIUM", label: "Medium", sub: "Operational disruption", color: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300 ring-1 ring-cyan-500" },
+                  { level: "LOW", label: "Low", sub: "Routine check / non-urgent", color: "border-zinc-700 bg-zinc-800/40 text-zinc-300 ring-1 ring-zinc-500" },
                 ].map(({ level, label, sub, color }) => {
                   const isChecked = priority === level;
                   return (
                     <label
                       key={level}
-                      className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
+                      className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
                         isChecked
-                          ? `${color} ring-1 ring-current font-bold shadow-sm`
-                          : "border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)]"
+                          ? `${color} font-bold shadow-sm`
+                          : "border-white/5 bg-zinc-950 text-zinc-400 hover:border-white/10 hover:text-zinc-300"
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-bold">{label}</span>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs font-bold">{label}</span>
                         <input
                           type="radio"
                           name="priority"
@@ -413,58 +440,67 @@ export function NewServiceRequest() {
               </div>
             </div>
 
-            {/* ── 6. Preferred Timing ───────────────────────────────────── */}
+            {/* 5. Preferred Timing */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-[var(--text-muted)]">
+                <label htmlFor="pref-date" className="block text-xs font-semibold text-zinc-400">
                   Preferred Date
                 </label>
                 <input
+                  id="pref-date"
                   type="date"
                   value={preferredDate}
                   onChange={(e) => setPreferredDate(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-sm focus:border-[#10b981] outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-zinc-950 text-zinc-100 text-xs sm:text-sm focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none transition-colors"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-[var(--text-muted)]">
+                <label htmlFor="pref-time" className="block text-xs font-semibold text-zinc-400">
                   Preferred Time Window
                 </label>
                 <input
+                  id="pref-time"
                   type="text"
                   value={preferredTime}
                   onChange={(e) => setPreferredTime(e.target.value)}
-                  placeholder="Immediate / ASAP or Specific Shift"
-                  className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] text-sm focus:border-[#10b981] outline-none"
+                  placeholder="Immediate / ASAP or Specific Shift…"
+                  className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-zinc-950 text-zinc-100 text-xs sm:text-sm placeholder-zinc-600 focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none transition-colors"
                 />
               </div>
             </div>
 
-            {/* ── Form Actions ─────────────────────────────────────────── */}
-            <div className="pt-4 border-t border-[var(--border)] flex items-center justify-end gap-3">
-              <Link
-                to="/customer"
-                className="px-5 py-2.5 rounded-xl text-xs font-semibold border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
-              >
-                Cancel
-              </Link>
-              <button
-                type="submit"
-                disabled={isSubmitting || ((subscription.isExhausted || subscription.needsConfiguration) && !requestAsQuotation)}
-                className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
-              >
-                <span>
-                  {isSubmitting
-                    ? "Dispatching..."
-                    : (subscription.isExhausted || subscription.needsConfiguration) && !requestAsQuotation
-                    ? (subscription.needsConfiguration ? "Allowance Unconfigured" : "Allowance Exhausted")
-                    : requestAsQuotation
-                    ? "Submit Quotation Request"
-                    : "Submit Service Request"}
-                </span>
-                <ArrowRightIcon size={14} />
-              </button>
+            {/* Form Actions: Compact 1-line Plan SLA Summary + Submit */}
+            <div className="pt-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <ShieldCheckIcon size={15} className="text-[#10b981] shrink-0" />
+                <span className="font-medium text-zinc-300">{slaSummary}</span>
+              </div>
+
+              <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+                <Link
+                  to="/customer"
+                  className="px-4 py-2.5 rounded-xl text-xs font-semibold border border-white/10 bg-zinc-950 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-all"
+                >
+                  Cancel
+                </Link>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || ((subscription.isExhausted || subscription.needsConfiguration) && !requestAsQuotation)}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#10b981] text-zinc-950 hover:bg-[#34d399] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <span>
+                    {isSubmitting
+                      ? "Dispatching…"
+                      : (subscription.isExhausted || subscription.needsConfiguration) && !requestAsQuotation
+                      ? (subscription.needsConfiguration ? "Allowance Unconfigured" : "Allowance Exhausted")
+                      : requestAsQuotation
+                      ? "Submit Quotation Request"
+                      : "Submit Service Request"}
+                  </span>
+                  <ArrowRightIcon size={14} />
+                </button>
+              </div>
             </div>
           </form>
         )}
