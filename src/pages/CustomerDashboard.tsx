@@ -8,7 +8,6 @@ import {
   ServiceCategory,
   CoveragePlanId,
   CANONICAL_SERVICE_CATEGORIES,
-  getCoveragePlanSlaLabel,
   WorkOrderCompletionReport,
   CustomerPurchase,
 } from "../types";
@@ -24,14 +23,12 @@ import { CustomerSupportModal } from "../components/CustomerSupportModal";
 import { notificationService } from "../services/notificationService";
 import {
   ClockIcon,
-  AlertTriangleIcon,
   CheckCircleIcon,
   ArrowRightIcon,
   XIcon,
   SearchIcon,
   RefreshCwIcon,
   ShieldCheckIcon,
-  EyeIcon,
   StarIcon,
   SendIcon,
   WrenchIcon,
@@ -377,35 +374,35 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
     }
   };
 
-  // High-Contrast Status Badges: VoltOps Emerald & Berry Plum Pills (NO YELLOW)
+  // High-Contrast Status Badges: VoltOps Commercial Field-Service Standards (NO YELLOW)
   const renderStatusBadge = (status: CustomerViewRequest["displayStatus"], isSelected: boolean = false) => {
     switch (status) {
       case "COMPLETED":
         return (
           <span
-            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              isSelected ? "bg-black text-[#10b981]" : "bg-[#b8287a] text-white shadow-xs"
+            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              isSelected ? "bg-zinc-950 text-[#10b981]" : "bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30"
             }`}
           >
-            DELIVERED
+            COMPLETED
           </span>
         );
       case "TRAVELLING":
         return (
           <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              isSelected ? "bg-black text-[#10b981]" : "bg-[#b8287a] text-white shadow-xs"
+            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              isSelected ? "bg-zinc-950 text-[#10b981]" : "bg-sky-500/15 text-sky-400 border border-sky-500/30"
             }`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping inline-block" />
-            ON THE WAY
+            <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping inline-block" />
+            EN ROUTE
           </span>
         );
       case "ON_SITE":
         return (
           <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              isSelected ? "bg-black text-[#10b981]" : "bg-[#b8287a] text-white"
+            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              isSelected ? "bg-zinc-950 text-[#10b981]" : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
             }`}
           >
             ON SITE
@@ -414,8 +411,8 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
       case "WORK_COMPLETED_AWAITING_CONFIRMATION":
         return (
           <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              isSelected ? "bg-black text-[#10b981]" : "bg-[#10b981] text-zinc-950 font-extrabold"
+            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              isSelected ? "bg-zinc-950 text-[#10b981]" : "bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/30 font-extrabold"
             }`}
           >
             SIGN-OFF
@@ -425,8 +422,8 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
       case "REVIEWING":
         return (
           <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              isSelected ? "bg-black text-[#10b981]" : "bg-[#10b981] text-zinc-950 font-extrabold"
+            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              isSelected ? "bg-zinc-950 text-[#10b981]" : "bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-bold"
             }`}
           >
             ASSIGNED
@@ -436,11 +433,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
       default:
         return (
           <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              isSelected ? "bg-black/40 text-black font-extrabold" : "bg-[#10b981] text-zinc-950 font-extrabold"
+            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              isSelected ? "bg-zinc-950 text-[#06b6d4]" : "bg-[#06b6d4]/15 text-[#06b6d4] border border-[#06b6d4]/30 font-bold"
             }`}
           >
-            RECEIVED
+            LOGGED
           </span>
         );
     }
@@ -474,10 +471,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
   const activeRequestObj = selectedRequest || activeRequests[0] || requests[0];
   const activeStep = activeRequestObj ? getTimelineStepIndex(activeRequestObj.displayStatus) : 0;
   const timelineSteps = [
-    { label: "1. Logged", sub: "Ticket Created" },
-    { label: "2. Triaged", sub: "Dispatcher Assigned" },
-    { label: "3. En Route", sub: "Specialist In Transit" },
-    { label: "4. On Site", sub: "Facility Arrival" },
+    { label: "1. LOGGED", sub: "Ticket Created" },
+    { label: "2. TRIAGED", sub: "Dispatcher Assigned" },
+    { label: "3. EN ROUTE", sub: "Specialist In Transit" },
+    { label: "4. ON SITE", sub: "Facility Arrival" },
   ];
 
   return (
@@ -490,14 +487,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             type="button"
             onClick={loadCustomerData}
             disabled={isLoading}
-            className="p-2.5 rounded-2xl border-0 bg-[#1c1d22] text-zinc-300 hover:text-white hover:bg-[#25262c] transition-all shadow-sm"
+            className="p-2.5 rounded-xl border border-white/5 bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all shadow-xs"
             title="Refresh active status"
           >
             <RefreshCwIcon size={15} className={isLoading ? "animate-spin text-[#10b981]" : ""} />
           </button>
           <Link
             to="/customer/new-request"
-            className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-zinc-950 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 active:scale-[0.98]"
+            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-zinc-950 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 active:scale-[0.98]"
           >
             <span className="font-extrabold text-sm">+</span>
             <span>New Request</span>
@@ -509,9 +506,9 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         {/* ── 1. Top Truthful Operational KPI Cards ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Total Requests (real count) */}
-          <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-3 shadow-md hover:-translate-y-0.5 transition-all">
+          <div className="bg-zinc-900 rounded-xl p-5 space-y-3 border border-white/5 shadow-md hover:-translate-y-0.5 transition-all">
             <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-medium">
-              <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
                 <WrenchIcon size={16} />
               </div>
               <span className="truncate">Total Requests</span>
@@ -522,9 +519,9 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
 
           {/* Card 2: Active Incidents (real count) */}
-          <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-3 shadow-md hover:-translate-y-0.5 transition-all">
+          <div className="bg-zinc-900 rounded-xl p-5 space-y-3 border border-white/5 shadow-md hover:-translate-y-0.5 transition-all">
             <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-medium">
-              <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
                 <ShieldCheckIcon size={16} />
               </div>
               <span className="truncate">Active Incidents</span>
@@ -535,9 +532,9 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
 
           {/* Card 3: Physical Arrival SLA (real plan target) */}
-          <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-3 shadow-md hover:-translate-y-0.5 transition-all">
+          <div className="bg-zinc-900 rounded-xl p-5 space-y-3 border border-white/5 shadow-md hover:-translate-y-0.5 transition-all">
             <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-medium">
-              <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
                 <ClockIcon size={16} />
               </div>
               <span className="truncate">Physical Arrival SLA</span>
@@ -557,17 +554,17 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
 
           {/* Card 4: Service Visit Credits (real subscription allowance with progress bar) */}
-          <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-3 shadow-md hover:-translate-y-0.5 transition-all">
+          <div className="bg-zinc-900 rounded-xl p-5 space-y-3 border border-white/5 shadow-md hover:-translate-y-0.5 transition-all">
             <div className="flex items-center gap-2.5 text-zinc-400 text-xs font-medium">
-              <div className="w-8 h-8 rounded-xl bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#10b981]/15 text-[#10b981] flex items-center justify-center">
                 <RadioIcon size={16} />
               </div>
               <span className="truncate">Service Visit Credits</span>
             </div>
             <div className="space-y-2">
-              <div className="text-2xl font-extrabold text-white tracking-tight">
-                {subscription.remainingVisits !== null ? subscription.remainingVisits : 27}{" "}
-                <span className="text-sm font-semibold text-zinc-400">
+              <div className="text-2xl font-extrabold text-white tracking-tight flex items-baseline gap-1.5">
+                <span>{subscription.remainingVisits !== null ? subscription.remainingVisits : 27}</span>
+                <span className="text-xs font-semibold text-zinc-400">
                   of {subscription.includedVisits !== null ? subscription.includedVisits : 30} left
                 </span>
               </div>
@@ -592,11 +589,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </div>
           </div>
         </div>
-        </div>
 
         {/* ── Actionable Alerts (When Genuinely Required) ── */}
         {pendingFeedbackRequest && (
-          <div className="rounded-2xl border-0 bg-[#b8287a]/20 px-5 py-3.5 text-xs flex items-center justify-between gap-3 text-white shadow-md animate-fade-in">
+          <div className="rounded-xl border border-white/5 bg-[#b8287a]/20 px-5 py-3.5 text-xs flex items-center justify-between gap-3 text-white shadow-md animate-fade-in">
             <div className="flex items-center gap-3 min-w-0">
               <StarIcon size={18} className="text-[#10b981] shrink-0" fill="currentColor" />
               <span className="truncate">
@@ -626,7 +622,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* ── Left Column: Service Requests List (35% width) ── */}
           <div className="w-full lg:w-[35%] space-y-4 shrink-0">
-            <div className="bg-[#1c1d22] rounded-3xl p-5 space-y-4 shadow-md">
+            <div className="bg-zinc-900 rounded-xl p-5 space-y-4 border border-white/5 shadow-md">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-extrabold text-white tracking-tight">
                   Service Requests
@@ -645,121 +641,121 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 </button>
               </div>
 
-                {/* Search Bar with Filter Icon */}
-                <div className="relative">
-                  <SearchIcon size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-10 py-3 rounded-2xl bg-[#26272e] text-white text-xs placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]/40 transition-all"
-                  />
-                  {searchQuery ? (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
-                    >
-                      <XIcon size={13} />
-                    </button>
-                  ) : (
-                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="4" y1="21" x2="4" y2="14" />
-                        <line x1="4" y1="10" x2="4" y2="3" />
-                        <line x1="12" y1="21" x2="12" y2="12" />
-                        <line x1="12" y1="8" x2="12" y2="3" />
-                        <line x1="20" y1="21" x2="20" y2="16" />
-                        <line x1="20" y1="12" x2="20" y2="3" />
-                        <line x1="1" y1="14" x2="7" y2="14" />
-                        <line x1="9" y1="8" x2="15" y2="8" />
-                        <line x1="17" y1="16" x2="23" y2="16" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
+              {/* Search Bar with Filter Icon */}
+              <div className="relative">
+                <SearchIcon size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <input
+                  type="text"
+                  placeholder="Search requests..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-9 py-2.5 rounded-lg bg-zinc-800 text-white text-xs placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#10b981] border border-white/5 transition-all"
+                />
+                {searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
+                  >
+                    <XIcon size={13} />
+                  </button>
+                ) : (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="4" y1="21" x2="4" y2="14" />
+                      <line x1="4" y1="10" x2="4" y2="3" />
+                      <line x1="12" y1="21" x2="12" y2="12" />
+                      <line x1="12" y1="8" x2="12" y2="3" />
+                      <line x1="20" y1="21" x2="20" y2="16" />
+                      <line x1="20" y1="12" x2="20" y2="3" />
+                      <line x1="1" y1="14" x2="7" y2="14" />
+                      <line x1="9" y1="8" x2="15" y2="8" />
+                      <line x1="17" y1="16" x2="23" y2="16" />
+                    </svg>
+                  </div>
+                )}
+              </div>
 
-                {/* Request Cards List */}
-                <div className="space-y-3 pt-1">
-                  {isLoading ? (
-                    <div className="p-8 text-center text-xs text-zinc-400">
-                      <RefreshCwIcon size={16} className="inline animate-spin mr-2 text-[#10b981]" />
-                      Loading requests...
-                    </div>
-                  ) : filteredRequests.length === 0 ? (
-                    <div className="p-8 text-center text-xs text-zinc-500">
-                      No requests match filter.
-                    </div>
-                  ) : (
-                    filteredRequests.map((req) => {
-                      const isSelected = activeRequestObj?.id === req.id;
-                      return (
+              {/* Request Cards List */}
+              <div className="space-y-2.5 pt-1">
+                {isLoading ? (
+                  <div className="p-8 text-center text-xs text-zinc-400">
+                    <RefreshCwIcon size={16} className="inline animate-spin mr-2 text-[#10b981]" />
+                    Loading requests...
+                  </div>
+                ) : filteredRequests.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-zinc-500">
+                    No requests match filter.
+                  </div>
+                ) : (
+                  filteredRequests.map((req) => {
+                    const isSelected = activeRequestObj?.id === req.id;
+                    return (
+                      <div
+                        key={req.id}
+                        onClick={() => setSelectedRequest(req)}
+                        className={`rounded-xl p-4 cursor-pointer transition-all duration-200 select-none border ${
+                          isSelected
+                            ? "bg-[#10b981] text-zinc-950 border-[#10b981] shadow-lg shadow-emerald-500/20 translate-x-1"
+                            : "bg-zinc-800/60 hover:bg-zinc-800 text-white border-white/5 shadow-xs"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                          <span
+                            className={`font-mono text-xs font-extrabold tracking-wide ${
+                              isSelected ? "text-zinc-950" : "text-white"
+                            }`}
+                          >
+                            Request {req.id}
+                          </span>
+                          {renderStatusBadge(req.displayStatus, isSelected)}
+                        </div>
+
                         <div
-                          key={req.id}
-                          onClick={() => setSelectedRequest(req)}
-                          className={`rounded-2xl p-4.5 cursor-pointer transition-all duration-200 select-none ${
-                            isSelected
-                              ? "bg-[#10b981] text-zinc-950 shadow-xl shadow-emerald-500/20 translate-x-1"
-                              : "bg-[#25262c] hover:bg-[#2d2e36] text-white shadow-sm"
+                          className={`text-xs font-bold truncate mt-1 ${
+                            isSelected ? "text-zinc-900" : "text-zinc-200"
                           }`}
                         >
-                          <div className="flex items-center justify-between gap-2 mb-1.5">
-                            <span
-                              className={`font-mono text-xs font-extrabold tracking-wide ${
-                                isSelected ? "text-zinc-950" : "text-white"
-                              }`}
-                            >
-                              Order ID Nº{req.id}
-                            </span>
-                            {renderStatusBadge(req.displayStatus, isSelected)}
-                          </div>
-
-                          <div
-                            className={`text-xs font-bold truncate mt-1 ${
-                              isSelected ? "text-zinc-900" : "text-zinc-200"
-                            }`}
-                          >
-                            {req.problem}
-                          </div>
-
-                          <div
-                            className={`text-[11px] truncate mt-0.5 ${
-                              isSelected ? "text-zinc-800" : "text-zinc-400"
-                            }`}
-                          >
-                            {req.asset} · {req.category}
-                          </div>
-
-                          <div
-                            className={`text-[10px] mt-2 font-mono flex items-center justify-between ${
-                              isSelected ? "text-zinc-800/90" : "text-zinc-500"
-                            }`}
-                          >
-                            <span>{req.submittedDate}</span>
-                            <span className="font-semibold">{req.arrivalSlaWindow}</span>
-                          </div>
+                          {req.problem}
                         </div>
-                      );
-                    })
-                  )}
-                </div>
+
+                        <div
+                          className={`text-[11px] truncate mt-0.5 ${
+                            isSelected ? "text-zinc-800" : "text-zinc-400"
+                          }`}
+                        >
+                          {req.asset} · {req.category}
+                        </div>
+
+                        <div
+                          className={`text-[10px] mt-2 font-mono flex items-center justify-between ${
+                            isSelected ? "text-zinc-800/90" : "text-zinc-500"
+                          }`}
+                        >
+                          <span>{req.submittedDate}</span>
+                          <span className="font-semibold">{req.arrivalSlaWindow}</span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
+          </div>
 
           {/* ── Right Column: Operational Work Order Workspace (65% width) ── */}
           <div className="w-full lg:w-[65%] space-y-4 min-w-0">
             {activeRequestObj ? (
               <>
-                {/* ── Detail Card 1: Order ID, Route & Connected Horizontal Timeline ── */}
-                <div className="bg-[#1c1d22] rounded-3xl p-6 space-y-5 shadow-md">
+                {/* ── Detail Card 1: Request ID, Facility & 4-Step Lifecycle Timeline ── */}
+                <div className="bg-zinc-900 rounded-xl p-5 space-y-5 border border-white/5 shadow-md">
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-                        Operational Work Order
+                        Operational Service Request
                       </span>
                       <h3 className="text-base font-extrabold text-white mt-0.5">
-                        Order ID Nº{activeRequestObj.workOrderId || activeRequestObj.id}
+                        Request {activeRequestObj.workOrderId || activeRequestObj.id}
                       </h3>
                     </div>
 
@@ -770,7 +766,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           setSupportDefaultId(activeRequestObj.workOrderId || activeRequestObj.id);
                           setSupportModalOpen(true);
                         }}
-                        className="w-8 h-8 rounded-xl bg-[#292a30] text-[#10b981] hover:bg-[#34353d] flex items-center justify-center transition-all"
+                        className="w-8 h-8 rounded-lg bg-zinc-800 text-[#10b981] hover:bg-zinc-700 flex items-center justify-center transition-all border border-white/5"
                         title="Contact Support or Report Issue"
                       >
                         <SendIcon size={13} />
@@ -797,198 +793,198 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     </div>
                   </div>
 
-                  {/* Connected Horizontal Timeline Node Stepper: 1. Logged -> 2. Triaged -> 3. En Route -> 4. On Site */}
+                  {/* Connected Horizontal Timeline Node Stepper: 1. LOGGED -> 2. TRIAGED -> 3. EN ROUTE -> 4. ON SITE */}
                   <div className="relative pt-3 pb-2">
-                      {/* Background Bar */}
-                      <div className="absolute top-5 left-4 right-4 h-1 bg-[#2c2d35] -translate-y-1/2 z-0 rounded-full" />
-                      {/* Active Emerald Line */}
-                      <div
-                        className="absolute top-5 left-4 h-1 bg-[#10b981] -translate-y-1/2 z-0 rounded-full transition-all duration-500"
-                        style={{
-                          width: `${Math.min(94, (activeStep / (timelineSteps.length - 1)) * 92)}%`,
-                        }}
-                      />
+                    {/* Background Bar */}
+                    <div className="absolute top-5 left-4 right-4 h-1 bg-zinc-800 -translate-y-1/2 z-0 rounded-full" />
+                    {/* Active Emerald Line */}
+                    <div
+                      className="absolute top-5 left-4 h-1 bg-[#10b981] -translate-y-1/2 z-0 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(94, (activeStep / (timelineSteps.length - 1)) * 92)}%`,
+                      }}
+                    />
 
-                      {/* Nodes */}
-                      <div className="relative z-10 flex justify-between">
-                        {timelineSteps.map((step, idx) => {
-                          const isCompleted = idx < activeStep;
-                          const isCurrent = idx === activeStep;
-                          return (
-                            <div key={step.label} className="flex flex-col items-center text-center">
-                              <div
-                                className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-extrabold transition-all ${
-                                  isCompleted
-                                    ? "bg-[#10b981] text-zinc-950 shadow-md shadow-emerald-500/20"
-                                    : isCurrent
-                                    ? "bg-[#1c1d22] text-[#10b981] ring-4 ring-[#10b981] shadow-lg shadow-emerald-500/30 animate-pulse"
-                                    : "bg-[#2c2d35] text-zinc-600"
-                                }`}
-                              >
-                                {isCompleted ? "✓" : idx + 1}
-                              </div>
-                              <span
-                                className={`mt-2 text-[10px] font-bold uppercase tracking-wider ${
-                                  isCurrent
-                                    ? "text-[#10b981]"
-                                    : isCompleted
-                                    ? "text-white"
-                                    : "text-zinc-500"
-                                }`}
-                              >
-                                {step.label}
-                              </span>
-                              <span className="text-[9px] text-zinc-400 mt-0.5">
-                                {step.sub}
-                              </span>
+                    {/* Nodes */}
+                    <div className="relative z-10 flex justify-between">
+                      {timelineSteps.map((step, idx) => {
+                        const isCompleted = idx < activeStep;
+                        const isCurrent = idx === activeStep;
+                        return (
+                          <div key={step.label} className="flex flex-col items-center text-center">
+                            <div
+                              className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-extrabold transition-all ${
+                                isCompleted
+                                  ? "bg-[#10b981] text-zinc-950 shadow-md shadow-emerald-500/20"
+                                  : isCurrent
+                                  ? "bg-zinc-900 text-[#10b981] ring-4 ring-[#10b981] shadow-lg shadow-emerald-500/30 animate-pulse"
+                                  : "bg-zinc-800 text-zinc-500"
+                              }`}
+                            >
+                              {isCompleted ? "✓" : idx + 1}
                             </div>
-                          );
-                        })}
-                      </div>
+                            <span
+                              className={`mt-2 text-[10px] font-bold uppercase tracking-wider ${
+                                isCurrent
+                                  ? "text-[#10b981]"
+                                  : isCompleted
+                                  ? "text-white"
+                                  : "text-zinc-500"
+                              }`}
+                            >
+                              {step.label}
+                            </span>
+                            <span className="text-[9px] text-zinc-400 mt-0.5">
+                              {step.sub}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-
-                  {/* ── Detail Card 2: Assigned Certified Specialist (Driver/Courier Style) ── */}
-                  <div className="bg-[#1c1d22] rounded-3xl p-5 flex items-center justify-between shadow-md">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-12 h-12 rounded-2xl bg-[#292a30] border-2 border-[#10b981] flex items-center justify-center font-bold text-sm text-[#10b981] shadow-md">
-                        {activeRequestObj.assignedTech
-                          ? activeRequestObj.assignedTech
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")
-                              .slice(0, 2)
-                          : "TA"}
-                      </div>
-                      <div>
-                        <div className="text-sm font-extrabold text-white">
-                          {activeRequestObj.assignedTech || "Tanvir Ahmed"}
-                        </div>
-                        <div className="text-xs text-zinc-400 mt-0.5">
-                          Lead Field Engineer · Certified Electrical & HVAC
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSupportDefaultId(activeRequestObj.workOrderId || activeRequestObj.id);
-                          setSupportModalOpen(true);
-                        }}
-                        className="p-3 rounded-2xl bg-[#292a30] text-[#10b981] hover:bg-[#34353d] transition-all shadow-sm"
-                        title="Contact Dispatcher / Technician"
-                      >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSupportDefaultId(activeRequestObj.workOrderId || activeRequestObj.id);
-                          setSupportModalOpen(true);
-                        }}
-                        className="p-3 rounded-2xl bg-[#292a30] text-[#10b981] hover:bg-[#34353d] transition-all shadow-sm"
-                        title="Send Message"
-                      >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* ── Detail Card 3: Order Details (Item / Service Price Breakdown) ── */}
-                  <div className="bg-[#1c1d22] rounded-3xl p-6 space-y-4 shadow-md">
-                    <h4 className="text-sm font-extrabold text-white">Order Details</h4>
-
-                    <div className="space-y-3 text-xs">
-                      <div className="flex items-start justify-between gap-4 pb-3 border-b border-white/[0.06]">
-                        <div>
-                          <div className="font-bold text-white text-xs">{activeRequestObj.problem}</div>
-                          <div className="text-zinc-400 text-[11px] mt-0.5">{activeRequestObj.description || "Routine breakdown maintenance and electrical diagnostics."}</div>
-                        </div>
-                        <div className="font-extrabold text-white text-sm shrink-0">Included</div>
-                      </div>
-
-                      <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-                        <div className="text-zinc-400">Trade Specialty</div>
-                        <div className="font-bold text-white">{activeRequestObj.category}</div>
-                      </div>
-
-                      <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-                        <div className="text-zinc-400">Priority Tier</div>
-                        <div>{renderPriorityBadge(activeRequestObj.priority)}</div>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-1">
-                        <div className="font-bold text-white">Visit Allowance Credit</div>
-                        <div className="font-extrabold text-[#10b981] text-sm">
-                          1 Visit Deducted <span className="text-zinc-400 font-normal">({subscription.remainingVisits !== null ? subscription.remainingVisits : 27} left)</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* ── Detail Card 4: Shipment / Facility Location ── */}
-                  <div className="bg-[#1c1d22] rounded-3xl p-5 flex items-center justify-between shadow-md">
-                    <div>
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                        Facility Location
-                      </div>
-                      <div className="font-bold text-white text-xs mt-0.5">
-                        {activeRequestObj.asset}
-                      </div>
-                      <div className="text-[11px] text-zinc-400">
-                        Savar Commercial Complex, Sector 4 · Unit Block B
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-2xl bg-[#292a30] text-[#10b981]">
-                      <BuildingIcon size={18} />
-                    </div>
-                  </div>
-
-                  {/* Technician Completion Report (when present) */}
-                  {activeRequestObj.completionReport && (
-                    <div className="bg-[#1c1d22] rounded-3xl p-6 space-y-3 shadow-md border border-[#10b981]/20">
-                      <div className="flex items-center justify-between">
-                        <div className="text-xs font-bold uppercase tracking-wider text-[#10b981] flex items-center gap-1.5">
-                          <CheckCircleIcon size={15} />
-                          <span>Technician Completion Report</span>
-                        </div>
-                        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                          ✓ Dispatcher Approved
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-zinc-200 leading-relaxed font-medium">
-                        {activeRequestObj.completionReport.workPerformed || activeRequestObj.completionReport.notes}
-                      </p>
-
-                      {activeRequestObj.completionReport.diagnosis && (
-                        <div className="text-xs text-zinc-400">
-                          <strong className="text-white">Diagnosis:</strong> {activeRequestObj.completionReport.diagnosis}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="bg-[#1c1d22] rounded-3xl p-12 text-center text-zinc-400 space-y-2">
-                  <CheckCircleIcon size={24} className="mx-auto text-[#10b981]" />
-                  <div className="text-sm font-bold text-white">No Request Selected</div>
-                  <p className="text-xs">Select a request from the left list to view live tracking.</p>
                 </div>
-              )}
-            </div>
+
+                {/* ── Detail Card 2: Assigned Certified Specialist ── */}
+                <div className="bg-zinc-900 rounded-xl p-5 flex items-center justify-between border border-white/5 shadow-md">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-11 h-11 rounded-lg bg-zinc-800 border border-[#10b981]/30 flex items-center justify-center font-bold text-sm text-[#10b981] shadow-xs">
+                      {activeRequestObj.assignedTech
+                        ? activeRequestObj.assignedTech
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .slice(0, 2)
+                        : "TA"}
+                    </div>
+                    <div>
+                      <div className="text-sm font-extrabold text-white">
+                        {activeRequestObj.assignedTech || "Tanvir Ahmed"}
+                      </div>
+                      <div className="text-xs text-zinc-400 mt-0.5">
+                        Lead Field Engineer · Certified Electrical & HVAC
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSupportDefaultId(activeRequestObj.workOrderId || activeRequestObj.id);
+                        setSupportModalOpen(true);
+                      }}
+                      className="p-2.5 rounded-lg bg-zinc-800 text-[#10b981] hover:bg-zinc-700 transition-all shadow-xs border border-white/5"
+                      title="Contact Dispatcher / Technician"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSupportDefaultId(activeRequestObj.workOrderId || activeRequestObj.id);
+                        setSupportModalOpen(true);
+                      }}
+                      className="p-2.5 rounded-lg bg-zinc-800 text-[#10b981] hover:bg-zinc-700 transition-all shadow-xs border border-white/5"
+                      title="Send Message"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── Detail Card 3: Incident Details ── */}
+                <div className="bg-zinc-900 rounded-xl p-5 space-y-4 border border-white/5 shadow-md">
+                  <h4 className="text-sm font-extrabold text-white">Incident Details</h4>
+
+                  <div className="space-y-3 text-xs">
+                    <div className="flex items-start justify-between gap-4 pb-3 border-b border-white/[0.06]">
+                      <div>
+                        <div className="font-bold text-white text-xs">{activeRequestObj.problem}</div>
+                        <div className="text-zinc-400 text-[11px] mt-0.5">{activeRequestObj.description || "Routine breakdown maintenance and electrical diagnostics."}</div>
+                      </div>
+                      <div className="font-extrabold text-white text-sm shrink-0">Included</div>
+                    </div>
+
+                    <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                      <div className="text-zinc-400">Trade Specialty</div>
+                      <div className="font-bold text-white">{activeRequestObj.category}</div>
+                    </div>
+
+                    <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                      <div className="text-zinc-400">Priority Tier</div>
+                      <div>{renderPriorityBadge(activeRequestObj.priority)}</div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="font-bold text-white">Visit Allowance Credit</div>
+                      <div className="font-extrabold text-[#10b981] text-sm">
+                        1 Visit Deducted <span className="text-zinc-400 font-normal">({subscription.remainingVisits !== null ? subscription.remainingVisits : 27} left)</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Detail Card 4: Facility Location ── */}
+                <div className="bg-zinc-900 rounded-xl p-5 flex items-center justify-between border border-white/5 shadow-md">
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                      Facility Location
+                    </div>
+                    <div className="font-bold text-white text-xs mt-0.5">
+                      {activeRequestObj.asset}
+                    </div>
+                    <div className="text-[11px] text-zinc-400">
+                      Savar Commercial Complex, Sector 4 · Unit Block B
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-lg bg-zinc-800 text-[#10b981] border border-white/5">
+                    <BuildingIcon size={18} />
+                  </div>
+                </div>
+
+                {/* Technician Completion Report (when present) */}
+                {activeRequestObj.completionReport && (
+                  <div className="bg-zinc-900 rounded-xl p-5 space-y-3 border border-[#10b981]/30 shadow-md">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs font-bold uppercase tracking-wider text-[#10b981] flex items-center gap-1.5">
+                        <CheckCircleIcon size={15} />
+                        <span>Technician Completion Report</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                        ✓ Dispatcher Approved
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-zinc-200 leading-relaxed font-medium">
+                      {activeRequestObj.completionReport.workPerformed || activeRequestObj.completionReport.notes}
+                    </p>
+
+                    {activeRequestObj.completionReport.diagnosis && (
+                      <div className="text-xs text-zinc-400">
+                        <strong className="text-white">Diagnosis:</strong> {activeRequestObj.completionReport.diagnosis}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="bg-zinc-900 rounded-xl p-12 text-center text-zinc-400 space-y-2 border border-white/5">
+                <CheckCircleIcon size={24} className="mx-auto text-[#10b981]" />
+                <div className="text-sm font-bold text-white">No Request Selected</div>
+                <p className="text-xs">Select a request from the left list to view live tracking.</p>
+              </div>
+            )}
           </div>
+        </div>
 
         {/* ── 3. Progressive Disclosure: Service History Table (When Toggled) ── */}
         {showHistory && (
-          <div className="bg-[#1c1d22] rounded-3xl overflow-hidden shadow-md space-y-4 p-5 animate-fade-in">
+          <div className="bg-zinc-900 rounded-xl overflow-hidden shadow-md space-y-4 p-5 border border-white/5 animate-fade-in">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-white">Facility Service History Archive</h3>
@@ -1008,7 +1004,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#26272e] text-white text-xs border-0 focus:ring-1 focus:ring-[#10b981]"
+                className="w-full px-3 py-2 rounded-lg bg-zinc-800 text-white text-xs border border-white/5 focus:ring-1 focus:ring-[#10b981]"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="ACTIVE">All Active</option>
@@ -1025,7 +1021,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#26272e] text-white text-xs border-0 focus:ring-1 focus:ring-[#10b981]"
+                className="w-full px-3 py-2 rounded-lg bg-zinc-800 text-white text-xs border border-white/5 focus:ring-1 focus:ring-[#10b981]"
               >
                 <option value="ALL">All Priorities</option>
                 <option value="URGENT">Urgent</option>
@@ -1036,7 +1032,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-[#26272e] text-white text-xs border-0 focus:ring-1 focus:ring-[#10b981]"
+                className="w-full px-3 py-2 rounded-lg bg-zinc-800 text-white text-xs border border-white/5 focus:ring-1 focus:ring-[#10b981]"
               >
                 <option value="ALL">All Categories</option>
                 {CANONICAL_SERVICE_CATEGORIES.map((c) => (
@@ -1122,6 +1118,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </button>
           </div>
         </div>
+      </div>
 
       {/* ── All Modals (Preserved 100% Functionality) ── */}
       {activeReceipt && (

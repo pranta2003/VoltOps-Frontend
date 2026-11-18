@@ -1820,3 +1820,27 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build in 8.83s (`npm run build`). Customer Dashboard bundle: 43.20 kB (down from 56.84 kB).
+
+
+---
+
+## Milestone 4.21 — Customer Dashboard Terminology Sanitization, Component Consistency & Dead Code Purge
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Sanitize courier terminology to VoltOps commercial standards, unify component container styling (`rounded-xl`, `bg-zinc-900`, `p-5`), and purge unused imports:
+  1. **Terminology Sanitization**:
+     - `Order ID NºSR-...` $\rightarrow$ `Request SR-...` across request cards and workspace detail header.
+     - `Order Details` $\rightarrow$ `Incident Details`.
+     - `DELIVERED` badge $\rightarrow$ `COMPLETED` (VoltOps Signal Emerald `#10b981`).
+     - `RECEIVED` badge $\rightarrow$ `LOGGED` (VoltOps Cyan `#06b6d4`).
+     - Standardized lifecycle progress stepper: `1. LOGGED` $\rightarrow$ `2. TRIAGED` $\rightarrow$ `3. EN ROUTE` $\rightarrow$ `4. ON SITE`.
+  2. **Component Consistency**:
+     - Standardized border radius to `rounded-xl`, background to `bg-zinc-900`, and padding to `p-5` with `border border-white/5` across both Left Column (Service Requests) and Right Column (Workspace) as well as the 4 KPI cards.
+     - Aligned Service Visit Credits progress bar cleanly with text baseline.
+  3. **Dead Code & Import Purge**:
+     - Purged unused icon imports (`AlertTriangleIcon`, `EyeIcon`) and unused helper `getCoveragePlanSlaLabel`.
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.28s (`npm run build`). Customer Dashboard bundle: 43.86 kB.
