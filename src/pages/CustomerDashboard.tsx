@@ -524,14 +524,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             type="button"
             onClick={loadCustomerData}
             disabled={isLoading}
-            className="p-2.5 rounded-xl border border-zinc-200 dark:border-white/5 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-xs"
+            className="p-2.5 rounded-xl border border-zinc-300 dark:border-white/5 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-xs"
             title="Refresh active status"
           >
             <RefreshCwIcon size={15} className={isLoading ? "animate-spin text-[#10b981]" : ""} />
           </button>
           {hasActiveRequest ? (
             <div
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-800/80 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-white/5 flex items-center gap-1.5 cursor-not-allowed select-none"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 border border-zinc-300 dark:border-white/5 flex items-center gap-1.5 cursor-not-allowed select-none"
               title="Active request open. You must complete or resolve your current request before submitting a new one."
             >
               <LockIcon size={13} className="text-zinc-500" />
@@ -553,7 +553,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         {/* ── 1. Sleek 2-Card Visual Strip (Truthful VoltOps Telemetry) ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Card 1: Visit Allowance Gauge */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 border border-zinc-200 dark:border-white/5 shadow-sm dark:shadow-md flex items-center gap-5">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 border border-zinc-200/90 dark:border-white/5 shadow-sm dark:shadow-md flex items-center gap-5">
             {/* Animated SVG Ring Gauge */}
             <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 84 84">
@@ -580,10 +580,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span className="text-base font-extrabold text-zinc-900 dark:text-white leading-none tracking-tight">
+                <span className="text-base font-extrabold text-zinc-950 dark:text-white leading-none tracking-tight">
                   {remainingVisits}
                 </span>
-                <span className="text-[9px] font-semibold text-zinc-500 mt-0.5">
+                <span className="text-[9px] font-semibold text-zinc-600 dark:text-zinc-500 mt-0.5">
                   /{includedVisits} left
                 </span>
               </div>
@@ -596,10 +596,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   {subscription.planName || "24/7 Priority Plan"}
                 </span>
               </div>
-              <div className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight">
+              <div className="text-sm font-bold text-zinc-950 dark:text-white tracking-tight">
                 {remainingVisits} of {includedVisits} Visits Remaining
               </div>
-              <div className="text-xs text-zinc-600 dark:text-zinc-400 flex items-center gap-1.5">
+              <div className="text-xs text-zinc-700 dark:text-zinc-400 flex items-center gap-1.5 font-medium">
                 <ClockIcon size={12} className="text-[#10b981] shrink-0" />
                 <span className="truncate">{slaLabel}</span>
               </div>
@@ -607,10 +607,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
 
           {/* Card 2: Facility Service Breakdown */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 border border-zinc-200 dark:border-white/5 shadow-sm dark:shadow-md flex flex-col justify-between space-y-3">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 border border-zinc-200/90 dark:border-white/5 shadow-sm dark:shadow-md flex flex-col justify-between space-y-3">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-zinc-900 dark:text-white tracking-tight">Facility Service Breakdown</span>
-              <span className="text-zinc-600 dark:text-zinc-400 font-medium">{requests.length} Total Incidents</span>
+              <span className="font-bold text-zinc-950 dark:text-white tracking-tight">Facility Service Breakdown</span>
+              <span className="text-zinc-700 dark:text-zinc-400 font-semibold">{requests.length} Total Incidents</span>
             </div>
 
             {/* Segmented Proportional Bar */}
@@ -637,7 +637,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               </div>
 
               {/* Legend & Status Counts */}
-              <div className="flex items-center justify-between text-[11px] text-zinc-600 dark:text-zinc-400 pt-1">
+              <div className="flex items-center justify-between text-[11px] text-zinc-700 dark:text-zinc-400 pt-1 font-medium">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#06b6d4]" />
                   <span>Active ({activeIncidentsCount})</span>
@@ -657,18 +657,18 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
         {/* ── Actionable Alerts (When Genuinely Required) ── */}
         {pendingFeedbackRequest && (
-          <div className="rounded-xl border border-white/5 bg-[#b8287a]/20 px-5 py-3.5 text-xs flex items-center justify-between gap-3 text-white shadow-md animate-fade-in">
+          <div className="rounded-xl border border-emerald-200/90 dark:border-white/5 bg-emerald-50 dark:bg-[#b8287a]/20 px-5 py-3.5 text-xs flex items-center justify-between gap-3 text-zinc-900 dark:text-zinc-100 shadow-sm dark:shadow-md animate-fade-in">
             <div className="flex items-center gap-3 min-w-0">
-              <StarIcon size={18} className="text-[#10b981] shrink-0" fill="currentColor" />
+              <StarIcon size={18} className="text-emerald-700 dark:text-[#10b981] shrink-0" fill="currentColor" />
               <span className="truncate">
-                Service completed on <strong className="font-bold text-[#10b981]">{pendingFeedbackRequest.asset}</strong> ({pendingFeedbackRequest.id}).
+                Service completed on <strong className="font-bold text-emerald-800 dark:text-emerald-400">{pendingFeedbackRequest.asset}</strong> ({pendingFeedbackRequest.id}).
               </span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => handleDismissFeedback(pendingFeedbackRequest.workOrderId)}
-                className="text-xs font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white px-2.5 py-1"
+                className="text-xs font-semibold text-zinc-800 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white px-2.5 py-1"
               >
                 Dismiss
               </button>
@@ -687,9 +687,9 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* ── Left Column: Service Requests List (35% width) ── */}
           <div className="w-full lg:w-[35%] space-y-4 shrink-0">
-            <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-4 border border-zinc-200 dark:border-white/5 shadow-sm dark:shadow-md">
+            <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-4 border border-zinc-200/90 dark:border-white/5 shadow-sm dark:shadow-md">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-extrabold text-zinc-900 dark:text-white tracking-tight">
+                <h2 className="text-base font-extrabold text-zinc-950 dark:text-white tracking-tight">
                   Service Requests
                 </h2>
                 <button
@@ -699,7 +699,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     setShowHistory(next);
                     setSearchParams(next ? { view: "all" } : {});
                   }}
-                  className="text-xs font-bold text-[#10b981] hover:underline flex items-center gap-1"
+                  className="text-xs font-bold text-emerald-800 dark:text-[#10b981] hover:underline flex items-center gap-1"
                 >
                   <span>{showHistory ? "Hide Table" : "Archive Table"}</span>
                   <ArrowRightIcon size={12} className={showHistory ? "rotate-90 transition-transform" : "transition-transform"} />
@@ -708,24 +708,24 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
               {/* Search Bar with Filter Icon */}
               <div className="relative">
-                <SearchIcon size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+                <SearchIcon size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
                   type="text"
                   placeholder="Search requests..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-9 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white text-xs placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#10b981] border border-zinc-300 dark:border-white/5 transition-all"
+                  className="w-full pl-9 pr-9 py-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-950 dark:text-white text-xs placeholder:text-zinc-500 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#10b981] border border-zinc-300 dark:border-white/5 transition-all"
                 />
                 {searchQuery ? (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-white"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
                   >
                     <XIcon size={13} />
                   </button>
                 ) : (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none">
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <line x1="4" y1="21" x2="4" y2="14" />
                       <line x1="4" y1="10" x2="4" y2="3" />
@@ -744,12 +744,12 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               {/* Request Cards List */}
               <div className="space-y-2.5 pt-1">
                 {isLoading ? (
-                  <div className="p-8 text-center text-xs text-zinc-500 dark:text-zinc-400">
+                  <div className="p-8 text-center text-xs text-zinc-600 dark:text-zinc-400">
                     <RefreshCwIcon size={16} className="inline animate-spin mr-2 text-[#10b981]" />
                     Loading requests...
                   </div>
                 ) : filteredRequests.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-zinc-500 dark:text-zinc-400">
+                  <div className="p-8 text-center text-xs text-zinc-600 dark:text-zinc-400">
                     No requests match filter.
                   </div>
                 ) : (
@@ -762,13 +762,13 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                         className={`rounded-xl p-3 cursor-pointer transition-all duration-150 select-none border ${
                           isSelected
                             ? "bg-[#10b981] text-zinc-950 border-[#10b981] shadow-md shadow-emerald-500/10"
-                            : "bg-zinc-50 hover:bg-zinc-100 text-zinc-900 border-zinc-200 dark:bg-zinc-800/60 dark:hover:bg-zinc-800 dark:text-white dark:border-white/5"
+                            : "bg-zinc-50 hover:bg-zinc-100 text-zinc-950 border-zinc-200/90 dark:bg-zinc-800/60 dark:hover:bg-zinc-800 dark:text-white dark:border-white/5"
                         }`}
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span
                             className={`font-mono text-xs font-bold tracking-tight ${
-                              isSelected ? "text-zinc-950" : "text-zinc-700 dark:text-zinc-300"
+                              isSelected ? "text-zinc-950" : "text-zinc-800 dark:text-zinc-300"
                             }`}
                           >
                             {req.id}
@@ -778,7 +778,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
                         <div
                           className={`text-xs font-medium truncate mt-1 ${
-                            isSelected ? "text-zinc-950 font-semibold" : "text-zinc-800 dark:text-zinc-300"
+                            isSelected ? "text-zinc-950 font-semibold" : "text-zinc-900 dark:text-zinc-300"
                           }`}
                           title={req.problem}
                         >
@@ -797,13 +797,13 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             {activeRequestObj ? (
               <>
                 {/* ── Detail Card 1: Request ID, Facility & 4-Step Lifecycle Timeline ── */}
-                <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-5 border border-zinc-200 dark:border-white/5 shadow-sm dark:shadow-md">
+                <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-5 border border-zinc-200/90 dark:border-white/5 shadow-sm dark:shadow-md">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-base font-extrabold text-zinc-900 dark:text-white">
+                      <h3 className="text-base font-extrabold text-zinc-950 dark:text-white">
                         Request {activeRequestObj.workOrderId || activeRequestObj.id}
                       </h3>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      <div className="text-xs text-zinc-700 dark:text-zinc-400 mt-0.5 font-medium">
                         {activeRequestObj.asset} · Savar Commercial Complex
                       </div>
                     </div>
@@ -815,7 +815,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           setSupportDefaultId(activeRequestObj.workOrderId || activeRequestObj.id);
                           setSupportModalOpen(true);
                         }}
-                        className="w-8 h-8 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-emerald-800 border-zinc-200 dark:bg-zinc-800 dark:text-[#10b981] dark:hover:bg-zinc-700 dark:border-white/5 flex items-center justify-center transition-all border"
+                        className="w-8 h-8 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-emerald-800 border-zinc-300 dark:bg-zinc-800 dark:text-[#10b981] dark:hover:bg-zinc-700 dark:border-white/5 flex items-center justify-center transition-all border"
                         title="Contact Support or Report Issue"
                       >
                         <SendIcon size={13} />
@@ -826,7 +826,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   {/* Date & Destination Banner */}
                   <div className="flex items-center justify-between text-xs pt-1">
                     <div>
-                      <div className="text-[11px] text-zinc-500 dark:text-zinc-400">{activeRequestObj.submittedDate}</div>
+                      <div className="text-[11px] text-zinc-700 dark:text-zinc-400 font-medium">{activeRequestObj.submittedDate}</div>
                     </div>
 
                     <div className="text-center">
@@ -834,8 +834,8 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     </div>
 
                     <div className="text-right">
-                      <div className="text-[11px] text-zinc-500 dark:text-zinc-400">Target Arrival SLA</div>
-                      <div className="font-extrabold text-emerald-700 dark:text-[#10b981] text-sm">
+                      <div className="text-[11px] text-zinc-600 dark:text-zinc-400 font-medium">Target Arrival SLA</div>
+                      <div className="font-extrabold text-emerald-800 dark:text-[#10b981] text-sm">
                         {activeRequestObj.arrivalSlaWindow || (subscription.planId === "247-priority" ? "20m Target" : "40m Target")}
                       </div>
                     </div>
@@ -866,7 +866,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                                   ? "bg-[#10b981] text-zinc-950 shadow-md shadow-emerald-500/20"
                                   : isCurrent
                                   ? "bg-white text-emerald-800 ring-4 ring-[#10b981] shadow-lg shadow-emerald-500/20 animate-pulse dark:bg-zinc-900 dark:text-[#10b981]"
-                                  : "bg-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-500"
+                                  : "bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-500"
                               }`}
                             >
                               {isCompleted ? "✓" : idx + 1}
@@ -874,10 +874,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                             <span
                               className={`mt-2 text-[10px] font-bold tracking-wider ${
                                 isCurrent
-                                  ? "text-emerald-700 dark:text-[#10b981]"
+                                  ? "text-emerald-800 dark:text-[#10b981]"
                                   : isCompleted
-                                  ? "text-zinc-900 dark:text-white"
-                                  : "text-zinc-500 dark:text-zinc-500"
+                                  ? "text-zinc-950 dark:text-white"
+                                  : "text-zinc-600 dark:text-zinc-500"
                               }`}
                             >
                               {step.label}
@@ -890,7 +890,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 </div>
 
                 {/* ── Detail Card 2: Assigned Certified Specialist ── */}
-                <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 flex items-center justify-between border border-zinc-200 dark:border-white/5 shadow-sm dark:shadow-md">
+                <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 flex items-center justify-between border border-zinc-200/90 dark:border-white/5 shadow-sm dark:shadow-md">
                   <div className="flex items-center gap-3.5">
                     <div className="w-11 h-11 rounded-lg bg-zinc-100 border border-emerald-300 dark:bg-zinc-800 dark:border-[#10b981]/30 flex items-center justify-center font-bold text-sm text-emerald-800 dark:text-[#10b981] shadow-xs">
                       {activeRequestObj.assignedTech
@@ -902,10 +902,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                         : "TA"}
                     </div>
                     <div>
-                      <div className="text-sm font-extrabold text-zinc-900 dark:text-white">
+                      <div className="text-sm font-extrabold text-zinc-950 dark:text-white">
                         {activeRequestObj.assignedTech || "Tanvir Ahmed"}
                       </div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      <div className="text-xs text-zinc-700 dark:text-zinc-400 mt-0.5 font-medium">
                         Electrical & HVAC
                       </div>
                     </div>
@@ -918,7 +918,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                         setSupportDefaultId(activeRequestObj.workOrderId || activeRequestObj.id);
                         setSupportModalOpen(true);
                       }}
-                      className="p-2.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-emerald-800 border-zinc-200 dark:bg-zinc-800 dark:text-[#10b981] dark:hover:bg-zinc-700 dark:border-white/5 transition-all shadow-xs border"
+                      className="p-2.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-emerald-800 border-zinc-300 dark:bg-zinc-800 dark:text-[#10b981] dark:hover:bg-zinc-700 dark:border-white/5 transition-all shadow-xs border"
                       title="Contact Dispatcher / Technician"
                     >
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -931,7 +931,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                         setSupportDefaultId(activeRequestObj.workOrderId || activeRequestObj.id);
                         setSupportModalOpen(true);
                       }}
-                      className="p-2.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-emerald-800 border-zinc-200 dark:bg-zinc-800 dark:text-[#10b981] dark:hover:bg-zinc-700 dark:border-white/5 transition-all shadow-xs border"
+                      className="p-2.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-emerald-800 border-zinc-300 dark:bg-zinc-800 dark:text-[#10b981] dark:hover:bg-zinc-700 dark:border-white/5 transition-all shadow-xs border"
                       title="Send Message"
                     >
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -942,29 +942,29 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 </div>
 
                 {/* ── Detail Card 3: Incident Details ── */}
-                <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-4 border border-zinc-200 dark:border-white/5 shadow-sm dark:shadow-md">
-                  <h4 className="text-sm font-extrabold text-zinc-900 dark:text-white">Incident Details</h4>
+                <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-4 border border-zinc-200/90 dark:border-white/5 shadow-sm dark:shadow-md">
+                  <h4 className="text-sm font-extrabold text-zinc-950 dark:text-white">Incident Details</h4>
 
                   <div className="space-y-3 text-xs">
                     <div className="pb-3 border-b border-zinc-200 dark:border-white/[0.06]">
-                      <div className="font-bold text-zinc-900 dark:text-white text-xs">{activeRequestObj.problem}</div>
-                      <div className="text-zinc-500 dark:text-zinc-400 text-[11px] mt-0.5">{activeRequestObj.description || "Routine breakdown maintenance and electrical diagnostics."}</div>
+                      <div className="font-bold text-zinc-950 dark:text-white text-xs">{activeRequestObj.problem}</div>
+                      <div className="text-zinc-700 dark:text-zinc-400 text-[11px] mt-0.5">{activeRequestObj.description || "Routine breakdown maintenance and electrical diagnostics."}</div>
                     </div>
 
                     <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-white/[0.06]">
-                      <div className="text-zinc-500 dark:text-zinc-400">Trade Specialty</div>
-                      <div className="font-bold text-zinc-900 dark:text-white">{activeRequestObj.category}</div>
+                      <div className="text-zinc-600 dark:text-zinc-400 font-medium">Trade Specialty</div>
+                      <div className="font-bold text-zinc-950 dark:text-white">{activeRequestObj.category}</div>
                     </div>
 
                     <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-white/[0.06]">
-                      <div className="text-zinc-500 dark:text-zinc-400">Priority Tier</div>
+                      <div className="text-zinc-600 dark:text-zinc-400 font-medium">Priority Tier</div>
                       <div>{renderPriorityBadge(activeRequestObj.priority)}</div>
                     </div>
 
                     <div className="flex items-center justify-between pt-1">
-                      <div className="font-bold text-zinc-900 dark:text-white">Visit Credit</div>
-                      <div className="font-extrabold text-emerald-700 dark:text-[#10b981] text-sm">
-                        1 Visit Deducted <span className="text-zinc-500 dark:text-zinc-400 font-normal">({remainingVisits} left)</span>
+                      <div className="font-bold text-zinc-950 dark:text-white">Visit Credit</div>
+                      <div className="font-extrabold text-emerald-800 dark:text-[#10b981] text-sm">
+                        1 Visit Deducted <span className="text-zinc-600 dark:text-zinc-400 font-normal">({remainingVisits} left)</span>
                       </div>
                     </div>
                   </div>
@@ -972,7 +972,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
                 {/* Technician Completion Report (when present) */}
                 {activeRequestObj.completionReport && (
-                  <div className="bg-emerald-50/60 dark:bg-zinc-900 rounded-xl p-5 space-y-3 border border-emerald-200 dark:border-[#10b981]/30 shadow-sm dark:shadow-md">
+                  <div className="bg-emerald-50/60 dark:bg-zinc-900 rounded-xl p-5 space-y-3 border border-emerald-200/90 dark:border-[#10b981]/30 shadow-sm dark:shadow-md">
                     <div className="flex items-center justify-between">
                       <div className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-[#10b981] flex items-center gap-1.5">
                         <CheckCircleIcon size={15} />
@@ -983,13 +983,13 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                       </span>
                     </div>
 
-                    <p className="text-xs text-zinc-800 dark:text-zinc-200 leading-relaxed font-medium">
+                    <p className="text-xs text-zinc-900 dark:text-zinc-200 leading-relaxed font-medium">
                       {activeRequestObj.completionReport.workPerformed || activeRequestObj.completionReport.notes}
                     </p>
 
                     {activeRequestObj.completionReport.diagnosis && (
-                      <div className="text-xs text-zinc-600 dark:text-zinc-400">
-                        <strong className="text-zinc-900 dark:text-white">Diagnosis:</strong> {activeRequestObj.completionReport.diagnosis}
+                      <div className="text-xs text-zinc-700 dark:text-zinc-400">
+                        <strong className="text-zinc-950 dark:text-white">Diagnosis:</strong> {activeRequestObj.completionReport.diagnosis}
                       </div>
                     )}
                   </div>
@@ -1007,16 +1007,16 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
         {/* ── 3. Progressive Disclosure: Service History Table (When Toggled) ── */}
         {showHistory && (
-          <div className="bg-white dark:bg-zinc-900 rounded-xl overflow-hidden shadow-sm dark:shadow-md space-y-4 p-5 border border-zinc-200 dark:border-white/5 animate-fade-in">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl overflow-hidden shadow-sm dark:shadow-md space-y-4 p-5 border border-zinc-200/90 dark:border-white/5 animate-fade-in">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-white">Facility Service History Archive</h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">Complete historical audit trail of all logged facility requests.</p>
+                <h3 className="text-sm font-bold text-zinc-950 dark:text-white">Facility Service History Archive</h3>
+                <p className="text-xs text-zinc-700 dark:text-zinc-400">Complete historical audit trail of all logged facility requests.</p>
               </div>
               <button
                 type="button"
                 onClick={clearFilters}
-                className="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                className="text-xs font-semibold text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
               >
                 Clear all filters
               </button>
@@ -1027,7 +1027,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white text-xs border border-zinc-300 dark:border-white/5 focus:ring-1 focus:ring-[#10b981]"
+                className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-950 dark:text-white text-xs border border-zinc-300 dark:border-white/5 focus:ring-1 focus:ring-[#10b981]"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="ACTIVE">All Active</option>
@@ -1044,7 +1044,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white text-xs border border-zinc-300 dark:border-white/5 focus:ring-1 focus:ring-[#10b981]"
+                className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-950 dark:text-white text-xs border border-zinc-300 dark:border-white/5 focus:ring-1 focus:ring-[#10b981]"
               >
                 <option value="ALL">All Priorities</option>
                 <option value="URGENT">Urgent</option>
@@ -1056,7 +1056,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white text-xs border border-zinc-300 dark:border-white/5 focus:ring-1 focus:ring-[#10b981]"
+                className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-950 dark:text-white text-xs border border-zinc-300 dark:border-white/5 focus:ring-1 focus:ring-[#10b981]"
               >
                 <option value="ALL">All Categories</option>
                 {CANONICAL_SERVICE_CATEGORIES.map((c) => (
@@ -1084,15 +1084,15 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 <tbody className="divide-y divide-zinc-200 dark:divide-white/[0.04]">
                   {filteredRequests.map((req) => (
                     <tr key={req.id} className="hover:bg-zinc-50 dark:hover:bg-white/[0.02] text-zinc-800 dark:text-zinc-200">
-                      <td className="py-3 px-3 font-mono font-bold text-zinc-900 dark:text-white">{req.id}</td>
+                      <td className="py-3 px-3 font-mono font-bold text-zinc-950 dark:text-white">{req.id}</td>
                       <td className="py-3 px-3">
-                        <div className="font-semibold text-zinc-900 dark:text-white">{req.problem}</div>
-                        <div className="text-[11px] text-zinc-500 dark:text-zinc-400">{req.asset}</div>
+                        <div className="font-semibold text-zinc-950 dark:text-white">{req.problem}</div>
+                        <div className="text-[11px] text-zinc-700 dark:text-zinc-400 font-medium">{req.asset}</div>
                       </td>
-                      <td className="py-3 px-3">{req.category}</td>
+                      <td className="py-3 px-3 text-zinc-700 dark:text-zinc-300 font-medium">{req.category}</td>
                       <td className="py-3 px-3">{renderPriorityBadge(req.priority)}</td>
                       <td className="py-3 px-3">{renderStatusBadge(req.displayStatus)}</td>
-                      <td className="py-3 px-3 text-zinc-500 dark:text-zinc-400">{req.submittedDate}</td>
+                      <td className="py-3 px-3 text-zinc-700 dark:text-zinc-400 tabular-nums">{req.submittedDate}</td>
                       <td className="py-3 px-3 text-right">
                         <button
                           type="button"
@@ -1100,7 +1100,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                             setSelectedRequest(req);
                             window.scrollTo({ top: 0, behavior: "smooth" });
                           }}
-                          className="text-xs font-bold text-[#10b981] hover:underline"
+                          className="text-xs font-bold text-emerald-800 dark:text-[#10b981] hover:underline"
                         >
                           View In Workspace
                         </button>
@@ -1114,16 +1114,16 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         )}
 
         {/* ── 4. Compact Facility Footer Bar ── */}
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 dark:text-zinc-500 gap-3 border-t border-zinc-200 dark:border-white/[0.06]">
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-600 dark:text-zinc-500 gap-3 border-t border-zinc-200 dark:border-white/[0.06]">
           <div className="flex items-center gap-2">
             <ShieldCheckIcon size={14} className="text-[#10b981]" />
-            <span>VoltOps Commercial Operations Platform</span>
+            <span className="font-medium">VoltOps Commercial Operations Platform</span>
           </div>
 
           <div className="flex items-center gap-4">
             <Link
               to="/customer/invoices"
-              className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors"
+              className="text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white transition-colors font-medium"
             >
               Invoices & Billing &rarr;
             </Link>
@@ -1133,7 +1133,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 setSupportDefaultId(activeRequestObj?.workOrderId || activeRequestObj?.id || "");
                 setSupportModalOpen(true);
               }}
-              className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors"
+              className="text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white transition-colors font-medium"
             >
               Contact Support
             </button>
