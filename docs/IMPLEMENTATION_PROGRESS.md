@@ -1747,3 +1747,21 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build in 8.18s (`npm run build`). Customer Dashboard bundle: 50.20 kB.
+
+
+---
+
+## Milestone 4.18 — Customer Dashboard Full MSlogistic & Dual-Mode Workspace Restoration
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Restore the exact MSlogistic & split order tracking UI layout from commit `84475e0` with VoltOps Emerald palette:
+  1. **Dual-Mode Switcher**:
+     - Mode 1: MSlogistic Fleet Analytics & Charts (`[ My Orders ]` vs `[ Analytics ]`).
+     - Mode 2: Live Work Order Workspace (Master-Detail 2-column view with timeline stepper, specialist card, and order breakdown).
+  2. **Palette Alignment (Zero Yellow)**:
+     - Signal Emerald (`#10b981`), Berry Plum (`#b8287a`), Cyan (`#06b6d4`), and Deep Slate (`#1c1d22`).
+  3. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 10.31s (`npm run build`). Customer Dashboard bundle: 55.86 kB.
