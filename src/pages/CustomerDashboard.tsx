@@ -399,10 +399,10 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
       }
     >
       <div className="space-y-6 max-w-7xl">
-        {/* ── 1. Top Row: 4 Metric Cards (Clean, Elevated Surfaces) ─────────────────────────── */}
+        {/* ── 1. Top Row: 4 Metric Cards (Clean, Flat Elevated Surfaces) ─────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Active Requests */}
-          <div className="p-5 rounded-2xl border border-white/[0.07] bg-zinc-900/90 shadow-sm hover:border-white/[0.12] transition-colors">
+          <div className="p-5 rounded-2xl border border-white/5 bg-zinc-900 shadow-sm hover:border-white/10 transition-colors">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
               <span>Active requests</span>
               <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
@@ -416,7 +416,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
 
           {/* Card 2: Field Dispatched */}
-          <div className="p-5 rounded-2xl border border-white/[0.07] bg-zinc-900/90 shadow-sm hover:border-white/[0.12] transition-colors">
+          <div className="p-5 rounded-2xl border border-white/5 bg-zinc-900 shadow-sm hover:border-white/10 transition-colors">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
               <span>Field dispatched</span>
               <div className="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center">
@@ -429,34 +429,32 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             <div className="mt-1 text-xs text-zinc-400">Technician en route or on site</div>
           </div>
 
-          {/* Card 3: Coverage Plan & SLA */}
-          <div className="p-5 rounded-2xl border border-white/[0.07] bg-zinc-900/90 shadow-sm hover:border-white/[0.12] transition-colors">
+          {/* Card 3: Target Arrival SLA */}
+          <div className="p-5 rounded-2xl border border-white/5 bg-zinc-900 shadow-sm hover:border-white/10 transition-colors">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
-              <span>Coverage plan</span>
+              <span>Target arrival SLA</span>
               <div className="w-8 h-8 rounded-xl bg-[#10b981]/10 border border-[#10b981]/20 flex items-center justify-center">
                 <ShieldCheckIcon size={15} className="text-[#10b981]" />
               </div>
             </div>
-            <div className="mt-3 text-base font-extrabold text-[#10b981] truncate">
-              {subscription.planName}
+            <div className="mt-3 text-3xl font-extrabold text-[#10b981] tracking-tight font-mono">
+              {subscription.planId === "247-priority"
+                ? "20m"
+                : subscription.planId === "247-standard"
+                ? "40m"
+                : subscription.planId === "8hr"
+                ? "8h"
+                : "Custom"}
             </div>
             <div className="mt-1 text-xs text-zinc-400 truncate">
-              {subscription.planId === "247-priority"
-                ? "20-minute physical arrival SLA"
-                : subscription.planId === "247-standard"
-                ? "40-minute physical arrival SLA"
-                : subscription.planId === "8hr"
-                ? "8-Hour daily window (08:00 – 17:00)"
-                : subscription.hasActiveSubscription
-                ? "Negotiated operational terms"
-                : "Active subscription required"}
+              {subscription.planName}
             </div>
           </div>
 
-          {/* Card 4: Service Credits & Allowance */}
-          <div className="p-5 rounded-2xl border border-white/[0.07] bg-zinc-900/90 shadow-sm hover:border-white/[0.12] transition-colors">
+          {/* Card 4: Visit Allowance */}
+          <div className="p-5 rounded-2xl border border-white/5 bg-zinc-900 shadow-sm hover:border-white/10 transition-colors">
             <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-zinc-400">
-              <span>Service visit credits</span>
+              <span>Visit allowance</span>
               <span
                 className={`text-[10px] font-bold px-2 py-0.5 rounded-full ring-1 ring-inset ${
                   subscription.needsConfiguration
@@ -469,7 +467,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 {subscription.needsConfiguration
                   ? "Negotiated"
                   : subscription.isExhausted
-                  ? "Allowance used"
+                  ? "Exhausted"
                   : "Active cycle"}
               </span>
             </div>
@@ -478,17 +476,14 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               {subscription.needsConfiguration ? (
                 <div>
                   <span className="text-sm font-bold text-zinc-50">
-                    Allowance to be confirmed
-                  </span>
-                  <span className="block text-[11px] text-zinc-400 mt-0.5">
-                    Configured per contract
+                    To be confirmed
                   </span>
                 </div>
               ) : (
                 <div className="text-3xl font-extrabold text-zinc-50 tracking-tight font-mono">
                   {subscription.remainingVisits}
                   <span className="text-xs font-normal text-zinc-400 ml-1.5 font-sans">
-                    / {subscription.includedVisits} left
+                    of {subscription.includedVisits} left
                   </span>
                 </div>
               )}
@@ -646,110 +641,22 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </div>
           ))}
 
-        {/* ── 2. Subscribed Plan & Demonstration Purchase Receipts ─────────── */}
-        <div className="rounded-2xl border border-white/[0.07] bg-zinc-900/90 p-5 sm:p-6 shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h2 className="font-bold text-base text-zinc-50 tracking-tight">
-                  Active Facility Coverage & Purchases
-                </h2>
-                {subscription.hasActiveSubscription ? (
-                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/25">
-                    {subscription.planName}
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/25">
-                    No Active Subscription
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-zinc-400 mt-1">
-                {subscription.hasActiveSubscription ? (
-                  <>
-                    Physical arrival commitment: <strong className="text-zinc-200">{subscription.planId === "247-priority" ? "20-minute rapid arrival SLA" : subscription.planId === "247-standard" ? "40-minute arrival SLA" : subscription.planId === "8hr" ? "8-Hour daily window" : "Negotiated terms"}</strong> • {subscription.remainingVisits !== null ? `${subscription.remainingVisits} of ${subscription.includedVisits} service visits available` : "Negotiated allowance"}
-                  </>
-                ) : (
-                  <span>An active subscription plan is required to submit on-site dispatch requests and receive guaranteed arrival SLAs.</span>
-                )}
-              </p>
-            </div>
-
-            <Link
-              to={subscription.hasActiveSubscription && subscription.planId ? `/checkout?plan=${subscription.planId}` : "/#packages"}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-zinc-200 hover:text-white transition-all flex items-center gap-1.5 self-start sm:self-auto shadow-xs"
-            >
-              <span>{subscription.hasActiveSubscription ? "Change Plan / Checkout" : "Subscribe to a Plan"}</span>
-              <ArrowRightIcon size={12} />
-            </Link>
-          </div>
-
-          {/* Receipts List */}
-          <div className="space-y-2.5">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block">
-              Demonstration Receipts ({purchases.length})
-            </span>
-
-            {purchases.length === 0 ? (
-              <p className="text-xs text-zinc-500 italic">No purchases recorded yet.</p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {purchases.map((pur) => (
-                  <div
-                    key={pur.purchaseId}
-                    className="p-4 rounded-xl border border-white/[0.06] bg-zinc-950/60 flex items-center justify-between gap-3 hover:border-emerald-500/40 transition-colors"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-xs text-zinc-100">{pur.receiptId}</span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/25">
-                          {pur.paymentStatus}
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-zinc-400 mt-1">
-                        {pur.planName} • {new Date(pur.date).toLocaleDateString("en-BD", { month: "short", day: "numeric", year: "numeric" })}
-                      </div>
-                      <div className="text-xs font-mono font-bold text-zinc-200 mt-1">
-                        {formatBdt(pur.totalAmount)} ({pur.billingPeriod})
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setActiveReceipt(pur)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all flex items-center gap-1 shrink-0"
-                    >
-                      <EyeIcon size={13} />
-                      <span>View Receipt</span>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── 3. Central Service Requests Table & Filter Toolbar ─────────────── */}
-        <div className="rounded-2xl border border-white/[0.07] bg-zinc-900/90 overflow-hidden shadow-sm space-y-0">
+        {/* ── 2. Central Service Requests Table & Filter Toolbar ─────────────── */}
+        <div className="rounded-2xl border border-white/5 bg-zinc-900 overflow-hidden shadow-sm space-y-0">
           {/* Header & View Mode Switcher */}
-          <div className="p-4 sm:p-5 border-b border-white/[0.06] flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h2 className="font-bold text-base text-zinc-50 tracking-tight">
-                  {viewMode === "recent" ? "Recent Service Requests" : "Complete Request History"}
-                </h2>
-                <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-white/[0.08] bg-white/[0.04] text-zinc-300 font-mono">
-                  {filteredRequests.length} total
-                </span>
-              </div>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Real-time dispatch milestones, technician status, and on-site repair progress
-              </p>
+          <div className="p-4 sm:p-5 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <h2 className="font-bold text-base text-zinc-50 tracking-tight">
+                {viewMode === "recent" ? "Recent Service Requests" : "Complete Request History"}
+              </h2>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-white/10 bg-white/[0.04] text-zinc-300 font-mono">
+                {filteredRequests.length} total
+              </span>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
               {/* Sleek Segmented Control */}
-              <div className="p-1 rounded-xl border border-white/[0.08] bg-zinc-950/80 flex items-center text-xs">
+              <div className="p-1 rounded-xl border border-white/5 bg-zinc-950/80 flex items-center text-xs">
                 <button
                   type="button"
                   onClick={() => {
@@ -784,7 +691,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 type="button"
                 onClick={loadCustomerData}
                 disabled={isLoading}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-white/[0.08] bg-zinc-950/80 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-white/10 bg-zinc-950/80 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5"
                 title="Refresh service requests"
               >
                 <RefreshCwIcon size={12} className={isLoading ? "animate-spin text-[#10b981]" : ""} />
@@ -797,7 +704,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   setSupportDefaultId("");
                   setSupportModalOpen(true);
                 }}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-white/[0.08] bg-zinc-950/80 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-white/10 bg-zinc-950/80 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all flex items-center gap-1.5"
                 title="Contact VoltOps Operations Support"
               >
                 <SendIcon size={12} className="text-[#10b981]" />
@@ -814,7 +721,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
 
           {/* ── Search & Filter Toolbar ────────────────────────────────────── */}
-          <div className="p-4 border-b border-white/[0.06] bg-zinc-950/40 space-y-3">
+          <div className="p-4 border-b border-white/5 bg-zinc-950/40 space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
               {/* Search Box */}
               <div className="relative">
@@ -826,7 +733,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   placeholder="Search ID, asset, problem..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-7 py-2 rounded-xl text-xs border border-white/[0.08] bg-zinc-950/80 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] transition-all"
+                  className="w-full pl-8 pr-7 py-2 rounded-xl text-xs border border-white/10 bg-zinc-950/80 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] transition-all"
                 />
                 {searchQuery && (
                   <button
@@ -846,7 +753,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   name="status"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs border border-white/[0.08] bg-zinc-950/80 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] transition-all"
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-white/10 bg-zinc-950/80 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] transition-all"
                   aria-label="Filter by lifecycle status"
                 >
                   <option value="ALL">All Statuses</option>
@@ -869,7 +776,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   name="priority"
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs border border-white/[0.08] bg-zinc-950/80 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] transition-all"
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-white/10 bg-zinc-950/80 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] transition-all"
                   aria-label="Filter by priority urgency"
                 >
                   <option value="ALL">All Priorities</option>
@@ -887,7 +794,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   name="category"
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs border border-white/[0.08] bg-zinc-950/80 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] transition-all"
+                  className="w-full px-3 py-2 rounded-xl text-xs border border-white/10 bg-zinc-950/80 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-[#10b981] focus:border-[#10b981] transition-all"
                   aria-label="Filter by trade category"
                 >
                   <option value="ALL">All Service Trades</option>
@@ -930,21 +837,21 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             </div>
           )}
 
-          {/* ── Request Table ──────────────────────────────────────────────── */}
+          {/* ── Request Table (Airy, Flat, High-Contrast) ──────────────────── */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm">
               <thead>
-                <tr className="border-b border-white/[0.08] bg-zinc-950/60 text-zinc-400 font-bold uppercase tracking-wider text-xs">
-                  <th className="py-3.5 px-4">Request ID</th>
-                  <th className="py-3.5 px-4">Asset & Category</th>
-                  <th className="py-3.5 px-4">Problem Summary</th>
-                  <th className="py-3.5 px-4">Priority</th>
-                  <th className="py-3.5 px-4">Status</th>
-                  <th className="py-3.5 px-4">SLA & Technician</th>
-                  <th className="py-3.5 px-4 text-right">Action</th>
+                <tr className="border-b border-white/5 bg-zinc-950/60 text-zinc-400 font-bold uppercase tracking-wider text-xs">
+                  <th className="py-4 px-5">Request ID</th>
+                  <th className="py-4 px-5">Asset & Category</th>
+                  <th className="py-4 px-5">Problem Summary</th>
+                  <th className="py-4 px-5">Priority</th>
+                  <th className="py-4 px-5">Status</th>
+                  <th className="py-4 px-5">SLA & Technician</th>
+                  <th className="py-4 px-5 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.05]">
+              <tbody className="divide-y divide-white/5">
                 {isLoading ? (
                   <tr>
                     <td colSpan={7} className="py-12 text-center text-xs text-zinc-400">
@@ -962,7 +869,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           <button
                             type="button"
                             onClick={clearFilters}
-                            className="inline-block px-4 py-2 rounded-xl text-xs font-bold border border-white/[0.08] bg-zinc-800 text-zinc-200 hover:text-white transition-colors"
+                            className="inline-block px-4 py-2 rounded-xl text-xs font-bold border border-white/10 bg-zinc-800 text-zinc-200 hover:text-white transition-colors"
                           >
                             Clear Filters
                           </button>
@@ -983,8 +890,8 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                   </tr>
                 ) : (
                   displayedRequests.map((r) => (
-                    <tr key={r.id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-zinc-50">
+                    <tr key={r.id} className="hover:bg-zinc-800/50 transition-colors">
+                      <td className="py-4 px-5 font-mono font-bold text-zinc-50">
                         {r.id}
                         {r.workOrderId && (
                           <div className="text-[10px] font-mono text-zinc-400">
@@ -992,15 +899,15 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           </div>
                         )}
                       </td>
-                      <td className="py-3.5 px-4">
-                        <div className="font-semibold text-zinc-100">{r.asset}</div>
+                      <td className="py-4 px-5">
+                        <div className="font-semibold text-zinc-50">{r.asset}</div>
                         <div className="text-[11px] text-zinc-400">{r.category}</div>
                       </td>
-                      <td className="py-3.5 px-4 max-w-xs">
+                      <td className="py-4 px-5 max-w-xs">
                         <div className="text-zinc-200 font-medium truncate">{r.problem}</div>
-                        <div className="text-[11px] text-zinc-500">{r.submittedDate}</div>
+                        <div className="text-[11px] text-zinc-400">{r.submittedDate}</div>
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-4 px-5">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] ${getPriorityBadge(
                             r.priority
@@ -1009,7 +916,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           {r.priority}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-4 px-5">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] ${getStatusBadge(
                             r.displayStatus
@@ -1018,7 +925,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           {r.displayStatus.replace("_", " ")}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-xs">
+                      <td className="py-4 px-5 text-xs">
                         {r.arrivalSlaWindow ? (
                           <div>
                             <span className="font-semibold text-sky-400 block">
@@ -1034,11 +941,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                           <span className="text-zinc-500">—</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-right">
+                      <td className="py-4 px-5 text-right">
                         <button
                           type="button"
                           onClick={() => setSelectedRequest(r)}
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.09] text-zinc-300 hover:text-white border border-white/[0.07] transition-all flex items-center gap-1.5 ml-auto shadow-xs"
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.09] text-zinc-300 hover:text-white border border-white/5 transition-all flex items-center gap-1.5 ml-auto shadow-xs"
                         >
                           <EyeIcon size={12} />
                           <span>Inspect</span>
@@ -1053,7 +960,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
           {/* View Mode Footer (when in recent view with more available) */}
           {viewMode === "recent" && filteredRequests.length > 5 && (
-            <div className="p-3.5 border-t border-white/[0.06] bg-zinc-950/30 text-center">
+            <div className="p-3.5 border-t border-white/5 bg-zinc-950/30 text-center">
               <button
                 type="button"
                 onClick={() => {
@@ -1069,7 +976,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           )}
         </div>
 
-        {/* ── 4. Inspection Detail Modal / Flattened Drawer (Anti-Nesting) ───── */}
+        {/* ── 3. Inspection Detail Modal / Flattened Drawer (Anti-Nesting) ───── */}
         {selectedRequest && (
           <div
             role="dialog"
@@ -1079,9 +986,9 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
           >
-            <div className="w-full max-w-xl rounded-3xl border border-white/[0.08] bg-zinc-900 p-6 sm:p-7 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+            <div className="w-full max-w-xl rounded-3xl border border-white/5 bg-zinc-900 p-6 sm:p-7 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
               {/* Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-white/[0.06]">
+              <div className="flex items-center justify-between pb-4 border-b border-white/5">
                 <div>
                   <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block font-mono">
                     Service Request Details
@@ -1093,7 +1000,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 <button
                   type="button"
                   onClick={() => setSelectedRequest(null)}
-                  className="w-8 h-8 rounded-full border border-white/[0.08] bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
+                  className="w-8 h-8 rounded-full border border-white/10 bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
                 >
                   <XIcon size={14} />
                 </button>
@@ -1102,7 +1009,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               {/* Flattened Single-Surface Body */}
               <div className="space-y-5 text-xs">
                 {/* Problem Summary (Flat section) */}
-                <div className="pb-4 border-b border-white/[0.06] space-y-1">
+                <div className="pb-4 border-b border-white/5 space-y-1">
                   <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block">
                     Problem Summary
                   </span>
@@ -1113,7 +1020,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 </div>
 
                 {/* Clean Label / Value Grid (No nested box-within-a-box) */}
-                <div className="grid grid-cols-2 gap-x-6 gap-y-3.5 pb-4 border-b border-white/[0.06]">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3.5 pb-4 border-b border-white/5">
                   <div>
                     <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block mb-1">
                       Trade Category
@@ -1167,7 +1074,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
                 {/* Assigned Technician (Flat divider block) */}
                 {selectedRequest.assignedTech && (
-                  <div className="pb-4 border-b border-white/[0.06] flex items-center justify-between">
+                  <div className="pb-4 border-b border-white/5 flex items-center justify-between">
                     <div>
                       <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block mb-1">
                         Assigned Specialist
@@ -1183,7 +1090,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
                 {/* Technician Sign-Off Notes */}
                 {selectedRequest.workNotes && (
-                  <div className="pb-4 border-b border-white/[0.06] space-y-1">
+                  <div className="pb-4 border-b border-white/5 space-y-1">
                     <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 block">
                       Technician Sign-Off Notes
                     </span>
@@ -1323,7 +1230,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 <button
                   type="button"
                   onClick={() => setSelectedRequest(null)}
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-zinc-800 hover:bg-zinc-700 border border-white/[0.08] text-zinc-100 transition-colors"
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-zinc-800 hover:bg-zinc-700 border border-white/10 text-zinc-100 transition-colors"
                 >
                   Close
                 </button>
@@ -1332,11 +1239,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
         )}
 
-        {/* ── 5. Additional Service Pack Quotation Modal (Demo Mode) ─────────── */}
+        {/* ── 4. Additional Service Pack Quotation Modal (Demo Mode) ─────────── */}
         {showQuotationModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-md rounded-3xl border border-white/[0.08] bg-zinc-900 p-6 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+            <div className="w-full max-w-md rounded-3xl border border-white/5 bg-zinc-900 p-6 shadow-2xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/5">
                 <div className="flex items-center gap-2">
                   <ShieldCheckIcon size={18} className="text-[#10b981]" />
                   <h3 className="font-bold text-lg text-zinc-50">
@@ -1349,7 +1256,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     setShowQuotationModal(false);
                     setQuotationRequested(false);
                   }}
-                  className="w-8 h-8 rounded-full border border-white/[0.08] bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
+                  className="w-8 h-8 rounded-full border border-white/10 bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors"
                 >
                   <XIcon size={14} />
                 </button>
@@ -1380,7 +1287,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     Your facility has fully utilized the included <strong>{subscription.includedVisits} on-site visits</strong> for the current billing cycle.
                   </p>
 
-                  <div className="p-4 rounded-2xl border border-white/[0.06] bg-zinc-950/60 space-y-2">
+                  <div className="p-4 rounded-2xl border border-white/5 bg-zinc-950/60 space-y-2">
                     <div className="font-bold text-sm text-zinc-100">Enterprise On-Demand 5-Pack</div>
                     <ul className="space-y-1.5 text-zinc-300">
                       <li>• 5 additional certified technician on-site visits</li>
@@ -1393,11 +1300,11 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                     <em>Prototype Notice:</em> Quotation requests are simulated locally. No real banking session or monetary charge will occur.
                   </div>
 
-                  <div className="flex justify-end gap-2 pt-2 border-t border-white/[0.06]">
+                  <div className="flex justify-end gap-2 pt-2 border-t border-white/5">
                     <button
                       type="button"
                       onClick={() => setShowQuotationModal(false)}
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 border border-white/[0.08] text-zinc-300 hover:text-white"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-zinc-800 border border-white/10 text-zinc-300 hover:text-white"
                     >
                       Cancel
                     </button>

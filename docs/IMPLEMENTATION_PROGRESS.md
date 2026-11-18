@@ -1702,3 +1702,26 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build (`npm run build`). Customer Dashboard bundle: 54.38 kB.
+
+
+---
+
+## Milestone 4.16 — Customer Dashboard Clutter Removal & Flat Premium B2B Refactor
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Aggressively strip visual clutter, eliminate redundant cards and subtitles, and apply an airy flat B2B SaaS aesthetic:
+  1. **Structural Cleanup & Clutter Elimination**:
+     - Deleted the large "Active Facility Coverage & Purchases" card and "Demonstration Receipts" section from the main view.
+     - Merged remaining visit allowance (e.g. "27 of 30 left" with progress bar) and target physical arrival SLA (e.g. "20m") strictly inside the top 4 KPI cards.
+     - Stripped all long explanatory subtitles under section headers (removed "Real-time dispatch milestones, technician status, and on-site repair progress").
+  2. **Airy Flat Table Styling**:
+     - Upgraded cell padding from `py-3.5 px-4` to `py-4 px-5` across all table headers and data cells.
+     - Completely eliminated internal vertical borders and muddy outlines.
+     - Applied subtle horizontal dividers (`border-b border-white/5`), deep canvas surfaces (`bg-zinc-950`), and elevated card/table containers (`bg-zinc-900 border border-white/5`).
+     - Added premium row hover state: `hover:bg-zinc-800/50 transition-colors`.
+     - Enforced stark white values (`text-zinc-50`) and uppercase table headers (`text-xs font-bold uppercase tracking-wider text-zinc-400`).
+  3. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 13.33s (`npm run build`). Customer Dashboard bundle: 50.25 kB.
