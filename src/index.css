@@ -10,7 +10,7 @@
 /* ── CSS Custom Properties: VoltOps Enterprise Design Tokens ────────── */
 :root {
   /* Surface colors — Light Mode (Clean Slate Architectural Canvas) */
-  --bg-base: #f1f5f9;        /* Slate-100 canvas for card elevation */
+  --bg-base: #e8edf3;        /* Architectural canvas for card elevation */
   --bg-surface: #ffffff;     /* Pure white card and panel surface */
   --bg-surface-2: #f8fafc;   /* Slate-50 secondary surface, inputs, subtle wells */
   --bg-surface-3: #e2e8f0;   /* Raised controls / active interactive states */

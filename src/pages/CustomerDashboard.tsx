@@ -553,7 +553,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         {/* ── 1. Sleek 2-Card Visual Strip (Truthful VoltOps Telemetry) ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Card 1: Visit Allowance Gauge */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 border border-slate-200/90 dark:border-white/5 shadow-sm dark:shadow-md flex items-center gap-5 border-l-4 border-l-emerald-500">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 border border-slate-300 dark:border-white/5 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-md flex items-center gap-5 border-l-4 border-l-emerald-500">
             {/* Animated SVG Ring Gauge */}
             <div className="relative w-20 h-20 shrink-0 flex items-center justify-center">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 84 84">
@@ -607,7 +607,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
           </div>
 
           {/* Card 2: Facility Service Breakdown */}
-          <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 border border-slate-200/90 dark:border-white/5 shadow-sm dark:shadow-md flex flex-col justify-between space-y-3 border-l-4 border-l-cyan-500">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 border border-slate-300 dark:border-white/5 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-md flex flex-col justify-between space-y-3 border-l-4 border-l-cyan-500">
             <div className="flex items-center justify-between text-xs">
               <span className="font-bold text-slate-950 dark:text-white tracking-tight">Facility Service Breakdown</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-transparent tabular-nums">{requests.length} Total Incidents</span>
@@ -687,7 +687,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
         <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* ── Left Column: Service Requests List (35% width) ── */}
           <div className="w-full lg:w-[35%] space-y-4 shrink-0">
-            <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-4 border border-slate-200/90 dark:border-white/5 shadow-sm dark:shadow-md">
+            <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-4 border border-slate-300 dark:border-white/5 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-md">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-extrabold text-slate-950 dark:text-white tracking-tight">
                   Service Requests
@@ -708,13 +708,13 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
               {/* Search Bar with Filter Icon */}
               <div className="relative">
-                <SearchIcon size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <SearchIcon size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
                 <input
                   type="text"
                   placeholder="Search requests..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-9 py-2.5 rounded-lg bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-xs placeholder:text-slate-400 dark:placeholder:text-zinc-500 border border-slate-300 dark:border-white/5 shadow-xs focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  className="w-full pl-9 pr-9 py-2.5 rounded-lg bg-slate-50 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-800 dark:border-white/5 dark:text-white dark:placeholder:text-zinc-500 text-xs shadow-xs focus:outline-none transition-all"
                 />
                 {searchQuery ? (
                   <button
@@ -762,7 +762,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                         className={`rounded-xl p-3 cursor-pointer transition-all duration-150 select-none border ${
                           isSelected
                             ? "bg-emerald-50/70 border-2 border-emerald-500 text-slate-900 shadow-sm dark:bg-[#10b981] dark:text-zinc-950 dark:border-[#10b981] dark:shadow-md dark:shadow-emerald-500/10"
-                            : "bg-white hover:bg-slate-50 text-slate-900 border-slate-200/90 shadow-2xs dark:bg-zinc-800/60 dark:hover:bg-zinc-800 dark:text-white dark:border-white/5"
+                            : "bg-slate-50/70 hover:bg-slate-100 border border-slate-300 text-slate-900 dark:bg-zinc-800/60 dark:hover:bg-zinc-800 dark:text-white dark:border-white/5"
                         }`}
                       >
                         <div className="flex items-center justify-between gap-2">
@@ -797,7 +797,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             {activeRequestObj ? (
               <>
                 {/* ── Detail Card 1: Request ID, Facility & 4-Step Lifecycle Timeline ── */}
-                <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-5 border border-slate-200/90 dark:border-white/5 shadow-sm dark:shadow-md">
+                <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-5 border border-slate-300 dark:border-white/5 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-md">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-base font-extrabold text-slate-950 dark:text-white">
@@ -890,7 +890,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 </div>
 
                 {/* ── Detail Card 2: Assigned Certified Specialist ── */}
-                <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 flex items-center justify-between border border-slate-200/90 dark:border-white/5 shadow-sm dark:shadow-md">
+                <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 flex items-center justify-between border border-slate-300 dark:border-white/5 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-md">
                   <div className="flex items-center gap-3.5">
                     <div className="w-11 h-11 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-sm shadow-xs dark:bg-zinc-800 dark:border-[#10b981]/30 dark:text-[#10b981] flex items-center justify-center">
                       {activeRequestObj.assignedTech
@@ -942,7 +942,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 </div>
 
                 {/* ── Detail Card 3: Incident Details ── */}
-                <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-4 border border-slate-200/90 dark:border-white/5 shadow-sm dark:shadow-md">
+                <div className="bg-white dark:bg-zinc-900 rounded-xl p-5 space-y-4 border border-slate-300 dark:border-white/5 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-md">
                   <h4 className="text-sm font-extrabold text-slate-950 dark:text-white">Incident Details</h4>
 
                   <div className="space-y-3 text-xs">
@@ -996,7 +996,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
                 )}
               </>
             ) : (
-              <div className="bg-white dark:bg-zinc-900 rounded-xl p-12 text-center text-slate-500 dark:text-zinc-400 space-y-2 border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-md">
+              <div className="bg-white dark:bg-zinc-900 rounded-xl p-12 text-center text-slate-500 dark:text-zinc-400 space-y-2 border border-slate-300 dark:border-white/5 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-md">
                 <CheckCircleIcon size={24} className="mx-auto text-[#10b981]" />
                 <div className="text-sm font-bold text-slate-900 dark:text-white">No Request Selected</div>
                 <p className="text-xs">Select a request from the left list to view live tracking.</p>
@@ -1007,7 +1007,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
 
         {/* ── 3. Progressive Disclosure: Service History Table (When Toggled) ── */}
         {showHistory && (
-          <div className="bg-white dark:bg-zinc-900 rounded-xl overflow-hidden shadow-sm dark:shadow-md space-y-4 p-5 border border-slate-200/90 dark:border-white/5 animate-fade-in">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl overflow-hidden shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-md space-y-4 p-5 border border-slate-300 dark:border-white/5 animate-fade-in">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-slate-950 dark:text-white">Facility Service History Archive</h3>
@@ -1027,7 +1027,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-xs border border-slate-300 dark:border-white/5 shadow-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-800 dark:border-white/5 dark:text-white text-xs shadow-xs"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="ACTIVE">All Active</option>
@@ -1044,7 +1044,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-xs border border-slate-300 dark:border-white/5 shadow-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-800 dark:border-white/5 dark:text-white text-xs shadow-xs"
               >
                 <option value="ALL">All Priorities</option>
                 <option value="URGENT">Urgent</option>
@@ -1056,7 +1056,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white dark:bg-zinc-800 text-slate-900 dark:text-white text-xs border border-slate-300 dark:border-white/5 shadow-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-800 dark:border-white/5 dark:text-white text-xs shadow-xs"
               >
                 <option value="ALL">All Categories</option>
                 {CANONICAL_SERVICE_CATEGORIES.map((c) => (
@@ -1071,7 +1071,7 @@ export function CustomerDashboard({ initialView }: CustomerDashboardProps) {
             <div className="overflow-x-auto pt-2">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold dark:border-white/[0.08] dark:bg-transparent dark:text-zinc-400">
+                  <tr className="border-b border-slate-300/80 bg-slate-100 text-slate-700 font-semibold dark:border-white/[0.08] dark:bg-transparent dark:text-zinc-400">
                     <th className="py-2.5 px-3">Request ID</th>
                     <th className="py-2.5 px-3">Asset / Problem</th>
                     <th className="py-2.5 px-3">Category</th>

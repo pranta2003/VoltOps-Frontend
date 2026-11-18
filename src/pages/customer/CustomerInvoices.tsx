@@ -120,7 +120,7 @@ export function CustomerInvoices() {
         {/* Top Billing Summary Strip (3 Compact Cards) */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           {/* Card 1: Outstanding Balance */}
-          <div className="p-4 rounded-xl border border-slate-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-1 border-l-4 border-l-rose-500">
+          <div className="p-4 rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-sm space-y-1 border-l-4 border-l-rose-500">
             <div className="flex items-center justify-between">
               <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">
                 Outstanding Balance
@@ -138,7 +138,7 @@ export function CustomerInvoices() {
           </div>
 
           {/* Card 2: Active Subscription */}
-          <div className="p-4 rounded-xl border border-slate-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-1 border-l-4 border-l-emerald-500">
+          <div className="p-4 rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-sm space-y-1 border-l-4 border-l-emerald-500">
             <div className="flex items-center justify-between">
               <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">
                 Active Subscription
@@ -157,7 +157,7 @@ export function CustomerInvoices() {
           </div>
 
           {/* Card 3: Invoices Due */}
-          <div className="p-4 rounded-xl border border-slate-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-1 border-l-4 border-l-[#b8287a]">
+          <div className="p-4 rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-sm space-y-1 border-l-4 border-l-[#b8287a]">
             <div className="flex items-center justify-between">
               <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">
                 Invoices Due
@@ -217,7 +217,7 @@ export function CustomerInvoices() {
                       className={`w-full text-left p-3.5 rounded-xl border transition-all ${
                         isSelected
                           ? "bg-emerald-50/70 border-2 border-emerald-500 text-slate-900 shadow-sm dark:border-[#10b981] dark:bg-zinc-900 dark:shadow-sm dark:ring-1 dark:ring-[#10b981]"
-                          : "border border-slate-200/90 bg-white dark:bg-zinc-900/60 text-slate-800 dark:text-zinc-400 hover:border-slate-300 dark:hover:border-white/10 hover:text-slate-950 dark:hover:text-zinc-200 shadow-2xs"
+                          : "border border-slate-300 bg-slate-50/70 hover:bg-slate-100 text-slate-800 dark:bg-zinc-900/60 dark:border-white/10 dark:text-zinc-400 dark:hover:border-white/20 dark:hover:text-zinc-200 shadow-2xs"
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -251,7 +251,7 @@ export function CustomerInvoices() {
 
             {/* Right: Full Itemized Invoice Detail */}
             {selectedInvoice && (
-              <div className="lg:col-span-8 p-6 sm:p-7 rounded-xl border border-slate-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-6">
+              <div className="lg:col-span-8 p-6 sm:p-7 rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] space-y-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/5 pb-5">
                   <div>
                     <div className="flex items-center gap-1.5 mb-1 text-[11px] font-mono font-bold text-emerald-700 dark:text-[#10b981] uppercase tracking-wider">
@@ -320,25 +320,25 @@ export function CustomerInvoices() {
 
                 {/* Metadata Grid (Generous spacing, no awkward truncation) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-950/60 border border-slate-200 dark:border-white/5">
+                  <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950/60 border border-slate-300/80 dark:border-white/5">
                     <span className="text-slate-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Customer Account</span>
                     <span className="font-semibold text-slate-950 dark:text-zinc-200 block mt-1 leading-snug">
                       {selectedInvoice.customerName}
                     </span>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-950/60 border border-slate-200 dark:border-white/5">
+                  <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950/60 border border-slate-300/80 dark:border-white/5">
                     <span className="text-slate-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Billing Date</span>
                     <span className="font-semibold text-slate-950 dark:text-zinc-200 block mt-1 tabular-nums">
                       {selectedInvoice.billingDate}
                     </span>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-950/60 border border-slate-200 dark:border-white/5">
+                  <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950/60 border border-slate-300/80 dark:border-white/5">
                     <span className="text-slate-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Payment Due</span>
                     <span className="font-semibold text-slate-950 dark:text-zinc-200 block mt-1 tabular-nums">
                       {selectedInvoice.dueDate}
                     </span>
                   </div>
-                  <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-950/60 border border-slate-200 dark:border-white/5">
+                  <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950/60 border border-slate-300/80 dark:border-white/5">
                     <span className="text-slate-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Coverage Plan</span>
                     <span className="font-semibold text-emerald-700 dark:text-[#10b981] block mt-1">
                       {subscription.planName}
@@ -347,10 +347,10 @@ export function CustomerInvoices() {
                 </div>
 
                 {/* Itemized Table */}
-                <div className="border border-slate-200 dark:border-white/5 rounded-xl overflow-hidden bg-slate-50/50 dark:bg-zinc-950/40">
+                <div className="border border-slate-300 dark:border-white/5 rounded-xl overflow-hidden bg-slate-50/50 dark:bg-zinc-950/40">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="text-slate-600 dark:text-zinc-400 border-b border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-zinc-950/80 text-[11px] font-semibold">
+                      <tr className="text-slate-700 dark:text-zinc-400 border-b border-slate-300/80 dark:border-white/5 bg-slate-100 dark:bg-zinc-950/80 text-[11px] font-semibold">
                         <th className="py-3 px-4">Line Item Description</th>
                         <th className="py-3 px-3 text-center w-20">Qty</th>
                         <th className="py-3 px-3 text-right w-28">Unit Price</th>

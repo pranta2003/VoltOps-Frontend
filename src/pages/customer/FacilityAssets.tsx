@@ -288,7 +288,7 @@ export function FacilityAssets() {
     >
       <div className="space-y-4 max-w-6xl mx-auto pb-24">
         {/* Compact Summary & Filter Pills Toolbar */}
-        <div className="p-4 rounded-xl border border-slate-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-sm space-y-3.5">
+        <div className="p-4 rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] space-y-3.5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             {/* Inline Filter Pills */}
             <div className="flex items-center gap-2 flex-wrap">
@@ -344,7 +344,7 @@ export function FacilityAssets() {
           {/* Search Box & Category Select */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-1">
             <div className="sm:col-span-8 relative">
-              <SearchIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <SearchIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 id="assets-search"
                 name="search"
@@ -352,7 +352,7 @@ export function FacilityAssets() {
                 placeholder="Search asset name, serial tag, or facility location…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-xl text-xs border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 shadow-xs focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-colors"
+                className="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-slate-50 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-100 dark:placeholder:text-zinc-500 shadow-xs focus:outline-none transition-colors"
               />
               {searchQuery && (
                 <button
@@ -371,7 +371,7 @@ export function FacilityAssets() {
                 name="category"
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl text-xs border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-200 shadow-xs focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-colors font-medium"
+                className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-200 shadow-xs focus:outline-none transition-colors font-medium"
                 aria-label="Filter by trade category"
               >
                 <option value="ALL">All Categories</option>
@@ -403,10 +403,10 @@ export function FacilityAssets() {
         )}
 
         {/* Asset Inventory Table (Proportional, Desktop Fit, Zero Horizontal Scroll) */}
-        <div className="rounded-xl border border-slate-200/90 dark:border-white/5 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
+        <div className="rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 overflow-hidden shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)]">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-zinc-950/60 text-slate-600 dark:text-zinc-400 font-semibold text-[11px]">
+              <tr className="border-b border-slate-300/80 dark:border-white/5 bg-slate-100 dark:bg-zinc-950/60 text-slate-700 dark:text-zinc-400 font-semibold text-[11px]">
                 <th className="py-3 px-3.5">Asset & Tag</th>
                 <th className="py-3 px-3 hidden sm:table-cell">Category</th>
                 <th className="py-3 px-3 hidden md:table-cell">Location</th>
