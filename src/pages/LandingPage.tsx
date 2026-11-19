@@ -1072,7 +1072,7 @@ export function LandingPage() {
                 className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] flex flex-col"
               >
                 <div
-                  className={`h-full p-6 rounded-[28px] border border-[var(--border)] glass-panel ${trade.glowClass} flex flex-col justify-between text-center shadow-[var(--shadow-sm)] group`}
+                  className="h-full p-6 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900/90 shadow-md dark:shadow-none hover:border-emerald-500/50 hover:shadow-lg dark:hover:border-emerald-500/40 flex flex-col justify-between text-center group transition-all duration-200"
                 >
                   <div className="flex flex-col items-center text-center w-full space-y-3">
                     {/* Trade Icon */}
