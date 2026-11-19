@@ -217,35 +217,35 @@ export function LeaveRequests() {
         {/* Modal: Submit Leave Request */}
         {modalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
-                <h3 className="font-heading font-bold text-sm text-[var(--text-primary)]">
+            <div className="w-full max-w-md rounded-2xl border border-slate-300 bg-white p-5 shadow-2xl space-y-4 dark:border-white/10 dark:bg-zinc-900">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-3">
+                <h3 className="font-heading font-bold text-sm text-slate-950 dark:text-zinc-50">
                   Submit Leave Request
                 </h3>
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="p-1 rounded-lg text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100"
                 >
                   <XIcon size={16} />
                 </button>
               </div>
 
               {formError && (
-                <div className="p-2.5 rounded-lg border border-rose-500/20 bg-rose-500/10 text-xs text-rose-700 dark:text-rose-300">
+                <div className="p-2.5 rounded-lg border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 text-xs text-rose-800 dark:text-rose-300 font-semibold">
                   {formError}
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-3 text-xs">
                 <div>
-                  <label className="block font-semibold text-[var(--text-primary)] mb-1">
+                  <label className="block font-bold text-slate-800 dark:text-zinc-200 mb-1">
                     Leave Type
                   </label>
                   <select
                     value={leaveType}
                     onChange={(e) => setLeaveType(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)]"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-950 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50"
                   >
                     <option value="ANNUAL">Annual Planned Leave</option>
                     <option value="MEDICAL">Medical / Health Leave</option>
@@ -256,7 +256,7 @@ export function LeaveRequests() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-[var(--text-primary)] mb-1">
+                    <label className="block font-bold text-slate-800 dark:text-zinc-200 mb-1">
                       Start Date
                     </label>
                     <input
@@ -264,11 +264,11 @@ export function LeaveRequests() {
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                       required
-                      className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] font-mono"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-950 font-mono focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50"
                     />
                   </div>
                   <div>
-                    <label className="block font-semibold text-[var(--text-primary)] mb-1">
+                    <label className="block font-bold text-slate-800 dark:text-zinc-200 mb-1">
                       End Date
                     </label>
                     <input
@@ -276,13 +276,13 @@ export function LeaveRequests() {
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
                       required
-                      className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] font-mono"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-950 font-mono focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-[var(--text-primary)] mb-1">
+                  <label className="block font-bold text-slate-800 dark:text-zinc-200 mb-1">
                     Reason & Handover Notes
                   </label>
                   <textarea
@@ -290,25 +290,25 @@ export function LeaveRequests() {
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Briefly state reason for leave and any pending tool or job handover details..."
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)]"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-950 placeholder-slate-400 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50"
                   />
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-800 dark:text-amber-300">
+                <div className="p-2.5 rounded-lg bg-cyan-50 border border-cyan-200 text-[11px] text-cyan-900 dark:bg-cyan-500/10 dark:border-cyan-500/20 dark:text-cyan-300 font-medium">
                   Notice: All leave requests require Dispatcher or Admin approval before shift assignments change.
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border)]">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-white/5">
                   <button
                     type="button"
                     onClick={() => setModalOpen(false)}
-                    className="px-3 py-1.5 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-1.5 rounded-lg font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all"
+                    className="px-4 py-1.5 rounded-lg font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm"
                   >
                     Submit Request
                   </button>
