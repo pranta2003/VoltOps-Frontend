@@ -1042,14 +1042,14 @@ export function LandingPage() {
           <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
             7 Supported Trades
           </span>
-          <h2 className="text-3xl sm:text-4xl font-space font-bold tracking-tight text-[var(--text-primary)]">
+          <h2 className="text-3xl sm:text-4xl font-space font-extrabold tracking-tight text-slate-900 dark:text-white">
             What we maintain for your{" "}
-            <span className="font-serif-italic font-normal">
+            <span className="font-serif-italic font-normal text-emerald-600 dark:text-emerald-400">
               facility
             </span>
           </h2>
-          <p className="text-sm text-slate-700 dark:text-slate-300">
-            Standardized commercial coverage across 7 technical trades with 20–40 minute physical arrival targets.
+          <p className="text-sm text-slate-700 dark:text-slate-300 font-medium max-w-xl mx-auto">
+            Commercial facility maintenance across 7 technical trades with guaranteed physical arrival SLAs.
           </p>
         </motion.div>
 
