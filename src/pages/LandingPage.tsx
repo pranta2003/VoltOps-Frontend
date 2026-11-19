@@ -1731,10 +1731,9 @@ export function LandingPage() {
                         : "text-slate-900 dark:text-white"
                     }`}
                   >
-                    <CountUpMetric
-                      value={metric.targetValue}
-                      decimals={metric.decimals || 0}
-                      suffix={metric.suffix}
+                    <AnimatedCounter
+                      value={`${metric.targetValue}${metric.suffix || ""}`}
+                      duration={1.8}
                     />
                   </div>
                   <h3 className="font-bold text-sm text-slate-900 dark:text-white mt-2 font-heading">
