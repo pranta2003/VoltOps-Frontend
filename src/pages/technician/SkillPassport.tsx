@@ -87,11 +87,11 @@ export function SkillPassport() {
             </div>
 
             <div className="flex items-center gap-2 self-start sm:self-auto text-xs">
-              <span className="px-2.5 py-1 rounded-md font-mono text-[11px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                Duty: {profile?.status || "AVAILABLE"}
+              <span className="px-2.5 py-1 rounded-md font-mono text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30">
+                Duty: {profile?.status ? profile.status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "Available"}
               </span>
-              <span className="px-2.5 py-1 rounded-md font-mono text-[11px] text-[var(--text-muted)] bg-[var(--bg-surface-2)] border border-[var(--border)]">
-                Active: {profile?.activeJobCount || 0} jobs
+              <span className="px-2.5 py-1 rounded-md font-mono text-[11px] text-slate-700 dark:text-zinc-300 bg-slate-100 border border-slate-300 dark:bg-zinc-950 dark:border-white/10 font-medium">
+                Active: {profile?.activeJobCount || 0} {(profile?.activeJobCount === 1) ? "job" : "jobs"}
               </span>
             </div>
           </div>
