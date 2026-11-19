@@ -305,7 +305,7 @@ export function MyJobs() {
         )}
 
         {/* ── Filter Toolbar ────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl border border-slate-300 border-l-4 border-l-emerald-500 bg-white shadow-md dark:border-white/5 dark:border-l-white/5 dark:bg-zinc-900 dark:shadow-none">
           {/* Search */}
           <div className="relative flex-1 min-w-[220px]">
             <SearchIcon
@@ -374,7 +374,7 @@ export function MyJobs() {
           </div>
 
           {/* Status Tabs */}
-          <div className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] p-0.5 text-xs">
+          <div className="inline-flex rounded-lg border border-slate-300 bg-slate-100 p-0.5 text-xs dark:border-white/10 dark:bg-zinc-950">
             {[
               { id: "ALL", label: "All" },
               { id: "TODAY", label: "Active Today" },
@@ -387,8 +387,8 @@ export function MyJobs() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`px-3 py-1 rounded-md font-medium transition-all ${
                   activeTab === tab.id
-                    ? "bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-sm"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    ? "bg-white text-slate-950 font-bold shadow-xs dark:bg-zinc-800 dark:text-zinc-50"
+                    : "text-slate-600 hover:text-slate-950 dark:text-zinc-400 dark:hover:text-zinc-100"
                 }`}
               >
                 {tab.label}
