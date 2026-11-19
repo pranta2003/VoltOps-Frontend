@@ -987,7 +987,12 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── Section: The 7 Canonical Service Trades (BALANCED & CENTERED) ─ */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <section id="services" data-section-tone="auto" className="py-20 max-w-6xl mx-auto px-5">
+      <section id="services" data-section-tone="auto" className="relative py-20 max-w-6xl mx-auto px-5">
+        {/* Subtle radial emerald aura in Dark Mode */}
+        <div
+          className="pointer-events-none absolute top-6 left-1/2 -translate-x-1/2 w-full max-w-3xl h-64 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_70%)] dark:block hidden"
+          aria-hidden="true"
+        />
         <motion.div
           initial="hidden"
           whileInView="visible"
