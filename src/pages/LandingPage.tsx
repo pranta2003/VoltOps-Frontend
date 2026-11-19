@@ -887,25 +887,8 @@ export function LandingPage() {
             />
           </video>
 
-          {/* Balanced cinematic dark overlay: keeps engineers and facility background visible with elevated brightness while ensuring high contrast for white text */}
-          <div
-            className="absolute inset-0 transition-colors duration-300"
-            style={{
-              background: isDark
-                ? "radial-gradient(ellipse at 50% 32%, rgba(6, 12, 20, 0.36) 0%, rgba(6, 12, 20, 0.54) 100%)"
-                : "radial-gradient(ellipse at 50% 32%, rgba(6, 12, 20, 0.32) 0%, rgba(6, 12, 20, 0.46) 100%)",
-            }}
-          />
-
-          {/* Smooth multi-stop bottom fade into base theme background (prevents sudden dark block) */}
-          <div
-            className="absolute inset-x-0 bottom-0 h-56 sm:h-72 pointer-events-none transition-colors duration-300"
-            style={{
-              background: isDark
-                ? "linear-gradient(to bottom, transparent 0%, rgba(11, 17, 23, 0.3) 30%, rgba(11, 17, 23, 0.75) 70%, var(--bg-base) 100%)"
-                : "linear-gradient(to bottom, transparent 0%, rgba(248, 250, 252, 0.25) 30%, rgba(248, 250, 252, 0.8) 70%, var(--bg-base) 100%)",
-            }}
-          />
+          {/* Refined cinematic dark gradient scrim: lets the video breathe while ensuring effortless contrast for headline */}
+          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/70 via-zinc-950/50 to-zinc-950" />
         </div>
 
         <motion.div
