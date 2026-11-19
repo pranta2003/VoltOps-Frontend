@@ -1397,7 +1397,7 @@ export function LandingPage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold font-card-title text-slate-900 dark:text-white">8-Hour Daily</h3>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-slate-600 dark:text-slate-400">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 whitespace-nowrap">
                     Plan A
                   </span>
                 </div>
@@ -1556,7 +1556,7 @@ export function LandingPage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold font-card-title text-slate-900 dark:text-white">Custom Coverage</h3>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-slate-600 dark:text-slate-400">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 whitespace-nowrap">
                     Plan D
                   </span>
                 </div>
