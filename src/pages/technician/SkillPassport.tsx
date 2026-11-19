@@ -46,7 +46,7 @@ export function SkillPassport() {
       action={
         <Link
           to="/technician/jobs"
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm"
         >
           <span>View Active Jobs</span>
           <ArrowRightIcon size={12} />
@@ -55,10 +55,10 @@ export function SkillPassport() {
     >
       <div className="space-y-4">
         {/* Verification Status & Identity Header */}
-        <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm">
+        <div className="p-4 rounded-xl border border-slate-300 border-l-4 border-l-emerald-500 bg-white shadow-md dark:border-white/5 dark:border-l-white/5 dark:bg-zinc-900 dark:shadow-none">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 font-bold text-base flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-cyan-100 border border-cyan-300 text-cyan-800 dark:bg-cyan-500/15 dark:border-cyan-500/30 dark:text-cyan-300 font-bold text-base flex items-center justify-center shrink-0">
                 {profile?.name
                   ? profile.name
                       .split(" ")
@@ -69,18 +69,18 @@ export function SkillPassport() {
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-base font-bold text-[var(--text-primary)] font-heading">
+                  <h2 className="text-base font-bold text-slate-950 dark:text-zinc-50 font-heading">
                     {profile?.name || "Kamrul Islam"}
                   </h2>
-                  <span className="font-mono text-xs px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)] border border-[var(--border)]">
+                  <span className="font-mono text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-300 dark:bg-zinc-950 dark:text-zinc-400 dark:border-white/10 font-medium">
                     {profile?.employeeId || "EMP-ELEC-409"}
                   </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                    <CheckCircleIcon size={11} className="text-emerald-500" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30">
+                    <CheckCircleIcon size={11} className="text-emerald-600 dark:text-emerald-400" />
                     <span>Verified Tier 1</span>
                   </span>
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="text-xs text-slate-600 dark:text-zinc-400 font-medium mt-0.5">
                   {profile?.designation || "Senior High-Voltage Specialist"} · {profile?.branch || "EPZ Industrial Core Hub"}
                 </p>
               </div>
