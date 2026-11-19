@@ -1323,19 +1323,19 @@ export function LandingPage() {
                   }`}
                 >
                   <div
-                    className="w-11 h-11 rounded-2xl flex items-center justify-center mb-3.5 transition-all shadow-sm"
-                    style={{
-                      background: isHov ? "#10b981" : "var(--bg-surface-2)",
-                      color: isHov ? "#06090e" : "var(--text-primary)",
-                    }}
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3.5 transition-all shadow-sm ${
+                      isHov
+                        ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                        : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                    }`}
                   >
                     <StepIcon size={19} />
                   </div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-[#34d399] mb-1">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1 font-semibold">
                     Step 0{step}
                   </div>
-                  <h3 className="font-bold font-heading text-sm text-[var(--text-primary)] mb-1.5">{title}</h3>
-                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-normal">{desc}</p>
+                  <h3 className="font-bold font-heading text-sm text-slate-900 dark:text-white mb-1.5">{title}</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal">{desc}</p>
                 </motion.div>
               );
             })}
