@@ -288,7 +288,7 @@ export function FacilityAssets() {
     >
       <div className="space-y-4 max-w-6xl mx-auto pb-24">
         {/* Compact Summary & Filter Pills Toolbar */}
-        <div className="p-4 rounded-xl border border-slate-300 border-l-4 border-l-emerald-500 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:border-white/5 dark:border-l-white/5 dark:bg-zinc-900 dark:shadow-none space-y-3.5">
+        <div className="p-4 rounded-xl border border-slate-300 border-l-4 border-l-emerald-500 shadow-md bg-white dark:border-white/5 dark:border-l-white/5 dark:bg-zinc-900 dark:shadow-none space-y-3.5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             {/* Inline Filter Pills */}
             <div className="flex items-center gap-2 flex-wrap">
@@ -352,7 +352,7 @@ export function FacilityAssets() {
                 placeholder="Search asset name, serial tag, or facility location…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-slate-50 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-100 dark:placeholder:text-zinc-500 shadow-xs focus:outline-none transition-colors"
+                className="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-slate-100 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-100 dark:placeholder:text-zinc-500 shadow-xs focus:outline-none transition-colors"
               />
               {searchQuery && (
                 <button
@@ -371,7 +371,7 @@ export function FacilityAssets() {
                 name="category"
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-200 shadow-xs focus:outline-none transition-colors font-medium"
+                className="w-full px-3 py-2 rounded-xl text-xs bg-slate-100 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-200 shadow-xs focus:outline-none transition-colors font-medium"
                 aria-label="Filter by trade category"
               >
                 <option value="ALL">All Categories</option>
@@ -403,10 +403,10 @@ export function FacilityAssets() {
         )}
 
         {/* Asset Inventory Table (Proportional, Desktop Fit, Zero Horizontal Scroll) */}
-        <div className="rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 overflow-hidden shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)]">
+        <div className="rounded-xl border border-slate-300 border-t-4 border-t-emerald-500 bg-white dark:bg-zinc-900 dark:border-white/5 dark:border-t-white/5 dark:shadow-none overflow-hidden shadow-md">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-300 dark:border-white/5 bg-slate-100 dark:bg-zinc-950/60 text-slate-700 dark:text-zinc-400 font-semibold text-[11px]">
+              <tr className="border-b-2 border-slate-300 bg-slate-200/70 text-slate-800 font-bold uppercase text-xs tracking-wider dark:border-white/5 dark:bg-zinc-950/60 dark:text-zinc-400">
                 <th className="py-3 px-3.5">Asset & Tag</th>
                 <th className="py-3 px-3 hidden sm:table-cell">Category</th>
                 <th className="py-3 px-3 hidden md:table-cell">Location</th>
@@ -416,7 +416,7 @@ export function FacilityAssets() {
                 <th className="py-3 px-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-white/5">
+            <tbody className="divide-y divide-slate-300/80 dark:divide-white/5">
               {isLoading ? (
                 <tr>
                   <td colSpan={7} className="py-16 text-center text-xs text-zinc-500 space-y-2">
@@ -452,8 +452,8 @@ export function FacilityAssets() {
                   return (
                     <Fragment key={asset.id}>
                       <tr
-                        className={`hover:bg-slate-50 dark:hover:bg-zinc-800/40 transition-colors ${
-                          isExpanded ? "bg-slate-50/80 dark:bg-zinc-800/30" : ""
+                        className={`odd:bg-white even:bg-slate-50/90 hover:bg-emerald-50/50 dark:odd:bg-transparent dark:even:bg-transparent dark:hover:bg-zinc-800/40 transition-colors ${
+                          isExpanded ? "!bg-slate-100/90 dark:!bg-zinc-800/30" : ""
                         }`}
                       >
                         <td className="py-3 px-3.5">
@@ -527,7 +527,7 @@ export function FacilityAssets() {
                             <button
                               type="button"
                               onClick={() => setSelectedAsset(asset)}
-                              className="px-2 py-1 rounded-lg text-xs font-medium border border-slate-300 dark:border-white/5 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 shadow-xs dark:bg-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1"
+                              className="px-2 py-1 rounded-lg text-xs font-medium border border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-800 shadow-xs dark:border-white/5 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1"
                               title="View specs"
                             >
                               <EyeIcon size={12} />
@@ -548,7 +548,7 @@ export function FacilityAssets() {
                               <button
                                 type="button"
                                 onClick={() => openReportModal(asset)}
-                                className="px-2 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-400 hover:bg-emerald-100 shadow-xs dark:border-transparent dark:bg-[#10b981]/15 dark:text-[#10b981] dark:hover:bg-[#10b981]/25 transition-all flex items-center gap-1"
+                                className="px-2 py-1 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-400 shadow-xs dark:border-transparent dark:bg-[#10b981]/15 dark:text-[#10b981] dark:hover:bg-[#10b981]/25 transition-all flex items-center gap-1"
                                 title={`Report breakdown for ${asset.name}`}
                               >
                                 <WrenchIcon size={11} />
