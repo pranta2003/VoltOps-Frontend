@@ -1408,7 +1408,7 @@ export function LandingPage() {
                     <span className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white">{COVERAGE_PLANS["8hr"].formattedPrice}</span>
                     <span className="text-xs text-slate-500">{COVERAGE_PLANS["8hr"].billingUnit}</span>
                   </div>
-                  <div className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 font-medium">Prototype Pricing • 08:00 – 17:00</div>
+                  <div className="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5 font-medium">Prototype Pricing · 08:00 – 17:00</div>
                 </div>
 
                 <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
@@ -1459,7 +1459,7 @@ export function LandingPage() {
                     <span className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white">{COVERAGE_PLANS["247-standard"].formattedPrice}</span>
                     <span className="text-xs text-slate-500">{COVERAGE_PLANS["247-standard"].billingUnit}</span>
                   </div>
-                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">Prototype Pricing • 24 Hours / 7 Days</div>
+                  <div className="text-[10px] text-cyan-700 dark:text-cyan-400 mt-0.5 font-medium">Prototype Pricing · 24 Hours / 7 Days</div>
                 </div>
 
                 <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
