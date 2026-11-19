@@ -1148,14 +1148,21 @@ export function LandingPage() {
                 { label: "Trade Skill & License Verification", val: "Hard eligibility gate", progress: 100, color: "#10b981" },
                 { label: "Proximity & Hub Routing", val: "Branch hub proximity score", progress: 85, color: "#06b6d4" },
                 { label: "Active Workload Balancing", val: "Max 2 active jobs per tech", progress: 75, color: "#38bdf8" },
-              ].map(({ label, val, progress, color }) => (
+              ].map(({ label, val, progress, color }, idx) => (
                 <div key={label} className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-950/60 border border-slate-200 dark:border-white/10 space-y-1.5">
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-slate-900 dark:text-white">{label}</span>
                     <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">{val}</span>
                   </div>
                   <div className="w-full bg-slate-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${progress}%`, background: color }} />
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${progress}%` }}
+                      viewport={{ once: true, margin: "-40px" }}
+                      transition={{ duration: 0.9, delay: 0.2 + idx * 0.15, ease: "easeOut" }}
+                      className="h-full rounded-full"
+                      style={{ background: color }}
+                    />
                   </div>
                 </div>
               ))}
