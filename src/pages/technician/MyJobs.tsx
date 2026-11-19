@@ -429,9 +429,9 @@ export function MyJobs() {
                 ) : (
                   filteredJobs.map((job) => (
                     <tr key={job.id} className="odd:bg-white even:bg-slate-50/90 hover:bg-emerald-50/50 dark:odd:bg-zinc-900 dark:even:bg-zinc-900 dark:hover:bg-zinc-800/50 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-[var(--text-primary)]">
-                        {job.id}
-                        <div className="text-[10px] font-mono text-[var(--text-muted)]">
+                      <td className="py-3.5 px-4 font-mono font-bold text-slate-950 dark:text-zinc-50 whitespace-nowrap">
+                        <div className="text-xs font-bold tabular-nums">{job.id}</div>
+                        <div className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 font-medium">
                           Ref: {job.requestId}
                         </div>
                       </td>
