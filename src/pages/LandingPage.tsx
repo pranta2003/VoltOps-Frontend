@@ -1792,28 +1792,28 @@ export function LandingPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
               About VoltOps
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)] leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-slate-900 dark:text-white leading-tight">
               Built for commercial{" "}
-              <span className="font-serif-italic font-normal">
+              <span className="font-serif-italic font-normal text-emerald-600 dark:text-emerald-400">
                 facility coordination
               </span>
             </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              We bridge commercial facility managers with verified multi-trade technicians, eliminating the frustration of unverified independent contractors and unpredictable arrival delays.
+            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+              We connect commercial facility managers with verified multi-trade technicians, eliminating unpredictable downtime and uncertified contractor delays.
             </p>
           </div>
           <div className="lg:col-span-6 space-y-3.5">
             {[
-              { title: "No uncertified technicians", desc: "Trade licenses and safety credentials are confirmed before assignment." },
-              { title: "No double bookings", desc: "Active jobs and proximity matching prevent overlapping assignments." },
-              { title: "Real accountability", desc: "Transparent physical arrival tracking and digital itemized repair logs." },
+              { title: "No uncertified technicians", desc: "Trade licenses and safety credentials are authenticated before dispatch." },
+              { title: "No double bookings", desc: "Live workload balancing and hub proximity prevent overlapping assignments." },
+              { title: "Guaranteed arrival accountability", desc: "Transparent physical arrival countdowns and digital itemized sign-off." },
             ].map(({ title, desc }) => (
-              <div key={title} className="p-5 rounded-2xl border border-[var(--border)] glass-panel space-y-1 shadow-[var(--shadow-sm)]">
-                <div className="flex items-center gap-2 font-bold text-sm text-[var(--text-primary)]">
-                  <CheckCircleIcon size={16} className="text-[#10b981] dark:text-[#34d399] shrink-0" />
+              <div key={title} className="p-5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none space-y-1 hover:border-emerald-500/40 transition-all">
+                <div className="flex items-center gap-2 font-bold text-sm text-slate-900 dark:text-white font-heading">
+                  <CheckCircleIcon size={16} className="text-emerald-500 shrink-0" />
                   <span>{title}</span>
                 </div>
-                <p className="text-xs pl-6 text-[var(--text-secondary)]">{desc}</p>
+                <p className="text-xs pl-6 text-slate-600 dark:text-slate-400 font-medium">{desc}</p>
               </div>
             ))}
           </div>
