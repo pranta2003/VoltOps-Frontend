@@ -1493,10 +1493,10 @@ export function LandingPage() {
             variants={cardItemVariants}
             whileHover={{ y: -5, scale: 1.01 }}
             transition={{ duration: 0.2 }}
-            className="flex flex-col transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.3)] rounded-[30px]"
+            className="flex flex-col transition-shadow duration-300 rounded-2xl"
           >
-            <div className="h-full p-6 sm:p-7 rounded-[30px] border-2 border-[#10b981] glass-panel glow-card-emerald flex flex-col justify-between relative shadow-[0_0_32px_rgba(16,185,129,0.22)]">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-0.5 rounded-full bg-[#10b981] text-[#06090e] text-[11px] font-bold uppercase tracking-wider shadow flex items-center gap-1">
+            <div className="h-full p-6 sm:p-7 rounded-2xl border-2 border-emerald-500 bg-white dark:bg-zinc-900 shadow-xl dark:shadow-none shadow-emerald-500/10 flex flex-col justify-between relative">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-0.5 rounded-full bg-emerald-500 text-zinc-950 text-[11px] font-bold uppercase tracking-wider shadow flex items-center gap-1">
                 <ZapIcon size={11} />
                 <span>Fastest Response</span>
               </div>
@@ -1533,11 +1533,11 @@ export function LandingPage() {
               </div>
 
               <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => handlePlan("247-priority")}
-                className="mt-6 w-full py-2.5 rounded-full font-bold text-xs bg-[#10b981] text-[#06090e] shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:bg-[#34d399] transition-all flex items-center justify-center gap-1.5"
+                className="mt-6 w-full py-2.5 rounded-full font-bold text-xs bg-emerald-500 text-zinc-950 shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:bg-emerald-400 transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
               >
                 <span>Select Plan C</span>
                 <ArrowRightIcon size={12} />
