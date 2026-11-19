@@ -82,14 +82,14 @@ export function LeaveRequests() {
   const getStatusBadge = (status: TechnicianLeaveRequest["status"]) => {
     switch (status) {
       case "APPROVED":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
+        return "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30 font-bold";
       case "PENDING":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+        return "bg-cyan-100 text-cyan-900 border-cyan-300 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/30 font-semibold";
       case "REJECTED":
-        return "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20";
+        return "bg-rose-100 text-rose-900 border-rose-300 dark:bg-[#b8287a]/20 dark:text-[#f472b6] dark:border-[#b8287a]/30 font-bold";
       case "CANCELLED":
       default:
-        return "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20";
+        return "bg-slate-100 text-slate-800 border-slate-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-white/10 font-medium";
     }
   };
 
@@ -110,7 +110,7 @@ export function LeaveRequests() {
         </button>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-4 pb-24">
         {/* Success Notice */}
         {actionSuccess && (
           <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
@@ -198,7 +198,7 @@ export function LeaveRequests() {
                           <button
                             type="button"
                             onClick={() => handleCancel(r.id)}
-                            className="px-2.5 py-1 rounded-md text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 transition-all"
+                            className="px-2.5 py-1 rounded-md text-[11px] font-semibold text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 border border-rose-300 dark:border-rose-500/20 transition-all"
                           >
                             Cancel
                           </button>
