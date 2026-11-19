@@ -1124,21 +1124,23 @@ export function LandingPage() {
                     </div>
                   </div>
 
-                  {/* Clean Simple CTA */}
-                  <div className="pt-3.5 border-t border-[var(--border)] mt-4 w-full">
-                    <a
-                      href="#packages"
-                      className="w-full py-1.5 rounded-full text-xs font-semibold text-center border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#06090e] hover:bg-[#10b981] transition-all flex items-center justify-center gap-1 shadow-sm"
-                    >
-                      <span>View Plans</span>
-                      <ArrowRightIcon size={11} />
-                    </a>
-                  </div>
+
                 </div>
               </motion.div>
             );
           })}
         </motion.div>
+
+        {/* Single unified link below the 7 trades grid */}
+        <div className="mt-10 text-center">
+          <a
+            href="#packages"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 shadow-sm transition-all"
+          >
+            <span>Explore All Coverage Plans</span>
+            <ArrowRightIcon size={14} className="text-emerald-500" />
+          </a>
+        </div>
       </section>
 
       {/* ── Section: Operations & Matching Engine Audit Trail ──────────── */}
