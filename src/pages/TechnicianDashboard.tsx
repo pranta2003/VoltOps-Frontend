@@ -251,8 +251,8 @@ export function TechnicianDashboard() {
         )}
 
         {/* ── Status Metric Cards (Restrained Operational Typography) ────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Link to="/technician/jobs" className="block">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <Link to="/technician/jobs" className="block transition-transform hover:-translate-y-0.5">
             <MetricCard
               label="Assigned Workload"
               value={`${activeJobs.length} Active`}
@@ -262,35 +262,39 @@ export function TechnicianDashboard() {
             />
           </Link>
 
-          <MetricCard
-            label="Transit SLA"
-            value={
-              enRouteJob
-                ? enRouteJob.isSlaBreached
-                  ? "Expired"
-                  : `${enRouteJob.arrivalSlaRemainingMinutes}m left`
-                : "Standby"
-            }
-            subtext={
-              enRouteJob
-                ? `Target: 20m · ${enRouteJob.assetName}`
-                : "No Active Transit Alarm"
-            }
-            icon={ClockIcon}
-            alert={!!enRouteJob && (enRouteJob.isSlaBreached || (enRouteJob.arrivalSlaRemainingMinutes ?? 0) <= 5)}
-            trend={{
-              direction: enRouteJob ? (enRouteJob.isSlaBreached ? "down" : "neutral") : "neutral",
-              label: enRouteJob ? (enRouteJob.isSlaBreached ? "SLA Breached" : "Arrival Active") : "Standby",
-            }}
-          />
+          <div className="transition-transform hover:-translate-y-0.5">
+            <MetricCard
+              label="Transit SLA"
+              value={
+                enRouteJob
+                  ? enRouteJob.isSlaBreached
+                    ? "Expired"
+                    : `${enRouteJob.arrivalSlaRemainingMinutes}m left`
+                  : "Standby"
+              }
+              subtext={
+                enRouteJob
+                  ? `Target: 20m · ${enRouteJob.assetName}`
+                  : "No Active Transit Alarm"
+              }
+              icon={ClockIcon}
+              alert={!!enRouteJob && (enRouteJob.isSlaBreached || (enRouteJob.arrivalSlaRemainingMinutes ?? 0) <= 5)}
+              trend={{
+                direction: enRouteJob ? (enRouteJob.isSlaBreached ? "down" : "neutral") : "neutral",
+                label: enRouteJob ? (enRouteJob.isSlaBreached ? "SLA Breached" : "Arrival Active") : "Standby",
+              }}
+            />
+          </div>
 
-          <MetricCard
-            label="Passport Status"
-            value="Certified"
-            subtext="DOE Master Electrician · Active"
-            icon={ShieldCheckIcon}
-            trend={{ direction: "neutral", label: "Tier 1 Active" }}
-          />
+          <Link to="/technician/skills" className="block transition-transform hover:-translate-y-0.5">
+            <MetricCard
+              label="Passport Status"
+              value="Certified"
+              subtext="DOE Master Electrician · Active"
+              icon={ShieldCheckIcon}
+              trend={{ direction: "neutral", label: "Tier 1 Active" }}
+            />
+          </Link>
         </div>
 
         {/* ── Active Priority Spotlight Card (Clean, Concise, with Working Action) ─ */}
