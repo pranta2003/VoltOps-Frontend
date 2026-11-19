@@ -1821,17 +1821,17 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: Contact & Inquiries (Accessible Form) ───────────────── */}
-      <section id="contact" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+      <section id="contact" data-section-tone="auto" className="py-20 border-t border-slate-300 dark:border-white/10 bg-[#e8edf3] dark:bg-zinc-950">
         <div className="max-w-6xl mx-auto px-5">
           {/* Banner */}
           <div
-            className="p-8 sm:p-10 rounded-[32px] flex flex-col md:flex-row items-center justify-between gap-6 glass-panel glow-card-emerald mb-14 border border-[#10b981]/40"
+            className="p-8 sm:p-10 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 bg-white dark:bg-zinc-900 border border-slate-300 border-l-4 border-l-emerald-500 dark:border-white/10 dark:border-l-emerald-500 shadow-md dark:shadow-none mb-14"
           >
             <div className="space-y-2 text-center md:text-left">
               <h2 className="text-2xl sm:text-3xl font-space font-bold tracking-tight text-slate-900 dark:text-white">
                 Ready to safeguard your facility operations?
               </h2>
-              <p className="text-sm text-slate-700 dark:text-slate-300">
+              <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
                 Select a coverage plan or discuss bespoke multi-site requirements.
               </p>
             </div>
@@ -1839,7 +1839,7 @@ export function LandingPage() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               href="#packages"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] shrink-0 shadow-md hover:bg-[#34d399] transition-all"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 shrink-0 shadow-md shadow-emerald-500/20 transition-all"
             >
               <span>View Plans</span>
               <ArrowRightIcon size={14} />
