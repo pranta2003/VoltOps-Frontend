@@ -1645,7 +1645,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: Regional Coverage Hubs (CONCISE CARDS) ────────────── */}
-      <section id="hubs" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+      <section id="hubs" data-section-tone="auto" className="py-20 border-t border-slate-300 dark:border-white/10 bg-[#e8edf3]/50 dark:bg-zinc-950/60">
         <div className="max-w-6xl mx-auto px-5">
           <motion.div
             initial="hidden"
@@ -1680,24 +1680,24 @@ export function LandingPage() {
                 transition={{ duration: 0.2 }}
                 className="flex flex-col"
               >
-                <div className="h-full p-6 rounded-[28px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)]">
+                <div className="h-full p-6 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none hover:border-emerald-500/50 hover:shadow-lg transition-all flex flex-col justify-between">
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#10b981] dark:text-[#34d399]">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                         <MapPinIcon size={19} />
                       </div>
-                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30 tabular-nums">
                         {hub.sla}
                       </span>
                     </div>
-                    <h3 className="font-bold font-card-title text-base text-[var(--text-primary)]">{hub.name}</h3>
-                    <div className="text-xs font-semibold text-emerald-700 dark:text-[#34d399]">{hub.coverage}</div>
-                    <p className="text-xs leading-relaxed text-[var(--text-secondary)]">{hub.desc}</p>
+                    <h3 className="font-bold font-heading text-base text-slate-900 dark:text-white">{hub.name}</h3>
+                    <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{hub.coverage}</div>
+                    <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 font-medium">{hub.desc}</p>
                   </div>
 
-                  <div className="pt-3.5 border-t border-[var(--border)] mt-4 flex items-center justify-between text-xs">
+                  <div className="pt-3.5 border-t border-slate-200 dark:border-white/10 mt-4 flex items-center justify-between text-xs">
                     <span className="text-slate-600 dark:text-slate-400">Status</span>
-                    <span className="font-bold text-[#10b981] dark:text-[#34d399]">Active Standby Roster</span>
+                    <span className="font-bold text-emerald-700 dark:text-emerald-400">Active Standby Roster</span>
                   </div>
                 </div>
               </motion.div>
