@@ -1231,31 +1231,31 @@ export function LandingPage() {
             </div>
 
             {/* Top Match */}
-            <div className="p-4 rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-surface-2)] space-y-2">
+            <div className="p-4 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-zinc-950/60 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <UserCheckIcon size={16} className="text-emerald-500" />
                   <span className="font-bold text-sm text-slate-900 dark:text-white">Tanvir Hasan</span>
                 </div>
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30 tabular-nums">
                   91% Match Score
                 </span>
               </div>
-              <p className="text-xs text-slate-700 dark:text-slate-300">CCTV Specialist | Tejgaon Hub | Available</p>
-              <div className="flex gap-3 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
+              <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">CCTV Specialist · Tejgaon Hub · Available</p>
+              <div className="flex gap-3 text-[11px] font-semibold text-emerald-800 dark:text-emerald-400">
                 <span>✓ Active License</span><span>✓ Standby Available</span><span>✓ 2.1 km away</span>
               </div>
             </div>
 
             {/* 2nd Match */}
-            <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-zinc-950/60">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-sm text-slate-800 dark:text-slate-200">Mehedi Zaman</span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                <span className="font-bold text-sm text-slate-900 dark:text-slate-200">Mehedi Zaman</span>
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-cyan-100 text-cyan-900 border border-cyan-300 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/30 tabular-nums">
                   78% Match Score
                 </span>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Security Tech | Banani | 1 Active Job</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Security Tech · Banani · 1 Active Job</p>
             </div>
 
             {/* Ineligible */}
