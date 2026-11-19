@@ -938,215 +938,93 @@ export function LandingPage() {
             </motion.a>
           </motion.div>
 
-          {/* ── 3-Card Centerpiece Spotlight ────────────────────────────── */}
+          {/* ── Compact Glassmorphic Hero Dock ────────────────────────────── */}
           <motion.div
             variants={heroItemVariants}
-            className="mt-12 relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 items-stretch"
+            className="mt-10 relative max-w-5xl mx-auto rounded-2xl border border-slate-300 dark:border-white/10 bg-white/90 dark:bg-zinc-950/80 backdrop-blur-md shadow-xl p-5 sm:p-6 text-left"
           >
-            {/* Left Card: Service Coverage */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              transition={{ duration: 0.2 }}
-              className="flex flex-col justify-between text-left p-6 sm:p-7 rounded-[28px] glass-panel glow-card-emerald order-2 md:order-2 lg:order-1 md:col-span-1 lg:col-span-3"
-            >
-              <div className="space-y-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-heading">
-                  Service Coverage
+            {/* Top row: Status header & Response Times ticker */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-200 dark:border-white/10">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                  7 Commercial Trades · Guaranteed Arrival SLAs
                 </span>
-                <div className="space-y-1.5">
-                  <h4 className="text-xl sm:text-[22px] font-bold font-heading text-slate-900 dark:text-white tracking-tight leading-snug">
-                    7 trades. One partner.
-                  </h4>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
-                    One service partner for your facility.
-                  </p>
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <div className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center gap-2.5 text-xs font-medium font-heading text-slate-800 dark:text-slate-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" />
-                    <span className="tracking-tight">Electrical & Power Systems</span>
-                  </div>
-                  <div className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center gap-2.5 text-xs font-medium font-heading text-slate-800 dark:text-slate-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" />
-                    <span className="tracking-tight">HVAC & Industrial Cooling</span>
-                  </div>
-                  <div className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center gap-2.5 text-xs font-medium font-heading text-slate-800 dark:text-slate-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" />
-                    <span className="tracking-tight">Plumbing & Piping Networks</span>
-                  </div>
-                  <div className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center gap-2.5 text-xs font-medium font-heading text-slate-800 dark:text-slate-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" />
-                    <span className="tracking-tight">Security, IT & Infrastructure</span>
-                  </div>
-                </div>
               </div>
-
-              <div className="border-t border-[var(--border)] pt-4 mt-6">
-                <a
-                  href="#services"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold font-heading text-[#10b981] dark:text-[#34d399] hover:underline"
-                >
-                  <span>View all 7 trades</span>
-                  <ArrowRightIcon size={12} />
-                </a>
-              </div>
-            </motion.div>
-
-            {/* Center Card: Explore Services */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              transition={{ duration: 0.2 }}
-              className="order-1 md:order-1 lg:order-2 md:col-span-2 lg:col-span-6"
-            >
-              <div
-                className="rounded-[32px] border border-[var(--border-strong)] p-6 sm:p-7 text-left relative glass-panel glow-card-emerald shadow-[var(--shadow-float)] flex flex-col justify-between h-full"
-                style={{
-                  background: isDark
-                    ? "radial-gradient(circle at 50% 0%, rgba(16,185,129,0.14) 0%, rgba(14,20,29,0.85) 65%)"
-                    : "radial-gradient(circle at 50% 0%, rgba(16,185,129,0.18) 0%, rgba(255,255,255,0.95) 75%)",
-                }}
-              >
-                {/* Header status bar */}
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--border)]">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                      Explore Services
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#10b981]/20 text-[#10b981] dark:text-[#34d399] border border-[#10b981]/30">
-                    Interactive
-                  </span>
-                </div>
-
-                {/* Main Card Title */}
-                <div className="space-y-1 mb-3.5">
-                  <h3 className="text-2xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white leading-tight">
-                    Explore facility services
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-                    Choose a trade to see what's covered.
-                  </p>
-                </div>
-
-                {/* 7-Trade Selector Tabs */}
-                <div className="flex gap-1.5 overflow-x-auto pb-2 mb-3.5 border-b border-[var(--border)] no-scrollbar">
-                  {CORE_SERVICES.map((s) => {
-                    const isActive = s.id === heroActiveTrade;
-                    const SvgIcon = s.icon;
-                    return (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => setHeroActiveTrade(s.id)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 border focus:outline-none ${
-                          isActive
-                            ? "border-[#10b981] bg-[#10b981] text-[#06090e] font-bold shadow-sm"
-                            : "border-transparent text-slate-600 dark:text-slate-400 hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
-                        }`}
-                      >
-                        <SvgIcon size={13} className={isActive ? "text-[#06090e]" : "text-slate-500"} />
-                        <span>{s.title}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Selected Trade Preview Box */}
-                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-3 mb-3.5">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: `${selectedTrade.accentColor}25`, color: selectedTrade.accentColor }}
-                    >
-                      <SelectedIcon size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm text-slate-900 dark:text-white">{selectedTrade.title}</h4>
-                      <p className="text-xs text-slate-600 dark:text-slate-400">
-                        {selectedTrade.shortDesc}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Systems Tags */}
-                  <div className="pt-2 border-t border-[var(--border)] flex flex-wrap items-center gap-1.5">
-                    {selectedTrade.capabilities.map((cap) => (
-                      <span
-                        key={cap}
-                        className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-[var(--bg-surface-3)] text-slate-700 dark:text-slate-200 border border-[var(--border)]"
-                      >
-                        {cap}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Bottom Link */}
-                <div className="flex items-center justify-between text-xs pt-2 border-t border-[var(--border)]">
-                  <span className="text-slate-600 dark:text-slate-400">
-                    All trades included in every plan
-                  </span>
-                  <a
-                    href="#services"
-                    className="inline-flex items-center gap-1 font-bold text-[#10b981] dark:text-[#34d399] hover:underline"
-                  >
-                    <span>View all services</span>
-                    <ArrowRightIcon size={12} />
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Right Card: Response Times */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              transition={{ duration: 0.2 }}
-              className="flex flex-col justify-between text-left p-6 sm:p-7 rounded-[28px] glass-panel glow-card-amber order-3 md:order-3 lg:order-3 md:col-span-1 lg:col-span-3"
-            >
-              <div className="space-y-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 font-heading">
-                  Response Times
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
+                  Response Times:
                 </span>
-                <div className="space-y-1.5">
-                  <h4 className="text-xl sm:text-[22px] font-bold font-heading text-slate-900 dark:text-white tracking-tight leading-snug">
-                    Coverage response times
-                  </h4>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
-                    Arrival time means technician arrival, not repair completion.
-                  </p>
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <div className="py-2.5 px-3 rounded-xl border border-emerald-500/25 bg-emerald-500/5 dark:bg-emerald-500/10 flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-900 dark:text-white font-heading tracking-tight">Plan C — Priority</span>
-                    <span className="font-bold text-[#10b981] dark:text-[#34d399] font-heading tabular-nums">20-minute arrival</span>
-                  </div>
-
-                  <div className="py-2.5 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-900 dark:text-white font-heading tracking-tight">Plan B — Standard</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 font-heading tabular-nums">40-minute arrival</span>
-                  </div>
-
-                  <div className="py-2.5 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-900 dark:text-white font-heading tracking-tight">Plan A — Daily</span>
-                    <span className="font-medium text-slate-600 dark:text-slate-400 font-heading tabular-nums">8h daily coverage</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-[var(--border)] pt-4 mt-6">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-bold tabular-nums">
+                  Plan C (20m)
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20 font-bold tabular-nums">
+                  Plan B (40m)
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10 font-medium tabular-nums">
+                  Plan A (8h)
+                </span>
                 <a
                   href="#packages"
-                  className="inline-flex items-center justify-between w-full text-xs font-bold font-heading text-[#10b981] dark:text-[#34d399] hover:underline"
+                  className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 hover:underline ml-2"
                 >
-                  <span>Compare Plans</span>
+                  <span>Plans</span>
                   <ArrowRightIcon size={12} />
                 </a>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+
+            {/* 7-Trade Selector Tabs */}
+            <div className="flex gap-1.5 overflow-x-auto pb-3 mb-3 border-b border-slate-200 dark:border-white/10 no-scrollbar">
+              {CORE_SERVICES.map((s) => {
+                const isActive = s.id === heroActiveTrade;
+                const SvgIcon = s.icon;
+                return (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => setHeroActiveTrade(s.id)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 border focus:outline-none ${
+                      isActive
+                        ? "border-emerald-500 bg-emerald-500 text-zinc-950 font-bold shadow-sm"
+                        : "border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/60"
+                    }`}
+                  >
+                    <SvgIcon size={13} className={isActive ? "text-zinc-950" : "text-slate-500 dark:text-slate-400"} />
+                    <span>{s.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Selected Trade Preview Box */}
+            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-zinc-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                >
+                  <SelectedIcon size={18} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-slate-900 dark:text-white">{selectedTrade.title}</h4>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    {selectedTrade.shortDesc}
+                  </p>
+                </div>
+              </div>
+
+              {/* Capabilities Tags */}
+              <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                {selectedTrade.capabilities.map((cap) => (
+                  <span
+                    key={cap}
+                    className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-white dark:bg-zinc-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10"
+                  >
+                    {cap}
+                  </span>
+                ))}
+              </div>
+            </div>          </motion.div>
         </motion.div>
       </header>
 
