@@ -1672,8 +1672,17 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: Our Operational Reach (Commercial Scale & Industrial Reach) ── */}
-      <section id="statistics" data-section-tone="auto" className="py-20 border-t border-slate-300 dark:border-white/10 bg-[#e8edf3]/40 dark:bg-zinc-950/40">
-        <div className="max-w-6xl mx-auto px-5">
+      <section id="statistics" data-section-tone="auto" className="relative py-20 border-t border-slate-300 dark:border-white/10 bg-[#e8edf3]/40 dark:bg-zinc-950/40 overflow-hidden">
+        {/* Subtle radial emerald/cyan ambient mesh backdrop in Dark Mode */}
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-100px,rgba(16,185,129,0.12),transparent_70%)] dark:block hidden"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute bottom-0 right-0 w-96 h-96 bg-[radial-gradient(circle_400px_at_bottom_right,rgba(6,182,212,0.08),transparent_70%)] dark:block hidden"
+          aria-hidden="true"
+        />
+        <div className="relative z-10 max-w-6xl mx-auto px-5">
           <motion.div
             initial="hidden"
             whileInView="visible"
