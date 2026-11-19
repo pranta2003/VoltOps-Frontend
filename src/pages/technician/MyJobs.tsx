@@ -277,7 +277,7 @@ export function MyJobs() {
     <Layout
       title="My Jobs"
     >
-      <div className="space-y-4">
+      <div className="space-y-4 pb-24">
         {/* Action success alert */}
         {actionSuccess && (
           <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between animate-fade-in">
@@ -568,7 +568,7 @@ export function MyJobs() {
                   <div className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
                     REPORT JOB COMPLETION
                   </div>
-                  <h3 id={completionModalHeadingId} className="font-heading font-bold text-base text-[var(--text-primary)]">
+                  <h3 id={completionModalHeadingId} className="font-heading font-bold text-base text-slate-950 dark:text-zinc-50">
                     {completionModalJob.id} · {completionModalJob.assetName}
                   </h3>
                   <p className="text-xs text-[var(--text-muted)]">
@@ -667,7 +667,7 @@ export function MyJobs() {
                     <button
                       type="submit"
                       disabled={isSubmittingCompletion}
-                      className="px-4 py-1.5 rounded-lg text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm disabled:opacity-50"
+                      className="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm disabled:opacity-50"
                     >
                       {isSubmittingCompletion ? "Submitting..." : "Submit Completion Report"}
                     </button>
@@ -692,7 +692,7 @@ export function MyJobs() {
                   <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
                     {inspectJob.id}
                   </span>
-                  <h3 id={inspectModalHeadingId} className="font-heading font-bold text-base text-[var(--text-primary)]">
+                  <h3 id={inspectModalHeadingId} className="font-heading font-bold text-base text-slate-950 dark:text-zinc-50">
                     {inspectJob.customerName}
                   </h3>
                 </div>
@@ -823,7 +823,7 @@ export function MyJobs() {
                       type="button"
                       onClick={() => handleDirectTransition(inspectJob, "ON_SITE")}
                       disabled={isUpdatingStatus}
-                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50"
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-sm disabled:opacity-50"
                     >
                       {isUpdatingStatus ? "Updating..." : "Confirm Arrival"}
                     </button>
