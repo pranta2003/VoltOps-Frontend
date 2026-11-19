@@ -103,7 +103,7 @@ export function LeaveRequests() {
             setFormError(null);
             setModalOpen(true);
           }}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm"
         >
           <span>Request Leave</span>
           <ArrowRightIcon size={12} />
@@ -122,17 +122,17 @@ export function LeaveRequests() {
         )}
 
         {/* Requests Table */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between">
+        <div className="rounded-xl border border-slate-300 border-t-4 border-t-emerald-500 bg-white shadow-md overflow-hidden dark:border-white/5 dark:border-t-white/5 dark:bg-zinc-900 dark:shadow-none">
+          <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between dark:border-white/5 dark:bg-zinc-950">
             <div>
-              <h3 className="font-heading font-semibold text-xs text-[var(--text-primary)]">
+              <h3 className="font-heading font-bold text-xs text-slate-950 dark:text-zinc-50">
                 My leave history & status
               </h3>
-              <p className="text-[11px] text-[var(--text-muted)]">
+              <p className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
                 Approval requires dispatcher or admin review before shift rosters update.
               </p>
             </div>
-            <span className="text-[11px] font-mono font-medium text-[var(--text-muted)] tabular-nums">
+            <span className="text-[11px] font-mono font-bold text-slate-700 dark:text-zinc-300 bg-slate-100 border border-slate-300 dark:bg-zinc-900 dark:border-white/10 px-2 py-0.5 rounded tabular-nums">
               {requests.length} requests
             </span>
           </div>
