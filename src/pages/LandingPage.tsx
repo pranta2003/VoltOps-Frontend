@@ -1207,20 +1207,23 @@ export function LandingPage() {
             </div>
 
             {/* 2nd Match */}
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-zinc-950/60">
+            <div className="p-4 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-zinc-950/60 space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm text-slate-900 dark:text-slate-200">Mehedi Zaman</span>
                 <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-cyan-100 text-cyan-900 border border-cyan-300 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/30 tabular-nums">
                   78% Match Score
                 </span>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Security Tech · Banani · 1 Active Job</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">Security Tech · Banani · 1 Active Job</p>
+              <div className="flex gap-3 text-[11px] font-semibold text-cyan-800 dark:text-cyan-400">
+                <span>✓ Active License</span><span>✓ Fast Transit</span><span>✓ 3.8 km away</span>
+              </div>
             </div>
 
             {/* Ineligible */}
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-zinc-950/40">
+            <div className="p-4 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50/70 dark:bg-zinc-950/40">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-sm text-slate-600 dark:text-slate-400">Nayeem Islam</span>
+                <span className="font-bold text-sm text-slate-700 dark:text-slate-400">Nayeem Islam</span>
                 <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-900 border border-rose-300 dark:bg-[#b8287a]/20 dark:text-[#f472b6] dark:border-[#b8287a]/30">
                   Disqualified
                 </span>
