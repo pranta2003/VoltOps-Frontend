@@ -1839,8 +1839,13 @@ export function LandingPage() {
                   { icon: MailIcon, label: "Email", value: "support@voltops.example" },
                   { icon: PhoneIcon, label: "Phone", value: "+880 1XXX-XXXXXX" },
                   { icon: MapPinIcon, label: "Operations Desk", value: "Dhaka Central & Regional Hubs, Bangladesh" },
-                ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="flex items-center gap-3.5 p-3.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none">
+                ].map(({ icon: Icon, label, value }, idx) => (
+                  <SpotlightCard
+                    key={label}
+                    delay={idx * 0.08}
+                    spotlightColor="rgba(16, 185, 129, 0.12)"
+                    className="flex items-center gap-3.5 p-3.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none"
+                  >
                     <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-zinc-800 text-emerald-600 dark:text-emerald-400 shrink-0">
                       <Icon size={17} />
                     </div>
@@ -1848,14 +1853,18 @@ export function LandingPage() {
                       <span className="text-[11px] font-semibold block text-slate-600 dark:text-slate-400">{label}</span>
                       <span className="text-xs font-medium text-slate-800 dark:text-slate-200">{value}</span>
                     </div>
-                  </div>
+                  </SpotlightCard>
                 ))}
               </div>
             </div>
 
             {/* Contact form */}
             <div className="lg:col-span-7">
-              <div className="p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none">
+              <SpotlightCard
+                delay={0.12}
+                spotlightColor="rgba(16, 185, 129, 0.14)"
+                className="p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none"
+              >
                 <h3 className="text-lg font-bold font-heading mb-1 text-slate-900 dark:text-white">Send an inquiry</h3>
                 <p className="text-xs mb-4 text-slate-600 dark:text-slate-400 font-medium">
                   For sales and custom schedule inquiries. For active emergencies, subscribe and log in to dispatch.
@@ -1931,7 +1940,7 @@ export function LandingPage() {
                     </motion.button>
                   </form>
                 )}
-              </div>
+              </SpotlightCard>
             </div>
           </div>
         </div>
