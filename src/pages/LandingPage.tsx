@@ -1637,35 +1637,32 @@ export function LandingPage() {
             variants={sectionContainerVariants}
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
           >
-            {REGIONAL_HUBS.map((hub) => (
-              <motion.div
+            {REGIONAL_HUBS.map((hub, idx) => (
+              <SpotlightCard
                 key={hub.name}
-                variants={cardItemVariants}
-                whileHover={{ y: -6 }}
-                transition={{ duration: 0.2 }}
-                className="flex flex-col"
+                delay={idx * 0.08}
+                spotlightColor="rgba(16, 185, 129, 0.15)"
+                className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none hover:border-emerald-500/50 hover:shadow-lg transition-all p-6 flex flex-col justify-between"
               >
-                <div className="h-full p-6 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none hover:border-emerald-500/50 hover:shadow-lg transition-all flex flex-col justify-between">
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                        <MapPinIcon size={19} />
-                      </div>
-                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30 tabular-nums">
-                        {hub.sla}
-                      </span>
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      <MapPinIcon size={19} />
                     </div>
-                    <h3 className="font-bold font-heading text-base text-slate-900 dark:text-white">{hub.name}</h3>
-                    <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{hub.coverage}</div>
-                    <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 font-medium">{hub.desc}</p>
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30 tabular-nums">
+                      {hub.sla}
+                    </span>
                   </div>
-
-                  <div className="pt-3.5 border-t border-slate-200 dark:border-white/10 mt-4 flex items-center justify-between text-xs">
-                    <span className="text-slate-600 dark:text-slate-400">Status</span>
-                    <span className="font-bold text-emerald-700 dark:text-emerald-400">Active Standby Roster</span>
-                  </div>
+                  <h3 className="font-bold font-heading text-base text-slate-900 dark:text-white">{hub.name}</h3>
+                  <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{hub.coverage}</div>
+                  <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 font-medium">{hub.desc}</p>
                 </div>
-              </motion.div>
+
+                <div className="pt-3.5 border-t border-slate-200 dark:border-white/10 mt-4 flex items-center justify-between text-xs">
+                  <span className="text-slate-600 dark:text-slate-400">Status</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400">Active Standby Roster</span>
+                </div>
+              </SpotlightCard>
             ))}
           </motion.div>
         </div>
