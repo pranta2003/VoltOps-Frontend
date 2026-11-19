@@ -975,7 +975,7 @@ export function LandingPage() {
             </div>
 
             {/* 7-Trade Selector Tabs */}
-            <div className="flex gap-1.5 overflow-x-auto pb-3 mb-3 border-b border-slate-200 dark:border-white/10 no-scrollbar">
+            <div className="flex gap-2 overflow-x-auto pb-3 mb-3 border-b border-slate-200 dark:border-white/10 no-scrollbar">
               {CORE_SERVICES.map((s) => {
                 const isActive = s.id === heroActiveTrade;
                 const SvgIcon = s.icon;
@@ -984,13 +984,13 @@ export function LandingPage() {
                     key={s.id}
                     type="button"
                     onClick={() => setHeroActiveTrade(s.id)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 border focus:outline-none ${
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 border focus:outline-none ${
                       isActive
-                        ? "border-emerald-500 bg-emerald-500 text-zinc-950 font-bold shadow-sm"
-                        : "border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/60"
+                        ? "border-emerald-500 bg-emerald-500 text-zinc-950 font-bold shadow-sm shadow-emerald-500/20"
+                        : "border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/60"
                     }`}
                   >
-                    <SvgIcon size={13} className={isActive ? "text-zinc-950" : "text-slate-500 dark:text-slate-400"} />
+                    <SvgIcon size={13} className={isActive ? "text-zinc-950" : "text-emerald-600 dark:text-emerald-400"} />
                     <span>{s.title}</span>
                   </button>
                 );
