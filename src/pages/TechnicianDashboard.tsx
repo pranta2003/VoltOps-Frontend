@@ -243,7 +243,7 @@ export function TechnicianDashboard() {
         </Link>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-4 pb-24">
         {/* Action success alert */}
         {actionSuccess && (
           <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between">
