@@ -98,17 +98,17 @@ export function SkillPassport() {
         </div>
 
         {/* Credentials & Licensing Table */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between">
+        <div className="rounded-xl border border-slate-300 border-t-4 border-t-emerald-500 bg-white shadow-md overflow-hidden dark:border-white/5 dark:border-t-white/5 dark:bg-zinc-900 dark:shadow-none">
+          <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between dark:border-white/5 dark:bg-zinc-950">
             <div>
-              <h3 className="font-heading font-semibold text-xs text-[var(--text-primary)]">
+              <h3 className="font-heading font-bold text-xs text-slate-950 dark:text-zinc-50">
                 Government licenses & certifications
               </h3>
-              <p className="text-[11px] text-[var(--text-muted)]">
+              <p className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
                 Authoritative credentials validated against Department of Energy standards
               </p>
             </div>
-            <span className="text-[11px] font-mono font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded">
+            <span className="text-[11px] font-mono font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/15 border border-emerald-300 dark:border-emerald-500/30 px-2 py-0.5 rounded">
               All Active
             </span>
           </div>
@@ -116,31 +116,31 @@ export function SkillPassport() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[var(--text-muted)] font-semibold text-[11px]">
+                <tr className="border-b-2 border-slate-300 bg-slate-200/70 text-slate-800 font-bold text-xs uppercase tracking-wider dark:border-white/5 dark:bg-zinc-950/60 dark:text-zinc-400">
                   <th className="py-2.5 px-4">Credential name</th>
                   <th className="py-2.5 px-4">Issuing authority</th>
                   <th className="py-2.5 px-4">Expiry / Status</th>
                   <th className="py-2.5 px-4 text-right">Verification</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-slate-300/80 dark:divide-white/5">
                 {profile?.certifications && profile.certifications.length > 0 ? (
                   profile.certifications.map((cert) => (
-                    <tr key={cert.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-3 px-4 font-semibold text-[var(--text-primary)]">
+                    <tr key={cert.id} className="odd:bg-white even:bg-slate-50/90 hover:bg-emerald-50/50 dark:odd:bg-zinc-900 dark:even:bg-zinc-900 dark:hover:bg-zinc-800/50 transition-colors">
+                      <td className="py-3 px-4 font-bold text-slate-950 dark:text-zinc-50">
                         {cert.name}
                       </td>
-                      <td className="py-3 px-4 text-[var(--text-muted)]">
+                      <td className="py-3 px-4 text-slate-600 dark:text-zinc-400 font-medium">
                         {cert.issuedBy}
                       </td>
                       <td className="py-3 px-4">
-                        <span className="font-mono text-xs text-[var(--text-primary)]">
+                        <span className="font-mono text-xs text-slate-700 dark:text-zinc-300 font-medium">
                           {cert.expiryDate ? `Expires ${cert.expiryDate}` : "Permanent / Indefinite"}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
-                          <CheckCircleIcon size={10} className="text-emerald-500" />
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30">
+                          <CheckCircleIcon size={10} className="text-emerald-600 dark:text-emerald-400" />
                           <span>Admin Signed</span>
                         </span>
                       </td>
