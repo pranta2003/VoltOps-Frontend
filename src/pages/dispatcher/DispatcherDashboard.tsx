@@ -487,19 +487,21 @@ export const DispatcherDashboard: FC = () => {
               </Link>
             </div>
 
-            <HorizontalBarChart
-              data={
-                metrics?.tradeCoverage?.map((trade) => ({
-                  label: trade.category,
-                  value: trade.availableCount,
-                  secondaryValue: trade.activeCount,
-                  secondaryLabel: "busy",
-                  color: "#10b981",
-                  badge: trade.availableCount > 0 ? "Ready" : "Busy",
-                })) || []
-              }
-              valueSuffix=" avail"
-            />
+            <div className="[&_[class*='bg-amber']]:!bg-cyan-500">
+              <HorizontalBarChart
+                data={
+                  metrics?.tradeCoverage?.map((trade) => ({
+                    label: trade.category,
+                    value: trade.availableCount,
+                    secondaryValue: trade.activeCount,
+                    secondaryLabel: "busy",
+                    color: "#10b981",
+                    badge: trade.availableCount > 0 ? "Ready" : "Busy",
+                  })) || []
+                }
+                valueSuffix=" avail"
+              />
+            </div>
           </div>
         </div>
 
