@@ -395,27 +395,27 @@ export function TechnicianDashboard() {
         {/* ── Visual Schedule Route & Competency ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
           {/* Today's Shift Route Progression */}
-          <div className="lg:col-span-7 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col justify-between">
+          <div className="lg:col-span-7 p-4 rounded-xl border border-slate-300 bg-white shadow-md dark:border-white/5 dark:bg-zinc-900 dark:shadow-none flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2.5">
-                <h3 className="text-xs font-medium text-[var(--text-muted)]">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-2 mb-2.5">
+                <h3 className="text-xs font-semibold text-slate-700 dark:text-zinc-300">
                   Today's dispatch route
                 </h3>
-                <span className="text-xs font-mono tabular-nums px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-medium">
+                <span className="text-xs font-mono tabular-nums px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-950 text-slate-700 dark:text-zinc-400 border border-slate-200 dark:border-white/5 font-medium">
                   08:00 - 18:00
                 </span>
               </div>
 
               <div className="space-y-2 pt-0.5">
                 {isLoading ? (
-                  <div className="py-8 text-center text-xs text-[var(--text-muted)]">Loading schedule...</div>
+                  <div className="py-8 text-center text-xs text-slate-600 dark:text-zinc-400">Loading schedule...</div>
                 ) : jobs.length === 0 ? (
-                  <div className="py-8 text-center text-xs text-[var(--text-muted)]">No jobs assigned yet.</div>
+                  <div className="py-8 text-center text-xs text-slate-600 dark:text-zinc-400">No jobs assigned yet.</div>
                 ) : (
                   jobs.slice(0, 4).map((job) => (
                     <div
                       key={job.id}
-                      className="flex items-center justify-between gap-3 p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]/50 hover:bg-[var(--bg-surface-2)] transition-colors"
+                      className="flex items-center justify-between gap-3 p-2.5 rounded-lg border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-zinc-950/50 hover:bg-slate-100 dark:hover:bg-zinc-800/50 transition-colors"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div
@@ -431,12 +431,12 @@ export function TechnicianDashboard() {
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-xs text-[var(--text-primary)] truncate">
+                            <span className="font-semibold text-xs text-slate-950 dark:text-zinc-50 truncate">
                               {job.customerName}
                             </span>
-                            <span className="text-[10px] font-mono text-[var(--text-muted)]">({job.id})</span>
+                            <span className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 font-medium">({job.id})</span>
                           </div>
-                          <div className="text-[11px] text-[var(--text-muted)] truncate">
+                          <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium truncate">
                             {job.assetName} · {job.facilityAddress}
                           </div>
                         </div>
@@ -453,7 +453,7 @@ export function TechnicianDashboard() {
                         <button
                           type="button"
                           onClick={() => setSelectedJob(job)}
-                          className="px-2 py-0.5 rounded text-[11px] font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all"
+                          className="px-2 py-0.5 rounded text-[11px] font-medium border border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all"
                         >
                           Manage
                         </button>
@@ -466,13 +466,13 @@ export function TechnicianDashboard() {
           </div>
 
           {/* Skill Passport Competency Overview */}
-          <div className="lg:col-span-5 p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col justify-between">
+          <div className="lg:col-span-5 p-4 rounded-xl border border-slate-300 bg-white shadow-md dark:border-white/5 dark:bg-zinc-900 dark:shadow-none flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2.5">
-                <h3 className="text-xs font-semibold text-[var(--text-muted)]">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-2 mb-2.5">
+                <h3 className="text-xs font-semibold text-slate-700 dark:text-zinc-300">
                   Trade competency
                 </h3>
-                <span className="text-xs font-mono text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded font-bold">
+                <span className="text-xs font-mono text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/20 px-2 py-0.5 rounded font-bold">
                   Tier 1
                 </span>
               </div>
@@ -497,13 +497,13 @@ export function TechnicianDashboard() {
             aria-labelledby={inspectModalHeadingId}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
           >
-            <div className="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-2xl space-y-3.5">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
+            <div className="w-full max-w-lg rounded-2xl border border-slate-300 bg-white p-5 shadow-2xl space-y-3.5 dark:border-white/10 dark:bg-zinc-900">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-2.5">
                 <div>
                   <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
                     {selectedJob.id} · Ref: {selectedJob.requestId}
                   </span>
-                  <h3 id={inspectModalHeadingId} className="font-heading font-bold text-base text-[var(--text-primary)]">
+                  <h3 id={inspectModalHeadingId} className="font-heading font-bold text-base text-slate-950 dark:text-zinc-50">
                     {selectedJob.customerName}
                   </h3>
                 </div>
@@ -511,38 +511,38 @@ export function TechnicianDashboard() {
                   type="button"
                   onClick={() => setSelectedJob(null)}
                   aria-label="Close details"
-                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="p-1 rounded-lg text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100"
                 >
                   <XIcon size={16} />
                 </button>
               </div>
 
               <div className="space-y-2.5 text-xs">
-                <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1.5">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-white/5 space-y-1.5">
                   <div className="flex justify-between items-center">
-                    <span className="text-[var(--text-muted)]">Current Status</span>
+                    <span className="text-slate-600 dark:text-zinc-400 font-medium">Current Status</span>
                     <span className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${getStatusBadge(selectedJob.status)}`}>
                       {selectedJob.status.replace(/_/g, " ")}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[var(--text-muted)]">Target Equipment</span>
-                    <span className="font-semibold text-[var(--text-primary)]">{selectedJob.assetName}</span>
+                    <span className="text-slate-600 dark:text-zinc-400 font-medium">Target Equipment</span>
+                    <span className="font-semibold text-slate-950 dark:text-zinc-50">{selectedJob.assetName}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[var(--text-muted)]">Trade Category</span>
-                    <span className="font-medium text-[var(--text-secondary)]">{selectedJob.category}</span>
+                    <span className="text-slate-600 dark:text-zinc-400 font-medium">Trade Category</span>
+                    <span className="font-medium text-slate-700 dark:text-zinc-300">{selectedJob.category}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[var(--text-muted)]">Facility Address</span>
-                    <span className="font-medium text-[var(--text-primary)] text-right max-w-[260px] truncate">
+                    <span className="text-slate-600 dark:text-zinc-400 font-medium">Facility Address</span>
+                    <span className="font-medium text-slate-950 dark:text-zinc-50 text-right max-w-[260px] truncate">
                       {selectedJob.facilityAddress}
                     </span>
                   </div>
                   {selectedJob.customerPhone && (
                     <div className="flex justify-between items-center">
-                      <span className="text-[var(--text-muted)]">Site Contact</span>
-                      <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                      <span className="text-slate-600 dark:text-zinc-400 font-medium">Site Contact</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
                         <PhoneIcon size={11} />
                         <span>{selectedJob.customerPhone}</span>
                       </span>
@@ -551,8 +551,8 @@ export function TechnicianDashboard() {
                 </div>
 
                 <div>
-                  <h4 className="font-semibold text-[var(--text-primary)] mb-1">Problem Description</h4>
-                  <p className="p-2.5 rounded-lg bg-[var(--bg-surface-2)] text-[var(--text-secondary)] border border-[var(--border)]">
+                  <h4 className="font-semibold text-slate-900 dark:text-zinc-100 mb-1">Problem Description</h4>
+                  <p className="p-2.5 rounded-lg bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-white/5">
                     {selectedJob.problemSummary}
                   </p>
                 </div>
@@ -568,8 +568,8 @@ export function TechnicianDashboard() {
 
                 {/* On-Site Interim Note Input */}
                 {selectedJob.status === "ON_SITE" && (
-                  <div className="p-2.5 rounded-xl border border-purple-500/30 bg-purple-500/5 space-y-1.5">
-                    <label className="block font-semibold text-purple-900 dark:text-purple-300 text-[11px]">
+                  <div className="p-2.5 rounded-xl border border-purple-300 dark:border-purple-500/30 bg-purple-50 dark:bg-purple-950/20 space-y-1.5">
+                    <label className="block font-semibold text-purple-950 dark:text-purple-300 text-[11px]">
                       Add Interim Progress Note:
                     </label>
                     <div className="flex gap-2">
@@ -578,7 +578,7 @@ export function TechnicianDashboard() {
                         value={interimNote}
                         onChange={(e) => setInterimNote(e.target.value)}
                         placeholder="e.g. Isolation complete; testing primary feeder..."
-                        className="flex-1 text-xs p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        className="flex-1 text-xs p-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-950 text-slate-950 dark:text-zinc-50 focus:outline-none focus:ring-1 focus:ring-purple-500"
                       />
                       <button
                         type="button"
@@ -593,7 +593,7 @@ export function TechnicianDashboard() {
                 )}
 
                 {selectedJob.status === "WORK_COMPLETED_AWAITING_CONFIRMATION" && (
-                  <div className="p-2.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-800 dark:text-cyan-300">
+                  <div className="p-2.5 rounded-xl border border-cyan-300 dark:border-cyan-500/30 bg-cyan-50 dark:bg-cyan-500/10 text-cyan-950 dark:text-cyan-300">
                     <span className="font-bold block">Completion Report Submitted</span>
                     <span>Awaiting dispatcher verification and customer sign-off.</span>
                   </div>
@@ -601,11 +601,11 @@ export function TechnicianDashboard() {
               </div>
 
               {/* Action Buttons inside Modal */}
-              <div className="flex items-center justify-between pt-2.5 border-t border-[var(--border)]">
+              <div className="flex items-center justify-between pt-2.5 border-t border-slate-200 dark:border-white/5">
                 <button
                   type="button"
                   onClick={() => setSelectedJob(null)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800"
                 >
                   Close
                 </button>
@@ -659,16 +659,16 @@ export function TechnicianDashboard() {
             aria-labelledby={completionModalHeadingId}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
           >
-            <div className="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-2xl space-y-3.5">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5">
+            <div className="w-full max-w-lg rounded-2xl border border-slate-300 bg-white p-5 shadow-2xl space-y-3.5 dark:border-white/10 dark:bg-zinc-900">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-2.5">
                 <div>
                   <div className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
                     REPORT JOB COMPLETION
                   </div>
-                  <h3 id={completionModalHeadingId} className="font-heading font-bold text-sm sm:text-base text-[var(--text-primary)]">
+                  <h3 id={completionModalHeadingId} className="font-heading font-bold text-sm sm:text-base text-slate-950 dark:text-zinc-50">
                     {completionModalJob.id} · {completionModalJob.assetName}
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)] truncate">
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 font-medium truncate">
                     {completionModalJob.customerName} ({completionModalJob.facilityAddress})
                   </p>
                 </div>
@@ -677,14 +677,14 @@ export function TechnicianDashboard() {
                   onClick={() => setCompletionModalJob(null)}
                   disabled={isSubmittingCompletion}
                   aria-label="Close completion form"
-                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="p-1 rounded-lg text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100"
                 >
                   <XIcon size={16} />
                 </button>
               </div>
 
               {completionError && (
-                <div className="p-2.5 rounded-xl border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-400 flex items-center gap-2">
+                <div className="p-2.5 rounded-xl border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 text-xs text-red-700 dark:text-red-400 flex items-center gap-2">
                   <AlertTriangleIcon size={14} className="shrink-0 text-red-500" />
                   <span>{completionError}</span>
                 </div>
@@ -692,7 +692,7 @@ export function TechnicianDashboard() {
 
               <form onSubmit={handleSubmitCompletion} className="space-y-3 text-xs">
                 <div>
-                  <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                  <label className="block font-semibold text-slate-800 dark:text-zinc-200 mb-1">
                     Diagnostic Findings & Work Performed <span className="text-red-500">*</span>
                   </label>
                   <textarea
@@ -701,13 +701,13 @@ export function TechnicianDashboard() {
                     value={completionNotes}
                     onChange={(e) => setCompletionNotes(e.target.value)}
                     placeholder="Describe testing performed, corrective repair steps taken, and operational verification..."
-                    className="w-full text-xs p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                    className="w-full text-xs p-2.5 rounded-lg border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-zinc-950 text-slate-950 dark:text-zinc-50 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                    <label className="block font-semibold text-slate-800 dark:text-zinc-200 mb-1">
                       Replacement Materials / Parts
                     </label>
                     <input
@@ -715,17 +715,17 @@ export function TechnicianDashboard() {
                       value={materialsUsed}
                       onChange={(e) => setMaterialsUsed(e.target.value)}
                       placeholder="e.g. 250A Fuse Link, Seal kit"
-                      className="w-full text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-zinc-950 text-slate-950 dark:text-zinc-50 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                    <label className="block font-semibold text-slate-800 dark:text-zinc-200 mb-1">
                       Labor Duration Spent
                     </label>
                     <select
                       value={laborHours}
                       onChange={(e) => setLaborHours(e.target.value)}
-                      className="w-full text-xs p-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full text-xs p-2 rounded-lg border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-zinc-950 text-slate-950 dark:text-zinc-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     >
                       <option value="0.5 hour">0.5 hour (30 min)</option>
                       <option value="1.0 hour">1.0 hour (Standard)</option>
@@ -736,16 +736,16 @@ export function TechnicianDashboard() {
                   </div>
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-[var(--bg-surface-2)] border border-[var(--border)] text-[11px] text-[var(--text-muted)]">
+                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-white/5 text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
                   Submitting this completion report records physical on-site restoration and advances this work order to <strong>Completion Pending Confirmation</strong>.
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]">
+                <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-white/5">
                   <button
                     type="button"
                     onClick={() => setCompletionModalJob(null)}
                     disabled={isSubmittingCompletion}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50"
                   >
                     Cancel
                   </button>
