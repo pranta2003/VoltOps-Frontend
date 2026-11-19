@@ -1265,14 +1265,13 @@ export function LandingPage() {
             variants={sectionContainerVariants}
             className="grid grid-cols-1 md:grid-cols-5 gap-4"
           >
-            {WORKFLOW_STEPS.map(({ step, icon: StepIcon, title, desc }) => {
+            {WORKFLOW_STEPS.map(({ step, icon: StepIcon, title, desc }, index) => {
               const isHov = hoveredStep === step;
               return (
-                <motion.div
+                <SpotlightCard
                   key={step}
-                  variants={cardItemVariants}
-                  whileHover={{ y: -5, scale: 1.01 }}
-                  transition={{ duration: 0.2 }}
+                  delay={index * 0.08}
+                  spotlightColor="rgba(16, 185, 129, 0.14)"
                   tabIndex={0}
                   onMouseEnter={() => setHoveredStep(step)}
                   onMouseLeave={() => setHoveredStep(null)}
@@ -1298,7 +1297,7 @@ export function LandingPage() {
                   </div>
                   <h3 className="font-bold font-heading text-sm text-slate-900 dark:text-white mb-1.5">{title}</h3>
                   <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal">{desc}</p>
-                </motion.div>
+                </SpotlightCard>
               );
             })}
           </motion.div>
