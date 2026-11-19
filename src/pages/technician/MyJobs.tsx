@@ -413,22 +413,22 @@ export function MyJobs() {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-slate-300/80 dark:divide-white/5">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={8} className="py-12 text-center text-xs text-slate-600 dark:text-zinc-400 font-medium">
                       Loading assigned technician jobs...
                     </td>
                   </tr>
                 ) : filteredJobs.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={8} className="py-12 text-center text-xs text-slate-600 dark:text-zinc-400 font-medium">
                       No matching jobs found in this view.
                     </td>
                   </tr>
                 ) : (
                   filteredJobs.map((job) => (
-                    <tr key={job.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
+                    <tr key={job.id} className="odd:bg-white even:bg-slate-50/90 hover:bg-emerald-50/50 dark:odd:bg-zinc-900 dark:even:bg-zinc-900 dark:hover:bg-zinc-800/50 transition-colors">
                       <td className="py-3.5 px-4 font-mono font-bold text-[var(--text-primary)]">
                         {job.id}
                         <div className="text-[10px] font-mono text-[var(--text-muted)]">
@@ -437,23 +437,23 @@ export function MyJobs() {
                       </td>
 
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-[var(--text-primary)]">{job.customerName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 mt-0.5">
-                          <MapPinIcon size={11} className="shrink-0 text-slate-400" />
+                        <div className="font-bold text-slate-950 dark:text-zinc-50">{job.customerName}</div>
+                        <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium flex items-center gap-1 mt-0.5">
+                          <MapPinIcon size={11} className="shrink-0 text-slate-500 dark:text-zinc-400" />
                           <span className="truncate max-w-[200px]">{job.facilityAddress}</span>
                         </div>
                       </td>
 
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-[var(--text-primary)]">{job.assetName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)]">{job.category}</div>
+                        <div className="font-bold text-slate-950 dark:text-zinc-50">{job.assetName}</div>
+                        <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium">{job.category}</div>
                       </td>
 
                       <td className="py-3.5 px-4 max-w-[220px]">
-                        <div className="text-[var(--text-primary)] truncate font-medium">
+                        <div className="text-slate-900 dark:text-zinc-100 truncate font-medium">
                           {job.problemSummary}
                         </div>
-                        <div className="text-[11px] text-[var(--text-muted)]">{job.scheduledTime}</div>
+                        <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium">{job.scheduledTime}</div>
                       </td>
 
                       <td className="py-3.5 px-4">
