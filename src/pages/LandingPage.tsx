@@ -893,6 +893,20 @@ export function LandingPage() {
           animate="visible"
           className="relative z-10 max-w-6xl mx-auto px-5"
         >
+          {/* Animated Eyebrow Pill */}
+          <motion.div
+            variants={heroItemVariants}
+            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md mb-6 shadow-sm shadow-emerald-500/10"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span className="text-xs font-semibold tracking-wide text-emerald-300">
+              7 Commercial Trades · 20–40m Physical Arrival SLA
+            </span>
+          </motion.div>
+
           {/* Editorial Headline */}
           <motion.h1
             variants={heroItemVariants}
