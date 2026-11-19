@@ -4,6 +4,8 @@ import { motion, useScroll, useSpring, useReducedMotion, useInView } from "frame
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { SpotlightCard } from "../components/landing/SpotlightCard";
+import { AnimatedCounter } from "../components/landing/AnimatedCounter";
 import { COVERAGE_PLANS } from "../config/coveragePricing";
 import { OPERATIONAL_REACH_METRICS, OPERATIONAL_REACH_DISCLAIMER } from "../config/operationalReach";
 import {
@@ -1022,72 +1024,63 @@ export function LandingPage() {
           variants={sectionContainerVariants}
           className="flex flex-wrap justify-center gap-6 items-stretch"
         >
-          {CORE_SERVICES.map((trade) => {
+          {CORE_SERVICES.map((trade, index) => {
             const TradeIcon = trade.icon;
             return (
-              <motion.div
+              <SpotlightCard
                 key={trade.id}
-                variants={cardItemVariants}
-                whileHover={{ y: -6, scale: 1.015 }}
-                transition={{ duration: 0.22, ease: "easeOut" }}
-                className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] flex flex-col"
+                delay={index * 0.06}
+                spotlightColor="rgba(16, 185, 129, 0.16)"
+                className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none hover:border-emerald-500/50 hover:shadow-lg dark:hover:border-emerald-500/40 p-6 flex flex-col justify-between text-center group transition-colors duration-200"
               >
-                <div
-                  className="h-full p-6 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900/90 shadow-md dark:shadow-none hover:border-emerald-500/50 hover:shadow-lg dark:hover:border-emerald-500/40 flex flex-col justify-between text-center group transition-all duration-200"
-                >
-                  <div className="flex flex-col items-center text-center w-full space-y-3">
-                    {/* Trade Icon */}
-                    <motion.div
-                      whileHover={{ scale: 1.12, rotate: 2 }}
-                      transition={{ duration: 0.2 }}
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto shadow-sm p-2.5"
-                      style={{
-                        backgroundColor: `${trade.accentColor}18`,
-                        color: trade.accentColor,
-                        border: `1px solid ${trade.accentColor}35`,
-                      }}
-                    >
-                      <TradeIcon size={22} />
-                    </motion.div>
-
-                    {/* SLA Badge */}
-                    <span
-                      className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border mx-auto"
-                      style={{
-                        borderColor: `${trade.accentColor}40`,
-                        color: trade.accentColor,
-                        backgroundColor: `${trade.accentColor}12`,
-                      }}
-                    >
-                      {trade.slaBadge}
-                    </span>
-
-                    {/* Title */}
-                    <h3 className="text-base sm:text-lg font-bold font-service-title text-[var(--text-primary)]">
-                      {trade.title}
-                    </h3>
-
-                    {/* Concise 1-Sentence Description */}
-                    <p className="text-xs text-slate-600 dark:text-slate-300 text-center leading-relaxed font-normal min-h-[36px]">
-                      {trade.shortDesc}
-                    </p>
-
-                    {/* 3 Compact Capability Pills */}
-                    <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2 w-full">
-                      {trade.capabilities.map((cap) => (
-                        <span
-                          key={cap}
-                          className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/10"
-                        >
-                          {cap}
-                        </span>
-                      ))}
-                    </div>
+                <div className="flex flex-col items-center text-center w-full space-y-3">
+                  {/* Trade Icon */}
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto shadow-sm p-2.5 transition-transform duration-200 group-hover:scale-110"
+                    style={{
+                      backgroundColor: `${trade.accentColor}18`,
+                      color: trade.accentColor,
+                      border: `1px solid ${trade.accentColor}35`,
+                    }}
+                  >
+                    <TradeIcon size={22} />
                   </div>
 
+                  {/* SLA Badge */}
+                  <span
+                    className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border mx-auto"
+                    style={{
+                      borderColor: `${trade.accentColor}40`,
+                      color: trade.accentColor,
+                      backgroundColor: `${trade.accentColor}12`,
+                    }}
+                  >
+                    {trade.slaBadge}
+                  </span>
 
+                  {/* Title */}
+                  <h3 className="text-base sm:text-lg font-bold font-service-title text-[var(--text-primary)]">
+                    {trade.title}
+                  </h3>
+
+                  {/* Concise 1-Sentence Description */}
+                  <p className="text-xs text-slate-600 dark:text-slate-300 text-center leading-relaxed font-normal min-h-[36px]">
+                    {trade.shortDesc}
+                  </p>
+
+                  {/* 3 Compact Capability Pills */}
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2 w-full">
+                    {trade.capabilities.map((cap) => (
+                      <span
+                        key={cap}
+                        className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/10"
+                      >
+                        {cap}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </motion.div>
+              </SpotlightCard>
             );
           })}
         </motion.div>
