@@ -1961,3 +1961,61 @@ This document tracks all completed implementation milestones, verified files, co
      - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
      - Automated test suite: 84 / 84 tests passing (100%).
      - Production build: Clean build in 8.64s (`npm run build`). CustomerInvoices bundle: 11.57 kB.
+
+---
+
+## Milestone 4.25 — Stage 5: Dispatcher Portal Transformation (Dual-Theme, Zero-Yellow, Minimalist Text)
+
+- **Date**: 19 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Commits**: `81bd556`, `85a4117`
+- **Objective**: Full transformation of the 6 Dispatcher Portal views (`DispatcherDashboard`, `ServiceRequests`, `WorkOrders`, `TechnicianRoster`, `DispatcherSchedule`, `DispatchAuditLog`).
+  1. Applied approved dual-theme design system (`#e8edf3` / `bg-zinc-950`).
+  2. Purged all amber/yellow in favor of Signal Emerald (`#10b981`), VoltOps Cyan (`#06b6d4`), and Berry Plum (`#b8287a`).
+  3. Enforced text minimalism and human-in-the-loop manual assignment boundary.
+  4. Preserved 100% of Customer and Admin portal code.
+  5. 84 / 84 tests passing, TypeScript 0 errors, Vite production build verified.
+
+---
+
+## Milestone 4.26 — Stage 6: Technician Portal Transformation (Dual-Theme Parity & 25 Granular Commits)
+
+- **Date**: 19 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Commit Range**: `999ed1d`..`275d784` (25 Atomic Commits)
+- **Today's Meaningful Commits on Branch `feature/project-wide-design-transformation`**:
+  1. `999ed1d` — `style(technician): apply VoltOps dual-theme surfaces and borders to dashboard panels`
+  2. `94bc223` — `refactor(technician): set dashboard title to Dashboard and remove redundant subtitle`
+  3. `552457c` — `style(technician): modernize top 3 KPI metric cards with dual-theme borders and elevation`
+  4. `8a3221d` — `style(technician): update urgent transit spotlight banner and recolor arrival CTA to emerald`
+  5. `344691c` — `style(technician): recolor trade competency progress bars to signal emerald`
+  6. `a70db96` — `refactor(technician): sort active and dispatched jobs to top of dispatch route`
+  7. `9458ff9` — `style(technician): strip long street addresses in dispatch route and apply cyan travelling badge`
+  8. `d43c99b` — `style(technician): add pb-24 bottom clearance to technician dashboard`
+  9. `c0cd5e6` — `style(technician): apply VoltOps dual-theme canvas and filter toolbar card styling to My Jobs`
+  10. `7a8059f` — `style(technician): style recessed search input and filter dropdowns in My Jobs`
+  11. `263382e` — `style(technician): wrap My Jobs table in elevated card with emerald top border and tinted thead`
+  12. `630c544` — `style(technician): apply zebra striping and high-ink dividers to My Jobs table rows`
+  13. `efebbfb` — `fix(technician): apply whitespace-nowrap and 2-line layout to Work Order ID column`
+  14. `ab1dcd6` — `style(technician): align priority and status badges to Berry Plum and Cyan palette`
+  15. `4b9ee53` — `style(technician): add pb-24 bottom clearance to My Jobs container`
+  16. `56223f2` — `style(technician): apply dual-theme surface tokens and emerald left accent to Skill Passport header`
+  17. `e057ee7` — `fix(technician): format duty status as Duty: On Job and fix active job pluralization`
+  18. `41ed41a` — `style(technician): wrap certifications table in elevated card with emerald top border and tinted thead`
+  19. `0eef10a` — `style(technician): restyle trade endorsements card with dual-theme badges and high-ink text`
+  20. `1d39fcc` — `refactor(technician): remove redundant demonstration mode telemetry footer from Skill Passport`
+  21. `8f21bf4` — `style(technician): add pb-24 bottom clearance to Skill Passport container`
+  22. `42bdb6e` — `style(technician): apply VoltOps dual-theme canvas and table card with emerald top border`
+  23. `18bd63e` — `style(technician): apply tinted thead and high-ink Light Mode typography to leave table`
+  24. `8ef1758` — `style(technician): polish leave request modal form with recessed dual-theme inputs`
+  25. `275d784` — `style(technician): align leave status badges with Berry Plum and Cyan and add pb-24 clearance`
+- **Strict Policy Compliance**:
+  - Customer Portal, Admin Portal, and Dispatcher Portal files: 100% untouched.
+  - Zero yellow / amber purge across all 4 technician pages.
+  - Added `pb-24` bottom clearance across all 4 views for chat widget clearance.
+  - Preserved all technician status transition, arrival, completion report, and leave submission workflows.
+- **Quality Gates Passed**:
+  - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+  - Automated test suite: 84 / 84 tests passing (100%).
+  - Production build: Clean build in 10.84s (`npm run build`).
+
