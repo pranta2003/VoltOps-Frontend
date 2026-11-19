@@ -882,8 +882,9 @@ export function LandingPage() {
             />
           </video>
 
-          {/* Refined cinematic dark gradient scrim: lets the video breathe while ensuring effortless contrast for headline */}
-          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/70 via-zinc-950/50 to-zinc-950" />
+          {/* Refined cinematic dark gradient & radial vignette scrim: lets the video breathe while ensuring effortless contrast */}
+          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/75 via-zinc-950/45 to-zinc-950" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(9,9,11,0.55)_65%,rgba(9,9,11,0.95)_100%)]" />
         </div>
 
         <motion.div
