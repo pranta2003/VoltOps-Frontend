@@ -1711,12 +1711,11 @@ export function LandingPage() {
             variants={sectionContainerVariants}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            {OPERATIONAL_REACH_METRICS.map((metric) => (
-              <motion.div
+            {OPERATIONAL_REACH_METRICS.map((metric, idx) => (
+              <SpotlightCard
                 key={metric.id}
-                variants={cardItemVariants}
-                whileHover={{ y: -5 }}
-                transition={{ duration: 0.2 }}
+                delay={idx * 0.08}
+                spotlightColor={metric.highlight ? "rgba(16, 185, 129, 0.2)" : "rgba(6, 182, 212, 0.14)"}
                 className={`p-6 rounded-2xl border flex flex-col justify-between shadow-md dark:shadow-none transition-all text-center ${
                   metric.highlight
                     ? "border-2 border-emerald-500 bg-white dark:bg-zinc-900 shadow-lg shadow-emerald-500/10"
@@ -1747,7 +1746,7 @@ export function LandingPage() {
                 >
                   {metric.description}
                 </p>
-              </motion.div>
+              </SpotlightCard>
             ))}
           </motion.div>
 
