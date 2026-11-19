@@ -2062,3 +2062,51 @@ This document tracks all completed implementation milestones, verified files, co
   - Automated test suite: 84 / 84 tests passing (100%).
   - Production build: Clean build in 10.75s (`npm run build`).
   - Remote tracking branch: Pushed to `origin/feature/project-wide-design-transformation` (82 commits ahead of `main`).
+
+
+### Milestone 4.28: Stage 7.2 Landing Page Motion, Vercel-Style Hero & Spotlight Interactions (25 Granular Commits)
+- **Date**: 20 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Commit Range**: `a613f79`..`d7b5ea5` (25 Atomic Commits)
+- **Today's Meaningful Commits on Branch `feature/project-wide-design-transformation`**:
+  1. `a613f79` — `feat(landing): create SpotlightCard component with interactive mouse spotlight and hover elevation`
+  2. `dbdc12b` — `feat(landing): create AnimatedCounter component with in-view scroll animation`
+  3. `aab28e2` — `refactor(landing): remove bottom 7-trade dock from hero section`
+  4. `6cfd6ac` — `style(landing): refine hero background video dark radial and linear vignette scrim`
+  5. `25ac7cd` — `feat(landing): add animated eyebrow pill with pulsing emerald indicator to hero`
+  6. `2d175c5` — `style(landing): implement staggered entrance animations for hero headline, subtitle and CTAs`
+  7. `c04e66a` — `feat(landing): add minimal single-row glassmorphic SLA strip at hero bottom`
+  8. `8ae2f33` — `style(landing): add ambient radial emerald aura and dot-grid texture to services section header`
+  9. `7af6342` — `refactor(landing): wrap 7 canonical trade cards in SpotlightCard with staggered scroll-in delays`
+  10. `c88d4c8` — `style(landing): elevate trade card tags and SLA badges inside SpotlightCard containers`
+  11. `e677a36` — `refactor(landing): wrap dispatch coordination cards in SpotlightCard containers`
+  12. `37cabd7` — `feat(landing): animate matching engine criteria progress bars from zero width on scroll`
+  13. `0a0e9b8` — `style(landing): refine candidate audit log telemetry styling inside dispatch spotlight`
+  14. `235d06b` — `feat(landing): add staggered entrance animations for 5-step workflow cards`
+  15. `571dd20` — `style(landing): add animated connecting track between workflow step icons on desktop`
+  16. `14f37e7` — `style(landing): add ambient emerald mesh glow backdrop behind operational reach metrics`
+  17. `ae65d0e` — `feat(landing): integrate AnimatedCounter into operational reach stat cards`
+  18. `72d4ea9` — `refactor(landing): wrap operational reach metric cards in SpotlightCard`
+  19. `facacbf` — `refactor(landing): wrap coverage plans A through D in SpotlightCard containers`
+  20. `b7fc301` — `style(landing): enhance Plan C priority card with animated emerald top glow and spotlight elevation`
+  21. `0280ce2` — `style(landing): align plan features checklist and callout tags within spotlight surfaces`
+  22. `193aaea` — `refactor(landing): wrap regional hub cards in SpotlightCard with scroll reveals`
+  23. `2322a6e` — `refactor(landing): wrap About section feature cards in SpotlightCard`
+  24. `c4aea6d` — `style(landing): add smooth scroll-reveal motion to contact inquiry panels and form card`
+  25. `d7b5ea5` — `style(landing): refine pre-footer CTA banner with subtle spotlight elevation and focus motion`
+- **Architectural & Motion Deliverables**:
+  - `SpotlightCard.tsx`: Smooth cursor-following spotlight gradient, hover elevation (`whileHover={{ y: -3 }}`), and scroll reveals (`whileInView`).
+  - `AnimatedCounter.tsx`: Performant `requestAnimationFrame` counter parsing prefixes, decimals, and suffixes with tabular numbers.
+  - Vercel-style clean hero with staggered motion entrance and minimal bottom SLA strip.
+  - Interactive matching engine progress bars animating from 0% on scroll into view.
+  - Desktop connecting track for workflow step indicators.
+- **Strict Policy Compliance**:
+  - Footer & payment badges: 100% untouched and locked.
+  - Customer, Admin, Dispatcher, and Technician portal files: 100% untouched and locked.
+  - Video background preserved with enhanced contrast vignette.
+  - Zero-Yellow purge strictly upheld.
+- **Quality Gates Passed**:
+  - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+  - Automated test suite: 84 / 84 tests passing (100%).
+  - Production build: Clean build in 1m 2s (`npm run build`).
+  - Remote tracking branch: Pushed to `origin/feature/project-wide-design-transformation` (108 commits ahead of `main`).
