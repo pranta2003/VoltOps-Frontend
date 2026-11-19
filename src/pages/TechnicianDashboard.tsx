@@ -121,6 +121,17 @@ export function TechnicianDashboard() {
   );
   const completedCount = jobs.filter((j) => j.status === "COMPLETED").length;
 
+  const sortedRouteJobs = [...jobs].sort((a, b) => {
+    const order: Record<string, number> = {
+      TRAVELLING: 0,
+      ON_SITE: 1,
+      ASSIGNED: 2,
+      WORK_COMPLETED_AWAITING_CONFIRMATION: 3,
+      COMPLETED: 4,
+    };
+    return (order[a.status] ?? 5) - (order[b.status] ?? 5);
+  });
+
   const handleDirectTransition = async (job: TechnicianJobItem, nextStatus: "TRAVELLING" | "ON_SITE") => {
     setIsUpdatingStatus(true);
     try {
@@ -415,7 +426,7 @@ export function TechnicianDashboard() {
                 ) : jobs.length === 0 ? (
                   <div className="py-8 text-center text-xs text-slate-600 dark:text-zinc-400">No jobs assigned yet.</div>
                 ) : (
-                  jobs.slice(0, 4).map((job) => (
+                  sortedRouteJobs.slice(0, 4).map((job) => (
                     <div
                       key={job.id}
                       className="flex items-center justify-between gap-3 p-2.5 rounded-lg border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-zinc-950/50 hover:bg-slate-100 dark:hover:bg-zinc-800/50 transition-colors"
