@@ -1178,7 +1178,7 @@ export function LandingPage() {
             variants={cardItemVariants}
             whileHover={{ y: -5, scale: 1.01 }}
             transition={{ duration: 0.2 }}
-            className="lg:col-span-6 p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald space-y-5 transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.22)]"
+            className="lg:col-span-6 p-6 sm:p-7 rounded-2xl border border-slate-300 border-l-4 border-l-emerald-500 dark:border-white/10 dark:border-l-emerald-500/80 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none space-y-5 transition-shadow duration-300"
           >
             <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border)]">
               <div>
@@ -1218,7 +1218,7 @@ export function LandingPage() {
             variants={cardItemVariants}
             whileHover={{ y: -5, scale: 1.01 }}
             transition={{ duration: 0.2 }}
-            className="lg:col-span-6 p-7 rounded-[32px] border border-[var(--border)] glass-panel space-y-4 transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.22)]"
+            className="lg:col-span-6 p-6 sm:p-7 rounded-2xl border border-slate-300 border-l-4 border-l-cyan-500 dark:border-white/10 dark:border-l-cyan-500/80 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none space-y-4 transition-shadow duration-300"
           >
             <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border)]">
               <div>
