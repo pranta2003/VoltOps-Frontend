@@ -424,11 +424,6 @@ export function LandingPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Active Trade Spotlight in Hero Centerpiece
-  const [heroActiveTrade, setHeroActiveTrade] = useState<string>("electrical");
-  const selectedTrade = CORE_SERVICES.find((s) => s.id === heroActiveTrade) || CORE_SERVICES[0];
-  const SelectedIcon = selectedTrade.icon;
-
   // Workflow step hover state
   const [hoveredStep, setHoveredStep] = useState<number | null>(null);
 
@@ -937,94 +932,6 @@ export function LandingPage() {
               <span>See How It Works</span>
             </motion.a>
           </motion.div>
-
-          {/* ── Compact Glassmorphic Hero Dock ────────────────────────────── */}
-          <motion.div
-            variants={heroItemVariants}
-            className="mt-10 relative max-w-5xl mx-auto rounded-2xl border border-slate-300 border-l-4 border-l-emerald-500 dark:border-white/10 dark:border-l-emerald-500/80 bg-white/95 dark:bg-zinc-950/80 backdrop-blur-md shadow-xl dark:shadow-none p-5 sm:p-6 text-left"
-          >
-            {/* Top row: Status header & Response Times ticker */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-200 dark:border-white/10">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                  7 Commercial Trades · Guaranteed Arrival SLAs
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
-                  Response Times:
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 font-bold tabular-nums">
-                  Plan C (20m)
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-cyan-50 text-cyan-900 border border-cyan-300 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20 font-bold tabular-nums">
-                  Plan B (40m)
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-white/10 font-semibold tabular-nums">
-                  Plan A (8h)
-                </span>
-                <a
-                  href="#packages"
-                  className="inline-flex items-center gap-1 font-bold text-emerald-700 dark:text-emerald-400 hover:underline ml-2"
-                >
-                  <span>Plans</span>
-                  <ArrowRightIcon size={12} />
-                </a>
-              </div>
-            </div>
-
-            {/* 7-Trade Selector Tabs */}
-            <div className="flex gap-2 overflow-x-auto pb-3 mb-3 border-b border-slate-200 dark:border-white/10 no-scrollbar">
-              {CORE_SERVICES.map((s) => {
-                const isActive = s.id === heroActiveTrade;
-                const SvgIcon = s.icon;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setHeroActiveTrade(s.id)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 border focus:outline-none ${
-                      isActive
-                        ? "border-emerald-500 bg-emerald-500 text-zinc-950 font-bold shadow-sm shadow-emerald-500/20"
-                        : "border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800/60"
-                    }`}
-                  >
-                    <SvgIcon size={13} className={isActive ? "text-zinc-950" : "text-emerald-600 dark:text-emerald-400"} />
-                    <span>{s.title}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Selected Trade Preview Box */}
-            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/80 dark:bg-zinc-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                >
-                  <SelectedIcon size={18} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-slate-900 dark:text-white">{selectedTrade.title}</h4>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">
-                    {selectedTrade.shortDesc}
-                  </p>
-                </div>
-              </div>
-
-              {/* Capabilities Tags */}
-              <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-                {selectedTrade.capabilities.map((cap) => (
-                  <span
-                    key={cap}
-                    className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-white dark:bg-zinc-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10"
-                  >
-                    {cap}
-                  </span>
-                ))}
-              </div>
-            </div>          </motion.div>
         </motion.div>
       </header>
 
