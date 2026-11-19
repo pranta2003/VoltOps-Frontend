@@ -1850,13 +1850,13 @@ export function LandingPage() {
             {/* Contact info */}
             <div className="lg:col-span-5 space-y-4">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   Direct Inquiries
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-space font-bold tracking-tight mt-1.5 text-slate-900 dark:text-white">
                   Talk with our team
                 </h2>
-                <p className="text-sm mt-1.5 text-slate-600 dark:text-slate-400">
+                <p className="text-sm mt-1.5 text-slate-600 dark:text-slate-400 font-medium">
                   Enterprise inquiries or multi-facility complex coordination? Send our operations team a message.
                 </p>
               </div>
@@ -1866,8 +1866,8 @@ export function LandingPage() {
                   { icon: PhoneIcon, label: "Phone", value: "+880 1XXX-XXXXXX" },
                   { icon: MapPinIcon, label: "Operations Desk", value: "Dhaka Central & Regional Hubs, Bangladesh" },
                 ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-[var(--border)] glass-panel shadow-[var(--shadow-sm)]">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#10b981] dark:text-[#34d399] shrink-0">
+                  <div key={label} className="flex items-center gap-3.5 p-3.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none">
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-zinc-800 text-emerald-600 dark:text-emerald-400 shrink-0">
                       <Icon size={17} />
                     </div>
                     <div>
@@ -1881,13 +1881,13 @@ export function LandingPage() {
 
             {/* Contact form */}
             <div className="lg:col-span-7">
-              <div className="p-7 rounded-[32px] border border-[var(--border)] glass-panel shadow-[var(--shadow-sm)]">
+              <div className="p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none">
                 <h3 className="text-lg font-bold font-heading mb-1 text-slate-900 dark:text-white">Send an inquiry</h3>
-                <p className="text-xs mb-4 text-slate-600 dark:text-slate-400">
+                <p className="text-xs mb-4 text-slate-600 dark:text-slate-400 font-medium">
                   For sales and custom schedule inquiries. For active emergencies, subscribe and log in to dispatch.
                 </p>
                 {contactDone ? (
-                  <div className="p-4 rounded-2xl text-sm border flex items-center gap-2 border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
+                  <div className="p-4 rounded-xl text-sm border flex items-center gap-2 border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                     <CheckCircleIcon size={18} />
                     <span>Inquiry submitted. Our coordination desk will reply within one business day.</span>
                   </div>
@@ -1904,7 +1904,7 @@ export function LandingPage() {
                           value={cName}
                           onChange={(e) => setCName(e.target.value)}
                           placeholder="Facility Manager"
-                          className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-zinc-950 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-zinc-500 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                         />
                       </div>
                       <div>
@@ -1917,7 +1917,7 @@ export function LandingPage() {
                           value={cEmail}
                           onChange={(e) => setCEmail(e.target.value)}
                           placeholder="manager@company.com"
-                          className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-zinc-950 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-zinc-500 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                         />
                       </div>
                     </div>
@@ -1930,7 +1930,7 @@ export function LandingPage() {
                         value={cCompany}
                         onChange={(e) => setCCompany(e.target.value)}
                         placeholder="Apex Galleria Complex"
-                        className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                        className="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-zinc-950 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-zinc-500 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                       />
                     </div>
                     <div>
@@ -1943,14 +1943,14 @@ export function LandingPage() {
                         value={cMsg}
                         onChange={(e) => setCMsg(e.target.value)}
                         placeholder="Describe your facility locations, equipment types, and coverage requirements..."
-                        className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#10b981] resize-none"
+                        className="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-zinc-950 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-zinc-500 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all resize-none"
                       />
                     </div>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       type="submit"
-                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-md"
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 shadow-md shadow-emerald-500/20 transition-all"
                     >
                       <span>Send Inquiry</span>
                       <ArrowRightIcon size={14} />
