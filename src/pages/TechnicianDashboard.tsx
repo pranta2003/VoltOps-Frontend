@@ -483,8 +483,8 @@ export function TechnicianDashboard() {
                 data={[
                   { label: "High-Voltage Switchgear & Transformers", value: 96, color: "emerald", secondaryLabel: "Class A Master License (DOE-BD)" },
                   { label: "Automatic Transfer Switches (ATS)", value: 92, color: "emerald", secondaryLabel: "Cummins & Perkins Certified" },
-                  { label: "Three-Phase Motors & Star-Delta Starters", value: 88, color: "blue", secondaryLabel: "Siemens Level 2 Upkeep" },
-                  { label: "Infrared Thermal Busbar Diagnostics", value: 85, color: "blue", secondaryLabel: "FLIR Level 1 Certified" },
+                  { label: "Three-Phase Motors & Star-Delta Starters", value: 88, color: "emerald", secondaryLabel: "Siemens Level 2 Upkeep" },
+                  { label: "Infrared Thermal Busbar Diagnostics", value: 85, color: "emerald", secondaryLabel: "FLIR Level 1 Certified" },
                 ]}
                 valueSuffix="%"
               />
