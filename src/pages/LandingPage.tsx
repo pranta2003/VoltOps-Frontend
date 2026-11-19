@@ -1193,15 +1193,15 @@ export function LandingPage() {
             <div className="space-y-3">
               {[
                 { label: "Trade Skill & License Verification", val: "Hard eligibility gate", progress: 100, color: "#10b981" },
-                { label: "Proximity & Hub Routing", val: "Branch hub proximity score", progress: 85, color: "#34d399" },
+                { label: "Proximity & Hub Routing", val: "Branch hub proximity score", progress: 85, color: "#06b6d4" },
                 { label: "Active Workload Balancing", val: "Max 2 active jobs per tech", progress: 75, color: "#38bdf8" },
               ].map(({ label, val, progress, color }) => (
-                <div key={label} className="p-3.5 rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1.5">
+                <div key={label} className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-950/60 border border-slate-200 dark:border-white/10 space-y-1.5">
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-slate-900 dark:text-white">{label}</span>
-                    <span className="text-slate-600 dark:text-slate-400 text-[11px]">{val}</span>
+                    <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">{val}</span>
                   </div>
-                  <div className="w-full bg-[var(--border)] h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
                     <div className="h-full rounded-full" style={{ width: `${progress}%`, background: color }} />
                   </div>
                 </div>
@@ -1259,14 +1259,14 @@ export function LandingPage() {
             </div>
 
             {/* Ineligible */}
-            <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] opacity-70">
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-zinc-950/40">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm text-slate-600 dark:text-slate-400">Nayeem Islam</span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400">
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-900 border border-rose-300 dark:bg-[#b8287a]/20 dark:text-[#f472b6] dark:border-[#b8287a]/30">
                   Disqualified
                 </span>
               </div>
-              <p className="text-xs text-red-600 dark:text-red-400 mt-1">✕ Trade license expired (filtered by hard rule)</p>
+              <p className="text-xs text-rose-700 dark:text-rose-400 mt-1 font-medium">✕ Trade license expired · Filtered by hard qualification gate</p>
             </div>
           </motion.div>
         </motion.div>
