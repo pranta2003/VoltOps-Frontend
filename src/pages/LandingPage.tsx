@@ -1128,10 +1128,9 @@ export function LandingPage() {
           className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch"
         >
           {/* Left Bento: Operations Dispatch Architecture */}
-          <motion.div
-            variants={cardItemVariants}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 0.2 }}
+          <SpotlightCard
+            delay={0}
+            spotlightColor="rgba(16, 185, 129, 0.16)"
             className="lg:col-span-6 p-6 sm:p-7 rounded-2xl border border-slate-300 border-l-4 border-l-emerald-500 dark:border-white/10 dark:border-l-emerald-500/80 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none space-y-5 transition-shadow duration-300"
           >
             <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border)]">
@@ -1165,13 +1164,12 @@ export function LandingPage() {
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed pt-2 border-t border-[var(--border)]">
               Human-verified dispatch. Transparent AI scoring.
             </p>
-          </motion.div>
+          </SpotlightCard>
 
           {/* Right Bento: Candidate Audit Evaluation */}
-          <motion.div
-            variants={cardItemVariants}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 0.2 }}
+          <SpotlightCard
+            delay={0.1}
+            spotlightColor="rgba(6, 182, 212, 0.16)"
             className="lg:col-span-6 p-6 sm:p-7 rounded-2xl border border-slate-300 border-l-4 border-l-cyan-500 dark:border-white/10 dark:border-l-cyan-500/80 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none space-y-4 transition-shadow duration-300"
           >
             <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border)]">
@@ -1222,7 +1220,7 @@ export function LandingPage() {
               </div>
               <p className="text-xs text-rose-700 dark:text-rose-400 mt-1 font-medium">✕ Trade license expired · Filtered by hard qualification gate</p>
             </div>
-          </motion.div>
+          </SpotlightCard>
         </motion.div>
       </section>
 
