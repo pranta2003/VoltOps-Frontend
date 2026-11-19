@@ -1285,13 +1285,13 @@ export function LandingPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
               Coordination Workflow
             </span>
-            <h2 className="text-3xl sm:text-4xl font-space font-bold tracking-tight text-[var(--text-primary)]">
+            <h2 className="text-3xl sm:text-4xl font-space font-extrabold tracking-tight text-slate-900 dark:text-white">
               How VoltOps resolves{" "}
-              <span className="font-serif-italic font-normal">
+              <span className="font-serif-italic font-normal text-emerald-600 dark:text-emerald-400">
                 breakdowns
               </span>
             </h2>
-            <p className="text-sm text-slate-700 dark:text-slate-300">
+            <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
               A straightforward path from problem report to verified on-site sign-off.
             </p>
           </motion.div>
@@ -1720,14 +1720,14 @@ export function LandingPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
               Our Operational Reach
             </span>
-            <h2 className="text-3xl sm:text-4xl font-space font-bold tracking-tight text-[var(--text-primary)]">
+            <h2 className="text-3xl sm:text-4xl font-space font-extrabold tracking-tight text-slate-900 dark:text-white">
               Built for commercial{" "}
-              <span className="font-serif-italic font-normal">
+              <span className="font-serif-italic font-normal text-emerald-600 dark:text-emerald-400">
                 operations
               </span>
             </h2>
-            <p className="text-sm text-slate-700 dark:text-slate-300">
-              Illustrative platform scale demonstrating multi-zone technician dispatching and enterprise reliability.
+            <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
+              Multi-zone technician dispatching and enterprise reliability across all commercial hubs.
             </p>
           </motion.div>
 
@@ -1764,13 +1764,13 @@ export function LandingPage() {
                       suffix={metric.suffix}
                     />
                   </div>
-                  <h3 className="font-bold text-sm text-[var(--text-primary)] mt-2">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white mt-2 font-heading">
                     {metric.label}
                   </h3>
                 </div>
                 <p
-                  className={`text-xs text-[var(--text-secondary)] mt-3 leading-relaxed pt-3 border-t ${
-                    metric.highlight ? "border-[#10b981]/30" : "border-[var(--border)]"
+                  className={`text-xs text-slate-600 dark:text-slate-400 mt-3 leading-relaxed pt-3 border-t font-medium ${
+                    metric.highlight ? "border-emerald-500/30" : "border-slate-200 dark:border-white/10"
                   }`}
                 >
                   {metric.description}
@@ -1780,7 +1780,7 @@ export function LandingPage() {
           </motion.div>
 
           {/* Understated illustrative prototype disclaimer */}
-          <p className="text-center text-[11px] text-[var(--text-muted)] mt-8 italic">
+          <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-8 font-medium">
             {OPERATIONAL_REACH_DISCLAIMER}
           </p>
         </div>
