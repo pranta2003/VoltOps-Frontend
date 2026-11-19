@@ -1258,49 +1258,53 @@ export function LandingPage() {
             </p>
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-40px" }}
-            variants={sectionContainerVariants}
-            className="grid grid-cols-1 md:grid-cols-5 gap-4"
-          >
-            {WORKFLOW_STEPS.map(({ step, icon: StepIcon, title, desc }, index) => {
-              const isHov = hoveredStep === step;
-              return (
-                <SpotlightCard
-                  key={step}
-                  delay={index * 0.08}
-                  spotlightColor="rgba(16, 185, 129, 0.14)"
-                  tabIndex={0}
-                  onMouseEnter={() => setHoveredStep(step)}
-                  onMouseLeave={() => setHoveredStep(null)}
-                  onFocus={() => setHoveredStep(step)}
-                  onBlur={() => setHoveredStep(null)}
-                  className={`p-5 rounded-2xl border transition-all duration-200 cursor-default shadow-md dark:shadow-none ${
-                    isHov
-                      ? "border-emerald-500 bg-white dark:bg-zinc-900 shadow-lg shadow-emerald-500/10"
-                      : "border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 hover:border-emerald-500/40"
-                  }`}
-                >
-                  <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3.5 transition-all shadow-sm ${
+          <div className="relative">
+            {/* Desktop connecting track line behind step icons */}
+            <div className="hidden md:block absolute top-[44px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-emerald-500/10 via-emerald-500/40 to-emerald-500/10 pointer-events-none z-0" />
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-40px" }}
+              variants={sectionContainerVariants}
+              className="relative z-10 grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              {WORKFLOW_STEPS.map(({ step, icon: StepIcon, title, desc }, index) => {
+                const isHov = hoveredStep === step;
+                return (
+                  <SpotlightCard
+                    key={step}
+                    delay={index * 0.08}
+                    spotlightColor="rgba(16, 185, 129, 0.14)"
+                    tabIndex={0}
+                    onMouseEnter={() => setHoveredStep(step)}
+                    onMouseLeave={() => setHoveredStep(null)}
+                    onFocus={() => setHoveredStep(step)}
+                    onBlur={() => setHoveredStep(null)}
+                    className={`p-5 rounded-2xl border transition-all duration-200 cursor-default shadow-md dark:shadow-none ${
                       isHov
-                        ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                        : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                        ? "border-emerald-500 bg-white dark:bg-zinc-900 shadow-lg shadow-emerald-500/10"
+                        : "border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 hover:border-emerald-500/40"
                     }`}
                   >
-                    <StepIcon size={19} />
-                  </div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1 font-semibold">
-                    Step 0{step}
-                  </div>
-                  <h3 className="font-bold font-heading text-sm text-slate-900 dark:text-white mb-1.5">{title}</h3>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal">{desc}</p>
-                </SpotlightCard>
-              );
-            })}
-          </motion.div>
+                    <div
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3.5 transition-all shadow-sm ${
+                        isHov
+                          ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                          : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                      }`}
+                    >
+                      <StepIcon size={19} />
+                    </div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1 font-semibold">
+                      Step 0{step}
+                    </div>
+                    <h3 className="font-bold font-heading text-sm text-slate-900 dark:text-white mb-1.5">{title}</h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal">{desc}</p>
+                  </SpotlightCard>
+                );
+              })}
+            </motion.div>
+          </div>
         </div>
       </section>
 
