@@ -1351,10 +1351,9 @@ export function LandingPage() {
           className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch"
         >
           {/* Plan A: 8-Hour Daily */}
-          <motion.div
-            variants={cardItemVariants}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 0.2 }}
+          <SpotlightCard
+            delay={0}
+            spotlightColor="rgba(16, 185, 129, 0.12)"
             className="flex flex-col transition-shadow duration-300 rounded-2xl"
           >
             <div className="h-full p-6 sm:p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none flex flex-col justify-between hover:border-emerald-500/40 transition-all">
@@ -1399,13 +1398,12 @@ export function LandingPage() {
                 Select Plan A
               </motion.button>
             </div>
-          </motion.div>
+          </SpotlightCard>
 
           {/* Plan B: 24/7 Standard */}
-          <motion.div
-            variants={cardItemVariants}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 0.2 }}
+          <SpotlightCard
+            delay={0.08}
+            spotlightColor="rgba(6, 182, 212, 0.14)"
             className="flex flex-col transition-shadow duration-300 rounded-2xl"
           >
             <div className="h-full p-6 sm:p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none flex flex-col justify-between hover:border-emerald-500/40 transition-all">
@@ -1450,13 +1448,12 @@ export function LandingPage() {
                 Select Plan B
               </motion.button>
             </div>
-          </motion.div>
+          </SpotlightCard>
 
           {/* Plan C: 24/7 Priority */}
-          <motion.div
-            variants={cardItemVariants}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 0.2 }}
+          <SpotlightCard
+            delay={0.16}
+            spotlightColor="rgba(16, 185, 129, 0.25)"
             className="flex flex-col transition-shadow duration-300 rounded-2xl"
           >
             <div className="h-full p-6 sm:p-7 rounded-2xl border-2 border-emerald-500 bg-white dark:bg-zinc-900 shadow-xl dark:shadow-none shadow-emerald-500/10 flex flex-col justify-between relative">
@@ -1507,13 +1504,12 @@ export function LandingPage() {
                 <ArrowRightIcon size={12} />
               </motion.button>
             </div>
-          </motion.div>
+          </SpotlightCard>
 
           {/* Plan D: Custom Coverage */}
-          <motion.div
-            variants={cardItemVariants}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 0.2 }}
+          <SpotlightCard
+            delay={0.24}
+            spotlightColor="rgba(6, 182, 212, 0.14)"
             className="flex flex-col transition-shadow duration-300 rounded-2xl"
           >
             <div className="h-full p-6 sm:p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none flex flex-col justify-between hover:border-emerald-500/40 transition-all">
@@ -1557,7 +1553,7 @@ export function LandingPage() {
                 Discuss a Custom Plan →
               </motion.button>
             </div>
-          </motion.div>
+          </SpotlightCard>
         </motion.div>
 
         {/* Expandable Comparison Matrix */}
