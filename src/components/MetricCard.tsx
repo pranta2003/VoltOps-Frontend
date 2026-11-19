@@ -39,13 +39,13 @@ export const MetricCard: FC<MetricCardProps> = ({
     <div
       className={`border rounded-xl p-4 transition-all duration-150 relative overflow-hidden ${
         alert
-          ? "bg-rose-500/[0.04] border-rose-500/30 dark:bg-rose-500/[0.08]"
-          : "bg-[var(--bg-surface)] border-[var(--border)] hover:border-[var(--border-strong)]"
+          ? "bg-rose-50 border-rose-300 dark:bg-[#b8287a]/10 dark:border-[#b8287a]/30 shadow-md dark:shadow-none"
+          : "bg-white border-slate-300 shadow-md dark:bg-zinc-900 dark:border-white/5 dark:shadow-none"
       }`}
     >
       {/* Top row: Label & Icon / Badge */}
       <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-xs font-medium text-[var(--text-muted)] truncate">
+        <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 truncate">
           {label}
         </span>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -54,8 +54,8 @@ export const MetricCard: FC<MetricCardProps> = ({
             <div
               className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                 alert
-                  ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-                  : "bg-[var(--bg-surface-2)] text-[var(--text-secondary)]"
+                  ? "bg-rose-100 text-[#8a1858] dark:bg-[#b8287a]/20 dark:text-[#f472b6]"
+                  : "bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-white/5"
               }`}
             >
               <Icon size={15} />
@@ -66,17 +66,17 @@ export const MetricCard: FC<MetricCardProps> = ({
 
       {/* Main KPI Value */}
       <div className="flex items-baseline gap-2">
-        <span className={`font-heading text-[var(--text-primary)] tracking-tight ${sizeClasses}`}>
+        <span className={`font-heading text-slate-950 dark:text-zinc-50 tracking-tight ${sizeClasses}`}>
           {value}
         </span>
         {trend && (
           <span
-            className={`text-[11px] font-semibold tabular-nums px-1.5 py-0.5 rounded ${
-              trend.direction === "up"
-                ? "text-emerald-700 bg-emerald-500/10 dark:text-emerald-300"
-                : trend.direction === "down"
-                ? "text-amber-700 bg-amber-500/10 dark:text-amber-300"
-                : "text-[var(--text-muted)] bg-[var(--bg-surface-2)]"
+            className={`text-[11px] font-semibold tabular-nums px-2 py-0.5 rounded-full border ${
+              trend.label === "Clear" || trend.direction === "up"
+                ? "text-emerald-800 bg-emerald-50 border-emerald-300 dark:text-emerald-300 dark:bg-emerald-500/10 dark:border-emerald-500/20"
+                : trend.direction === "down" || trend.label.toLowerCase().includes("action")
+                ? "text-cyan-800 bg-cyan-50 border-cyan-300 dark:text-[#06b6d4] dark:bg-[#06b6d4]/15 dark:border-[#06b6d4]/30"
+                : "text-slate-700 bg-slate-100 border-slate-300 dark:text-zinc-400 dark:bg-zinc-800 dark:border-white/10"
             }`}
           >
             {trend.label}
@@ -86,7 +86,7 @@ export const MetricCard: FC<MetricCardProps> = ({
 
       {/* Subtext description */}
       {subtext && (
-        <p className="text-xs text-[var(--text-muted)] mt-1.5 truncate">
+        <p className="text-xs font-medium text-slate-600 dark:text-zinc-400 mt-1.5 truncate">
           {subtext}
         </p>
       )}

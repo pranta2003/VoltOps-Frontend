@@ -143,19 +143,19 @@ export function AuditLog() {
     switch (sev) {
       case "CRITICAL":
         return {
-          container: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20",
-          dot: "bg-red-500",
+          container: "bg-rose-50 text-[#8a1858] border border-rose-300 dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30 font-bold",
+          dot: "bg-[#b8287a]",
         };
       case "WARNING":
         return {
-          container: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
-          dot: "bg-amber-500",
+          container: "bg-cyan-50 text-cyan-800 border border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30 font-bold",
+          dot: "bg-[#06b6d4]",
         };
       case "INFO":
       default:
         return {
-          container: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
-          dot: "bg-blue-500",
+          container: "bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 font-bold",
+          dot: "bg-emerald-500",
         };
     }
   };
@@ -163,18 +163,18 @@ export function AuditLog() {
   const getCategoryBadge = (cat: AuditEventCategory) => {
     switch (cat) {
       case "SECURITY":
-        return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
+        return "bg-rose-50 text-[#8a1858] border border-rose-300 dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30 font-bold";
       case "ROLE_CHANGE":
-        return "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20";
+        return "bg-purple-50 text-purple-800 border border-purple-300 dark:bg-purple-500/10 dark:text-purple-300 dark:border-purple-500/20 font-bold";
       case "DISPATCH":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
+        return "bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 font-bold";
       case "VERIFICATION":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+        return "bg-cyan-50 text-cyan-800 border border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30 font-bold";
       case "ACCOUNT":
-        return "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20";
+        return "bg-indigo-50 text-indigo-800 border border-indigo-300 dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/20 font-bold";
       case "AUTH":
       default:
-        return "bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20";
+        return "bg-slate-100 text-slate-800 border border-slate-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-white/10 font-bold";
     }
   };
 
@@ -186,37 +186,32 @@ export function AuditLog() {
           type="button"
           onClick={handleExportJSON}
           disabled={events.length === 0}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all shadow-sm disabled:opacity-40 btn-press"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-300 bg-white text-slate-800 hover:text-slate-950 hover:bg-slate-100 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 transition-all shadow-xs disabled:opacity-40 btn-press"
           title="Download compliance audit trail in JSON format"
         >
-          <FileTextIcon size={14} className="text-[var(--text-muted)]" />
+          <FileTextIcon size={14} className="text-slate-500 dark:text-zinc-400" />
           <span>Export JSON</span>
         </button>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-4 pb-24">
         {/* ── Sub-header / Status Toolbar ───────────────────────────────── */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[var(--text-muted)]">
+            <span className="text-xs text-slate-700 dark:text-zinc-400 font-medium tabular-nums">
               {totalCount} events recorded
             </span>
-            <span className="text-xs text-[var(--text-muted)] hidden sm:inline">•</span>
-            <span className="text-xs text-[var(--text-muted)] hidden sm:inline">
+            <span className="text-xs text-slate-400 dark:text-zinc-600 hidden sm:inline">•</span>
+            <span className="text-xs text-slate-700 dark:text-zinc-400 font-medium hidden sm:inline">
               Immutable ledger
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            {isLiveConnected ? (
+            {isLiveConnected && (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Live API
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                Local preview
               </span>
             )}
 
@@ -226,7 +221,7 @@ export function AuditLog() {
               disabled={isLoading}
               title="Refresh audit ledger"
               aria-label="Refresh audit ledger"
-              className="p-1.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] disabled:opacity-40 transition-colors btn-press"
+              className="p-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50 hover:border-slate-400 disabled:opacity-40 transition-colors btn-press shadow-xs"
             >
               <RefreshCwIcon size={14} className={isLoading ? "animate-spin" : ""} />
             </button>
@@ -235,15 +230,15 @@ export function AuditLog() {
 
         {/* ── Integration Error / Offline Notice (Compact) ─────────────── */}
         {apiError && (
-          <div className="p-3 rounded-lg border border-amber-500/20 bg-amber-500/10 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between gap-2">
+          <div className="p-3 rounded-lg border border-rose-300 bg-rose-50 text-xs text-[#8a1858] dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <AlertTriangleIcon size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
-              <span>{apiError}</span>
+              <AlertTriangleIcon size={14} className="text-[#b8287a] shrink-0" />
+              <span className="font-medium">{apiError}</span>
             </div>
             <button
               type="button"
               onClick={loadAuditLogs}
-              className="text-xs font-semibold underline hover:no-underline shrink-0"
+              className="text-xs font-bold underline hover:no-underline shrink-0"
             >
               Retry
             </button>
@@ -251,12 +246,12 @@ export function AuditLog() {
         )}
 
         {/* ── Compact Filter Bar ────────────────────────────────────────── */}
-        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
+        <div className="p-3 rounded-xl border border-slate-300 border-l-4 border-l-emerald-500 bg-white shadow-md dark:bg-zinc-900 dark:border-white/5 dark:border-l-white/5 dark:shadow-none flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
           {/* Search input */}
           <div className="relative flex-1 min-w-[200px]">
             <SearchIcon
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
             />
             <input
               type="text"
@@ -264,14 +259,14 @@ export function AuditLog() {
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search by actor, action, target entity, or event ID..."
-              className="w-full pl-8 pr-7 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981]/30 transition-all"
+              className="w-full pl-8 pr-7 py-1.5 rounded-lg border border-slate-300 bg-slate-100/80 text-xs text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 dark:placeholder:text-zinc-500 dark:focus:border-emerald-500 transition-all outline-none"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => handleSearchChange("")}
                 aria-label="Clear search"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-950 dark:text-zinc-400 dark:hover:text-zinc-100 p-0.5"
               >
                 <XIcon size={12} />
               </button>
@@ -284,7 +279,7 @@ export function AuditLog() {
               value={categoryFilter}
               onChange={(e) => handleCategoryChange(e.target.value as any)}
               aria-label="Filter by category"
-              className="w-full md:w-auto px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#10b981] transition-all cursor-pointer font-medium"
+              className="w-full md:w-auto px-3 py-1.5 rounded-lg border border-slate-300 bg-slate-100/80 text-xs text-slate-950 font-bold focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 dark:focus:border-emerald-500 transition-all cursor-pointer outline-none"
             >
               <option value="ALL">All Categories</option>
               <option value="ROLE_CHANGE">Role Changes</option>
@@ -297,7 +292,7 @@ export function AuditLog() {
           </div>
 
           {/* Severity Segmented Tabs */}
-          <div className="flex items-center gap-1 shrink-0 p-0.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]">
+          <div className="flex items-center gap-1 shrink-0 p-0.5 rounded-lg border border-slate-300 bg-slate-100/80 dark:border-white/10 dark:bg-zinc-950">
             {(
               [
                 { id: "ALL", label: "All" },
@@ -312,10 +307,10 @@ export function AuditLog() {
                   key={id}
                   type="button"
                   onClick={() => handleSeverityChange(id)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                  className={`px-2.5 py-1 rounded-md text-xs transition-all ${
                     isActive
-                      ? "bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm font-semibold"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                      ? "bg-white border border-slate-300 text-slate-950 font-bold shadow-xs dark:bg-zinc-800 dark:border-white/10 dark:text-zinc-50"
+                      : "text-slate-700 hover:text-slate-950 dark:text-zinc-400 dark:hover:text-zinc-200 font-medium"
                   }`}
                 >
                   {label}
@@ -326,10 +321,10 @@ export function AuditLog() {
         </div>
 
         {/* ── Audit Ledger Table ─────────────────────────────────────────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
+        <div className="bg-white border border-slate-300 border-t-4 border-t-emerald-500 rounded-xl shadow-md overflow-hidden dark:bg-zinc-900 dark:border-white/5 dark:border-t-white/5 dark:shadow-none">
           <div className="overflow-x-auto w-full">
             <table className="w-full text-left text-xs sm:text-[13px]">
-              <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] text-xs font-medium border-b border-[var(--border)]">
+              <thead className="bg-slate-200/70 border-b-2 border-slate-300 text-slate-800 font-bold text-xs uppercase tracking-wider dark:bg-zinc-950/60 dark:border-white/5 dark:text-zinc-400">
                 <tr>
                   <th className="py-2.5 px-4">Timestamp</th>
                   <th className="py-2.5 px-4">Actor</th>
@@ -339,38 +334,38 @@ export function AuditLog() {
                   <th className="py-2.5 px-4 text-right">Detail</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-slate-300/80 dark:divide-white/5">
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, idx) => (
                     <tr key={`skel-audit-${idx}`} className="animate-pulse">
                       <td className="py-3 px-4">
-                        <div className="h-4 w-28 bg-[var(--border)] rounded mb-1" />
-                        <div className="h-3 w-16 bg-[var(--border)] rounded" />
+                        <div className="h-4 w-28 bg-slate-200 dark:bg-zinc-800 rounded mb-1" />
+                        <div className="h-3 w-16 bg-slate-200 dark:bg-zinc-800 rounded" />
                       </td>
                       <td className="py-3 px-4">
-                        <div className="h-4 w-24 bg-[var(--border)] rounded mb-1" />
-                        <div className="h-3 w-20 bg-[var(--border)] rounded" />
+                        <div className="h-4 w-24 bg-slate-200 dark:bg-zinc-800 rounded mb-1" />
+                        <div className="h-3 w-20 bg-slate-200 dark:bg-zinc-800 rounded" />
                       </td>
                       <td className="py-3 px-4">
-                        <div className="h-4 w-44 bg-[var(--border)] rounded mb-1" />
-                        <div className="h-3 w-24 bg-[var(--border)] rounded" />
+                        <div className="h-4 w-44 bg-slate-200 dark:bg-zinc-800 rounded mb-1" />
+                        <div className="h-3 w-24 bg-slate-200 dark:bg-zinc-800 rounded" />
                       </td>
                       <td className="py-3 px-4">
-                        <div className="h-5 w-20 bg-[var(--border)] rounded-full" />
+                        <div className="h-5 w-20 bg-slate-200 dark:bg-zinc-800 rounded-full" />
                       </td>
                       <td className="py-3 px-4">
-                        <div className="h-5 w-16 bg-[var(--border)] rounded-full" />
+                        <div className="h-5 w-16 bg-slate-200 dark:bg-zinc-800 rounded-full" />
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <div className="h-6 w-14 bg-[var(--border)] rounded-md inline-block" />
+                        <div className="h-6 w-14 bg-slate-200 dark:bg-zinc-800 rounded-md inline-block" />
                       </td>
                     </tr>
                   ))
                 ) : events.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-[var(--text-muted)]">
+                    <td colSpan={6} className="py-12 text-center text-slate-600 dark:text-zinc-400">
                       <div className="max-w-xs mx-auto space-y-2">
-                        <p className="font-semibold text-sm text-[var(--text-primary)]">
+                        <p className="font-bold text-sm text-slate-950 dark:text-zinc-100">
                           No audit records found
                         </p>
                         <p className="text-xs">
@@ -384,7 +379,7 @@ export function AuditLog() {
                             setSeverityFilter("ALL");
                             setCurrentPage(1);
                           }}
-                          className="px-3 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs font-medium text-[var(--text-primary)] hover:border-[#10b981] transition-colors"
+                          className="px-3 py-1 rounded-lg border border-slate-300 bg-slate-100 text-xs font-bold text-slate-800 hover:text-slate-950 hover:bg-slate-200 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-200 transition-colors"
                         >
                           Clear filters
                         </button>
@@ -398,36 +393,36 @@ export function AuditLog() {
                     return (
                       <tr
                         key={evt.id}
-                        className="hover:bg-[var(--bg-surface-2)]/60 transition-colors"
+                        className="odd:bg-white even:bg-slate-50/90 hover:bg-emerald-50/50 dark:odd:bg-zinc-900 dark:even:bg-zinc-900 dark:hover:bg-zinc-800/50 transition-colors"
                       >
                         {/* Timestamp & ID */}
                         <td className="py-3 px-4">
-                          <div className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] whitespace-nowrap">
+                          <div className="font-bold text-xs sm:text-[13px] text-slate-950 dark:text-zinc-50 whitespace-nowrap tabular-nums">
                             {evt.timestamp}
                           </div>
-                          <div className="text-xs text-[var(--text-secondary)] font-mono">
+                          <div className="text-xs text-slate-600 dark:text-zinc-400 font-mono font-medium">
                             {evt.id}
                           </div>
                         </td>
 
                         {/* Actor */}
                         <td className="py-3 px-4">
-                          <div className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)]">
+                          <div className="font-bold text-xs sm:text-[13px] text-slate-950 dark:text-zinc-50">
                             {evt.actorName}
                           </div>
-                          <div className="text-xs text-[var(--text-muted)] font-mono">
+                          <div className="text-xs text-slate-600 dark:text-zinc-400 font-mono font-medium">
                             {evt.actorRole} · {evt.actorIp}
                           </div>
                         </td>
 
                         {/* Action Description & Target */}
                         <td className="py-3 px-4">
-                          <div className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)] max-w-sm truncate" title={evt.action}>
+                          <div className="font-semibold text-xs sm:text-[13px] text-slate-950 dark:text-zinc-100 max-w-sm truncate" title={evt.action}>
                             {evt.action}
                           </div>
-                          <div className="text-xs text-[var(--text-secondary)] flex items-center gap-1 mt-0.5">
-                            <span className="text-[var(--text-muted)]">Target:</span>
-                            <span className="font-mono text-emerald-700 dark:text-emerald-300 font-medium">
+                          <div className="text-xs text-slate-600 dark:text-zinc-400 flex items-center gap-1 mt-0.5 font-medium">
+                            <span>Target:</span>
+                            <span className="font-mono text-emerald-700 dark:text-emerald-400 font-bold">
                               {evt.targetEntity}
                             </span>
                           </div>
@@ -436,7 +431,7 @@ export function AuditLog() {
                         {/* Category */}
                         <td className="py-3 px-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium border ${getCategoryBadge(
+                            className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold border ${getCategoryBadge(
                               evt.category
                             )}`}
                           >
@@ -447,7 +442,7 @@ export function AuditLog() {
                         {/* Severity */}
                         <td className="py-3 px-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${sevStyle.container}`}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border ${sevStyle.container}`}
                           >
                             <span className={`w-1.5 h-1.5 rounded-full ${sevStyle.dot}`} />
                             {evt.severity}
@@ -462,9 +457,9 @@ export function AuditLog() {
                               lastFocusedTriggerRef.current = e.currentTarget;
                               setSelectedEvent(evt);
                             }}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all btn-press"
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold border border-slate-300 bg-white text-slate-800 hover:text-slate-950 hover:bg-slate-100 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 transition-all shadow-xs btn-press"
                           >
-                            <EyeIcon size={13} className="text-[var(--text-muted)]" />
+                            <EyeIcon size={13} className="text-slate-500 dark:text-zinc-400" />
                             <span>Inspect</span>
                           </button>
                         </td>
@@ -477,12 +472,11 @@ export function AuditLog() {
           </div>
 
           {/* ── Compact Pagination Controls ───────────────────────────────── */}
-          <div className="py-2.5 px-4 border-t border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
+          <div className="py-2.5 px-4 border-t border-slate-300 bg-slate-100/90 dark:border-white/5 dark:bg-zinc-950 flex items-center justify-between gap-3 text-xs text-slate-700 dark:text-zinc-400 font-medium">
             <div>
               {totalCount > 0 ? (
                 <>
-                  Showing {(currentPage - 1) * pageSize + 1}–
-                  {Math.min(currentPage * pageSize, totalCount)} of {totalCount}
+                  Showing <span className="font-bold text-slate-950 dark:text-zinc-100 tabular-nums">{(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, totalCount)}</span> of <span className="font-bold text-slate-950 dark:text-zinc-100 tabular-nums">{totalCount}</span>
                 </>
               ) : (
                 "0 events"
@@ -494,12 +488,12 @@ export function AuditLog() {
                 type="button"
                 disabled={currentPage <= 1 || isLoading}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className="px-2.5 py-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-medium text-xs btn-press"
+                className="px-2.5 py-1 rounded-lg border border-slate-300 bg-white text-slate-900 disabled:opacity-40 hover:bg-slate-50 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-200 transition-all font-bold text-xs shadow-xs btn-press"
               >
                 Previous
               </button>
 
-              <span className="px-2 text-[var(--text-muted)]">
+              <span className="px-2 text-slate-700 dark:text-zinc-400 font-bold tabular-nums">
                 {currentPage} / {totalPages}
               </span>
 
@@ -507,7 +501,7 @@ export function AuditLog() {
                 type="button"
                 disabled={currentPage >= totalPages || isLoading}
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className="px-2.5 py-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-medium text-xs btn-press"
+                className="px-2.5 py-1 rounded-lg border border-slate-300 bg-white text-slate-900 disabled:opacity-40 hover:bg-slate-50 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-200 transition-all font-bold text-xs shadow-xs btn-press"
               >
                 Next
               </button>
@@ -523,24 +517,24 @@ export function AuditLog() {
             aria-labelledby="audit-modal-title"
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
           >
-            <div className="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="w-full max-w-lg rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
               {/* Header */}
-              <div className="flex items-start justify-between border-b border-[var(--border)] pb-3">
+              <div className="flex items-start justify-between border-b border-slate-200 dark:border-white/10 pb-3">
                 <div>
                   <h3
                     id="audit-modal-title"
-                    className="font-heading font-semibold text-base text-[var(--text-primary)]"
+                    className="font-heading font-bold text-base text-slate-950 dark:text-zinc-50"
                   >
                     Audit Event Details
                   </h3>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-[var(--text-muted)] font-mono">
+                    <span className="text-xs text-slate-600 dark:text-zinc-400 font-mono font-medium">
                       {selectedEvent.id}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleCopyId(selectedEvent.id)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[#10b981] transition-colors"
+                      className="px-1.5 py-0.5 rounded text-[10px] font-bold border border-slate-300 bg-slate-100 text-slate-700 hover:text-slate-950 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-300 transition-colors"
                     >
                       {copiedEventId ? "Copied" : "Copy ID"}
                     </button>
@@ -550,7 +544,7 @@ export function AuditLog() {
                   type="button"
                   onClick={() => setSelectedEvent(null)}
                   aria-label="Close dialog"
-                  className="p-1 rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-colors"
+                  className="p-1 rounded-md border border-slate-300 dark:border-white/10 text-slate-600 dark:text-zinc-400 hover:text-slate-950 dark:hover:text-zinc-50 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <XIcon size={14} />
                 </button>
@@ -558,17 +552,17 @@ export function AuditLog() {
 
               {/* Metadata Grid */}
               <div className="space-y-3 text-xs">
-                <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)]">
+                <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-300 dark:bg-zinc-950 dark:border-white/10">
                   <div>
-                    <span className="text-[var(--text-muted)] text-[11px] block">Timestamp</span>
-                    <span className="font-medium text-[var(--text-primary)]">
+                    <span className="text-slate-600 dark:text-zinc-400 text-[11px] block font-medium">Timestamp</span>
+                    <span className="font-bold text-slate-950 dark:text-zinc-50 tabular-nums">
                       {selectedEvent.timestamp}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--text-muted)] text-[11px] block">Severity</span>
+                    <span className="text-slate-600 dark:text-zinc-400 text-[11px] block font-medium">Severity</span>
                     <span
-                      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border mt-0.5 ${
+                      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold border mt-0.5 ${
                         getSeverityBadge(selectedEvent.severity).container
                       }`}
                     >
@@ -582,53 +576,53 @@ export function AuditLog() {
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-2">
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-300 dark:bg-zinc-950 dark:border-white/10 space-y-2">
                   <div>
-                    <span className="text-[var(--text-muted)] text-[11px] block">Actor</span>
-                    <span className="font-semibold text-[var(--text-primary)]">
+                    <span className="text-slate-600 dark:text-zinc-400 text-[11px] block font-medium">Actor</span>
+                    <span className="font-bold text-slate-950 dark:text-zinc-50">
                       {selectedEvent.actorName}
                     </span>
-                    <span className="text-[var(--text-muted)] font-mono text-[11px] ml-1.5">
+                    <span className="text-slate-600 dark:text-zinc-400 font-mono text-[11px] ml-1.5 font-medium">
                       ({selectedEvent.actorRole} · IP {selectedEvent.actorIp})
                     </span>
                   </div>
 
                   <div>
-                    <span className="text-[var(--text-muted)] text-[11px] block">Action</span>
-                    <span className="font-medium text-[var(--text-primary)]">
+                    <span className="text-slate-600 dark:text-zinc-400 text-[11px] block font-medium">Action</span>
+                    <span className="font-semibold text-slate-950 dark:text-zinc-100">
                       {selectedEvent.action}
                     </span>
                   </div>
 
                   <div>
-                    <span className="text-[var(--text-muted)] text-[11px] block">Target Entity</span>
-                    <span className="font-mono text-emerald-600 dark:text-emerald-400 font-medium">
+                    <span className="text-slate-600 dark:text-zinc-400 text-[11px] block font-medium">Target Entity</span>
+                    <span className="font-mono text-emerald-700 dark:text-emerald-400 font-bold">
                       {selectedEvent.targetEntity}
                     </span>
                     {selectedEvent.targetId && (
-                      <span className="text-[var(--text-muted)] font-mono text-[11px] ml-1.5">
+                      <span className="text-slate-600 dark:text-zinc-400 font-mono text-[11px] ml-1.5 font-medium">
                         (ID: {selectedEvent.targetId})
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-1">
-                  <span className="text-[var(--text-muted)] font-semibold text-[11px] block">
+                <div className="p-3.5 rounded-xl border border-slate-300 bg-slate-50 dark:bg-zinc-950 dark:border-white/10 space-y-1">
+                  <span className="text-slate-600 dark:text-zinc-400 font-bold text-[11px] block">
                     Context Details
                   </span>
-                  <p className="text-[var(--text-secondary)] leading-relaxed">
+                  <p className="text-slate-800 dark:text-zinc-200 leading-relaxed font-medium">
                     {selectedEvent.details}
                   </p>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="pt-3 border-t border-[var(--border)] flex justify-end">
+              <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex justify-end">
                 <button
                   type="button"
                   onClick={() => setSelectedEvent(null)}
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-[var(--bg-surface-2)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border-strong)] transition-all btn-press"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-white border border-slate-300 text-slate-800 hover:text-slate-950 hover:bg-slate-100 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-200 transition-all btn-press shadow-xs"
                 >
                   Close
                 </button>
