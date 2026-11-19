@@ -52,8 +52,8 @@ const CORE_SERVICES: ServiceTrade[] = [
     title: "Electrical & Power",
     canonicalName: "Electrical and power systems",
     icon: ZapIcon,
-    accentColor: "#f59e0b",
-    glowClass: "glow-card-amber",
+    accentColor: "#10b981",
+    glowClass: "glow-card-emerald",
     badge: "Electrical",
     slaBadge: "20–40 Min SLA",
     shortDesc: "Commercial electrical systems, switchgear, backup power, and distribution panels.",
@@ -125,7 +125,7 @@ const CORE_SERVICES: ServiceTrade[] = [
     canonicalName: "Facility maintenance",
     icon: BuildingIcon,
     accentColor: "#f43f5e",
-    glowClass: "glow-card-amber",
+    glowClass: "glow-card-purple",
     badge: "Facility",
     slaBadge: "20–40 Min SLA",
     shortDesc: "Automatic sliding doors, industrial roll-up shutters, and structural upkeep.",
@@ -145,7 +145,7 @@ const WORKFLOW_STEPS = [
 // ── 4 Role Workspaces (Concise, 1-2 lines each) ───────────────────────────
 const ROLE_WORKSPACES = [
   { icon: BuildingIcon, title: "Commercial Customer", desc: "Submit breakdown requests, track technician arrival countdowns, and approve digital receipts.", glow: "glow-card-emerald" },
-  { icon: RadioIcon, title: "Dispatcher Console", desc: "Review incoming requests, evaluate candidate match scores, and confirm certified assignments.", glow: "glow-card-amber" },
+  { icon: RadioIcon, title: "Dispatcher Console", desc: "Review incoming requests, evaluate candidate match scores, and confirm certified assignments.", glow: "glow-card-cyan" },
   { icon: WrenchIcon, title: "Field Technician", desc: "Manage active shift rosters, update job progression, and log on-site completion notes.", glow: "glow-card-cyan" },
   { icon: SettingsIcon, title: "Administrator", desc: "Govern staff accounts, verify technician skill passports, and audit operational event logs.", glow: "glow-card-indigo" },
 ];
@@ -567,7 +567,7 @@ export function LandingPage() {
           style={{ background: "radial-gradient(circle, rgba(56,189,248,0.28) 0%, transparent 70%)" }}
         />
 
-        {/* Animated Amber Warm Glow Source 3 */}
+        {/* Animated Cyan Cool Glow Source 3 */}
         <motion.div
           animate={
             shouldReduceMotion
