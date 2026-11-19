@@ -1273,7 +1273,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: How It Works (CONCISE 5-STEP PROCESS) ─────────────── */}
-      <section id="how" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+      <section id="how" data-section-tone="auto" className="py-20 border-t border-slate-300 dark:border-white/10 bg-[#e8edf3]/50 dark:bg-zinc-950/60">
         <div className="max-w-6xl mx-auto px-5">
           <motion.div
             initial="hidden"
@@ -1316,8 +1316,10 @@ export function LandingPage() {
                   onMouseLeave={() => setHoveredStep(null)}
                   onFocus={() => setHoveredStep(step)}
                   onBlur={() => setHoveredStep(null)}
-                  className={`p-5 rounded-[26px] border border-[var(--border)] glass-panel transition-all duration-200 cursor-default hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.22)] ${
-                    isHov ? "border-[#10b981] shadow-[var(--shadow-md)]" : ""
+                  className={`p-5 rounded-2xl border transition-all duration-200 cursor-default shadow-md dark:shadow-none ${
+                    isHov
+                      ? "border-emerald-500 bg-white dark:bg-zinc-900 shadow-lg shadow-emerald-500/10"
+                      : "border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 hover:border-emerald-500/40"
                   }`}
                 >
                   <div
