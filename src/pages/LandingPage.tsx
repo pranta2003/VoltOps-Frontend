@@ -1112,11 +1112,11 @@ export function LandingPage() {
                     </p>
 
                     {/* 3 Compact Capability Pills */}
-                    <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1 w-full">
+                    <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2 w-full">
                       {trade.capabilities.map((cap) => (
                         <span
                           key={cap}
-                          className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--bg-surface-2)] text-slate-700 dark:text-slate-300 border border-[var(--border)]"
+                          className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/10"
                         >
                           {cap}
                         </span>
