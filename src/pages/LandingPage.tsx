@@ -1798,7 +1798,9 @@ export function LandingPage() {
       <section id="contact" data-section-tone="auto" className="py-20 border-t border-slate-300 dark:border-white/10 bg-[#e8edf3] dark:bg-zinc-950">
         <div className="max-w-6xl mx-auto px-5">
           {/* Banner */}
-          <div
+          <SpotlightCard
+            delay={0.05}
+            spotlightColor="rgba(16, 185, 129, 0.2)"
             className="p-8 sm:p-10 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 bg-white dark:bg-zinc-900 border border-slate-300 border-l-4 border-l-emerald-500 dark:border-white/10 dark:border-l-emerald-500 shadow-md dark:shadow-none mb-14"
           >
             <div className="space-y-2 text-center md:text-left">
@@ -1813,12 +1815,12 @@ export function LandingPage() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               href="#packages"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 shrink-0 shadow-md shadow-emerald-500/20 transition-all"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 shrink-0 shadow-md shadow-emerald-500/20 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400"
             >
               <span>View Plans</span>
               <ArrowRightIcon size={14} />
             </motion.a>
-          </div>
+          </SpotlightCard>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 text-left">
             {/* Contact info */}
