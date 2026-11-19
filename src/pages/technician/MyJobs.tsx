@@ -310,7 +310,7 @@ export function MyJobs() {
           <div className="relative flex-1 min-w-[220px]">
             <SearchIcon
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
             />
             <input
               type="text"
@@ -318,14 +318,14 @@ export function MyJobs() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by job ID, asset, customer or address..."
               aria-label="Search jobs"
-              className="w-full text-xs py-2 pl-9 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full text-xs py-2 pl-9 pr-8 rounded-lg border border-slate-300 bg-slate-100/80 text-slate-950 placeholder-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder-zinc-500"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
                 aria-label="Clear search"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 p-0.5"
               >
                 <XIcon size={13} />
               </button>
@@ -338,7 +338,7 @@ export function MyJobs() {
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               aria-label="Filter by trade category"
-              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-slate-300 bg-slate-100/80 text-slate-950 appearance-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50"
             >
               <option value="ALL">All Trades</option>
               {CANONICAL_SERVICE_CATEGORIES.map((cat) => (
@@ -349,7 +349,7 @@ export function MyJobs() {
             </select>
             <ChevronDownIcon
               size={13}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
             />
           </div>
 
@@ -359,7 +359,7 @@ export function MyJobs() {
               value={selectedPriority}
               onChange={(e) => setSelectedPriority(e.target.value)}
               aria-label="Filter by priority"
-              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-slate-300 bg-slate-100/80 text-slate-950 appearance-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50"
             >
               <option value="ALL">All Priorities</option>
               <option value="URGENT">Urgent (Arrival SLA)</option>
@@ -369,7 +369,7 @@ export function MyJobs() {
             </select>
             <ChevronDownIcon
               size={13}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
             />
           </div>
 
