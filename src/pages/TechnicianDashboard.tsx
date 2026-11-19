@@ -299,33 +299,33 @@ export function TechnicianDashboard() {
 
         {/* ── Active Priority Spotlight Card (Clean, Concise, with Working Action) ─ */}
         {enRouteJob ? (
-          <div className="p-3.5 rounded-xl border border-rose-500/30 bg-rose-50/20 dark:bg-rose-950/10 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-4 rounded-xl border border-rose-300 dark:border-rose-500/30 bg-rose-50/70 dark:bg-rose-950/20 shadow-md dark:shadow-none flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-start gap-3 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400 flex items-center justify-center shrink-0 mt-0.5">
                 <AlertTriangleIcon size={16} />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-xs text-rose-700 dark:text-rose-400">{enRouteJob.id}</span>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20">
+                  <span className="font-mono font-bold text-xs text-rose-800 dark:text-rose-400">{enRouteJob.id}</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-200/80 text-rose-900 dark:bg-rose-500/20 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30">
                     {enRouteJob.priority} Priority
                   </span>
                   {enRouteJob.arrivalSlaRemainingMinutes !== undefined && (
                     <span
-                      className={`text-xs font-mono ${
+                      className={`text-xs font-mono tabular-nums ${
                         enRouteJob.isSlaBreached
-                          ? "text-rose-600 dark:text-rose-400 font-bold"
-                          : "text-[var(--text-muted)]"
+                          ? "text-rose-700 dark:text-rose-400 font-bold"
+                          : "text-slate-700 dark:text-zinc-300 font-medium"
                       }`}
                     >
                       {enRouteJob.isSlaBreached ? "SLA Expired (0m)" : `${enRouteJob.arrivalSlaRemainingMinutes}m remaining`}
                     </span>
                   )}
                 </div>
-                <div className="font-heading font-semibold text-xs sm:text-sm text-[var(--text-primary)] truncate mt-0.5">
+                <div className="font-heading font-semibold text-xs sm:text-sm text-slate-950 dark:text-zinc-50 truncate mt-0.5">
                   {enRouteJob.assetName}
                 </div>
-                <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">
+                <p className="text-xs text-slate-700 dark:text-zinc-400 font-medium truncate mt-0.5">
                   {enRouteJob.problemSummary} · {enRouteJob.customerName}
                 </p>
               </div>
@@ -337,7 +337,7 @@ export function TechnicianDashboard() {
                   type="button"
                   onClick={() => handleDirectTransition(enRouteJob, "TRAVELLING")}
                   disabled={isUpdatingStatus}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 transition-all shadow-sm disabled:opacity-50"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-cyan-600 text-white hover:bg-cyan-700 transition-all shadow-sm disabled:opacity-50"
                 >
                   Start Travel
                 </button>
@@ -347,7 +347,7 @@ export function TechnicianDashboard() {
                   type="button"
                   onClick={() => handleDirectTransition(enRouteJob, "ON_SITE")}
                   disabled={isUpdatingStatus}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-sm disabled:opacity-50"
                 >
                   Confirm Arrival
                 </button>
@@ -361,7 +361,7 @@ export function TechnicianDashboard() {
                     setMaterialsUsed("");
                     setCompletionError(null);
                   }}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-sm"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-sm"
                 >
                   Submit Report
                 </button>
@@ -369,26 +369,26 @@ export function TechnicianDashboard() {
               <button
                 type="button"
                 onClick={() => setSelectedJob(enRouteJob)}
-                className="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                className="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50 hover:bg-white dark:hover:bg-zinc-800 transition-all"
               >
                 Details
               </button>
             </div>
           </div>
         ) : (
-          <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 shadow-sm flex items-center justify-between">
+          <div className="p-4 rounded-xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-950/20 shadow-md dark:shadow-none flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 flex items-center justify-center">
                 <CheckCircleIcon size={16} />
               </div>
               <div>
-                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">All emergency transits clear</span>
-                <p className="text-xs text-[var(--text-muted)]">Completed {completedCount} work orders today. Standby for next dispatch assignment.</p>
+                <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">All emergency transits clear</span>
+                <p className="text-xs text-slate-700 dark:text-zinc-400 font-medium">Completed {completedCount} work orders today. Standby for next dispatch assignment.</p>
               </div>
             </div>
             <Link
               to="/technician/jobs"
-              className="text-xs font-semibold text-[#10b981] hover:underline"
+              className="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
             >
               View roster
             </Link>
@@ -629,7 +629,7 @@ export function TechnicianDashboard() {
                       type="button"
                       onClick={() => handleDirectTransition(selectedJob, "ON_SITE")}
                       disabled={isUpdatingStatus}
-                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50"
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-sm disabled:opacity-50"
                     >
                       {isUpdatingStatus ? "Updating..." : "Confirm Arrival"}
                     </button>
