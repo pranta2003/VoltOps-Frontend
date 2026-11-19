@@ -140,7 +140,7 @@ export function LeaveRequests() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[var(--text-muted)] font-semibold text-[11px]">
+                <tr className="border-b-2 border-slate-300 bg-slate-200/70 text-slate-800 font-bold text-xs uppercase tracking-wider dark:border-white/5 dark:bg-zinc-950/60 dark:text-zinc-400">
                   <th className="py-2.5 px-4">Request ID</th>
                   <th className="py-2.5 px-4">Type</th>
                   <th className="py-2.5 px-4">Dates</th>
@@ -149,37 +149,37 @@ export function LeaveRequests() {
                   <th className="py-2.5 px-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-slate-300/80 dark:divide-white/5">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={6} className="py-8 text-center text-xs text-slate-600 dark:text-zinc-400 font-medium">
                       Loading leave records...
                     </td>
                   </tr>
                 ) : requests.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={6} className="py-8 text-center text-xs text-slate-600 dark:text-zinc-400 font-medium">
                       No leave requests recorded. Click "Request Leave" above to apply.
                     </td>
                   </tr>
                 ) : (
                   requests.map((r) => (
-                    <tr key={r.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-[var(--text-primary)]">
+                    <tr key={r.id} className="odd:bg-white even:bg-slate-50/90 hover:bg-emerald-50/50 dark:odd:bg-zinc-900 dark:even:bg-zinc-900 dark:hover:bg-zinc-800/50 transition-colors">
+                      <td className="py-3 px-4 font-mono font-bold text-slate-950 dark:text-zinc-50 whitespace-nowrap">
                         {r.id}
                       </td>
                       <td className="py-3 px-4">
-                        <span className="font-semibold text-[var(--text-primary)]">
+                        <span className="font-bold text-slate-950 dark:text-zinc-50">
                           {r.leaveType}
                         </span>
                       </td>
-                      <td className="py-3 px-4 font-mono text-xs text-[var(--text-primary)]">
-                        {r.startDate} <span className="text-[var(--text-muted)]">to</span> {r.endDate}
+                      <td className="py-3 px-4 font-mono text-xs text-slate-700 dark:text-zinc-300 font-medium tabular-nums whitespace-nowrap">
+                        {r.startDate} <span className="text-slate-500 dark:text-zinc-400">to</span> {r.endDate}
                       </td>
                       <td className="py-3 px-4 max-w-[280px]">
-                        <p className="truncate text-[var(--text-primary)]">{r.reason}</p>
+                        <p className="truncate text-slate-900 dark:text-zinc-100 font-medium">{r.reason}</p>
                         {r.reviewerNotes && (
-                          <p className="text-[11px] text-[var(--text-muted)] truncate mt-0.5">
+                          <p className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium truncate mt-0.5">
                             Note: {r.reviewerNotes}
                           </p>
                         )}
