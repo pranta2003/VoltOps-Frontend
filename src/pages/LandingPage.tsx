@@ -1708,7 +1708,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: Our Operational Reach (Commercial Scale & Industrial Reach) ── */}
-      <section id="statistics" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface)]">
+      <section id="statistics" data-section-tone="auto" className="py-20 border-t border-slate-300 dark:border-white/10 bg-[#e8edf3]/40 dark:bg-zinc-950/40">
         <div className="max-w-6xl mx-auto px-5">
           <motion.div
             initial="hidden"
@@ -1744,17 +1744,17 @@ export function LandingPage() {
                 variants={cardItemVariants}
                 whileHover={{ y: -5 }}
                 transition={{ duration: 0.2 }}
-                className={`p-6 rounded-[28px] border glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)] transition-all text-center ${
+                className={`p-6 rounded-2xl border flex flex-col justify-between shadow-md dark:shadow-none transition-all text-center ${
                   metric.highlight
-                    ? "border-2 border-[#10b981] bg-emerald-500/5 shadow-[0_0_24px_rgba(16,185,129,0.15)]"
-                    : "border-[var(--border)] hover:border-[#10b981]/50"
+                    ? "border-2 border-emerald-500 bg-white dark:bg-zinc-900 shadow-lg shadow-emerald-500/10"
+                    : "border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 hover:border-emerald-500/50"
                 }`}
               >
                 <div>
                   <div
-                    className={`text-4xl sm:text-5xl font-extrabold font-heading tracking-tight ${
+                    className={`text-4xl sm:text-5xl font-extrabold font-heading tracking-tight tabular-nums ${
                       metric.highlight
-                        ? "text-[#10b981] dark:text-[#34d399]"
+                        ? "text-emerald-600 dark:text-emerald-400"
                         : "text-slate-900 dark:text-white"
                     }`}
                   >
