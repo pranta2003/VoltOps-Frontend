@@ -184,7 +184,7 @@ export function NewServiceRequest() {
       <div className="max-w-4xl mx-auto pb-24">
         {hasActiveRequest && activeRequest ? (
           /* Focused Single Active Request Blocker Card */
-          <div className="p-8 rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-lg text-center space-y-5">
+          <div className="p-8 rounded-xl border border-slate-300 border-l-4 border-l-emerald-500 dark:border-white/5 dark:border-l-white/5 bg-white dark:bg-zinc-900 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-lg text-center space-y-5">
             <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-zinc-800/80 border border-slate-300/80 dark:border-white/10 text-slate-600 dark:text-zinc-400 mx-auto flex items-center justify-center">
               <LockIcon size={24} className="text-slate-600 dark:text-zinc-400" />
             </div>
@@ -250,7 +250,7 @@ export function NewServiceRequest() {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="p-6 sm:p-8 rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] space-y-7"
+            className="p-6 sm:p-8 rounded-xl border border-slate-300 border-l-4 border-l-emerald-500 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:border-white/5 dark:border-l-white/5 dark:bg-zinc-900 dark:shadow-none space-y-7"
           >
             {errorMessage && (
               <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 text-xs flex items-center justify-between">
@@ -336,8 +336,8 @@ export function NewServiceRequest() {
                       onClick={() => setSelectedCategory(cat)}
                       className={`p-3.5 rounded-xl border text-left text-xs font-medium transition-all flex items-start gap-2.5 ${
                         isSelected
-                          ? "border-2 border-emerald-500 bg-emerald-50/80 dark:bg-[#10b981]/10 text-emerald-950 dark:text-zinc-50 shadow-xs font-semibold ring-1 ring-emerald-500"
-                          : "border border-slate-300 bg-white text-slate-800 shadow-xs hover:border-slate-400 hover:text-slate-950 hover:bg-slate-50 dark:border-white/5 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:border-white/10 dark:hover:text-zinc-200"
+                          ? "border-2 border-emerald-500 bg-emerald-50 text-emerald-950 shadow-xs font-semibold ring-1 ring-emerald-500 dark:bg-[#10b981]/10 dark:text-zinc-50"
+                          : "border border-slate-300 bg-slate-50 text-slate-800 shadow-xs hover:bg-slate-100 hover:border-slate-400 hover:text-slate-950 dark:border-white/5 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:border-white/10 dark:hover:text-zinc-200"
                       }`}
                     >
                       <WrenchIcon size={14} className="text-[#10b981] shrink-0 mt-0.5" />
@@ -419,7 +419,7 @@ export function NewServiceRequest() {
                       className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
                         isChecked
                           ? `${color} font-bold shadow-sm`
-                          : "border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-400 hover:border-slate-400 dark:hover:border-white/10 hover:text-slate-950 dark:hover:text-zinc-300 shadow-xs"
+                          : "border border-slate-300 bg-slate-50 text-slate-800 hover:bg-slate-100 hover:border-slate-400 hover:text-slate-950 dark:border-white/5 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:border-white/10 dark:hover:text-zinc-300 shadow-xs"
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
