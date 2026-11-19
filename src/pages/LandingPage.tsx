@@ -916,13 +916,13 @@ export function LandingPage() {
           {/* CTA Buttons */}
           <motion.div
             variants={heroItemVariants}
-            className="flex flex-wrap items-center justify-center gap-3.5 pt-6"
+            className="flex flex-wrap items-center justify-center gap-4 pt-6"
           >
             <motion.a
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               href="#packages"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-[#10b981] text-[#06090e] shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-[#34d399] hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all group"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-emerald-500 text-zinc-950 shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-zinc-950"
             >
               <span>Explore Coverage Plans</span>
               <ArrowRightIcon size={15} className="group-hover:translate-x-1 transition-transform" />
@@ -931,9 +931,9 @@ export function LandingPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               href="#how"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm border border-white/20 text-white hover:text-white bg-white/10 hover:bg-white/15 backdrop-blur-xl transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm border border-white/20 text-white bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-white/40 focus:ring-offset-2 focus:ring-offset-zinc-950"
             >
-              <CompassIcon size={15} className="text-[#34d399]" />
+              <CompassIcon size={15} className="text-emerald-400" />
               <span>See How It Works</span>
             </motion.a>
           </motion.div>
