@@ -1776,14 +1776,19 @@ export function LandingPage() {
               { title: "No uncertified technicians", desc: "Trade licenses and safety credentials are authenticated before dispatch." },
               { title: "No double bookings", desc: "Live workload balancing and hub proximity prevent overlapping assignments." },
               { title: "Guaranteed arrival accountability", desc: "Transparent physical arrival countdowns and digital itemized sign-off." },
-            ].map(({ title, desc }) => (
-              <div key={title} className="p-5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none space-y-1 hover:border-emerald-500/40 transition-all">
+            ].map(({ title, desc }, idx) => (
+              <SpotlightCard
+                key={title}
+                delay={idx * 0.08}
+                spotlightColor="rgba(16, 185, 129, 0.14)"
+                className="p-5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none space-y-1 hover:border-emerald-500/40 transition-all"
+              >
                 <div className="flex items-center gap-2 font-bold text-sm text-slate-900 dark:text-white font-heading">
                   <CheckCircleIcon size={16} className="text-emerald-500 shrink-0" />
                   <span>{title}</span>
                 </div>
                 <p className="text-xs pl-6 text-slate-600 dark:text-slate-400 font-medium">{desc}</p>
-              </div>
+              </SpotlightCard>
             ))}
           </div>
         </div>
