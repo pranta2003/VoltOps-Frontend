@@ -189,22 +189,7 @@ export function SkillPassport() {
           </div>
         </div>
 
-        {/* Truthful Telemetry Notice */}
-        <div className="p-3 rounded-xl border border-slate-700/30 bg-slate-800/10 text-xs text-[var(--text-muted)] flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShieldCheckIcon size={14} className="text-[#10b981] shrink-0" />
-            <span>
-              Demonstration Mode: Skill passport credentials synchronize locally and adhere to central dispatch matching rules.
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={loadProfile}
-            className="text-xs font-semibold text-[#10b981] hover:underline shrink-0"
-          >
-            Refresh
-          </button>
-        </div>
+
       </div>
     </Layout>
   );
