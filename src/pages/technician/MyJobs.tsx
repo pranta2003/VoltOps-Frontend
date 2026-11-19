@@ -248,28 +248,28 @@ export function MyJobs() {
   const getStatusBadge = (status: TechnicianJobItem["status"]) => {
     switch (status) {
       case "ASSIGNED":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+        return "bg-slate-200/80 text-slate-800 border-slate-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-white/10 font-medium";
       case "TRAVELLING":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 font-bold animate-pulse";
+        return "bg-cyan-100 text-cyan-900 border-cyan-300 dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-500/30 font-bold animate-pulse";
       case "ON_SITE":
-        return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20 font-bold";
+        return "bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30 font-bold";
       case "WORK_COMPLETED_AWAITING_CONFIRMATION":
-        return "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20 font-bold";
+        return "bg-cyan-50 text-cyan-900 border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-300 dark:border-cyan-500/20 font-bold";
       case "COMPLETED":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 font-semibold";
+        return "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30 font-bold";
     }
   };
 
   const getPriorityBadge = (priority: TechnicianJobItem["priority"]) => {
     switch (priority) {
       case "URGENT":
-        return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20 font-bold";
+        return "bg-rose-100 text-rose-900 border-rose-300 dark:bg-[#b8287a]/20 dark:text-[#f472b6] dark:border-[#b8287a]/30 font-bold";
       case "HIGH":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+        return "bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20 font-semibold";
       case "MEDIUM":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+        return "bg-cyan-100 text-cyan-900 border-cyan-300 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/30 font-medium";
       case "LOW":
-        return "bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20";
+        return "bg-slate-100 text-slate-800 border-slate-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-white/10 font-medium";
     }
   };
 
@@ -483,12 +483,12 @@ export function MyJobs() {
                             <span>SLA Expired (0m)</span>
                           </div>
                         ) : job.arrivalSlaRemainingMinutes !== undefined ? (
-                          <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-amber-600 dark:text-amber-400">
+                          <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-cyan-700 dark:text-cyan-300">
                             <ClockIcon size={12} className="animate-spin" />
                             <span>{job.arrivalSlaRemainingMinutes} min left</span>
                           </div>
                         ) : job.status === "COMPLETED" ? (
-                          <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+                          <span className="text-emerald-700 dark:text-emerald-400 text-xs font-bold">
                             ✓ Completed
                           </span>
                         ) : (
