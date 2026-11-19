@@ -1048,7 +1048,7 @@ export function LandingPage() {
 
                   {/* SLA Badge */}
                   <span
-                    className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border mx-auto"
+                    className="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-3 py-0.5 rounded-full uppercase tracking-wider border shadow-xs mx-auto"
                     style={{
                       borderColor: `${trade.accentColor}40`,
                       color: trade.accentColor,
@@ -1073,7 +1073,7 @@ export function LandingPage() {
                     {trade.capabilities.map((cap) => (
                       <span
                         key={cap}
-                        className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/10"
+                        className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800/80 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/10 group-hover:border-emerald-500/30 transition-colors"
                       >
                         {cap}
                       </span>
