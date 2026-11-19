@@ -2019,3 +2019,46 @@ This document tracks all completed implementation milestones, verified files, co
   - Automated test suite: 84 / 84 tests passing (100%).
   - Production build: Clean build in 10.84s (`npm run build`).
 
+
+---
+
+### Milestone 4.27: Stage 7 Landing Page Design Transformation (Video Hero, Interactive Dock, Dual-Theme Parity & 25 Granular Commits)
+- **Date**: 20 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Commit Range**: `0e7a9c8`..`06cad2c` (25 Atomic Commits)
+- **Today's Meaningful Commits on Branch `feature/project-wide-design-transformation`**:
+  1. `0e7a9c8` — `style(landing): refine hero video dark gradient scrim for contrast and depth`
+  2. `6d3baad` — `style(landing): polish hero headline typography and CTA button focus states`
+  3. `7107f13` — `refactor(landing): streamline hero bottom dock into unified compact glassmorphic container`
+  4. `9c5e1f9` — `feat(landing): embed interactive 7-trade switcher and capabilities preview in hero dock`
+  5. `5171dd2` — `style(landing): purge amber from electrical trade and dispatcher glow in favor of emerald and cyan`
+  6. `1a6fdbe` — `style(landing): align hero dock to VoltOps dual-theme surfaces and borders`
+  7. `e87af4c` — `refactor(landing): tighten trade card copy and typography for the 7 canonical services`
+  8. `d56ef6d` — `style(landing): apply VoltOps dual-theme surfaces and emerald hover borders to service cards`
+  9. `2401ad9` — `refactor(landing): replace per-card view plan buttons with unified coverage plans link below grid`
+  10. `275e8d7` — `style(landing): polish trade capability pills and SLA target badges`
+  11. `72af223` — `style(landing): apply VoltOps dual-theme surfaces and borders to dispatch coordination cards`
+  12. `f11ac0e` — `style(landing): replace amber 78 percent match score with VoltOps Cyan in matching audit`
+  13. `d81029d` — `style(landing): align disqualified candidate status to Berry Plum and tighten audit copy`
+  14. `567fc70` — `style(landing): apply VoltOps dual-theme surfaces and borders to 5-step workflow cards`
+  15. `3cac879` — `style(landing): polish workflow step icons and interactive hover states`
+  16. `973166c` — `style(landing): upgrade operational reach stat cards with dual-theme elevation and tabular nums`
+  17. `38a3f29` — `style(landing): sharpen Light Mode high-ink typography across workflow and operational reach`
+  18. `4f8a1cb` — `fix(landing): apply whitespace-nowrap to Plan D pill and align plan tags`
+  19. `118a946` — `style(landing): purge amber prototype pricing on Plan A in favor of muted neutral text`
+  20. `287c355` — `style(landing): align coverage plan card heights and highlight Plan C with Signal Emerald`
+  21. `42b65ea` — `style(landing): apply VoltOps dual-theme surfaces and borders across Plans A, B, and D`
+  22. `1f60e64` — `style(landing): apply VoltOps dual-theme surfaces and emerald accents to regional hubs cards`
+  23. `df86fb6` — `refactor(landing): tighten About section copy and elevate features cards with dual-theme borders`
+  24. `db005ce` — `style(landing): polish contact section with recessed dual-theme inputs and focus rings`
+  25. `06cad2c` — `style(landing): align pre-footer CTA banner and refine bottom section spacing`
+- **Strict Policy Compliance**:
+  - Footer & payment badges: 100% untouched and locked.
+  - Customer, Admin, Dispatcher, and Technician portal files: 100% untouched.
+  - Video background preserved behind crisp linear scrim.
+  - Zero-Yellow purge across all trades, glows, pricing, and audit scores in favor of Signal Emerald (#10b981), VoltOps Cyan (#06b6d4), and Berry Plum (#b8287a).
+- **Quality Gates Passed**:
+  - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+  - Automated test suite: 84 / 84 tests passing (100%).
+  - Production build: Clean build in 10.75s (`npm run build`).
+  - Remote tracking branch: Pushed to `origin/feature/project-wide-design-transformation` (82 commits ahead of `main`).
