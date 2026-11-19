@@ -53,7 +53,7 @@ export function SkillPassport() {
         </Link>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-4 pb-24">
         {/* Verification Status & Identity Header */}
         <div className="p-4 rounded-xl border border-slate-300 border-l-4 border-l-emerald-500 bg-white shadow-md dark:border-white/5 dark:border-l-white/5 dark:bg-zinc-900 dark:shadow-none">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
