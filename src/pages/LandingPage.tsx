@@ -1379,10 +1379,11 @@ export function LandingPage() {
                   <span className="text-xs font-bold text-slate-700 dark:text-slate-300">No physical arrival SLA</span>
                 </div>
 
-                <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
+                <ul className="space-y-2 text-xs text-slate-800 dark:text-slate-200">
                   {["15 included visits / cycle", "Business Hours (08:00 - 16:00)", "Scheduled daytime repairs", "All 7 trades covered"].map((b) => (
-                    <li key={b} className="flex items-center gap-2">
-                      <CheckIcon className="text-emerald-500" />{b}
+                    <li key={b} className="flex items-center gap-2 font-medium">
+                      <CheckIcon className="text-emerald-500 shrink-0" />
+                      <span>{b}</span>
                     </li>
                   ))}
                 </ul>
@@ -1429,10 +1430,11 @@ export function LandingPage() {
                   <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Within 40 minutes on site</span>
                 </div>
 
-                <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
+                <ul className="space-y-2 text-xs text-slate-800 dark:text-slate-200">
                   {["25 included visits / cycle", "Round-the-clock coverage", "40-min physical arrival SLA", "Digital repair logs"].map((b) => (
-                    <li key={b} className="flex items-center gap-2">
-                      <CheckIcon className="text-emerald-500" />{b}
+                    <li key={b} className="flex items-center gap-2 font-medium">
+                      <CheckIcon className="text-emerald-500 shrink-0" />
+                      <span>{b}</span>
                     </li>
                   ))}
                 </ul>
@@ -1484,10 +1486,11 @@ export function LandingPage() {
                   <span className="text-base font-extrabold font-heading text-slate-900 dark:text-white">Within 20 minutes on site</span>
                 </div>
 
-                <ul className="space-y-1.5 text-xs">
+                <ul className="space-y-2 text-xs">
                   {["30 included visits / cycle", "Critical commercial coverage", "20-min rapid arrival (2x faster)", "Top emergency priority"].map((b, i) => (
-                    <li key={b} className={`flex items-center gap-2 ${i === 0 || i === 1 ? "font-bold text-slate-900 dark:text-white" : "text-slate-800 dark:text-slate-200"}`}>
-                      <CheckIcon className="text-[#10b981]" />{b}
+                    <li key={b} className={`flex items-center gap-2 ${i === 0 || i === 1 ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-800 dark:text-slate-200"}`}>
+                      <CheckIcon className="text-[#10b981] shrink-0" />
+                      <span>{b}</span>
                     </li>
                   ))}
                 </ul>
@@ -1534,10 +1537,11 @@ export function LandingPage() {
                   <span className="text-xs font-bold text-slate-900 dark:text-white">6, 8, 12, or 16 hours/day</span>
                 </div>
 
-                <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
+                <ul className="space-y-2 text-xs text-slate-800 dark:text-slate-200">
                   {["Negotiated visit allowance", "Tailored enterprise shifts", "Negotiated SLAs", "Multi-facility scaling"].map((b) => (
-                    <li key={b} className="flex items-center gap-2">
-                      <CheckIcon className="text-emerald-500" />{b}
+                    <li key={b} className="flex items-center gap-2 font-medium">
+                      <CheckIcon className="text-emerald-500 shrink-0" />
+                      <span>{b}</span>
                     </li>
                   ))}
                 </ul>
