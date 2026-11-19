@@ -218,9 +218,9 @@ export function TechnicianDashboard() {
   const getStatusBadge = (status: TechnicianJobItem["status"]) => {
     switch (status) {
       case "ASSIGNED":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+        return "bg-slate-200/70 text-slate-800 dark:bg-zinc-800 dark:text-zinc-300 border-slate-300 dark:border-white/10";
       case "TRAVELLING":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+        return "bg-cyan-100 text-cyan-900 dark:bg-cyan-500/15 dark:text-cyan-300 border-cyan-300 dark:border-cyan-500/30 font-semibold";
       case "ON_SITE":
         return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20";
       case "WORK_COMPLETED_AWAITING_CONFIRMATION":
@@ -435,10 +435,10 @@ export function TechnicianDashboard() {
                         <div
                           className={`w-6 h-6 rounded-md flex items-center justify-center font-mono text-xs font-bold shrink-0 ${
                             job.status === "COMPLETED"
-                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400"
                               : job.status === "TRAVELLING"
-                              ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 animate-pulse"
-                              : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                              ? "bg-cyan-100 text-cyan-800 dark:bg-cyan-500/20 dark:text-cyan-300 animate-pulse border border-cyan-300 dark:border-cyan-500/30"
+                              : "bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300"
                           }`}
                         >
                           {job.status === "COMPLETED" ? "✓" : job.id.slice(-2)}
@@ -451,7 +451,7 @@ export function TechnicianDashboard() {
                             <span className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 font-medium">({job.id})</span>
                           </div>
                           <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium truncate">
-                            {job.assetName} · {job.facilityAddress}
+                            {job.assetName}
                           </div>
                         </div>
                       </div>
