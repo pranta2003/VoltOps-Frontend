@@ -221,12 +221,11 @@ export function TechnicianDashboard() {
 
   return (
     <Layout
-      title="My Jobs"
-      subtitle={`${user?.name || "Kamrul Islam"} · Active Shift`}
+      title="Dashboard"
       action={
         <Link
           to="/technician/jobs"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm"
         >
           <span>Open My Jobs</span>
           <ArrowRightIcon size={12} />
