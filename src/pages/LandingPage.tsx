@@ -1368,8 +1368,7 @@ export function LandingPage() {
 
         {/* SLA Clarification Banner */}
         <div
-          className="max-w-2xl mx-auto mb-10 p-4 rounded-2xl border text-xs sm:text-sm flex items-start gap-3 glass-panel"
-          style={{ borderColor: "var(--border-strong)" }}
+          className="max-w-2xl mx-auto mb-10 p-4 rounded-xl border border-slate-300 border-l-4 border-l-emerald-500 dark:border-white/10 dark:border-l-emerald-500 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none text-xs sm:text-sm flex items-start gap-3"
         >
           <ClockIcon size={18} className="shrink-0 text-[#10b981] mt-0.5" />
           <div className="text-slate-800 dark:text-slate-200">
@@ -1391,9 +1390,9 @@ export function LandingPage() {
             variants={cardItemVariants}
             whileHover={{ y: -5, scale: 1.01 }}
             transition={{ duration: 0.2 }}
-            className="flex flex-col transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.25)] rounded-[30px]"
+            className="flex flex-col transition-shadow duration-300 rounded-2xl"
           >
-            <div className="h-full p-6 sm:p-7 rounded-[30px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)]">
+            <div className="h-full p-6 sm:p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none flex flex-col justify-between hover:border-emerald-500/40 transition-all">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold font-card-title text-slate-900 dark:text-white">8-Hour Daily</h3>
@@ -1442,9 +1441,9 @@ export function LandingPage() {
             variants={cardItemVariants}
             whileHover={{ y: -5, scale: 1.01 }}
             transition={{ duration: 0.2 }}
-            className="flex flex-col transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.25)] rounded-[30px]"
+            className="flex flex-col transition-shadow duration-300 rounded-2xl"
           >
-            <div className="h-full p-6 sm:p-7 rounded-[30px] border border-[var(--border)] glass-panel glow-card-emerald flex flex-col justify-between shadow-[var(--shadow-sm)]">
+            <div className="h-full p-6 sm:p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none flex flex-col justify-between hover:border-emerald-500/40 transition-all">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold font-card-title text-slate-900 dark:text-white">24/7 Standard</h3>
@@ -1550,9 +1549,9 @@ export function LandingPage() {
             variants={cardItemVariants}
             whileHover={{ y: -5, scale: 1.01 }}
             transition={{ duration: 0.2 }}
-            className="flex flex-col transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.25)] rounded-[30px]"
+            className="flex flex-col transition-shadow duration-300 rounded-2xl"
           >
-            <div className="h-full p-6 sm:p-7 rounded-[30px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)]">
+            <div className="h-full p-6 sm:p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none flex flex-col justify-between hover:border-emerald-500/40 transition-all">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold font-card-title text-slate-900 dark:text-white">Custom Coverage</h3>
