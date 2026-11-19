@@ -941,7 +941,7 @@ export function LandingPage() {
           {/* ── Compact Glassmorphic Hero Dock ────────────────────────────── */}
           <motion.div
             variants={heroItemVariants}
-            className="mt-10 relative max-w-5xl mx-auto rounded-2xl border border-slate-300 dark:border-white/10 bg-white/90 dark:bg-zinc-950/80 backdrop-blur-md shadow-xl p-5 sm:p-6 text-left"
+            className="mt-10 relative max-w-5xl mx-auto rounded-2xl border border-slate-300 border-l-4 border-l-emerald-500 dark:border-white/10 dark:border-l-emerald-500/80 bg-white/95 dark:bg-zinc-950/80 backdrop-blur-md shadow-xl dark:shadow-none p-5 sm:p-6 text-left"
           >
             {/* Top row: Status header & Response Times ticker */}
             <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-200 dark:border-white/10">
@@ -955,18 +955,18 @@ export function LandingPage() {
                 <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
                   Response Times:
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-bold tabular-nums">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 font-bold tabular-nums">
                   Plan C (20m)
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20 font-bold tabular-nums">
+                <span className="px-2.5 py-0.5 rounded-full bg-cyan-50 text-cyan-900 border border-cyan-300 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20 font-bold tabular-nums">
                   Plan B (40m)
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/10 font-medium tabular-nums">
+                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-white/10 font-semibold tabular-nums">
                   Plan A (8h)
                 </span>
                 <a
                   href="#packages"
-                  className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 hover:underline ml-2"
+                  className="inline-flex items-center gap-1 font-bold text-emerald-700 dark:text-emerald-400 hover:underline ml-2"
                 >
                   <span>Plans</span>
                   <ArrowRightIcon size={12} />
