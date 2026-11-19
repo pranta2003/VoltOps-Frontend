@@ -159,12 +159,12 @@ export function SkillPassport() {
         </div>
 
         {/* Competencies & Trade Endorsements */}
-        <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-3">
-          <div className="border-b border-[var(--border)] pb-2.5">
-            <h3 className="font-heading font-semibold text-xs text-[var(--text-primary)]">
+        <div className="p-4 rounded-xl border border-slate-300 bg-white shadow-md dark:border-white/5 dark:bg-zinc-900 dark:shadow-none space-y-3">
+          <div className="border-b border-slate-200 dark:border-white/5 pb-2.5">
+            <h3 className="font-heading font-bold text-xs text-slate-950 dark:text-zinc-50">
               Trade endorsements & authorized equipment
             </h3>
-            <p className="text-[11px] text-[var(--text-muted)]">
+            <p className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
               Primary and secondary trade domains where technician is cleared for solo emergency dispatch
             </p>
           </div>
@@ -174,17 +174,17 @@ export function SkillPassport() {
               profile.skills.map((skill) => (
                 <div
                   key={skill.id}
-                  className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs flex items-center gap-2 shadow-xs"
+                  className="px-3 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-xs flex items-center gap-2 shadow-xs dark:border-white/10 dark:bg-zinc-950"
                 >
-                  <WrenchIcon size={13} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
-                  <span className="font-medium text-[var(--text-primary)]">{skill.name}</span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border)]">
+                  <WrenchIcon size={13} className="text-cyan-700 dark:text-cyan-400 shrink-0" />
+                  <span className="font-bold text-slate-950 dark:text-zinc-50">{skill.name}</span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white text-slate-700 border border-slate-300 dark:bg-zinc-900 dark:text-zinc-300 dark:border-white/10 font-medium">
                     {skill.category}
                   </span>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-[var(--text-muted)]">No trade competencies recorded.</p>
+              <p className="text-xs text-slate-600 dark:text-zinc-400 font-medium">No trade competencies recorded.</p>
             )}
           </div>
         </div>
