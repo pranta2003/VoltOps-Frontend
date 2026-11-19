@@ -160,15 +160,15 @@ export function DispatcherSchedule() {
       label: "Morning Shift",
       window: "08:00 - 16:00",
       accent: "border-l-4 border-l-emerald-500",
-      badge: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+      badge: "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30",
       items: filteredRoster.filter((r) => r.shift.startsWith("Morning")),
     },
     {
       id: "Evening",
       label: "Evening Shift",
       window: "16:00 - 00:00",
-      accent: "border-l-4 border-l-amber-500",
-      badge: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
+      accent: "border-l-4 border-l-cyan-500",
+      badge: "bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30",
       items: filteredRoster.filter((r) => r.shift.startsWith("Evening")),
     },
     {
@@ -176,7 +176,7 @@ export function DispatcherSchedule() {
       label: "Night Standby",
       window: "00:00 - 08:00",
       accent: "border-l-4 border-l-indigo-500",
-      badge: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
+      badge: "bg-indigo-50 text-indigo-800 border-indigo-300 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800/40",
       items: filteredRoster.filter((r) => r.shift.startsWith("Night")),
     },
   ];
@@ -184,11 +184,11 @@ export function DispatcherSchedule() {
   const getStatusBadge = (status: ShiftRosterItem["status"]) => {
     switch (status) {
       case "ON_DUTY":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20";
+        return "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30";
       case "STANDBY":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20";
+        return "bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30";
       case "ON_LEAVE":
-        return "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20";
+        return "bg-purple-50 text-purple-800 border-purple-300 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/40";
     }
   };
 
@@ -201,18 +201,18 @@ export function DispatcherSchedule() {
             type="button"
             onClick={() => setDayOffset((prev) => prev - 1)}
             aria-label="Previous Day"
-            className="p-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="p-1 rounded-md border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50"
           >
             <ChevronRightIcon size={14} className="rotate-180" />
           </button>
-          <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-primary)] font-semibold">
+          <span className="text-xs font-semibold tabular-nums px-2.5 py-1 rounded-md bg-white dark:bg-zinc-900 border border-slate-300 dark:border-white/10 text-slate-950 dark:text-zinc-50 shadow-xs">
             {currentDateDisplay.weekday}, {currentDateDisplay.date} {currentDateDisplay.isToday ? "(Today)" : ""}
           </span>
           <button
             type="button"
             onClick={() => setDayOffset((prev) => prev + 1)}
             aria-label="Next Day"
-            className="p-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            className="p-1 rounded-md border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50"
           >
             <ChevronRightIcon size={14} />
           </button>
@@ -220,7 +220,7 @@ export function DispatcherSchedule() {
             <button
               type="button"
               onClick={() => setDayOffset(0)}
-              className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold underline px-1"
+              className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold underline px-1"
             >
               Today
             </button>
@@ -228,76 +228,78 @@ export function DispatcherSchedule() {
         </div>
       }
     >
-      <div className="space-y-3">
-        {/* ── Compact Filter Toolbar ──────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Search Input */}
-          <div className="relative flex-1 min-w-[200px]">
-            <SearchIcon
-              size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
-            />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search schedule"
-              aria-label="Search schedule"
-              className="w-full text-xs pl-9 pr-8 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                aria-label="Clear search"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5"
+      <div className="space-y-4 pb-24">
+        {/* ── Elevated Filter Toolbar ─────────────────────────────────────── */}
+        <div className="bg-white border border-slate-300 border-l-4 border-l-emerald-500 rounded-xl p-4 shadow-md dark:bg-zinc-900 dark:border-white/5 dark:border-l-white/5 dark:shadow-none">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Search Input */}
+            <div className="relative flex-1 min-w-[200px]">
+              <SearchIcon
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search schedule"
+                aria-label="Search schedule"
+                className="w-full text-xs pl-9 pr-8 py-2 rounded-lg bg-slate-100/80 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 dark:placeholder:text-zinc-500"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  aria-label="Clear search"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-950 dark:text-zinc-400 dark:hover:text-zinc-100 p-0.5"
+                >
+                  <XIcon size={13} />
+                </button>
+              )}
+            </div>
+
+            {/* Hub Filter */}
+            <div className="relative">
+              <select
+                value={selectedBranch}
+                onChange={(e) => setSelectedBranch(e.target.value)}
+                aria-label="Filter by branch hub"
+                className="text-xs py-2 pl-3 pr-8 rounded-lg bg-slate-100/80 border border-slate-300 text-slate-950 font-medium focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 appearance-none"
               >
-                <XIcon size={13} />
-              </button>
-            )}
-          </div>
+                <option value="ALL">All hubs</option>
+                <option value="EPZ">EPZ Hub</option>
+                <option value="Gazipur">Gazipur Hub</option>
+                <option value="Tejgaon">Tejgaon Hub</option>
+              </select>
+              <ChevronDownIcon
+                size={13}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
+              />
+            </div>
 
-          {/* Hub Filter */}
-          <div className="relative">
-            <select
-              value={selectedBranch}
-              onChange={(e) => setSelectedBranch(e.target.value)}
-              aria-label="Filter by branch hub"
-              className="text-xs py-1.5 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="ALL">All hubs</option>
-              <option value="EPZ">EPZ Hub</option>
-              <option value="Gazipur">Gazipur Hub</option>
-              <option value="Tejgaon">Tejgaon Hub</option>
-            </select>
-            <ChevronDownIcon
-              size={13}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
-            />
-          </div>
-
-          {/* Shift Filter */}
-          <div className="relative">
-            <select
-              value={selectedShift}
-              onChange={(e) => setSelectedShift(e.target.value)}
-              aria-label="Filter by shift window"
-              className="text-xs py-1.5 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="ALL">All shifts</option>
-              <option value="Morning">Morning</option>
-              <option value="Evening">Evening</option>
-              <option value="Night">Night</option>
-            </select>
-            <ChevronDownIcon
-              size={13}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
-            />
+            {/* Shift Filter */}
+            <div className="relative">
+              <select
+                value={selectedShift}
+                onChange={(e) => setSelectedShift(e.target.value)}
+                aria-label="Filter by shift window"
+                className="text-xs py-2 pl-3 pr-8 rounded-lg bg-slate-100/80 border border-slate-300 text-slate-950 font-medium focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 appearance-none"
+              >
+                <option value="ALL">All shifts</option>
+                <option value="Morning">Morning</option>
+                <option value="Evening">Evening</option>
+                <option value="Night">Night</option>
+              </select>
+              <ChevronDownIcon
+                size={13}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
+              />
+            </div>
           </div>
         </div>
 
         {/* ── Shift Sections ─────────────────────────────────────────────── */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           {shiftLanes.map((lane) => {
             if (selectedShift !== "ALL" && !lane.id.includes(selectedShift)) {
               return null;
@@ -306,50 +308,55 @@ export function DispatcherSchedule() {
             return (
               <div
                 key={lane.id}
-                className={`rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-xs ${lane.accent}`}
+                className={`rounded-xl border border-slate-300 bg-white shadow-md dark:border-white/5 dark:bg-zinc-900 dark:shadow-none overflow-hidden ${lane.accent}`}
               >
                 {/* Lane Header */}
-                <div className="px-4 py-2 bg-[var(--bg-surface-2)] border-b border-[var(--border)] flex items-center justify-between">
+                <div className="px-4 py-2.5 bg-slate-100/80 dark:bg-zinc-950/60 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold text-xs text-[var(--text-primary)]">{lane.id}</span>
-                    <span className="text-[11px] text-[var(--text-muted)]">({lane.window})</span>
+                    <span className="font-bold text-xs text-slate-950 dark:text-zinc-50">{lane.label}</span>
+                    <span className="text-[11px] text-slate-600 dark:text-zinc-400 tabular-nums">({lane.window})</span>
                   </div>
-                  <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border)]">
+                  <span className="text-[10px] tabular-nums font-bold px-2 py-0.5 rounded-full bg-white dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 border border-slate-300 dark:border-white/10 shadow-xs">
                     {lane.items.length} {lane.items.length === 1 ? "technician" : "technicians"}
                   </span>
                 </div>
 
                 {/* Technician Shift Rows */}
                 {lane.items.length === 0 ? (
-                  <div className="p-4 text-center text-xs text-[var(--text-muted)]">
+                  <div className="p-6 text-center text-xs text-slate-600 dark:text-zinc-400">
                     No technicians scheduled.
                   </div>
                 ) : (
-                  <div className="divide-y divide-[var(--border)]">
+                  <div className="divide-y divide-slate-200 dark:divide-white/5">
                     {lane.items.map((item) => (
                       <div
                         key={item.id}
-                        className="px-4 py-2 flex flex-wrap items-center justify-between gap-2.5 hover:bg-[var(--bg-surface-2)] transition-colors text-xs"
+                        className="px-4 py-3 flex flex-wrap items-center justify-between gap-3 odd:bg-white even:bg-slate-50/70 hover:bg-emerald-50/40 dark:odd:bg-zinc-900 dark:even:bg-zinc-900 dark:hover:bg-zinc-800/40 transition-colors text-xs"
                       >
                         {/* Technician */}
                         <div className="flex items-center gap-2.5 min-w-[180px]">
-                          <div className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+                          <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-300 dark:bg-zinc-800 dark:border-white/10 text-[10px] font-bold flex items-center justify-center shrink-0 text-slate-900 dark:text-zinc-100">
                             {item.technicianName.substring(0, 2).toUpperCase()}
                           </div>
-                          <span className="font-medium text-xs text-[var(--text-primary)]">
-                            {item.technicianName}
-                          </span>
+                          <div>
+                            <span className="font-bold text-xs text-slate-950 dark:text-zinc-50 block">
+                              {item.technicianName}
+                            </span>
+                            <span className="text-[11px] text-slate-600 dark:text-zinc-400">
+                              {item.branch}
+                            </span>
+                          </div>
                         </div>
 
                         {/* Trade */}
-                        <div className="min-w-[160px] text-[var(--text-secondary)]">
+                        <div className="min-w-[160px] text-slate-700 dark:text-zinc-300 font-medium">
                           {item.primaryTrade}
                         </div>
 
                         {/* Status */}
                         <div>
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${getStatusBadge(
+                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getStatusBadge(
                               item.status
                             )}`}
                           >
@@ -360,11 +367,11 @@ export function DispatcherSchedule() {
                         {/* Current Assignment */}
                         <div className="min-w-[180px] text-right font-mono text-xs">
                           {item.activeJob ? (
-                            <span className="font-semibold text-emerald-600 dark:text-emerald-400 truncate block" title={item.activeJob}>
+                            <span className="font-semibold text-emerald-700 dark:text-emerald-400 truncate block" title={item.activeJob}>
                               {item.activeJob}
                             </span>
                           ) : (
-                            <span className="text-[var(--text-muted)]">None</span>
+                            <span className="text-slate-500 dark:text-zinc-500">None</span>
                           )}
                         </div>
                       </div>

@@ -168,13 +168,12 @@ export const WorkOrders: FC = () => {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case "URGENT":
-        return "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-900";
       case "HIGH":
-        return "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-900";
+        return "bg-rose-50 text-[#8a1858] border-rose-300 dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30";
       case "MEDIUM":
-        return "bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border-sky-200 dark:border-sky-900";
+        return "bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30";
       default:
-        return "bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
+        return "bg-slate-50 text-slate-700 border-slate-300 dark:bg-zinc-800/60 dark:text-zinc-300 dark:border-white/10";
     }
   };
 
@@ -182,49 +181,49 @@ export const WorkOrders: FC = () => {
     switch (status) {
       case "UNASSIGNED":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-900">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-[#8a1858] border-rose-300 dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#b8287a] animate-pulse" />
             Unassigned
           </span>
         );
       case "TRAVELLING":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-900">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#06b6d4]" />
             In Transit
           </span>
         );
       case "ON_SITE":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800/40">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
             On Site
           </span>
         );
       case "WORK_COMPLETED_AWAITING_CONFIRMATION":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-cyan-50 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-900">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#06b6d4] animate-pulse" />
             Reported Complete
           </span>
         );
       case "ASSIGNED":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-800 border-indigo-300 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800/40">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
             Assigned
           </span>
         );
       case "COMPLETED":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             Completed
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 border-slate-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-white/10">
             <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
             {status}
           </span>
@@ -235,15 +234,15 @@ export const WorkOrders: FC = () => {
   const renderArrivalSla = (wo: WorkOrder) => {
     if (!wo.slaDeadline) {
       if (wo.coveragePlan === "8hr") {
-        return <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">No SLA (08:00–17:00)</span>;
+        return <span className="text-[10px] text-slate-600 dark:text-zinc-400 font-medium">No SLA (08:00–17:00)</span>;
       }
       if (wo.coveragePlan === "custom") {
-        return <span className="text-[10px] text-sky-700 dark:text-sky-400 font-medium">Custom Terms</span>;
+        return <span className="text-[10px] text-cyan-700 dark:text-[#06b6d4] font-medium">Custom Terms</span>;
       }
-      return <span className="text-[10px] text-[var(--text-muted)]">No Arrival SLA</span>;
+      return <span className="text-[10px] text-slate-500 dark:text-zinc-500">No Arrival SLA</span>;
     }
     return (
-      <span className="font-mono text-[11px] text-[var(--text-primary)]">
+      <span className="font-mono tabular-nums text-[11px] text-slate-900 dark:text-zinc-100 font-semibold">
         {new Date(wo.slaDeadline).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
       </span>
     );
@@ -263,36 +262,12 @@ export const WorkOrders: FC = () => {
       title="Work Orders"
       action={
         <div className="flex items-center gap-2">
-          <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-              errorMessage && workOrders.length === 0
-                ? "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20"
-                : isStale
-                ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20"
-                : isOffline
-                ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20"
-                : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20"
-            }`}
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                errorMessage && workOrders.length === 0
-                  ? "bg-rose-500"
-                  : isStale
-                  ? "bg-amber-500"
-                  : isOffline
-                  ? "bg-amber-500"
-                  : "bg-emerald-500"
-              }`}
-            />
-            {errorMessage && workOrders.length === 0
-              ? "Connection Error"
-              : isStale
-              ? "Stale Data"
-              : isOffline
-              ? "Local preview"
-              : "Live API"}
-          </span>
+          {!isOffline && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Live API
+            </span>
+          )}
 
           <button
             type="button"
@@ -300,17 +275,17 @@ export const WorkOrders: FC = () => {
             disabled={isRefreshing}
             aria-label="Refresh orders"
             title="Refresh orders"
-            className="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] active:scale-95 transition-all duration-150 disabled:opacity-50"
+            className="p-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50 hover:border-slate-400 dark:hover:border-white/20 active:scale-95 transition-all duration-150 disabled:opacity-50"
           >
             <RefreshCwIcon size={15} className={isRefreshing ? "animate-spin text-emerald-500" : ""} />
           </button>
         </div>
       }
     >
-      <div className="space-y-3">
+      <div className="space-y-4 pb-24">
         {/* Error notification banner if request failed */}
         {errorMessage && (
-          <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
+          <div className="p-3 rounded-xl border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-900 dark:text-rose-300">
             <div className="flex items-center gap-2">
               <AlertTriangleIcon size={15} className="text-rose-500 shrink-0" />
               <span>{errorMessage}</span>
@@ -325,14 +300,15 @@ export const WorkOrders: FC = () => {
           </div>
         )}
 
-        {/* ── Compact Filter & Status Grouping Strip ───────────────────────── */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
-          {/* Status Tabs */}
-          <div className="flex items-center gap-1.5 flex-wrap">
+        {/* ── Elevated Filter Toolbar ──────────────────────────────────────── */}
+        <div className="bg-white border border-slate-300 border-l-4 border-l-emerald-500 rounded-xl p-4 shadow-md dark:bg-zinc-900 dark:border-white/5 dark:border-l-white/5 dark:shadow-none space-y-3">
+          {/* Row 1: Status Filter Pills */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 mr-1">Status:</span>
             {[
-              { id: "ALL", label: "All", count: workOrders.length },
+              { id: "ALL", label: "All", count: workOrders.length, dot: "" },
               ...(lifecycleCounts.UNASSIGNED > 0
-                ? [{ id: "UNASSIGNED", label: "Unassigned", count: lifecycleCounts.UNASSIGNED, dot: "bg-rose-500" }]
+                ? [{ id: "UNASSIGNED", label: "Unassigned", count: lifecycleCounts.UNASSIGNED, dot: "bg-[#b8287a]" }]
                 : []),
               { id: "ASSIGNED", label: "Assigned", count: lifecycleCounts.ASSIGNED, dot: "bg-indigo-500" },
               ...(lifecycleCounts.WORK_COMPLETED_AWAITING_CONFIRMATION > 0 || selectedStatus === "WORK_COMPLETED_AWAITING_CONFIRMATION"
@@ -340,7 +316,7 @@ export const WorkOrders: FC = () => {
                     id: "WORK_COMPLETED_AWAITING_CONFIRMATION",
                     label: "Reported Complete",
                     count: lifecycleCounts.WORK_COMPLETED_AWAITING_CONFIRMATION,
-                    dot: "bg-cyan-500",
+                    dot: "bg-[#06b6d4]",
                   }]
                 : []),
               { id: "COMPLETED", label: "Completed", count: lifecycleCounts.COMPLETED, dot: "bg-emerald-500" },
@@ -353,24 +329,24 @@ export const WorkOrders: FC = () => {
                   onClick={() => setSelectedStatus(tab.id)}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs transition-all ${
                     isSelected
-                      ? "border border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold shadow-xs"
-                      : "border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)]"
+                      ? "border border-emerald-500 bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30 font-semibold shadow-xs"
+                      : "border border-slate-200 bg-slate-50 text-slate-700 hover:text-slate-950 hover:border-slate-300 dark:border-white/5 dark:bg-zinc-800/60 dark:text-zinc-300 dark:hover:border-white/15"
                   }`}
                 >
                   {tab.dot && <span className={`w-1.5 h-1.5 rounded-full ${tab.dot}`} />}
                   <span>{tab.label}</span>
-                  <span className="text-[10px] font-mono opacity-80">({tab.count})</span>
+                  <span className="tabular-nums opacity-80">({tab.count})</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Right: Search and Trade filter */}
-          <div className="flex items-center gap-2 flex-1 min-w-[260px] justify-end">
-            <div className="relative flex-1 max-w-xs">
+          {/* Row 2: Search, Trade & Priority Filter */}
+          <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-200 dark:border-white/5">
+            <div className="relative flex-1 min-w-[200px]">
               <SearchIcon
                 size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
               />
               <input
                 type="text"
@@ -378,14 +354,14 @@ export const WorkOrders: FC = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search work orders"
                 aria-label="Search work orders"
-                className="w-full text-xs pl-9 pr-8 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full text-xs pl-9 pr-8 py-2 rounded-lg bg-slate-100/80 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 dark:placeholder:text-zinc-500"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
                   aria-label="Clear search"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-950 dark:text-zinc-400 dark:hover:text-zinc-100 p-0.5"
                 >
                   <XIcon size={13} />
                 </button>
@@ -397,7 +373,7 @@ export const WorkOrders: FC = () => {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 aria-label="Filter by trade category"
-                className="text-xs py-1.5 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="text-xs py-2 pl-3 pr-8 rounded-lg bg-slate-100/80 border border-slate-300 text-slate-950 font-medium focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 appearance-none"
               >
                 <option value="ALL">All trades</option>
                 {CANONICAL_SERVICE_CATEGORIES.map((cat) => (
@@ -408,7 +384,7 @@ export const WorkOrders: FC = () => {
               </select>
               <ChevronDownIcon
                 size={13}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
               />
             </div>
           </div>
@@ -416,23 +392,23 @@ export const WorkOrders: FC = () => {
 
         {/* ── Grouped Execution Board ──────────────────────────────────────── */}
         {isLoading ? (
-          <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
+          <div className="p-8 text-center text-xs text-slate-600 dark:text-zinc-400 bg-white dark:bg-zinc-900 rounded-xl border border-slate-300 dark:border-white/10 shadow-md">
             Loading work orders...
           </div>
         ) : workOrders.length === 0 ? (
-          <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
+          <div className="p-8 text-center text-xs text-slate-600 dark:text-zinc-400 bg-white dark:bg-zinc-900 rounded-xl border border-slate-300 dark:border-white/10 shadow-md">
             No work orders match the selected filters.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             {[
               ...(selectedStatus === "ALL" || selectedStatus === "UNASSIGNED"
                 ? (lifecycleCounts.UNASSIGNED > 0 || selectedStatus === "UNASSIGNED"
                   ? [{
                       statusKey: "UNASSIGNED",
                       title: "Unassigned",
-                      dot: "bg-rose-500",
-                      badge: "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20",
+                      dot: "bg-[#b8287a]",
+                      badge: "bg-rose-50 text-[#8a1858] border-rose-300 dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30",
                       orders: workOrders.filter((w) => w.status === "UNASSIGNED"),
                     }]
                   : [])
@@ -442,7 +418,7 @@ export const WorkOrders: FC = () => {
                     statusKey: "ASSIGNED",
                     title: "Assigned",
                     dot: "bg-indigo-500",
-                    badge: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
+                    badge: "bg-indigo-50 text-indigo-800 border-indigo-300 dark:bg-indigo-950/60 dark:text-indigo-300",
                     orders: workOrders.filter((w) => w.status === "ASSIGNED" || w.status === "TRAVELLING" || w.status === "ON_SITE"),
                   }]
                 : []),
@@ -450,8 +426,8 @@ export const WorkOrders: FC = () => {
                 ? [{
                     statusKey: "WORK_COMPLETED_AWAITING_CONFIRMATION",
                     title: "Reported Complete",
-                    dot: "bg-cyan-500",
-                    badge: "bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-cyan-500/20",
+                    dot: "bg-[#06b6d4]",
+                    badge: "bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4]",
                     orders: workOrders.filter((w) => w.status === "WORK_COMPLETED_AWAITING_CONFIRMATION"),
                   }]
                 : []),
@@ -460,32 +436,32 @@ export const WorkOrders: FC = () => {
                     statusKey: "COMPLETED",
                     title: "Completed",
                     dot: "bg-emerald-500",
-                    badge: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
+                    badge: "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300",
                     orders: workOrders.filter((w) => w.status === "COMPLETED"),
                   }]
                 : []),
             ].map((column) => (
               <div
                 key={column.statusKey}
-                className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]/60 flex flex-col p-3 space-y-2.5 min-h-[160px]"
+                className="bg-slate-200/60 border border-slate-300 dark:bg-zinc-900/50 dark:border-white/5 rounded-xl p-3 flex flex-col space-y-3 min-h-[160px]"
               >
                 {/* Column Header */}
-                <div className="flex items-center justify-between pb-2 border-b border-[var(--border)]">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-300 dark:border-white/10">
                   <div className="flex items-center gap-1.5">
                     <span className={`w-2 h-2 rounded-full ${column.dot}`} />
-                    <h3 className="text-xs font-bold text-[var(--text-primary)]">
+                    <h3 className="text-xs font-bold text-slate-950 dark:text-zinc-50">
                       {column.title}
                     </h3>
                   </div>
-                  <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border)]">
+                  <span className="tabular-nums text-[10px] font-bold px-2 py-0.5 rounded-full bg-white dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 border border-slate-300 dark:border-white/10 shadow-xs">
                     {column.orders.length}
                   </span>
                 </div>
 
                 {/* Column Cards */}
-                <div className="space-y-2 flex-1">
+                <div className="space-y-2.5 flex-1">
                   {column.orders.length === 0 ? (
-                    <div className="h-24 flex items-center justify-center text-[11px] text-[var(--text-muted)] italic">
+                    <div className="h-24 flex items-center justify-center text-[11px] text-slate-500 dark:text-zinc-400 italic">
                       No orders
                     </div>
                   ) : (
@@ -493,48 +469,48 @@ export const WorkOrders: FC = () => {
                       <div
                         key={wo.id}
                         onClick={(e) => handleOpenInspect(wo, e as any)}
-                        className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--border-strong)] hover:shadow-xs transition-all cursor-pointer space-y-2 group"
+                        className="p-3.5 rounded-xl bg-white border border-slate-300 shadow-sm dark:bg-zinc-900 dark:border-white/10 hover:border-slate-400 dark:hover:border-white/20 transition-all cursor-pointer space-y-2 group"
                       >
                         {/* Top: ID & Status */}
                         <div className="flex items-center justify-between gap-1">
                           <div className="flex items-center gap-1.5 min-w-0">
-                            <span className="font-mono font-bold text-xs text-[var(--text-primary)]">
+                            <span className="font-mono font-bold text-xs text-slate-950 dark:text-zinc-100">
                               {wo.id}
                             </span>
                             {wo.status === "TRAVELLING" && (
-                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 shrink-0">
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-50 text-cyan-800 border border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30 shrink-0">
                                 In Transit
                               </span>
                             )}
                             {wo.status === "ON_SITE" && (
-                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30 shrink-0">
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800/40 shrink-0">
                                 On Site
                               </span>
                             )}
                           </div>
-                          <span className="text-[10px] text-[var(--text-muted)] font-mono shrink-0">
+                          <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-mono shrink-0">
                             {renderArrivalSla(wo)}
                           </span>
                         </div>
 
                         {/* Customer & Asset */}
                         <div className="space-y-0.5">
-                          <div className="font-semibold text-xs text-[var(--text-primary)] truncate" title={wo.customerName}>
+                          <div className="font-bold text-xs text-slate-950 dark:text-zinc-50 truncate" title={wo.customerName}>
                             {wo.customerName}
                           </div>
-                          <div className="text-[11px] text-[var(--text-muted)] truncate" title={wo.assetName}>
+                          <div className="text-[11px] text-slate-600 dark:text-zinc-400 truncate" title={wo.assetName}>
                             {wo.assetName}
                           </div>
                         </div>
 
                         {/* Bottom: Assigned Technician */}
-                        <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="pt-2 border-t border-slate-200 dark:border-white/5 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
                           {wo.assignedTechnicianName ? (
                             <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0 text-[var(--text-primary)]">
+                              <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-zinc-800 text-[10px] font-bold flex items-center justify-center shrink-0 text-slate-900 dark:text-zinc-100">
                                 {wo.assignedTechnicianName.substring(0, 2).toUpperCase()}
                               </span>
-                              <span className="text-[11px] text-[var(--text-secondary)] font-medium truncate" title={wo.assignedTechnicianName}>
+                              <span className="text-[11px] text-slate-700 dark:text-zinc-300 font-medium truncate" title={wo.assignedTechnicianName}>
                                 {wo.assignedTechnicianName}
                               </span>
                             </div>
@@ -542,7 +518,7 @@ export const WorkOrders: FC = () => {
                             <button
                               type="button"
                               onClick={(e) => handleOpenAssign(wo, e)}
-                              className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                              className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
                             >
                               + Assign technician
                             </button>
@@ -550,7 +526,7 @@ export const WorkOrders: FC = () => {
                           <button
                             type="button"
                             onClick={(e) => handleOpenInspect(wo, e as any)}
-                            className="text-[10px] text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors"
+                            className="text-[10px] font-semibold text-slate-600 group-hover:text-slate-950 dark:text-zinc-400 dark:group-hover:text-zinc-100 transition-colors whitespace-nowrap"
                           >
                             Details →
                           </button>
@@ -571,16 +547,16 @@ export const WorkOrders: FC = () => {
           role="dialog"
           aria-modal="true"
           aria-labelledby={inspectModalHeadingId}
-          className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs animate-fade-in"
+          className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-fade-in"
         >
-          <div className="w-full max-w-lg h-full bg-[var(--bg-surface)] border-l border-[var(--border)] shadow-2xl flex flex-col justify-between overflow-y-auto">
+          <div className="w-full max-w-lg h-full bg-white dark:bg-zinc-900 border-l border-slate-300 dark:border-white/10 shadow-2xl flex flex-col justify-between overflow-y-auto">
             {/* Drawer Header */}
-            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
+            <div className="p-4 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   Order Details
                 </span>
-                <h3 id={inspectModalHeadingId} className="text-sm font-bold text-[var(--text-primary)]">
+                <h3 id={inspectModalHeadingId} className="text-sm font-bold text-slate-950 dark:text-zinc-50">
                   {inspectOrder.id} — {inspectOrder.customerName}
                 </h3>
               </div>
@@ -589,7 +565,7 @@ export const WorkOrders: FC = () => {
                 <button
                   type="button"
                   onClick={handleCloseModals}
-                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-950 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <XIcon size={16} />
                 </button>
@@ -599,16 +575,16 @@ export const WorkOrders: FC = () => {
             {/* Drawer Content */}
             <div className="p-4 space-y-3.5 flex-1 text-xs">
               {/* Operational Lifecycle Stepper */}
-              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
-                <div className="text-[10px] font-medium text-[var(--text-muted)] mb-2">
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-zinc-950">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 mb-2">
                   Lifecycle status
                 </div>
                 <div className="grid grid-cols-5 gap-1 text-center text-[9px]">
                   <div
                     className={`p-1 rounded-lg border ${
                       inspectOrder.status === "UNASSIGNED"
-                        ? "border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-700 font-bold"
-                        : "border-[var(--border)] text-[var(--text-muted)]"
+                        ? "border-[#b8287a] bg-rose-50 dark:bg-[#b8287a]/20 text-[#8a1858] dark:text-[#e879b9] font-bold"
+                        : "border-slate-200 dark:border-white/5 text-slate-500 dark:text-zinc-500"
                     }`}
                   >
                     1. Unassigned
@@ -616,8 +592,8 @@ export const WorkOrders: FC = () => {
                   <div
                     className={`p-1 rounded-lg border ${
                       inspectOrder.status === "ASSIGNED"
-                        ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 font-bold"
-                        : "border-[var(--border)] text-[var(--text-muted)]"
+                        ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-bold"
+                        : "border-slate-200 dark:border-white/5 text-slate-500 dark:text-zinc-500"
                     }`}
                   >
                     2. Assigned
@@ -625,8 +601,8 @@ export const WorkOrders: FC = () => {
                   <div
                     className={`p-1 rounded-lg border ${
                       inspectOrder.status === "TRAVELLING" || inspectOrder.status === "ON_SITE"
-                        ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-700 font-bold"
-                        : "border-[var(--border)] text-[var(--text-muted)]"
+                        ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/40 text-cyan-800 dark:text-[#06b6d4] font-bold"
+                        : "border-slate-200 dark:border-white/5 text-slate-500 dark:text-zinc-500"
                     }`}
                   >
                     3. On Site
@@ -634,8 +610,8 @@ export const WorkOrders: FC = () => {
                   <div
                     className={`p-1 rounded-lg border ${
                       inspectOrder.status === "WORK_COMPLETED_AWAITING_CONFIRMATION"
-                        ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 font-bold"
-                        : "border-[var(--border)] text-[var(--text-muted)]"
+                        ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/40 text-cyan-800 dark:text-[#06b6d4] font-bold"
+                        : "border-slate-200 dark:border-white/5 text-slate-500 dark:text-zinc-500"
                     }`}
                   >
                     4. Sign-Off
@@ -643,8 +619,8 @@ export const WorkOrders: FC = () => {
                   <div
                     className={`p-1 rounded-lg border ${
                       inspectOrder.status === "COMPLETED"
-                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 font-bold"
-                        : "border-[var(--border)] text-[var(--text-muted)]"
+                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-bold"
+                        : "border-slate-200 dark:border-white/5 text-slate-500 dark:text-zinc-500"
                     }`}
                   >
                     5. Completed
@@ -653,32 +629,32 @@ export const WorkOrders: FC = () => {
               </div>
 
               {/* Facility & Equipment Information */}
-              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2">
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-zinc-950 space-y-2">
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <span className="text-[10px] font-medium text-[var(--text-muted)] block">Facility</span>
-                    <span className="font-semibold text-[var(--text-primary)]">{inspectOrder.facilityAddress}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block">Facility</span>
+                    <span className="font-semibold text-slate-950 dark:text-zinc-50">{inspectOrder.facilityAddress}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] font-medium text-[var(--text-muted)] block">Trade Category</span>
-                    <span className="font-semibold text-[var(--text-primary)]">{inspectOrder.category}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block">Trade Category</span>
+                    <span className="font-semibold text-slate-950 dark:text-zinc-50">{inspectOrder.category}</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--border)]">
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-white/5">
                   <div>
-                    <span className="text-[10px] font-medium text-[var(--text-muted)] block">Equipment Asset</span>
-                    <span className="font-semibold text-[var(--text-primary)]">{inspectOrder.assetName}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block">Equipment Asset</span>
+                    <span className="font-semibold text-slate-950 dark:text-zinc-50">{inspectOrder.assetName}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] font-medium text-[var(--text-muted)] block">Arrival Target SLA</span>
-                    <span className="font-semibold text-[var(--text-primary)]">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block">Arrival Target SLA</span>
+                    <span className="font-semibold text-slate-950 dark:text-zinc-50">
                       {inspectOrder.slaDeadline ? (
-                        <span className="font-mono tabular-nums">
+                        <span className="tabular-nums">
                           {new Date(inspectOrder.slaDeadline).toLocaleTimeString()} ({inspectOrder.coveragePlan === "247-priority" ? "20m Rapid" : "40m Standard"})
                         </span>
                       ) : (
-                        <span className="text-amber-700 dark:text-amber-400">
+                        <span className="text-slate-600 dark:text-zinc-400">
                           {inspectOrder.coveragePlan === "8hr" ? "Plan A (08:00–17:00, No Arrival SLA)" : "Plan D (Negotiated)"}
                         </span>
                       )}
@@ -686,32 +662,32 @@ export const WorkOrders: FC = () => {
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-[var(--border)]">
-                  <span className="text-[10px] font-medium text-[var(--text-muted)] block">Problem Summary</span>
-                  <p className="font-medium text-[var(--text-primary)] mt-0.5">{inspectOrder.problemSummary}</p>
+                <div className="pt-2 border-t border-slate-200 dark:border-white/5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block">Problem Summary</span>
+                  <p className="font-medium text-slate-950 dark:text-zinc-100 mt-0.5">{inspectOrder.problemSummary}</p>
                 </div>
 
                 {inspectOrder.workNotes && (
-                  <div className="pt-2 border-t border-[var(--border)]">
-                    <span className="text-[10px] font-medium text-[var(--text-muted)] block">Dispatch Notes</span>
-                    <p className="text-[11px] text-[var(--text-primary)] mt-0.5">{inspectOrder.workNotes}</p>
+                  <div className="pt-2 border-t border-slate-200 dark:border-white/5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block">Dispatch Notes</span>
+                    <p className="text-[11px] text-slate-800 dark:text-zinc-200 mt-0.5">{inspectOrder.workNotes}</p>
                   </div>
                 )}
 
                 {inspectOrder.completionReport && (
-                  <div className="pt-2 border-t border-[var(--border)] p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                    <span className="text-[10px] font-medium text-cyan-700 dark:text-cyan-300 block">
+                  <div className="pt-2 border-t border-slate-200 dark:border-white/5 p-2 rounded-lg bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/20">
+                    <span className="text-[10px] font-bold text-cyan-800 dark:text-cyan-300 block">
                       Technician Completion Report
                     </span>
-                    <p className="text-[11px] text-[var(--text-primary)] mt-0.5 font-medium">
+                    <p className="text-[11px] text-slate-900 dark:text-zinc-50 mt-0.5 font-medium">
                       {inspectOrder.completionReport.notes}
                     </p>
                     {inspectOrder.completionReport.materialsUsed && (
-                      <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
+                      <p className="text-[10px] text-slate-600 dark:text-zinc-400 mt-0.5">
                         Materials: {inspectOrder.completionReport.materialsUsed}
                       </p>
                     )}
-                    <div className="text-[10px] font-mono tabular-nums text-cyan-600 dark:text-cyan-400 mt-1">
+                    <div className="text-[10px] tabular-nums text-cyan-700 dark:text-cyan-400 mt-1 font-semibold">
                       Submitted: {new Date(inspectOrder.completionReport.completedAt).toLocaleTimeString()} by {inspectOrder.completionReport.technicianName}
                     </div>
                   </div>
@@ -719,30 +695,30 @@ export const WorkOrders: FC = () => {
               </div>
 
               {/* Assigned Technician Profile Strip */}
-              <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] space-y-1">
-                <span className="text-[10px] font-medium text-[var(--text-muted)] block">
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-white/5 bg-white dark:bg-zinc-950 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block">
                   Dispatched Technician
                 </span>
                 {inspectOrder.assignedTechnicianName ? (
                   <div className="flex items-center justify-between pt-1">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs flex items-center justify-center border border-emerald-500/20">
+                      <div className="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-bold text-xs flex items-center justify-center border border-emerald-300 dark:border-emerald-500/30">
                         {inspectOrder.assignedTechnicianName.substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <div className="font-semibold text-xs text-[var(--text-primary)]">
+                        <div className="font-bold text-xs text-slate-950 dark:text-zinc-50">
                           {inspectOrder.assignedTechnicianName}
                         </div>
-                        <div className="text-[10px] text-[var(--text-muted)]">Verified Field Lead</div>
+                        <div className="text-[10px] text-slate-600 dark:text-zinc-400">Verified Field Lead</div>
                       </div>
                     </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30">
                       Dispatched
                     </span>
                   </div>
                 ) : (
                   <div className="flex items-center justify-between pt-1">
-                    <span className="text-amber-600 dark:text-amber-400 font-semibold text-xs">
+                    <span className="text-rose-600 dark:text-[#e879b9] font-semibold text-xs">
                       No technician currently assigned
                     </span>
                     <button
@@ -752,7 +728,7 @@ export const WorkOrders: FC = () => {
                         handleCloseModals();
                         handleOpenAssign(wo, e);
                       }}
-                      className="px-2.5 py-1 rounded text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs"
+                      className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs active:scale-95 transition-all"
                     >
                       Assign Now
                     </button>
@@ -762,15 +738,15 @@ export const WorkOrders: FC = () => {
 
               {/* Linear Status Transition Controls */}
               {inspectOrder.status !== "COMPLETED" && (
-                <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2">
-                  <div className="text-xs font-semibold text-[var(--text-primary)]">Advance Status:</div>
+                <div className="p-3 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-zinc-950 space-y-2">
+                  <div className="text-xs font-bold text-slate-950 dark:text-zinc-50">Advance Status:</div>
                   <div className="flex flex-wrap gap-2">
                     {VALID_WORK_ORDER_TRANSITIONS[inspectOrder.status]?.includes("TRAVELLING") && (
                       <button
                         type="button"
                         onClick={() => handleTransitionStatus("TRAVELLING")}
                         disabled={isUpdatingStatus}
-                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-600 text-white hover:bg-amber-700 active:scale-95 transition-all disabled:opacity-50"
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-700 text-white hover:bg-cyan-800 active:scale-95 transition-all disabled:opacity-50"
                       >
                         {isUpdatingStatus ? "Updating..." : "Mark In Transit (TRAVELLING)"}
                       </button>
@@ -801,7 +777,7 @@ export const WorkOrders: FC = () => {
             </div>
 
             {/* Drawer Footer Actions */}
-            <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-surface)] flex items-center justify-between">
+            <div className="p-4 border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-zinc-950 flex items-center justify-between">
               <div>
                 {inspectOrder.status === "UNASSIGNED" && (
                   <button
@@ -820,7 +796,7 @@ export const WorkOrders: FC = () => {
               <button
                 type="button"
                 onClick={handleCloseModals}
-                className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50"
               >
                 Close Drawer
               </button>
@@ -837,60 +813,60 @@ export const WorkOrders: FC = () => {
           aria-labelledby={assignModalHeadingId}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
         >
-          <div className="w-full max-w-2xl rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   Advisory Matching Engine (SDP-4 Hard Rules)
                 </span>
-                <h3 id={assignModalHeadingId} className="text-base font-bold text-[var(--text-primary)]">
+                <h3 id={assignModalHeadingId} className="text-base font-bold text-slate-950 dark:text-zinc-50">
                   Assign Technician to {assignOrder.id}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={handleCloseModals}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-950 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 <XIcon size={16} />
               </button>
             </div>
 
             {/* Target Breakdown Card */}
-            <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs space-y-1">
+            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-zinc-950 text-xs space-y-1">
               <div>
-                <strong className="text-[var(--text-primary)]">Customer:</strong> {assignOrder.customerName}
+                <strong className="text-slate-950 dark:text-zinc-100">Customer:</strong> {assignOrder.customerName}
               </div>
               <div>
-                <strong className="text-[var(--text-primary)]">Facility:</strong> {assignOrder.facilityAddress}
+                <strong className="text-slate-950 dark:text-zinc-100">Facility:</strong> {assignOrder.facilityAddress}
               </div>
               <div>
-                <strong className="text-[var(--text-primary)]">Required Trade:</strong> {assignOrder.category}
+                <strong className="text-slate-950 dark:text-zinc-100">Required Trade:</strong> {assignOrder.category}
               </div>
               <div>
-                <strong className="text-[var(--text-primary)]">Equipment & Problem:</strong> {assignOrder.assetName} —{" "}
+                <strong className="text-slate-950 dark:text-zinc-100">Equipment & Problem:</strong> {assignOrder.assetName} —{" "}
                 {assignOrder.problemSummary}
               </div>
             </div>
 
             {assignSuccess ? (
-              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-center font-bold text-sm">
+              <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-center font-bold text-sm">
                 ✓ {assignSuccess}
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">
                   <span>Eligible Candidates (Ranked by Arithmetic Score)</span>
-                  <span className="text-[10px] font-normal text-slate-500">Human Confirmation Required</span>
+                  <span className="text-[10px] font-medium text-slate-500 dark:text-zinc-400">Human Confirmation Required</span>
                 </div>
 
                 {isLoadingMatches ? (
-                  <div className="py-8 text-center text-xs text-[var(--text-muted)]">
+                  <div className="py-8 text-center text-xs text-slate-600 dark:text-zinc-400">
                     Evaluating candidate passports and branch locations...
                   </div>
                 ) : matchingTechs.length === 0 ? (
-                  <div className="py-6 text-center text-xs text-rose-600 dark:text-rose-400">
+                  <div className="py-6 text-center text-xs text-rose-600 dark:text-rose-400 font-medium">
                     No available certified technicians found for {assignOrder.category}.
                   </div>
                 ) : (
@@ -901,41 +877,41 @@ export const WorkOrders: FC = () => {
                         onClick={() => setSelectedTech(candidate)}
                         className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
                           selectedTech?.technicianId === candidate.technicianId
-                            ? "border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 ring-1 ring-emerald-500"
-                            : "border-[var(--border)] bg-[var(--bg-surface)] hover:border-slate-300 dark:hover:border-slate-700"
+                            ? "border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20 ring-1 ring-emerald-500"
+                            : "border-slate-300 bg-white hover:border-slate-400 dark:border-white/10 dark:bg-zinc-900 dark:hover:border-white/20"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-bold text-xs text-[var(--text-primary)]">
+                              <span className="font-bold text-xs text-slate-950 dark:text-zinc-50">
                                 {candidate.technicianName}
                               </span>
                               <span
                                 className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${
                                   candidate.recommendationTier === "TIER_1_PREFERRED"
-                                    ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20"
-                                    : "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20"
+                                    ? "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30"
+                                    : "bg-blue-50 text-blue-800 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800/40"
                                 }`}
                               >
                                 {candidate.recommendationTier === "TIER_1_PREFERRED" ? "Tier 1: Preferred" : "Tier 2: Eligible"}
                               </span>
-                              <span className="text-[11px] text-[var(--text-muted)]">· ETA ~{candidate.etaMinutes}m</span>
+                              <span className="text-[11px] text-slate-600 dark:text-zinc-400 tabular-nums">· ETA ~{candidate.etaMinutes}m</span>
                             </div>
-                            <div className="text-[11px] text-[var(--text-muted)] flex flex-wrap items-center gap-1.5 pt-0.5">
+                            <div className="text-[11px] text-slate-600 dark:text-zinc-400 flex flex-wrap items-center gap-1.5 pt-0.5">
                               <span>{candidate.designation}</span>
                               <span>•</span>
-                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">✓ Active License</span>
+                              <span className="text-emerald-700 dark:text-emerald-400 font-semibold">✓ Active License</span>
                               <span>•</span>
                               <span>{candidate.eligibilityFactors?.standbyAvailable ? "✓ Standby" : `${candidate.activeJobCount} Active Job(s)`}</span>
                               {candidate.eligibilityFactors?.branchMatched && (
                                 <>
                                   <span>•</span>
-                                  <span className="text-sky-600 dark:text-sky-400 font-medium">✓ Branch Match</span>
+                                  <span className="text-cyan-700 dark:text-cyan-400 font-semibold">✓ Branch Match</span>
                                 </>
                               )}
                             </div>
-                            <p className="text-[11px] text-slate-600 dark:text-slate-300 italic pt-0.5">
+                            <p className="text-[11px] text-slate-700 dark:text-zinc-300 italic pt-0.5">
                               "{candidate.explanation}"
                             </p>
                           </div>
@@ -946,7 +922,7 @@ export const WorkOrders: FC = () => {
                                 <CheckIcon size={12} />
                               </span>
                             ) : (
-                              <span className="w-5 h-5 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)]" />
+                              <span className="w-5 h-5 rounded-full border border-slate-300 dark:border-white/20 flex items-center justify-center text-slate-400" />
                             )}
                           </div>
                         </div>
@@ -958,7 +934,7 @@ export const WorkOrders: FC = () => {
                 {/* Dispatcher Notes */}
                 {selectedTech && (
                   <div className="space-y-1 pt-2">
-                    <label htmlFor="assign-dispatch-notes" className="text-xs font-semibold text-[var(--text-primary)]">
+                    <label htmlFor="assign-dispatch-notes" className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
                       Dispatch Instructions (Optional):
                     </label>
                     <textarea
@@ -967,7 +943,7 @@ export const WorkOrders: FC = () => {
                       value={dispatchNotes}
                       onChange={(e) => setDispatchNotes(e.target.value)}
                       placeholder="e.g. Bring diagnostic fiber loopback tester and OTDR equipment."
-                      className="w-full text-xs p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full text-xs p-2.5 rounded-lg bg-slate-100/80 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50"
                     />
                   </div>
                 )}
@@ -975,11 +951,11 @@ export const WorkOrders: FC = () => {
             )}
 
             {/* Modal Actions */}
-            <div className="pt-3 border-t border-[var(--border)] flex items-center justify-end gap-2">
+            <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={handleCloseModals}
-                className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50"
               >
                 Cancel
               </button>
