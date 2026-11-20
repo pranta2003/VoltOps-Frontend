@@ -429,6 +429,9 @@ export function LandingPage() {
   // Workflow step hover state
   const [hoveredStep, setHoveredStep] = useState<number | null>(null);
 
+  // Navbar link hover state
+  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
+
   // Plan comparison expand state
   const [showMatrix, setShowMatrix] = useState(false);
 
@@ -694,8 +697,9 @@ export function LandingPage() {
                 </div>
               </a>
 
-              {/* Desktop Center Nav Pills (Context-Aware Translucent Glass Treatment) */}
+              {/* Desktop Center Nav Pills (Context-Aware Sliding Hover Pill) */}
               <div
+                onMouseLeave={() => setHoveredNav(null)}
                 className={`hidden lg:flex items-center gap-0.5 xl:gap-1 text-xs font-semibold px-2 xl:px-2.5 py-1 rounded-full border backdrop-blur-sm transition-all duration-300 ${
                   isNavbarDark
                     ? "border-white/10 bg-white/5"
@@ -710,19 +714,36 @@ export function LandingPage() {
                   ["#hubs", "Coverage Hubs"],
                   ["#about", "About"],
                   ["#contact", "Contact"],
-                ].map(([href, label]) => (
-                  <a
-                    key={href}
-                    href={href}
-                    className={`px-2.5 xl:px-3 py-1 rounded-full transition-all font-semibold ${
-                      isNavbarDark
-                        ? "text-slate-200 hover:text-white hover:bg-white/10"
-                        : "text-slate-700 hover:text-slate-950 hover:bg-slate-900/5"
-                    }`}
-                  >
-                    {label}
-                  </a>
-                ))}
+                ].map(([href, label]) => {
+                  const isHovered = hoveredNav === href;
+                  return (
+                    <a
+                      key={href}
+                      href={href}
+                      onMouseEnter={() => setHoveredNav(href)}
+                      className={`relative px-2.5 xl:px-3 py-1 rounded-full transition-colors font-semibold z-10 ${
+                        isNavbarDark
+                          ? isHovered
+                            ? "text-white"
+                            : "text-slate-200"
+                          : isHovered
+                          ? "text-slate-950 font-bold"
+                          : "text-slate-700"
+                      }`}
+                    >
+                      {isHovered && (
+                        <motion.span
+                          layoutId="navbar-hover-pill"
+                          transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                          className={`absolute inset-0 rounded-full -z-10 ${
+                            isNavbarDark ? "bg-white/15" : "bg-slate-900/10"
+                          }`}
+                        />
+                      )}
+                      {label}
+                    </a>
+                  );
+                })}
               </div>
 
               {/* Desktop Right Actions */}
