@@ -624,7 +624,7 @@ export function LandingPage() {
               isNavbarDark
                 ? scrolled
                   ? "backdrop-blur-xl shadow-2xl bg-zinc-950/85 border border-white/15"
-                  : "backdrop-blur-xl shadow-xl bg-zinc-950/50 border border-white/10"
+                  : "backdrop-blur-xl shadow-xl bg-zinc-950/80 dark:bg-zinc-950/50 border border-white/15 dark:border-white/10"
                 : scrolled
                 ? "backdrop-blur-xl shadow-lg bg-white/85 border border-slate-300/90"
                 : "backdrop-blur-xl shadow-md bg-white/75 border border-slate-200/90"
@@ -889,9 +889,13 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── HERO SECTION: INDUSTRIAL MAINTENANCE PHOTOGRAPHY & ENTRANCE ─── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <header data-section-tone="dark" className="relative overflow-hidden bg-zinc-950 text-white border-b border-white/10 dark:border-white/5 pt-20 sm:pt-22 lg:pt-24 pb-20 lg:pb-24 text-center">
-        {/* Hero Background Layer: Looping Cinematic Slow-Motion Video with Dark CSS Overlay */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+      <header
+        data-section-tone="dark"
+        className="relative bg-[#e8edf3] dark:bg-zinc-950 pt-20 pb-6 px-3 sm:px-6 lg:px-8 dark:p-0 dark:border-b dark:border-white/10 transition-colors"
+      >
+        <div className="relative overflow-hidden rounded-[2rem] shadow-2xl border border-slate-300/90 dark:rounded-none dark:border-0 dark:shadow-none bg-zinc-950 text-white pt-16 sm:pt-20 lg:pt-24 pb-16 lg:pb-24 dark:pt-20 dark:sm:pt-22 dark:lg:pt-24 dark:pb-20 dark:lg:pb-24 text-center">
+          {/* Hero Background Layer: Looping Cinematic Slow-Motion Video with Dark CSS Overlay */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
           {/* Highly compressed looping 16:9 video with enhanced brightness */}
           <video
             autoPlay
@@ -1057,6 +1061,7 @@ export function LandingPage() {
             </motion.a>
           </motion.div>
         </motion.div>
+        </div>
       </header>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
