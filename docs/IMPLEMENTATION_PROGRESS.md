@@ -2153,3 +2153,33 @@ This document tracks all completed implementation milestones, verified files, co
   - Automated test suite: 84 / 84 tests passing (100%).
   - Production build: Clean build in 17.91s (`npm run build`).
   - Remote tracking branch: Pushed to `origin/feature/project-wide-design-transformation`.
+
+---
+
+## Milestone 4.30 — Stage 8: Light-Mode Hero Frame Enhancement & End-to-End System QA
+
+- **Date**: 20 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Key Commits**:
+  - `691665a` — `style(landing): frame hero showcase with rounded borders and padding in light mode while preserving full-bleed in dark mode`
+- **Objective & Accomplishments**:
+  1. **Light-Mode Hero Frame Enhancement**:
+     - Eliminates abrupt full-bleed black cut into `#e8edf3` canvas in Light Mode by providing an outer framing wrapper (`bg-[#e8edf3] dark:bg-zinc-950 pt-20 pb-6 px-3 sm:px-6 lg:px-8 dark:p-0 dark:border-b dark:border-white/10`).
+     - Houses the video background and dark gradient scrim inside an inner rounded cinematic showcase (`rounded-[2rem] overflow-hidden shadow-2xl border border-slate-300/90 dark:rounded-none dark:border-0 dark:shadow-none bg-zinc-950`).
+     - In Dark Mode, maintains 100% full-bleed edge-to-edge layout with crisp bottom boundary.
+     - Preserves floating navbar contrast over framed showcase with deep dark glass pill (`bg-zinc-950/80` / `border-white/15`).
+  2. **Comprehensive End-to-End System QA (Real Browser Walkthrough)**:
+     - **Flow 1 (Landing Page & Onboarding)**: Nav links (`#services`, `#dispatch`, `#how`, `#packages`, `#hubs`, `#about`, `#contact`), spring theme toggle, Plan C selection, and contact form submission verified.
+     - **Flow 2 (Customer Portal)**: Active 24/7 Priority KPIs verified; New Service Request submitted for AC, HVAC trade and verified active; Facility assets searched and specs viewed; Invoice payment simulation tested (`Initiate Payment` -> `Gateway Pending` / `Webhook Pending`).
+     - **Flow 3 (Dispatcher Portal)**: Verified Trade Capacity cyan progress bars; Service Requests triaged; Work Orders Kanban lifecycle verified; `+ Assign technician` matching modal tested; Technicians roster, schedule, and audit log verified.
+     - **Flow 4 (Technician Portal)**: Dashboard arrival confirmation verified; My Jobs drawers inspected; Skill Passport verified; Leave Requests modal tested.
+     - **Flow 5 (Sign-Off & Customer Review)**: Work order approved from `PENDING COMPLETION REVIEWS` by Dispatcher -> status moved to `COMPLETED` -> Customer Dashboard verified completed banner and submitted 5★ feedback rating.
+     - **Flow 6 (Admin Portal)**: Overview hub verified; User management searched and `+ Create Staff` modal verified; Dispatchers management tested; Technicians credential audit drawer verified; Audit Log JSON export verified.
+  3. **Strict Policy Compliance**:
+     - Footer & payment badges: 100% untouched and locked.
+     - Zero-Yellow purge strictly upheld.
+     - Branch discipline: Strictly on `feature/project-wide-design-transformation` (never pushed to `main`).
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 25.05s (`npm run build`).
