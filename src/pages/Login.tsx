@@ -26,6 +26,11 @@ export function Login() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
+  const showDemoPreview =
+    import.meta.env.DEV ||
+    !import.meta.env.VITE_API_BASE_URL ||
+    !import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_DEMO_MODE !== "false";
 
   function continueAfterAuth(role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER") {
     const pendingPlan = selectedPlanId || sessionStorage.getItem("voltops_pending_plan");
@@ -212,8 +217,8 @@ export function Login() {
           </p>
         </div>
 
-        {/* Development-Only Role Preview */}
-        {import.meta.env.DEV && (
+        {/* Role Preview (Enabled in Dev, Local Preview, and Vercel Deployments) */}
+        {showDemoPreview && (
           <div
             className="mt-5 border rounded-2xl p-4 shadow-[var(--shadow-sm)]"
             style={{
@@ -222,8 +227,8 @@ export function Login() {
             }}
           >
             <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 Developer Preview
               </span>
               <span className="text-[11px] text-[var(--text-muted)]">Demo roles</span>
