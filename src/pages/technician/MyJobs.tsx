@@ -248,28 +248,28 @@ export function MyJobs() {
   const getStatusBadge = (status: TechnicianJobItem["status"]) => {
     switch (status) {
       case "ASSIGNED":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+        return "bg-slate-200/80 text-slate-800 border-slate-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-white/10 font-medium";
       case "TRAVELLING":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 font-bold animate-pulse";
+        return "bg-cyan-100 text-cyan-900 border-cyan-300 dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-500/30 font-bold animate-pulse";
       case "ON_SITE":
-        return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20 font-bold";
+        return "bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30 font-bold";
       case "WORK_COMPLETED_AWAITING_CONFIRMATION":
-        return "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20 font-bold";
+        return "bg-cyan-50 text-cyan-900 border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-300 dark:border-cyan-500/20 font-bold";
       case "COMPLETED":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 font-semibold";
+        return "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30 font-bold";
     }
   };
 
   const getPriorityBadge = (priority: TechnicianJobItem["priority"]) => {
     switch (priority) {
       case "URGENT":
-        return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20 font-bold";
+        return "bg-rose-100 text-rose-900 border-rose-300 dark:bg-[#b8287a]/20 dark:text-[#f472b6] dark:border-[#b8287a]/30 font-bold";
       case "HIGH":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+        return "bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20 font-semibold";
       case "MEDIUM":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+        return "bg-cyan-100 text-cyan-900 border-cyan-300 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/30 font-medium";
       case "LOW":
-        return "bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20";
+        return "bg-slate-100 text-slate-800 border-slate-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-white/10 font-medium";
     }
   };
 
@@ -277,7 +277,7 @@ export function MyJobs() {
     <Layout
       title="My Jobs"
     >
-      <div className="space-y-4">
+      <div className="space-y-4 pb-24">
         {/* Action success alert */}
         {actionSuccess && (
           <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between animate-fade-in">
@@ -305,12 +305,12 @@ export function MyJobs() {
         )}
 
         {/* ── Filter Toolbar ────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl border border-slate-300 border-l-4 border-l-emerald-500 bg-white shadow-md dark:border-white/5 dark:border-l-white/5 dark:bg-zinc-900 dark:shadow-none">
           {/* Search */}
           <div className="relative flex-1 min-w-[220px]">
             <SearchIcon
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
             />
             <input
               type="text"
@@ -318,14 +318,14 @@ export function MyJobs() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by job ID, asset, customer or address..."
               aria-label="Search jobs"
-              className="w-full text-xs py-2 pl-9 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full text-xs py-2 pl-9 pr-8 rounded-lg border border-slate-300 bg-slate-100/80 text-slate-950 placeholder-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder-zinc-500"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
                 aria-label="Clear search"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 p-0.5"
               >
                 <XIcon size={13} />
               </button>
@@ -338,7 +338,7 @@ export function MyJobs() {
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               aria-label="Filter by trade category"
-              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-slate-300 bg-slate-100/80 text-slate-950 appearance-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50"
             >
               <option value="ALL">All Trades</option>
               {CANONICAL_SERVICE_CATEGORIES.map((cat) => (
@@ -349,7 +349,7 @@ export function MyJobs() {
             </select>
             <ChevronDownIcon
               size={13}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
             />
           </div>
 
@@ -359,7 +359,7 @@ export function MyJobs() {
               value={selectedPriority}
               onChange={(e) => setSelectedPriority(e.target.value)}
               aria-label="Filter by priority"
-              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="text-xs py-2 pl-3 pr-8 rounded-lg border border-slate-300 bg-slate-100/80 text-slate-950 appearance-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50"
             >
               <option value="ALL">All Priorities</option>
               <option value="URGENT">Urgent (Arrival SLA)</option>
@@ -369,12 +369,12 @@ export function MyJobs() {
             </select>
             <ChevronDownIcon
               size={13}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
             />
           </div>
 
           {/* Status Tabs */}
-          <div className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] p-0.5 text-xs">
+          <div className="inline-flex rounded-lg border border-slate-300 bg-slate-100 p-0.5 text-xs dark:border-white/10 dark:bg-zinc-950">
             {[
               { id: "ALL", label: "All" },
               { id: "TODAY", label: "Active Today" },
@@ -387,8 +387,8 @@ export function MyJobs() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`px-3 py-1 rounded-md font-medium transition-all ${
                   activeTab === tab.id
-                    ? "bg-[var(--bg-surface)] text-[var(--text-primary)] font-semibold shadow-sm"
-                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    ? "bg-white text-slate-950 font-bold shadow-xs dark:bg-zinc-800 dark:text-zinc-50"
+                    : "text-slate-600 hover:text-slate-950 dark:text-zinc-400 dark:hover:text-zinc-100"
                 }`}
               >
                 {tab.label}
@@ -398,11 +398,11 @@ export function MyJobs() {
         </div>
 
         {/* ── Jobs Table ────────────────────────────────────────────────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
+        <div className="rounded-xl border border-slate-300 border-t-4 border-t-emerald-500 bg-white shadow-md overflow-hidden dark:border-white/5 dark:border-t-white/5 dark:bg-zinc-900 dark:shadow-none">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="border-b-2 border-slate-300 bg-slate-200/70 text-slate-800 font-bold text-xs uppercase tracking-wider dark:border-white/5 dark:bg-zinc-950/60 dark:text-zinc-400">
                   <th className="py-3 px-4">Work Order</th>
                   <th className="py-3 px-4">Customer & Facility</th>
                   <th className="py-3 px-4">Target Asset & Trade</th>
@@ -413,47 +413,47 @@ export function MyJobs() {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-slate-300/80 dark:divide-white/5">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={8} className="py-12 text-center text-xs text-slate-600 dark:text-zinc-400 font-medium">
                       Loading assigned technician jobs...
                     </td>
                   </tr>
                 ) : filteredJobs.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={8} className="py-12 text-center text-xs text-slate-600 dark:text-zinc-400 font-medium">
                       No matching jobs found in this view.
                     </td>
                   </tr>
                 ) : (
                   filteredJobs.map((job) => (
-                    <tr key={job.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-[var(--text-primary)]">
-                        {job.id}
-                        <div className="text-[10px] font-mono text-[var(--text-muted)]">
+                    <tr key={job.id} className="odd:bg-white even:bg-slate-50/90 hover:bg-emerald-50/50 dark:odd:bg-zinc-900 dark:even:bg-zinc-900 dark:hover:bg-zinc-800/50 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-slate-950 dark:text-zinc-50 whitespace-nowrap">
+                        <div className="text-xs font-bold tabular-nums">{job.id}</div>
+                        <div className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 font-medium">
                           Ref: {job.requestId}
                         </div>
                       </td>
 
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-[var(--text-primary)]">{job.customerName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1 mt-0.5">
-                          <MapPinIcon size={11} className="shrink-0 text-slate-400" />
+                        <div className="font-bold text-slate-950 dark:text-zinc-50">{job.customerName}</div>
+                        <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium flex items-center gap-1 mt-0.5">
+                          <MapPinIcon size={11} className="shrink-0 text-slate-500 dark:text-zinc-400" />
                           <span className="truncate max-w-[200px]">{job.facilityAddress}</span>
                         </div>
                       </td>
 
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-[var(--text-primary)]">{job.assetName}</div>
-                        <div className="text-[11px] text-[var(--text-muted)]">{job.category}</div>
+                        <div className="font-bold text-slate-950 dark:text-zinc-50">{job.assetName}</div>
+                        <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium">{job.category}</div>
                       </td>
 
                       <td className="py-3.5 px-4 max-w-[220px]">
-                        <div className="text-[var(--text-primary)] truncate font-medium">
+                        <div className="text-slate-900 dark:text-zinc-100 truncate font-medium">
                           {job.problemSummary}
                         </div>
-                        <div className="text-[11px] text-[var(--text-muted)]">{job.scheduledTime}</div>
+                        <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium">{job.scheduledTime}</div>
                       </td>
 
                       <td className="py-3.5 px-4">
@@ -483,12 +483,12 @@ export function MyJobs() {
                             <span>SLA Expired (0m)</span>
                           </div>
                         ) : job.arrivalSlaRemainingMinutes !== undefined ? (
-                          <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-amber-600 dark:text-amber-400">
+                          <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-cyan-700 dark:text-cyan-300">
                             <ClockIcon size={12} className="animate-spin" />
                             <span>{job.arrivalSlaRemainingMinutes} min left</span>
                           </div>
                         ) : job.status === "COMPLETED" ? (
-                          <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">
+                          <span className="text-emerald-700 dark:text-emerald-400 text-xs font-bold">
                             ✓ Completed
                           </span>
                         ) : (
@@ -568,7 +568,7 @@ export function MyJobs() {
                   <div className="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
                     REPORT JOB COMPLETION
                   </div>
-                  <h3 id={completionModalHeadingId} className="font-heading font-bold text-base text-[var(--text-primary)]">
+                  <h3 id={completionModalHeadingId} className="font-heading font-bold text-base text-slate-950 dark:text-zinc-50">
                     {completionModalJob.id} · {completionModalJob.assetName}
                   </h3>
                   <p className="text-xs text-[var(--text-muted)]">
@@ -667,7 +667,7 @@ export function MyJobs() {
                     <button
                       type="submit"
                       disabled={isSubmittingCompletion}
-                      className="px-4 py-1.5 rounded-lg text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm disabled:opacity-50"
+                      className="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm disabled:opacity-50"
                     >
                       {isSubmittingCompletion ? "Submitting..." : "Submit Completion Report"}
                     </button>
@@ -692,7 +692,7 @@ export function MyJobs() {
                   <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
                     {inspectJob.id}
                   </span>
-                  <h3 id={inspectModalHeadingId} className="font-heading font-bold text-base text-[var(--text-primary)]">
+                  <h3 id={inspectModalHeadingId} className="font-heading font-bold text-base text-slate-950 dark:text-zinc-50">
                     {inspectJob.customerName}
                   </h3>
                 </div>
@@ -823,7 +823,7 @@ export function MyJobs() {
                       type="button"
                       onClick={() => handleDirectTransition(inspectJob, "ON_SITE")}
                       disabled={isUpdatingStatus}
-                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50"
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-sm disabled:opacity-50"
                     >
                       {isUpdatingStatus ? "Updating..." : "Confirm Arrival"}
                     </button>

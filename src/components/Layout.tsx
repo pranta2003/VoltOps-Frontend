@@ -96,7 +96,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
     : "VO";
 
   return (
-    <div className="flex h-screen w-full max-w-full overflow-hidden bg-[var(--bg-base)] text-[var(--text-primary)]">
+    <div className="flex h-screen w-full max-w-full overflow-hidden bg-[#e8edf3] dark:bg-[var(--bg-base)] text-[var(--text-primary)]">
       {/* ── Desktop Sidebar (Linear / Vercel Neutral Slate: 256px wide) ──── */}
       <aside className="hidden lg:flex w-64 shrink-0 flex-col justify-between border-r border-slate-800/80 bg-[#0b1117] text-slate-300 select-none">
         <div>
@@ -110,8 +110,8 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
                 <span className="font-heading font-extrabold text-base tracking-tight text-white group-hover:text-[#10b981] transition-colors block">
                   VoltOps
                 </span>
-                <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                  {role} Portal
+                <span className="block text-[10px] font-medium text-slate-400 capitalize">
+                  {role.toLowerCase()} portal
                 </span>
               </div>
             </Link>
@@ -149,14 +149,14 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-semibold text-white truncate">{user?.name || "User"}</div>
-                <div className="text-[10px] text-slate-400 uppercase tracking-wider truncate">{user?.role}</div>
+                <div className="text-[11px] text-slate-400 capitalize truncate">{role.toLowerCase()}</div>
               </div>
             </div>
             <button
               onClick={logout}
               type="button"
               className="text-[11px] text-slate-400 hover:text-white transition-colors px-2 py-1 rounded-md hover:bg-white/10 shrink-0"
-              title="Sign Out"
+              title="Sign out"
             >
               Sign out
             </button>
@@ -170,19 +170,18 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
         {isPreview && (
           <aside
             aria-label="Developer Preview Notice"
-            className="shrink-0 bg-amber-500/15 border-b border-amber-500/30 px-3.5 py-1.5 flex items-center justify-between text-xs text-amber-700 dark:text-amber-300 font-medium select-none z-20"
+            className="shrink-0 bg-emerald-50 dark:bg-emerald-500/10 border-b border-emerald-200 dark:border-emerald-500/20 px-3.5 py-1.5 flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-400 font-medium select-none z-20"
           >
             <div className="flex items-center gap-2 truncate">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
-              <span className="font-bold tracking-tight">LOCAL PREVIEW</span>
-              <span className="hidden sm:inline text-amber-600/80 dark:text-amber-400/80 font-normal">
-                — Offline Demonstration Mode ({role}). Backend APIs bypassed.
+              <span className="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse shrink-0" />
+              <span className="font-bold tracking-tight text-xs uppercase text-emerald-800 dark:text-emerald-400">
+                LOCAL PREVIEW · {role}
               </span>
             </div>
             <button
               type="button"
               onClick={exitPreview}
-              className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-800 dark:text-amber-200 border border-amber-500/40 transition-colors shrink-0"
+              className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 dark:text-emerald-300 dark:border-emerald-500/30 transition-colors shrink-0"
             >
               Exit Preview
             </button>
@@ -190,7 +189,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
         )}
 
         {/* Top Header Bar */}
-        <header className="h-14 shrink-0 border-b border-[var(--border)] bg-[var(--bg-surface)] px-4 sm:px-6 flex items-center justify-between gap-3 min-w-0 w-full">
+        <header className="h-14 shrink-0 border-b border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-950 shadow-xs dark:shadow-none px-4 sm:px-6 flex items-center justify-between gap-3 min-w-0 w-full">
           <div className="flex items-center gap-2.5 min-w-0">
             {/* Mobile menu trigger */}
             <button
@@ -203,7 +202,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
             </button>
 
             <div className="min-w-0">
-              <h1 className="font-heading font-bold text-base sm:text-lg lg:text-xl text-[var(--text-primary)] tracking-tight truncate">
+              <h1 className="font-heading font-semibold text-base sm:text-lg text-[var(--text-primary)] tracking-tight truncate">
                 {title}
               </h1>
               {subtitle && (
@@ -293,7 +292,7 @@ export function Layout({ children, title, subtitle, action }: LayoutProps) {
         )}
 
         {/* Scrollable Dashboard Body */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 lg:p-6 w-full min-w-0">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-5 lg:p-6 w-full min-w-0 bg-[#e8edf3] dark:bg-zinc-950">
           <div className="max-w-7xl mx-auto space-y-4 w-full min-w-0">
             {children}
           </div>

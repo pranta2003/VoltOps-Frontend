@@ -22,3 +22,6 @@ npm-debug.log*
 public/videos/backup/
 .vercel
 .env*
+.agents/
+
+skills-lock.json

@@ -74,15 +74,6 @@ export function Login() {
 
     setIsSubmitting(true);
 
-
- // useEffect(() => {
-   // if (!ref.current) return;
-    //if (typeof IntersectionObserver === "undefined") {
-     // setRevealed(true);
-     // return;
-  //  }
-    
-
     try {
       await login(trimmedEmail, password);
       continueAfterAuth("CUSTOMER");
@@ -231,11 +222,11 @@ export function Login() {
             }}
           >
             <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
+              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                 Developer Preview
               </span>
-              <span className="text-[10px] text-[var(--text-muted)] font-mono">DEMO ROLES</span>
+              <span className="text-[11px] text-[var(--text-muted)]">Demo roles</span>
             </div>
             <p className="text-[11px] text-[var(--text-muted)] leading-relaxed mb-3">
               Explore role-guarded operational portals directly without requiring a live backend session.

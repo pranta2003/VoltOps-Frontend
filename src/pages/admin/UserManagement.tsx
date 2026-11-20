@@ -97,9 +97,9 @@ export function UserManagement() {
     }
 
     setIsLiveConnected(res.isLive);
-    if (!res.endpointConnected) {
+    if (!res.endpointConnected && res.isLive) {
       setApiErrorMessage(
-        "Backend endpoint GET /api/admin/users is unavailable. Displaying offline user baseline."
+        "Backend endpoint GET /api/admin/users is unavailable."
       );
     }
     setLoading(false);
@@ -233,14 +233,14 @@ export function UserManagement() {
   const getRoleBadge = (role: Role) => {
     switch (role) {
       case "ADMIN":
-        return "bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20";
+        return "bg-purple-50 text-purple-800 border-purple-300 dark:bg-purple-500/10 dark:text-purple-300 dark:border-purple-500/20";
       case "DISPATCHER":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
+        return "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
       case "TECHNICIAN":
-        return "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20";
+        return "bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30";
       case "CUSTOMER":
       default:
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20";
+        return "bg-blue-50 text-blue-800 border-blue-300 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/20";
     }
   };
 
@@ -261,25 +261,20 @@ export function UserManagement() {
         </button>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-4 pb-24">
         {/* ── Sub-header / Status Toolbar ───────────────────────────────── */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[var(--text-muted)]">
+            <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">
               {totalCount} accounts registered
             </span>
           </div>
 
           <div className="flex items-center gap-2">
-            {isLiveConnected ? (
+            {isLiveConnected && (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Live API
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                Local preview
               </span>
             )}
 
@@ -289,7 +284,7 @@ export function UserManagement() {
               disabled={loading}
               title="Refresh users"
               aria-label="Refresh users"
-              className="p-1.5 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] disabled:opacity-40 transition-colors btn-press"
+              className="p-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50 hover:border-slate-400 disabled:opacity-40 transition-colors btn-press"
             >
               <RefreshCwIcon size={14} className={loading ? "animate-spin" : ""} />
             </button>
@@ -298,9 +293,9 @@ export function UserManagement() {
 
         {/* ── Compact Alerts ────────────────────────────────────────────── */}
         {apiErrorMessage && (
-          <div className="p-3 rounded-lg border border-amber-500/20 bg-amber-500/10 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between gap-2">
+          <div className="p-3 rounded-xl border border-rose-300 bg-rose-50 text-xs text-[#8a1858] dark:border-[#b8287a]/30 dark:bg-[#b8287a]/15 dark:text-[#f472b6] flex items-center justify-between gap-2 shadow-xs">
             <div className="flex items-center gap-2">
-              <AlertTriangleIcon size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
+              <AlertTriangleIcon size={14} className="text-[#8a1858] dark:text-[#f472b6] shrink-0" />
               <span>{apiErrorMessage}</span>
             </div>
             <button
@@ -314,26 +309,26 @@ export function UserManagement() {
         )}
 
         {actionSuccessNotice && (
-          <div className="p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-xs font-medium text-emerald-800 dark:text-emerald-300 flex items-center gap-2 animate-fade-in">
-            <CheckCircleIcon size={14} className="text-emerald-500 shrink-0" />
+          <div className="p-3 rounded-xl border border-emerald-300 bg-emerald-50 text-xs font-bold text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 flex items-center gap-2 shadow-xs animate-fade-in">
+            <CheckCircleIcon size={14} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>{actionSuccessNotice}</span>
           </div>
         )}
 
         {actionErrorNotice && (
-          <div className="p-3 rounded-lg border border-red-500/20 bg-red-500/10 text-xs font-medium text-red-700 dark:text-red-400 flex items-center gap-2 animate-fade-in">
-            <AlertTriangleIcon size={14} className="text-red-500 shrink-0" />
+          <div className="p-3 rounded-xl border border-rose-300 bg-rose-50 text-xs font-bold text-[#8a1858] dark:border-[#b8287a]/30 dark:bg-[#b8287a]/15 dark:text-[#f472b6] flex items-center gap-2 shadow-xs animate-fade-in">
+            <AlertTriangleIcon size={14} className="text-[#8a1858] dark:text-[#f472b6] shrink-0" />
             <span>{actionErrorNotice}</span>
           </div>
         )}
 
-        {/* ── Compact Filter Bar ────────────────────────────────────────── */}
-        <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5">
+        {/* ── Filter Bar ────────────────────────────────────────── */}
+        <div className="p-3.5 rounded-xl border border-slate-300 border-l-4 border-l-emerald-500 bg-white shadow-md dark:border-white/5 dark:border-l-white/5 dark:bg-zinc-900 dark:shadow-none flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
           {/* Search input */}
           <div className="relative flex-1 min-w-[200px]">
             <SearchIcon
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-500 pointer-events-none"
             />
             <input
               type="text"
@@ -344,7 +339,7 @@ export function UserManagement() {
                 setCurrentPage(1);
               }}
               placeholder="Search by name, email, or facility branch..."
-              className="w-full pl-8 pr-7 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981]/30 transition-all"
+              className="w-full pl-8 pr-7 py-2 rounded-xl border border-slate-300 bg-slate-100/80 text-xs text-slate-950 placeholder:text-slate-500 focus:bg-white focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 dark:placeholder:text-zinc-500 transition-all shadow-xs"
             />
             {searchQuery && (
               <button
@@ -354,7 +349,7 @@ export function UserManagement() {
                   setCurrentPage(1);
                 }}
                 aria-label="Clear search"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-100 p-0.5"
               >
                 <XIcon size={12} />
               </button>
@@ -370,7 +365,7 @@ export function UserManagement() {
                 setCurrentPage(1);
               }}
               aria-label="Filter by role"
-              className="w-full md:w-auto px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#10b981] transition-all cursor-pointer font-medium"
+              className="w-full md:w-auto px-3 py-2 rounded-xl border border-slate-300 bg-slate-100/80 text-xs text-slate-950 focus:bg-white focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 transition-all cursor-pointer font-bold shadow-xs"
             >
               <option value="ALL">All Roles</option>
               <option value="ADMIN">Administrators</option>
@@ -381,7 +376,7 @@ export function UserManagement() {
           </div>
 
           {/* Status Segmented Tabs */}
-          <div className="flex items-center gap-1 shrink-0 p-0.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)]">
+          <div className="flex items-center gap-1 shrink-0 p-1 rounded-xl border border-slate-300 bg-slate-100 dark:border-white/10 dark:bg-zinc-950 shadow-xs">
             {(
               [
                 { id: "ALL", label: "All" },
@@ -398,10 +393,10 @@ export function UserManagement() {
                     setStatusFilter(id);
                     setCurrentPage(1);
                   }}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                     isActive
-                      ? "bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm font-semibold"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                      ? "bg-white text-slate-950 shadow-xs border border-slate-300 dark:bg-zinc-800 dark:text-zinc-50 dark:border-white/10"
+                      : "text-slate-700 hover:text-slate-950 dark:text-zinc-400 dark:hover:text-zinc-100"
                   }`}
                 >
                   {label}
@@ -412,50 +407,50 @@ export function UserManagement() {
         </div>
 
         {/* ── Users Table ───────────────────────────────────────────────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
+        <div className="bg-white border border-slate-300 border-t-4 border-t-emerald-500 rounded-xl shadow-md overflow-hidden dark:bg-zinc-900 dark:border-white/5 dark:border-t-white/5 dark:shadow-none">
           <div className="overflow-x-auto w-full">
             <table className="w-full text-left text-xs sm:text-[13px]">
-              <thead className="bg-[var(--bg-surface-2)] text-[var(--text-muted)] uppercase tracking-wider text-xs font-semibold border-b border-[var(--border)]">
+              <thead className="bg-slate-200/70 border-b-2 border-slate-300 text-slate-800 font-bold text-xs uppercase tracking-wider dark:bg-zinc-950/60 dark:border-white/5 dark:text-zinc-400">
                 <tr>
-                  <th className="py-2.5 px-4">User</th>
-                  <th className="py-2.5 px-4">Role</th>
-                  <th className="py-2.5 px-4">Branch / Dept</th>
-                  <th className="py-2.5 px-4">Status</th>
-                  <th className="py-2.5 px-4">Created</th>
-                  <th className="py-2.5 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4">User</th>
+                  <th className="py-3 px-4">Role</th>
+                  <th className="py-3 px-4">Branch / Dept</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Created</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-slate-300/80 dark:divide-white/5">
                 {loading ? (
                   Array.from({ length: 5 }).map((_, idx) => (
                     <tr key={`skel-user-${idx}`} className="animate-pulse">
                       <td className="py-3 px-4">
-                        <div className="h-4 w-32 bg-[var(--border)] rounded mb-1" />
-                        <div className="h-3 w-40 bg-[var(--border)] rounded" />
+                        <div className="h-4 w-32 bg-slate-200 dark:bg-zinc-800 rounded mb-1" />
+                        <div className="h-3 w-40 bg-slate-200 dark:bg-zinc-800 rounded" />
                       </td>
                       <td className="py-3 px-4">
-                        <div className="h-5 w-20 bg-[var(--border)] rounded-full" />
+                        <div className="h-5 w-20 bg-slate-200 dark:bg-zinc-800 rounded-full" />
                       </td>
                       <td className="py-3 px-4">
-                        <div className="h-4 w-28 bg-[var(--border)] rounded mb-1" />
-                        <div className="h-3 w-20 bg-[var(--border)] rounded" />
+                        <div className="h-4 w-28 bg-slate-200 dark:bg-zinc-800 rounded mb-1" />
+                        <div className="h-3 w-20 bg-slate-200 dark:bg-zinc-800 rounded" />
                       </td>
                       <td className="py-3 px-4">
-                        <div className="h-5 w-16 bg-[var(--border)] rounded-full" />
+                        <div className="h-5 w-16 bg-slate-200 dark:bg-zinc-800 rounded-full" />
                       </td>
                       <td className="py-3 px-4">
-                        <div className="h-4 w-20 bg-[var(--border)] rounded" />
+                        <div className="h-4 w-20 bg-slate-200 dark:bg-zinc-800 rounded" />
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <div className="h-6 w-24 bg-[var(--border)] rounded-md inline-block" />
+                        <div className="h-6 w-24 bg-slate-200 dark:bg-zinc-800 rounded-md inline-block" />
                       </td>
                     </tr>
                   ))
                 ) : users.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-[var(--text-muted)]">
+                    <td colSpan={6} className="py-12 text-center text-slate-600 dark:text-zinc-400">
                       <div className="max-w-xs mx-auto space-y-2">
-                        <p className="font-semibold text-sm text-[var(--text-primary)]">
+                        <p className="font-bold text-sm text-slate-950 dark:text-zinc-100">
                           No users match your criteria
                         </p>
                         <p className="text-xs">Try clearing search filters or selecting All Roles.</p>
@@ -467,7 +462,7 @@ export function UserManagement() {
                             setStatusFilter("ALL");
                             setCurrentPage(1);
                           }}
-                          className="px-3 py-1 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs font-medium text-[var(--text-primary)] hover:border-[#10b981] transition-colors"
+                          className="px-3 py-1 rounded-lg border border-slate-300 bg-slate-100 text-xs font-semibold text-slate-800 hover:bg-slate-200 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-200 transition-colors shadow-xs"
                         >
                           Clear filters
                         </button>
@@ -476,12 +471,8 @@ export function UserManagement() {
                   </tr>
                 ) : (
                   users.map((u) => {
-                    const initials = u.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .substring(0, 2)
-                      .toUpperCase();
+                    const cleanWords = u.name.replace(/[^a-zA-Z0-9\s]/g, "").trim().split(/\s+/).filter(Boolean);
+                    const initials = cleanWords.map((n) => n[0]).join("").substring(0, 2).toUpperCase() || "U";
 
                     const isSelf = Boolean(
                       currentUser?.email &&
@@ -491,24 +482,24 @@ export function UserManagement() {
                     return (
                       <tr
                         key={u.id}
-                        className="hover:bg-[var(--bg-surface-2)]/60 transition-colors"
+                        className="odd:bg-white even:bg-slate-50/90 hover:bg-emerald-50/50 dark:odd:bg-zinc-900 dark:even:bg-zinc-900 dark:hover:bg-zinc-800/50 transition-colors"
                       >
                         {/* User Identity */}
-                        <td className="py-3 px-4">
+                        <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-[var(--bg-surface-2)] border border-[var(--border)] flex items-center justify-center font-bold text-xs text-[var(--text-secondary)] shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-white/10 flex items-center justify-center font-bold text-xs text-slate-800 dark:text-zinc-200 shrink-0">
                               {initials}
                             </div>
                             <div className="min-w-0">
-                              <div className="font-semibold text-xs sm:text-[13px] text-[var(--text-primary)] flex items-center gap-1.5 truncate">
+                              <div className="font-bold text-xs sm:text-[13px] text-slate-950 dark:text-zinc-50 flex items-center gap-1.5 truncate">
                                 <span>{u.name}</span>
                                 {isSelf && (
-                                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-700 dark:text-purple-300 font-semibold border border-purple-500/20">
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-800 dark:bg-purple-500/10 dark:text-purple-300 font-bold border border-purple-300 dark:border-purple-500/20">
                                     You
                                   </span>
                                 )}
                               </div>
-                              <div className="text-xs text-[var(--text-secondary)] font-mono truncate">
+                              <div className="text-xs text-slate-600 dark:text-zinc-400 font-mono truncate">
                                 {u.email}
                               </div>
                             </div>
@@ -516,9 +507,9 @@ export function UserManagement() {
                         </td>
 
                         {/* Role */}
-                        <td className="py-3 px-4 whitespace-nowrap">
+                        <td className="py-3.5 px-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium border ${getRoleBadge(
+                            className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold border ${getRoleBadge(
                               u.role
                             )}`}
                           >
@@ -527,26 +518,26 @@ export function UserManagement() {
                         </td>
 
                         {/* Branch / Dept */}
-                        <td className="py-3 px-4">
-                          <div className="font-medium text-xs sm:text-[13px] text-[var(--text-primary)]">
+                        <td className="py-3.5 px-4">
+                          <div className="font-bold text-xs sm:text-[13px] text-slate-950 dark:text-zinc-50">
                             {u.branch || "—"}
                           </div>
                           {u.department && (
-                            <div className="text-xs text-[var(--text-muted)]">
+                            <div className="text-xs text-slate-600 dark:text-zinc-400 font-medium">
                               {u.department} {u.designation && `· ${u.designation}`}
                             </div>
                           )}
                         </td>
 
-                        {/* Status (Compact dot badge) */}
-                        <td className="py-3 px-4 whitespace-nowrap">
+                        {/* Status */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
                           {u.isActive ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                               Active
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500/10 text-slate-700 dark:text-slate-400 border border-slate-500/20">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20">
                               <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                               Inactive
                             </span>
@@ -554,12 +545,12 @@ export function UserManagement() {
                         </td>
 
                         {/* Created Date */}
-                        <td className="py-3 px-4 text-xs text-[var(--text-muted)] font-mono whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-xs text-slate-700 dark:text-zinc-400 font-mono whitespace-nowrap tabular-nums">
                           {u.createdAt}
                         </td>
 
                         {/* Contextual Actions */}
-                        <td className="py-3 px-4 text-right">
+                        <td className="py-3.5 px-4 text-right">
                           <div className="inline-flex items-center justify-end gap-1.5">
                             <button
                               type="button"
@@ -567,9 +558,9 @@ export function UserManagement() {
                                 lastFocusedTriggerRef.current = e.currentTarget;
                                 setSelectedUser(u);
                               }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-all btn-press"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-200 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 transition-all shadow-xs btn-press"
                             >
-                              <EyeIcon size={12} className="text-[var(--text-muted)]" />
+                              <EyeIcon size={12} className="text-slate-500 dark:text-zinc-400" />
                               <span>Inspect</span>
                             </button>
 
@@ -577,12 +568,12 @@ export function UserManagement() {
                               type="button"
                               onClick={(e) => handleInitiateStatusToggle(u, e.currentTarget)}
                               disabled={isSelf && u.isActive}
-                              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all border btn-press ${
+                              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border shadow-xs btn-press ${
                                 isSelf && u.isActive
-                                  ? "border-[var(--border)] text-[var(--text-muted)] opacity-40 cursor-not-allowed"
+                                  ? "border-slate-300 text-slate-400 dark:border-white/10 dark:text-zinc-600 opacity-40 cursor-not-allowed"
                                   : u.isActive
-                                  ? "border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/10"
-                                  : "border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                                  ? "border-rose-300 text-[#8a1858] hover:bg-rose-50 dark:border-[#b8287a]/30 dark:text-[#e879b9] dark:hover:bg-[#b8287a]/15"
+                                  : "border-emerald-300 text-emerald-800 hover:bg-emerald-50 dark:border-emerald-500/30 dark:text-emerald-400 dark:hover:bg-emerald-500/15"
                               }`}
                               title={
                                 isSelf && u.isActive
@@ -605,7 +596,7 @@ export function UserManagement() {
           </div>
 
           {/* ── Compact Pagination Controls ───────────────────────────────── */}
-          <div className="py-2.5 px-4 border-t border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
+          <div className="py-2.5 px-4 border-t border-slate-300 bg-slate-100 dark:border-white/5 dark:bg-zinc-950/60 flex items-center justify-between gap-3 text-xs text-slate-700 dark:text-zinc-400 font-medium">
             <div>
               {totalCount > 0 ? (
                 <>
@@ -622,12 +613,12 @@ export function UserManagement() {
                 type="button"
                 disabled={currentPage <= 1 || loading}
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className="px-2.5 py-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-medium text-xs btn-press"
+                className="px-2.5 py-1 rounded-lg border border-slate-300 bg-white text-slate-900 disabled:opacity-40 hover:bg-slate-50 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-200 transition-all font-bold text-xs shadow-xs btn-press"
               >
                 Previous
               </button>
 
-              <span className="px-2 text-[var(--text-muted)]">
+              <span className="px-2 text-slate-700 dark:text-zinc-400 font-bold tabular-nums">
                 {currentPage} / {totalPages}
               </span>
 
@@ -635,7 +626,7 @@ export function UserManagement() {
                 type="button"
                 disabled={currentPage >= totalPages || loading}
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className="px-2.5 py-1 rounded-md border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] disabled:opacity-40 hover:border-[#10b981] transition-all font-medium text-xs btn-press"
+                className="px-2.5 py-1 rounded-lg border border-slate-300 bg-white text-slate-900 disabled:opacity-40 hover:bg-slate-50 dark:border-white/10 dark:bg-zinc-900 dark:text-zinc-200 transition-all font-bold text-xs shadow-xs btn-press"
               >
                 Next
               </button>
@@ -651,16 +642,16 @@ export function UserManagement() {
             aria-labelledby="create-staff-title"
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
           >
-            <div className="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-start justify-between border-b border-[var(--border)] pb-3">
+            <div className="w-full max-w-lg rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-start justify-between border-b border-slate-200 dark:border-white/5 pb-3">
                 <div>
                   <h3
                     id="create-staff-title"
-                    className="font-heading font-semibold text-base text-[var(--text-primary)]"
+                    className="font-heading font-bold text-base text-slate-950 dark:text-zinc-50"
                   >
                     Create Staff Account
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  <p className="text-xs font-medium text-slate-600 dark:text-zinc-400 mt-0.5">
                     Provision internal operational credentials.
                   </p>
                 </div>
@@ -668,22 +659,22 @@ export function UserManagement() {
                   type="button"
                   onClick={() => setCreateModalOpen(false)}
                   aria-label="Close dialog"
-                  className="p-1 rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-colors"
+                  className="p-1 rounded-md border border-slate-300 dark:border-white/10 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
                 >
                   <XIcon size={14} />
                 </button>
               </div>
 
               {createErrorNotice && (
-                <div className="p-3 rounded-lg border border-red-500/20 bg-red-500/10 text-xs text-red-700 dark:text-red-400 flex items-start gap-2">
-                  <AlertTriangleIcon size={14} className="text-red-500 shrink-0 mt-0.5" />
+                <div className="p-3 rounded-xl border border-rose-300 bg-rose-50 text-xs text-[#8a1858] dark:border-[#b8287a]/30 dark:bg-[#b8287a]/15 dark:text-[#f472b6] flex items-start gap-2 shadow-xs">
+                  <AlertTriangleIcon size={14} className="text-[#8a1858] dark:text-[#f472b6] shrink-0 mt-0.5" />
                   <span>{createErrorNotice}</span>
                 </div>
               )}
 
               <form onSubmit={handleCreateStaff} className="space-y-3.5 text-xs">
                 <div>
-                  <label htmlFor="staff-name" className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+                  <label htmlFor="staff-name" className="block text-xs font-bold text-slate-900 dark:text-zinc-200 mb-1">
                     Full Name *
                   </label>
                   <input
@@ -694,12 +685,12 @@ export function UserManagement() {
                     value={newStaffName}
                     onChange={(e) => setNewStaffName(e.target.value)}
                     placeholder="e.g. Sajeeb Ahmed"
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:border-[#10b981]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-100/80 text-xs text-slate-950 placeholder:text-slate-500 outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 dark:placeholder:text-zinc-500 transition-all shadow-xs"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="staff-email" className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+                  <label htmlFor="staff-email" className="block text-xs font-bold text-slate-900 dark:text-zinc-200 mb-1">
                     Corporate Email *
                   </label>
                   <input
@@ -709,13 +700,13 @@ export function UserManagement() {
                     value={newStaffEmail}
                     onChange={(e) => setNewStaffEmail(e.target.value)}
                     placeholder="sajeeb@voltops.com"
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:border-[#10b981]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-100/80 text-xs text-slate-950 placeholder:text-slate-500 outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 dark:placeholder:text-zinc-500 transition-all shadow-xs"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="staff-password" className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+                    <label htmlFor="staff-password" className="block text-xs font-bold text-slate-900 dark:text-zinc-200 mb-1">
                       Initial Password *
                     </label>
                     <input
@@ -725,11 +716,11 @@ export function UserManagement() {
                       value={newStaffPassword}
                       onChange={(e) => setNewStaffPassword(e.target.value)}
                       placeholder="Min 8 characters"
-                      className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] outline-none focus:border-[#10b981]"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-100/80 text-xs text-slate-950 outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 transition-all shadow-xs"
                     />
                   </div>
                   <div>
-                    <label htmlFor="staff-confirm-password" className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+                    <label htmlFor="staff-confirm-password" className="block text-xs font-bold text-slate-900 dark:text-zinc-200 mb-1">
                       Confirm Password *
                     </label>
                     <input
@@ -739,21 +730,21 @@ export function UserManagement() {
                       value={newStaffConfirmPassword}
                       onChange={(e) => setNewStaffConfirmPassword(e.target.value)}
                       placeholder="Re-enter password"
-                      className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] outline-none focus:border-[#10b981]"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-100/80 text-xs text-slate-950 outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 transition-all shadow-xs"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="staff-role" className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+                    <label htmlFor="staff-role" className="block text-xs font-bold text-slate-900 dark:text-zinc-200 mb-1">
                       Staff Role *
                     </label>
                     <select
                       id="staff-role"
                       value={newStaffRole}
                       onChange={(e) => setNewStaffRole(e.target.value as any)}
-                      className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] outline-none focus:border-[#10b981] cursor-pointer"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-100/80 text-xs text-slate-950 outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 cursor-pointer font-bold transition-all shadow-xs"
                     >
                       <option value="DISPATCHER">DISPATCHER</option>
                       <option value="TECHNICIAN">TECHNICIAN</option>
@@ -761,14 +752,14 @@ export function UserManagement() {
                     </select>
                   </div>
                   <div>
-                    <label htmlFor="staff-branch" className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+                    <label htmlFor="staff-branch" className="block text-xs font-bold text-slate-900 dark:text-zinc-200 mb-1">
                       Primary Branch
                     </label>
                     <select
                       id="staff-branch"
                       value={newStaffBranch}
                       onChange={(e) => setNewStaffBranch(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] outline-none focus:border-[#10b981] cursor-pointer"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-100/80 text-xs text-slate-950 outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 cursor-pointer font-bold transition-all shadow-xs"
                     >
                       <option value="EPZ Industrial Core">EPZ Industrial Core</option>
                       <option value="Gazipur Hub">Gazipur Hub</option>
@@ -780,7 +771,7 @@ export function UserManagement() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="staff-dept" className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+                    <label htmlFor="staff-dept" className="block text-xs font-bold text-slate-900 dark:text-zinc-200 mb-1">
                       Department (Optional)
                     </label>
                     <input
@@ -789,11 +780,11 @@ export function UserManagement() {
                       value={newStaffDept}
                       onChange={(e) => setNewStaffDept(e.target.value)}
                       placeholder="e.g. Field Operations"
-                      className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] outline-none focus:border-[#10b981]"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-100/80 text-xs text-slate-950 outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 transition-all shadow-xs"
                     />
                   </div>
                   <div>
-                    <label htmlFor="staff-desig" className="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+                    <label htmlFor="staff-desig" className="block text-xs font-bold text-slate-900 dark:text-zinc-200 mb-1">
                       Designation (Optional)
                     </label>
                     <input
@@ -802,23 +793,23 @@ export function UserManagement() {
                       value={newStaffDesig}
                       onChange={(e) => setNewStaffDesig(e.target.value)}
                       placeholder="e.g. Senior Dispatch Coordinator"
-                      className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs text-[var(--text-primary)] outline-none focus:border-[#10b981]"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-slate-100/80 text-xs text-slate-950 outline-none focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 transition-all shadow-xs"
                     />
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-[var(--border)] flex items-center justify-end gap-2">
+                <div className="pt-3 border-t border-slate-200 dark:border-white/5 flex items-center justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setCreateModalOpen(false)}
-                    className="px-3 py-1.5 rounded-lg border border-[var(--border)] text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] btn-press"
+                    className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 transition-all shadow-xs btn-press"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submittingStaff}
-                    className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#10b981] text-[#06090e] hover:bg-[#059669] transition-all shadow-sm disabled:opacity-50 btn-press"
+                    className="px-4 py-1.5 rounded-lg text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#059669] transition-all shadow-sm disabled:opacity-50 btn-press"
                   >
                     {submittingStaff ? "Creating..." : "Create Account"}
                   </button>
@@ -836,23 +827,23 @@ export function UserManagement() {
             aria-labelledby="user-details-title"
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
           >
-            <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-2xl space-y-4">
-              <div className="flex items-start justify-between border-b border-[var(--border)] pb-3">
+            <div className="w-full max-w-md rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 p-5 sm:p-6 shadow-2xl space-y-4">
+              <div className="flex items-start justify-between border-b border-slate-200 dark:border-white/5 pb-3">
                 <div>
                   <h3
                     id="user-details-title"
-                    className="font-heading font-semibold text-base text-[var(--text-primary)]"
+                    className="font-heading font-bold text-base text-slate-950 dark:text-zinc-50"
                   >
                     User Account Record
                   </h3>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-xs text-[var(--text-muted)] font-mono">
+                    <span className="text-xs text-slate-600 dark:text-zinc-400 font-mono">
                       {selectedUser.id}
                     </span>
                     <button
                       type="button"
                       onClick={() => handleCopyId(selectedUser.id)}
-                      className="px-1.5 py-0.5 rounded text-[10px] font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[#10b981]"
+                      className="px-2 py-0.5 rounded text-[10px] font-bold border border-slate-300 bg-slate-100 text-slate-800 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-300 hover:text-emerald-700 transition-all shadow-xs"
                     >
                       {copiedId ? "Copied" : "Copy ID"}
                     </button>
@@ -862,24 +853,24 @@ export function UserManagement() {
                   type="button"
                   onClick={() => setSelectedUser(null)}
                   aria-label="Close dialog"
-                  className="p-1 rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="p-1 rounded-md border border-slate-300 dark:border-white/10 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-100"
                 >
                   <XIcon size={14} />
                 </button>
               </div>
 
               <div className="space-y-3 text-xs">
-                <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)] grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-xl bg-slate-100/80 dark:bg-zinc-950 border border-slate-300 dark:border-white/10 grid grid-cols-2 gap-3 shadow-xs">
                   <div>
-                    <span className="text-[var(--text-muted)] text-[11px] block">Full Name</span>
-                    <span className="font-semibold text-[var(--text-primary)]">
+                    <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">Full Name</span>
+                    <span className="font-bold text-slate-950 dark:text-zinc-50">
                       {selectedUser.name}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--text-muted)] text-[11px] block">Role</span>
+                    <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">Role</span>
                     <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold border mt-0.5 ${getRoleBadge(
+                      className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold border mt-0.5 ${getRoleBadge(
                         selectedUser.role
                       )}`}
                     >
@@ -888,37 +879,37 @@ export function UserManagement() {
                   </div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-2">
+                <div className="p-3 rounded-xl bg-slate-100/80 dark:bg-zinc-950 border border-slate-300 dark:border-white/10 space-y-2 shadow-xs">
                   <div>
-                    <span className="text-[var(--text-muted)] text-[11px] block">Email</span>
-                    <span className="font-mono text-[var(--text-primary)]">
+                    <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">Email</span>
+                    <span className="font-mono text-slate-950 dark:text-zinc-50 font-medium">
                       {selectedUser.email}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--text-muted)] text-[11px] block">Branch</span>
-                    <span className="text-[var(--text-primary)]">
+                    <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">Branch</span>
+                    <span className="text-slate-950 dark:text-zinc-50 font-bold">
                       {selectedUser.branch || "General Workforce"}
                     </span>
                   </div>
                   {selectedUser.department && (
                     <div>
-                      <span className="text-[var(--text-muted)] text-[11px] block">
+                      <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">
                         Department & Designation
                       </span>
-                      <span className="text-[var(--text-primary)]">
+                      <span className="text-slate-950 dark:text-zinc-50 font-medium">
                         {selectedUser.department}{" "}
                         {selectedUser.designation && `· ${selectedUser.designation}`}
                       </span>
                     </div>
                   )}
                   <div>
-                    <span className="text-[var(--text-muted)] text-[11px] block">Account Status</span>
+                    <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">Account Status</span>
                     <span
-                      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border mt-0.5 ${
+                      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold border mt-0.5 ${
                         selectedUser.isActive
-                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
-                          : "bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20"
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+                          : "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20"
                       }`}
                     >
                       <span
@@ -930,17 +921,17 @@ export function UserManagement() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-[var(--text-muted)] text-[11px] block">Created Date</span>
-                    <span className="text-[var(--text-primary)]">{selectedUser.createdAt}</span>
+                    <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">Created Date</span>
+                    <span className="text-slate-950 dark:text-zinc-50 font-mono tabular-nums">{selectedUser.createdAt}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[var(--border)] flex justify-end">
+              <div className="pt-3 border-t border-slate-200 dark:border-white/5 flex justify-end">
                 <button
                   type="button"
                   onClick={() => setSelectedUser(null)}
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-[var(--bg-surface-2)] text-[var(--text-primary)] border border-[var(--border)] hover:border-[var(--border-strong)] btn-press"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300 hover:bg-slate-200 dark:bg-zinc-800 dark:text-zinc-200 dark:border-white/10 dark:hover:bg-zinc-700 transition-all shadow-xs btn-press"
                 >
                   Close
                 </button>
@@ -957,22 +948,22 @@ export function UserManagement() {
             aria-labelledby="confirm-status-title"
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
           >
-            <div className="w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-2xl space-y-3">
+            <div className="w-full max-w-sm rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 p-5 shadow-2xl space-y-3">
               <div className="flex items-start gap-2.5">
                 <AlertTriangleIcon
                   size={16}
                   className={`shrink-0 mt-0.5 ${
-                    confirmTargetUser.targetStatus ? "text-emerald-600" : "text-red-500"
+                    confirmTargetUser.targetStatus ? "text-emerald-600" : "text-[#b8287a]"
                   }`}
                 />
                 <div>
                   <h3
                     id="confirm-status-title"
-                    className="font-heading font-semibold text-sm text-[var(--text-primary)]"
+                    className="font-heading font-bold text-sm text-slate-950 dark:text-zinc-50"
                   >
                     Confirm {confirmTargetUser.targetStatus ? "Reactivation" : "Deactivation"}
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
+                  <p className="text-xs font-medium text-slate-700 dark:text-zinc-300 mt-1">
                     {confirmTargetUser.targetStatus
                       ? `Reactivate ${confirmTargetUser.user.name}? The account will regain access to authorized portals.`
                       : `Deactivate ${confirmTargetUser.user.name}? The user will be blocked from accessing operations.`}
@@ -980,12 +971,12 @@ export function UserManagement() {
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-[var(--border)] flex items-center justify-end gap-2">
+              <div className="pt-2 border-t border-slate-200 dark:border-white/5 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   disabled={submittingStatusChange}
                   onClick={() => setConfirmTargetUser(null)}
-                  className="px-3 py-1.5 rounded-lg border border-[var(--border)] text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] btn-press"
+                  className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 transition-all shadow-xs btn-press"
                 >
                   Cancel
                 </button>
@@ -993,10 +984,10 @@ export function UserManagement() {
                   type="button"
                   disabled={submittingStatusChange}
                   onClick={handleConfirmStatusChange}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-sm btn-press ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm btn-press ${
                     confirmTargetUser.targetStatus
-                      ? "bg-[#10b981] text-[#06090e] hover:bg-[#059669]"
-                      : "bg-red-600 text-white hover:bg-red-700"
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#10b981] dark:text-zinc-950"
+                      : "bg-[#b8287a] hover:bg-[#9d1762] text-white"
                   } disabled:opacity-50`}
                 >
                   {submittingStatusChange

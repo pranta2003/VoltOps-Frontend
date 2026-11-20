@@ -4,6 +4,9 @@ import { motion, useScroll, useSpring, useReducedMotion, useInView } from "frame
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { SpotlightCard } from "../components/landing/SpotlightCard";
+import { AnimatedCounter } from "../components/landing/AnimatedCounter";
+import { LightHeroVisual } from "../components/landing/LightHeroVisual";
 import { COVERAGE_PLANS } from "../config/coveragePricing";
 import { OPERATIONAL_REACH_METRICS, OPERATIONAL_REACH_DISCLAIMER } from "../config/operationalReach";
 import {
@@ -52,8 +55,8 @@ const CORE_SERVICES: ServiceTrade[] = [
     title: "Electrical & Power",
     canonicalName: "Electrical and power systems",
     icon: ZapIcon,
-    accentColor: "#f59e0b",
-    glowClass: "glow-card-amber",
+    accentColor: "#10b981",
+    glowClass: "glow-card-emerald",
     badge: "Electrical",
     slaBadge: "20–40 Min SLA",
     shortDesc: "Commercial electrical systems, switchgear, backup power, and distribution panels.",
@@ -125,7 +128,7 @@ const CORE_SERVICES: ServiceTrade[] = [
     canonicalName: "Facility maintenance",
     icon: BuildingIcon,
     accentColor: "#f43f5e",
-    glowClass: "glow-card-amber",
+    glowClass: "glow-card-purple",
     badge: "Facility",
     slaBadge: "20–40 Min SLA",
     shortDesc: "Automatic sliding doors, industrial roll-up shutters, and structural upkeep.",
@@ -145,7 +148,7 @@ const WORKFLOW_STEPS = [
 // ── 4 Role Workspaces (Concise, 1-2 lines each) ───────────────────────────
 const ROLE_WORKSPACES = [
   { icon: BuildingIcon, title: "Commercial Customer", desc: "Submit breakdown requests, track technician arrival countdowns, and approve digital receipts.", glow: "glow-card-emerald" },
-  { icon: RadioIcon, title: "Dispatcher Console", desc: "Review incoming requests, evaluate candidate match scores, and confirm certified assignments.", glow: "glow-card-amber" },
+  { icon: RadioIcon, title: "Dispatcher Console", desc: "Review incoming requests, evaluate candidate match scores, and confirm certified assignments.", glow: "glow-card-cyan" },
   { icon: WrenchIcon, title: "Field Technician", desc: "Manage active shift rosters, update job progression, and log on-site completion notes.", glow: "glow-card-cyan" },
   { icon: SettingsIcon, title: "Administrator", desc: "Govern staff accounts, verify technician skill passports, and audit operational event logs.", glow: "glow-card-indigo" },
 ];
@@ -318,7 +321,7 @@ export function LandingPage() {
   }, []);
 
   // Context-aware navbar: adapts appearance to whether the section directly behind the floating navbar is dark or light
-  const [activeSectionTone, setActiveSectionTone] = useState<"dark" | "light">("dark");
+  const [activeSectionTone, setActiveSectionTone] = useState<"dark" | "light">(() => (isDark ? "dark" : "light"));
 
   useEffect(() => {
     if (isDark) {
@@ -424,13 +427,11 @@ export function LandingPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Active Trade Spotlight in Hero Centerpiece
-  const [heroActiveTrade, setHeroActiveTrade] = useState<string>("electrical");
-  const selectedTrade = CORE_SERVICES.find((s) => s.id === heroActiveTrade) || CORE_SERVICES[0];
-  const SelectedIcon = selectedTrade.icon;
-
   // Workflow step hover state
   const [hoveredStep, setHoveredStep] = useState<number | null>(null);
+
+  // Navbar link hover state
+  const [hoveredNav, setHoveredNav] = useState<string | null>(null);
 
   // Plan comparison expand state
   const [showMatrix, setShowMatrix] = useState(false);
@@ -471,18 +472,18 @@ export function LandingPage() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.09,
-        delayChildren: shouldReduceMotion ? 0 : 0.05,
+        staggerChildren: shouldReduceMotion ? 0 : 0.12,
+        delayChildren: shouldReduceMotion ? 0 : 0.1,
       },
     },
   };
 
   const heroItemVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
+    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 24 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const },
+      transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] as const },
     },
   };
 
@@ -513,9 +514,9 @@ export function LandingPage() {
       className="relative min-h-screen font-sans selection:bg-[#10b981] selection:text-[#06090e] overflow-x-hidden"
       style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}
     >
-      {/* ── Top-Edge Scroll Progress Indicator (Framer Motion Spring) ───── */}
+      {/* ── Top-Edge Scroll Progress Indicator (2px Emerald-to-Cyan Spring) ───── */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#10b981] via-[#34d399] to-[#38bdf8] origin-left z-[100]"
+        className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-cyan-400 to-emerald-500 origin-left z-[100] shadow-[0_0_8px_rgba(16,185,129,0.5)]"
         style={{ scaleX }}
         aria-hidden="true"
       />
@@ -567,7 +568,7 @@ export function LandingPage() {
           style={{ background: "radial-gradient(circle, rgba(56,189,248,0.28) 0%, transparent 70%)" }}
         />
 
-        {/* Animated Amber Warm Glow Source 3 */}
+        {/* Animated Cyan Cool Glow Source 3 */}
         <motion.div
           animate={
             shouldReduceMotion
@@ -616,23 +617,31 @@ export function LandingPage() {
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         className="fixed top-0 left-0 right-0 z-50 pointer-events-none px-3.5 sm:px-6 pt-3 sm:pt-4 transition-all duration-300"
       >
-        <div className="max-w-xl md:max-w-3xl lg:max-w-6xl mx-auto">
+        <div className={`mx-auto transition-all duration-500 ease-out ${scrolled ? "max-w-xl md:max-w-2xl lg:max-w-5xl" : "max-w-xl md:max-w-3xl lg:max-w-6xl"}`}>
           <nav
-            className={`pointer-events-auto px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition-all duration-300 ease-in-out ${
+            className={`pointer-events-auto rounded-full transition-all duration-300 ease-in-out ${
+              scrolled ? "px-3.5 sm:px-4 py-1.5 sm:py-2" : "px-4 sm:px-5 py-2.5 sm:py-3"
+            } ${
               isNavbarDark
                 ? scrolled
-                  ? "backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] bg-slate-950/80 border border-white/20"
-                  : "backdrop-blur-xl bg-slate-950/45 shadow-[0_8px_32px_rgba(0,0,0,0.25)] border border-white/15"
+                  ? "backdrop-blur-xl shadow-2xl bg-zinc-950/85 border border-white/15"
+                  : "backdrop-blur-xl shadow-xl bg-zinc-950/50 border border-white/10"
                 : scrolled
-                ? "backdrop-blur-2xl shadow-[0_12px_36px_rgba(0,0,0,0.08)] bg-white/85 border border-slate-300/80"
-                : "backdrop-blur-xl bg-white/70 shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-slate-200/80"
+                ? "backdrop-blur-xl shadow-md bg-white/90 border border-slate-300/90 text-slate-900"
+                : "backdrop-blur-xl shadow-sm bg-white/85 border border-slate-300/90 text-slate-900"
             }`}
             aria-label="Main Navigation"
           >
             <div className="flex items-center justify-between">
               {/* Logo Mark & Staggered Wordmark */}
               <a href="#" className="flex items-center gap-2.5 group shrink-0 focus-visible:outline-none">
-                <LogoMark size={32} />
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 6 }}
+                  whileTap={{ scale: 0.94 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <LogoMark size={32} />
+                </motion.div>
                 <div className="flex items-center gap-1.5">
                   {shouldReduceMotion ? (
                     <span
@@ -695,8 +704,9 @@ export function LandingPage() {
                 </div>
               </a>
 
-              {/* Desktop Center Nav Pills (Context-Aware Translucent Glass Treatment) */}
+              {/* Desktop Center Nav Pills (Context-Aware Sliding Hover Pill) */}
               <div
+                onMouseLeave={() => setHoveredNav(null)}
                 className={`hidden lg:flex items-center gap-0.5 xl:gap-1 text-xs font-semibold px-2 xl:px-2.5 py-1 rounded-full border backdrop-blur-sm transition-all duration-300 ${
                   isNavbarDark
                     ? "border-white/10 bg-white/5"
@@ -711,19 +721,36 @@ export function LandingPage() {
                   ["#hubs", "Coverage Hubs"],
                   ["#about", "About"],
                   ["#contact", "Contact"],
-                ].map(([href, label]) => (
-                  <a
-                    key={href}
-                    href={href}
-                    className={`px-2.5 xl:px-3 py-1 rounded-full transition-all font-semibold ${
-                      isNavbarDark
-                        ? "text-slate-200 hover:text-white hover:bg-white/10"
-                        : "text-slate-700 hover:text-slate-950 hover:bg-slate-900/5"
-                    }`}
-                  >
-                    {label}
-                  </a>
-                ))}
+                ].map(([href, label]) => {
+                  const isHovered = hoveredNav === href;
+                  return (
+                    <a
+                      key={href}
+                      href={href}
+                      onMouseEnter={() => setHoveredNav(href)}
+                      className={`relative px-2.5 xl:px-3 py-1 rounded-full transition-colors font-semibold z-10 ${
+                        isNavbarDark
+                          ? isHovered
+                            ? "text-white"
+                            : "text-slate-200"
+                          : isHovered
+                          ? "text-slate-950 font-bold"
+                          : "text-slate-700"
+                      }`}
+                    >
+                      {isHovered && (
+                        <motion.span
+                          layoutId="navbar-hover-pill"
+                          transition={{ type: "spring", stiffness: 380, damping: 28 }}
+                          className={`absolute inset-0 rounded-full -z-10 ${
+                            isNavbarDark ? "bg-white/15" : "bg-slate-900/10"
+                          }`}
+                        />
+                      )}
+                      {label}
+                    </a>
+                  );
+                })}
               </div>
 
               {/* Desktop Right Actions */}
@@ -749,10 +776,14 @@ export function LandingPage() {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   href="#packages"
-                  className="inline-flex items-center gap-1.5 px-3.5 xl:px-4 py-1.5 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] shadow-[0_0_16px_rgba(16,185,129,0.35)] hover:bg-[#34d399] transition-all group"
+                  className="relative overflow-hidden inline-flex items-center gap-1.5 px-3.5 xl:px-4 py-1.5 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] shadow-[0_0_16px_rgba(16,185,129,0.35)] hover:bg-[#34d399] transition-all group"
                 >
-                  <span>Choose Plan</span>
-                  <ArrowRightIcon size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                  <span
+                    className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
+                    aria-hidden="true"
+                  />
+                  <span className="relative z-10">Choose Plan</span>
+                  <ArrowRightIcon size={12} className="relative z-10 group-hover:translate-x-0.5 transition-transform" />
                 </motion.a>
               </div>
 
@@ -859,15 +890,24 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── HERO SECTION: INDUSTRIAL MAINTENANCE PHOTOGRAPHY & ENTRANCE ─── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <header data-section-tone="dark" className="relative overflow-hidden pt-20 sm:pt-22 lg:pt-24 pb-20 lg:pb-24 text-center">
-        {/* Hero Background Layer: Looping Cinematic Slow-Motion Video with Dark CSS Overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none overflow-hidden z-0"
-          style={{
-            maskImage: "linear-gradient(to bottom, black 0%, black 65%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 65%, transparent 100%)",
-          }}
-        >
+      <header
+        data-section-tone={isDark ? "dark" : "light"}
+        className="relative overflow-hidden bg-gradient-to-b from-white via-[#f4f7fb] to-[#e8edf3] dark:bg-zinc-950 dark:bg-none text-slate-900 dark:text-white border-b border-slate-300/80 dark:border-white/10 dark:pt-20 dark:sm:pt-22 dark:lg:pt-24 dark:pb-20 dark:lg:pb-24 dark:text-center transition-colors"
+      >
+        {/* Light Mode Architectural Backdrop: Engineering Grid & Ambient Soft Radial Glows */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 block dark:hidden">
+          {/* Subtle engineering grid overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.05)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,#000_60%,transparent_100%)]" />
+
+          {/* Soft ambient radial emerald glow behind headline */}
+          <div className="absolute -top-12 left-1/2 -translate-x-[65%] w-[38rem] h-[24rem] bg-emerald-400/15 rounded-full blur-[100px] pointer-events-none" />
+
+          {/* Soft ambient radial cyan glow behind headline */}
+          <div className="absolute top-10 left-1/2 -translate-x-[35%] w-[36rem] h-[22rem] bg-cyan-400/15 rounded-full blur-[100px] pointer-events-none" />
+        </div>
+
+        {/* Hero Background Layer: Dark Mode ONLY Looping Cinematic Video with Dark CSS Overlay */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 hidden dark:block">
           {/* Highly compressed looping 16:9 video with enhanced brightness */}
           <video
             autoPlay
@@ -887,42 +927,121 @@ export function LandingPage() {
             />
           </video>
 
-          {/* Balanced cinematic dark overlay: keeps engineers and facility background visible with elevated brightness while ensuring high contrast for white text */}
-          <div
-            className="absolute inset-0 transition-colors duration-300"
-            style={{
-              background: isDark
-                ? "radial-gradient(ellipse at 50% 32%, rgba(6, 12, 20, 0.36) 0%, rgba(6, 12, 20, 0.54) 100%)"
-                : "radial-gradient(ellipse at 50% 32%, rgba(6, 12, 20, 0.32) 0%, rgba(6, 12, 20, 0.46) 100%)",
-            }}
-          />
-
-          {/* Smooth multi-stop bottom fade into base theme background (prevents sudden dark block) */}
-          <div
-            className="absolute inset-x-0 bottom-0 h-56 sm:h-72 pointer-events-none transition-colors duration-300"
-            style={{
-              background: isDark
-                ? "linear-gradient(to bottom, transparent 0%, rgba(11, 17, 23, 0.3) 30%, rgba(11, 17, 23, 0.75) 70%, var(--bg-base) 100%)"
-                : "linear-gradient(to bottom, transparent 0%, rgba(248, 250, 252, 0.25) 30%, rgba(248, 250, 252, 0.8) 70%, var(--bg-base) 100%)",
-            }}
-          />
+          {/* Refined cinematic dark gradient & radial vignette scrim: lets the video breathe while ensuring effortless contrast */}
+          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(9,9,11,0.6)_65%,rgba(9,9,11,0.98)_100%)]" />
         </div>
 
+        {/* ── LIGHT MODE: 2-COLUMN SPLIT SAAS HERO ── */}
         <motion.div
           variants={heroContainerVariants}
           initial="hidden"
           animate="visible"
-          className="relative z-10 max-w-6xl mx-auto px-5"
+          className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-16 lg:pb-20 block dark:hidden"
         >
+          <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center text-left">
+            {/* Left Column (lg:col-span-6, left-aligned) */}
+            <div className="lg:col-span-6 space-y-6">
+              {/* Animated Eyebrow Pill */}
+              <motion.div
+                variants={heroItemVariants}
+                className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 shadow-xs transition-colors"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
+                </span>
+                <span className="text-xs font-semibold tracking-wide">
+                  20–40m Physical Arrival SLA
+                </span>
+              </motion.div>
+
+              {/* Editorial Headline */}
+              <motion.h1
+                variants={heroItemVariants}
+                className="font-heading font-extrabold text-4xl sm:text-5xl lg:text-[54px] xl:text-[58px] tracking-tight leading-[1.08] text-slate-950"
+              >
+                One partner for every{" "}
+                <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
+                  commercial facility repair.
+                </span>
+              </motion.h1>
+
+              {/* Supporting Text */}
+              <motion.p
+                variants={heroItemVariants}
+                className="text-base sm:text-lg font-heading font-normal text-slate-600 max-w-xl leading-relaxed tracking-tight"
+              >
+                Commercial maintenance across seven essential trades.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div
+                variants={heroItemVariants}
+                className="flex flex-wrap items-center gap-4 pt-2"
+              >
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  href="#packages"
+                  className="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-emerald-500 text-zinc-950 shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
+                >
+                  <span
+                    className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
+                    aria-hidden="true"
+                  />
+                  <span className="relative z-10">Explore Coverage Plans</span>
+                  <ArrowRightIcon size={15} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+                </motion.a>
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  href="#how"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm bg-white hover:bg-slate-50 text-slate-900 border border-slate-300 shadow-sm backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+                >
+                  <CompassIcon size={15} className="text-emerald-600" />
+                  <span>See How It Works</span>
+                </motion.a>
+              </motion.div>
+            </div>
+
+            {/* Right Column (lg:col-span-6) — Animated VoltOps Live Dispatch Preview */}
+            <motion.div
+              variants={heroItemVariants}
+              className="lg:col-span-6 flex justify-center lg:justify-end pt-4 lg:pt-0"
+            >
+              <LightHeroVisual shouldReduceMotion={shouldReduceMotion ?? false} />
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* ── DARK MODE: FULL-BLEED CENTERED CINEMATIC HERO (100% UNTOUCHED) ── */}
+        <motion.div
+          variants={heroContainerVariants}
+          initial="hidden"
+          animate="visible"
+          className="relative z-10 max-w-6xl mx-auto px-5 hidden dark:block"
+        >
+          {/* Animated Eyebrow Pill */}
+          <motion.div
+            variants={heroItemVariants}
+            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md mb-6 shadow-sm shadow-emerald-500/10"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span className="text-xs font-semibold tracking-wide text-emerald-300">
+              7 Commercial Trades · 20–40m Physical Arrival SLA
+            </span>
+          </motion.div>
+
           {/* Editorial Headline */}
           <motion.h1
             variants={heroItemVariants}
             className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[64px] tracking-tight leading-[1.08] text-white max-w-4xl mx-auto drop-shadow-md"
           >
-            One partner.{" "}
-            <span className="font-serif-italic font-normal text-emerald-300">
-              Every facility repair.
-            </span>
+            One partner for every commercial facility repair.
           </motion.h1>
 
           {/* Supporting Text */}
@@ -936,236 +1055,106 @@ export function LandingPage() {
           {/* CTA Buttons */}
           <motion.div
             variants={heroItemVariants}
-            className="flex flex-wrap items-center justify-center gap-3.5 pt-6"
+            className="flex flex-wrap items-center justify-center gap-4 pt-6"
           >
             <motion.a
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               href="#packages"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-[#10b981] text-[#06090e] shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-[#34d399] hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all group"
+              className="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-emerald-500 text-zinc-950 shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-zinc-950"
             >
-              <span>Explore Coverage Plans</span>
-              <ArrowRightIcon size={15} className="group-hover:translate-x-1 transition-transform" />
+              <span
+                className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
+                aria-hidden="true"
+              />
+              <span className="relative z-10">Explore Coverage Plans</span>
+              <ArrowRightIcon size={15} className="relative z-10 group-hover:translate-x-1 transition-transform" />
             </motion.a>
             <motion.a
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               href="#how"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm border border-white/20 text-white hover:text-white bg-white/10 hover:bg-white/15 backdrop-blur-xl transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm border border-white/20 text-white bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-white/40 focus:ring-offset-2 focus:ring-offset-zinc-950"
             >
-              <CompassIcon size={15} className="text-[#34d399]" />
+              <CompassIcon size={15} className="text-emerald-400" />
               <span>See How It Works</span>
             </motion.a>
           </motion.div>
 
-          {/* ── 3-Card Centerpiece Spotlight ────────────────────────────── */}
+          {/* Minimal Single-Row Glassmorphic SLA Strip */}
           <motion.div
             variants={heroItemVariants}
-            className="mt-12 relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 items-stretch"
+            className="mt-12 inline-flex flex-wrap items-center justify-center gap-3 sm:gap-6 px-6 py-2.5 rounded-full border border-white/15 bg-zinc-950/85 backdrop-blur-xl shadow-2xl"
           >
-            {/* Left Card: Service Coverage */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              transition={{ duration: 0.2 }}
-              className="flex flex-col justify-between text-left p-6 sm:p-7 rounded-[28px] glass-panel glow-card-emerald order-2 md:order-2 lg:order-1 md:col-span-1 lg:col-span-3"
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-xs font-semibold text-slate-200">
+                Plan C: <strong className="text-emerald-400 font-bold">20m Arrival</strong>
+              </span>
+            </div>
+            <span className="hidden sm:inline text-white/20">·</span>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+              <span className="text-xs font-semibold text-slate-200">
+                Plan B: <strong className="text-cyan-400 font-bold">40m Arrival</strong>
+              </span>
+            </div>
+            <span className="hidden sm:inline text-white/20">·</span>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+              <span className="text-xs font-semibold text-slate-200">
+                Plan A: <strong className="text-slate-300 font-bold">8h Daily</strong>
+              </span>
+            </div>
+            <span className="hidden sm:inline text-white/20">·</span>
+            <div className="flex items-center gap-2">
+              <ShieldCheckIcon size={14} className="text-emerald-400" />
+              <span className="text-xs font-semibold text-emerald-300">
+                7 Licensed Trades
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Subtle Animated Scroll-Down Cue */}
+          <motion.div
+            variants={heroItemVariants}
+            className="mt-8 flex justify-center"
+          >
+            <motion.a
+              href="#services"
+              aria-label="Scroll to services"
+              animate={
+                shouldReduceMotion
+                  ? undefined
+                  : {
+                      y: [0, 6, 0],
+                      opacity: [0.55, 0.95, 0.55],
+                    }
+              }
+              transition={{
+                duration: 2.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="group inline-flex flex-col items-center gap-1.5 text-zinc-400 hover:text-emerald-400 transition-colors focus:outline-none"
             >
-              <div className="space-y-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-heading">
-                  Service Coverage
-                </span>
-                <div className="space-y-1.5">
-                  <h4 className="text-xl sm:text-[22px] font-bold font-heading text-slate-900 dark:text-white tracking-tight leading-snug">
-                    7 trades. One partner.
-                  </h4>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
-                    One service partner for your facility.
-                  </p>
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <div className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center gap-2.5 text-xs font-medium font-heading text-slate-800 dark:text-slate-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" />
-                    <span className="tracking-tight">Electrical & Power Systems</span>
-                  </div>
-                  <div className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center gap-2.5 text-xs font-medium font-heading text-slate-800 dark:text-slate-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" />
-                    <span className="tracking-tight">HVAC & Industrial Cooling</span>
-                  </div>
-                  <div className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center gap-2.5 text-xs font-medium font-heading text-slate-800 dark:text-slate-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" />
-                    <span className="tracking-tight">Plumbing & Piping Networks</span>
-                  </div>
-                  <div className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center gap-2.5 text-xs font-medium font-heading text-slate-800 dark:text-slate-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shrink-0" />
-                    <span className="tracking-tight">Security, IT & Infrastructure</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-[var(--border)] pt-4 mt-6">
-                <a
-                  href="#services"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold font-heading text-[#10b981] dark:text-[#34d399] hover:underline"
-                >
-                  <span>View all 7 trades</span>
-                  <ArrowRightIcon size={12} />
-                </a>
-              </div>
-            </motion.div>
-
-            {/* Center Card: Explore Services */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              transition={{ duration: 0.2 }}
-              className="order-1 md:order-1 lg:order-2 md:col-span-2 lg:col-span-6"
-            >
-              <div
-                className="rounded-[32px] border border-[var(--border-strong)] p-6 sm:p-7 text-left relative glass-panel glow-card-emerald shadow-[var(--shadow-float)] flex flex-col justify-between h-full"
-                style={{
-                  background: isDark
-                    ? "radial-gradient(circle at 50% 0%, rgba(16,185,129,0.14) 0%, rgba(14,20,29,0.85) 65%)"
-                    : "radial-gradient(circle at 50% 0%, rgba(16,185,129,0.18) 0%, rgba(255,255,255,0.95) 75%)",
-                }}
+              <span className="text-[10px] uppercase font-bold tracking-widest opacity-80 group-hover:opacity-100">
+                Explore Platform
+              </span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4 text-emerald-400/80 group-hover:text-emerald-400 transition-colors"
               >
-                {/* Header status bar */}
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--border)]">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] animate-pulse" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-                      Explore Services
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#10b981]/20 text-[#10b981] dark:text-[#34d399] border border-[#10b981]/30">
-                    Interactive
-                  </span>
-                </div>
-
-                {/* Main Card Title */}
-                <div className="space-y-1 mb-3.5">
-                  <h3 className="text-2xl sm:text-3xl font-extrabold font-heading text-slate-900 dark:text-white leading-tight">
-                    Explore facility services
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-                    Choose a trade to see what's covered.
-                  </p>
-                </div>
-
-                {/* 7-Trade Selector Tabs */}
-                <div className="flex gap-1.5 overflow-x-auto pb-2 mb-3.5 border-b border-[var(--border)] no-scrollbar">
-                  {CORE_SERVICES.map((s) => {
-                    const isActive = s.id === heroActiveTrade;
-                    const SvgIcon = s.icon;
-                    return (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => setHeroActiveTrade(s.id)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 border focus:outline-none ${
-                          isActive
-                            ? "border-[#10b981] bg-[#10b981] text-[#06090e] font-bold shadow-sm"
-                            : "border-transparent text-slate-600 dark:text-slate-400 hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
-                        }`}
-                      >
-                        <SvgIcon size={13} className={isActive ? "text-[#06090e]" : "text-slate-500"} />
-                        <span>{s.title}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Selected Trade Preview Box */}
-                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-3 mb-3.5">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: `${selectedTrade.accentColor}25`, color: selectedTrade.accentColor }}
-                    >
-                      <SelectedIcon size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm text-slate-900 dark:text-white">{selectedTrade.title}</h4>
-                      <p className="text-xs text-slate-600 dark:text-slate-400">
-                        {selectedTrade.shortDesc}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Systems Tags */}
-                  <div className="pt-2 border-t border-[var(--border)] flex flex-wrap items-center gap-1.5">
-                    {selectedTrade.capabilities.map((cap) => (
-                      <span
-                        key={cap}
-                        className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-[var(--bg-surface-3)] text-slate-700 dark:text-slate-200 border border-[var(--border)]"
-                      >
-                        {cap}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Bottom Link */}
-                <div className="flex items-center justify-between text-xs pt-2 border-t border-[var(--border)]">
-                  <span className="text-slate-600 dark:text-slate-400">
-                    All trades included in every plan
-                  </span>
-                  <a
-                    href="#services"
-                    className="inline-flex items-center gap-1 font-bold text-[#10b981] dark:text-[#34d399] hover:underline"
-                  >
-                    <span>View all services</span>
-                    <ArrowRightIcon size={12} />
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Right Card: Response Times */}
-            <motion.div
-              whileHover={{ y: -4 }}
-              transition={{ duration: 0.2 }}
-              className="flex flex-col justify-between text-left p-6 sm:p-7 rounded-[28px] glass-panel glow-card-amber order-3 md:order-3 lg:order-3 md:col-span-1 lg:col-span-3"
-            >
-              <div className="space-y-4">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 font-heading">
-                  Response Times
-                </span>
-                <div className="space-y-1.5">
-                  <h4 className="text-xl sm:text-[22px] font-bold font-heading text-slate-900 dark:text-white tracking-tight leading-snug">
-                    Coverage response times
-                  </h4>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
-                    Arrival time means technician arrival, not repair completion.
-                  </p>
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <div className="py-2.5 px-3 rounded-xl border border-emerald-500/25 bg-emerald-500/5 dark:bg-emerald-500/10 flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-900 dark:text-white font-heading tracking-tight">Plan C — Priority</span>
-                    <span className="font-bold text-[#10b981] dark:text-[#34d399] font-heading tabular-nums">20-minute arrival</span>
-                  </div>
-
-                  <div className="py-2.5 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-900 dark:text-white font-heading tracking-tight">Plan B — Standard</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200 font-heading tabular-nums">40-minute arrival</span>
-                  </div>
-
-                  <div className="py-2.5 px-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between text-xs">
-                    <span className="font-semibold text-slate-900 dark:text-white font-heading tracking-tight">Plan A — Daily</span>
-                    <span className="font-medium text-slate-600 dark:text-slate-400 font-heading tabular-nums">8h daily coverage</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-[var(--border)] pt-4 mt-6">
-                <a
-                  href="#packages"
-                  className="inline-flex items-center justify-between w-full text-xs font-bold font-heading text-[#10b981] dark:text-[#34d399] hover:underline"
-                >
-                  <span>Compare Plans</span>
-                  <ArrowRightIcon size={12} />
-                </a>
-              </div>
-            </motion.div>
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </motion.a>
           </motion.div>
         </motion.div>
       </header>
@@ -1173,7 +1162,12 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── Section: The 7 Canonical Service Trades (BALANCED & CENTERED) ─ */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <section id="services" data-section-tone="auto" className="py-20 max-w-6xl mx-auto px-5">
+      <section id="services" data-section-tone="auto" className="relative py-20 max-w-6xl mx-auto px-5">
+        {/* Subtle radial emerald aura in Dark Mode */}
+        <div
+          className="pointer-events-none absolute top-6 left-1/2 -translate-x-1/2 w-full max-w-3xl h-64 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.12),transparent_70%)] dark:block hidden"
+          aria-hidden="true"
+        />
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -1184,14 +1178,14 @@ export function LandingPage() {
           <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
             7 Supported Trades
           </span>
-          <h2 className="text-3xl sm:text-4xl font-space font-bold tracking-tight text-[var(--text-primary)]">
+          <h2 className="text-3xl sm:text-4xl font-space font-extrabold tracking-tight text-slate-900 dark:text-white">
             What we maintain for your{" "}
-            <span className="font-serif-italic font-normal">
+            <span className="font-serif-italic font-normal text-emerald-600 dark:text-emerald-400">
               facility
             </span>
           </h2>
-          <p className="text-sm text-slate-700 dark:text-slate-300">
-            Standardized commercial coverage across 7 technical trades with 20–40 minute physical arrival targets.
+          <p className="text-sm text-slate-700 dark:text-slate-300 font-medium max-w-xl mx-auto">
+            Commercial facility maintenance across 7 technical trades with guaranteed physical arrival SLAs.
           </p>
         </motion.div>
 
@@ -1203,84 +1197,77 @@ export function LandingPage() {
           variants={sectionContainerVariants}
           className="flex flex-wrap justify-center gap-6 items-stretch"
         >
-          {CORE_SERVICES.map((trade) => {
+          {CORE_SERVICES.map((trade, index) => {
             const TradeIcon = trade.icon;
             return (
-              <motion.div
+              <SpotlightCard
                 key={trade.id}
-                variants={cardItemVariants}
-                whileHover={{ y: -6, scale: 1.015 }}
-                transition={{ duration: 0.22, ease: "easeOut" }}
-                className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] flex flex-col"
+                delay={index * 0.06}
+                spotlightColor="rgba(16, 185, 129, 0.16)"
+                className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none hover:border-emerald-500/50 hover:shadow-lg dark:hover:border-emerald-500/40 p-6 flex flex-col justify-between text-center group transition-colors duration-200"
               >
-                <div
-                  className={`h-full p-6 rounded-[28px] border border-[var(--border)] glass-panel ${trade.glowClass} flex flex-col justify-between text-center shadow-[var(--shadow-sm)] group`}
-                >
-                  <div className="flex flex-col items-center text-center w-full space-y-3">
-                    {/* Trade Icon */}
-                    <motion.div
-                      whileHover={{ scale: 1.12, rotate: 2 }}
-                      transition={{ duration: 0.2 }}
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto shadow-sm p-2.5"
-                      style={{
-                        backgroundColor: `${trade.accentColor}18`,
-                        color: trade.accentColor,
-                        border: `1px solid ${trade.accentColor}35`,
-                      }}
-                    >
-                      <TradeIcon size={22} />
-                    </motion.div>
-
-                    {/* SLA Badge */}
-                    <span
-                      className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider border mx-auto"
-                      style={{
-                        borderColor: `${trade.accentColor}40`,
-                        color: trade.accentColor,
-                        backgroundColor: `${trade.accentColor}12`,
-                      }}
-                    >
-                      {trade.slaBadge}
-                    </span>
-
-                    {/* Title */}
-                    <h3 className="text-base sm:text-lg font-bold font-service-title text-[var(--text-primary)]">
-                      {trade.title}
-                    </h3>
-
-                    {/* Concise 1-Sentence Description */}
-                    <p className="text-xs text-slate-600 dark:text-slate-300 text-center leading-relaxed font-normal min-h-[36px]">
-                      {trade.shortDesc}
-                    </p>
-
-                    {/* 3 Compact Capability Pills */}
-                    <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1 w-full">
-                      {trade.capabilities.map((cap) => (
-                        <span
-                          key={cap}
-                          className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--bg-surface-2)] text-slate-700 dark:text-slate-300 border border-[var(--border)]"
-                        >
-                          {cap}
-                        </span>
-                      ))}
-                    </div>
+                <div className="flex flex-col items-center text-center w-full space-y-3">
+                  {/* Trade Icon */}
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto shadow-sm p-2.5 transition-transform duration-200 group-hover:scale-110"
+                    style={{
+                      backgroundColor: `${trade.accentColor}18`,
+                      color: trade.accentColor,
+                      border: `1px solid ${trade.accentColor}35`,
+                    }}
+                  >
+                    <TradeIcon size={22} />
                   </div>
 
-                  {/* Clean Simple CTA */}
-                  <div className="pt-3.5 border-t border-[var(--border)] mt-4 w-full">
-                    <a
-                      href="#packages"
-                      className="w-full py-1.5 rounded-full text-xs font-semibold text-center border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#06090e] hover:bg-[#10b981] transition-all flex items-center justify-center gap-1 shadow-sm"
-                    >
-                      <span>View Plans</span>
-                      <ArrowRightIcon size={11} />
-                    </a>
+                  {/* SLA Badge */}
+                  <span
+                    className="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-3 py-0.5 rounded-full uppercase tracking-wider border shadow-xs mx-auto"
+                    style={{
+                      borderColor: `${trade.accentColor}40`,
+                      color: trade.accentColor,
+                      backgroundColor: `${trade.accentColor}12`,
+                    }}
+                  >
+                    {trade.slaBadge}
+                  </span>
+
+                  {/* Title */}
+                  <h3 className="text-base sm:text-lg font-bold font-service-title text-[var(--text-primary)]">
+                    {trade.title}
+                  </h3>
+
+                  {/* Concise 1-Sentence Description */}
+                  <p className="text-xs text-slate-600 dark:text-slate-300 text-center leading-relaxed font-normal min-h-[36px]">
+                    {trade.shortDesc}
+                  </p>
+
+                  {/* 3 Compact Capability Pills */}
+                  <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2 w-full">
+                    {trade.capabilities.map((cap) => (
+                      <span
+                        key={cap}
+                        className="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800/80 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-white/10 group-hover:border-emerald-500/30 transition-colors"
+                      >
+                        {cap}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              </motion.div>
+              </SpotlightCard>
             );
           })}
         </motion.div>
+
+        {/* Single unified link below the 7 trades grid */}
+        <div className="mt-10 text-center">
+          <a
+            href="#packages"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 shadow-sm transition-all"
+          >
+            <span>Explore All Coverage Plans</span>
+            <ArrowRightIcon size={14} className="text-emerald-500" />
+          </a>
+        </div>
       </section>
 
       {/* ── Section: Operations & Matching Engine Audit Trail ──────────── */}
@@ -1314,11 +1301,10 @@ export function LandingPage() {
           className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch"
         >
           {/* Left Bento: Operations Dispatch Architecture */}
-          <motion.div
-            variants={cardItemVariants}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 0.2 }}
-            className="lg:col-span-6 p-7 rounded-[32px] border border-[var(--border)] glass-panel glow-card-emerald space-y-5 transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.22)]"
+          <SpotlightCard
+            delay={0}
+            spotlightColor="rgba(16, 185, 129, 0.16)"
+            className="lg:col-span-6 p-6 sm:p-7 rounded-2xl border border-slate-300 border-l-4 border-l-emerald-500 dark:border-white/10 dark:border-l-emerald-500/80 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none space-y-5 transition-shadow duration-300"
           >
             <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border)]">
               <div>
@@ -1333,16 +1319,23 @@ export function LandingPage() {
             <div className="space-y-3">
               {[
                 { label: "Trade Skill & License Verification", val: "Hard eligibility gate", progress: 100, color: "#10b981" },
-                { label: "Proximity & Hub Routing", val: "Branch hub proximity score", progress: 85, color: "#34d399" },
+                { label: "Proximity & Hub Routing", val: "Branch hub proximity score", progress: 85, color: "#06b6d4" },
                 { label: "Active Workload Balancing", val: "Max 2 active jobs per tech", progress: 75, color: "#38bdf8" },
-              ].map(({ label, val, progress, color }) => (
-                <div key={label} className="p-3.5 rounded-2xl bg-[var(--bg-surface-2)] border border-[var(--border)] space-y-1.5">
+              ].map(({ label, val, progress, color }, idx) => (
+                <div key={label} className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-950/60 border border-slate-200 dark:border-white/10 space-y-1.5">
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-slate-900 dark:text-white">{label}</span>
-                    <span className="text-slate-600 dark:text-slate-400 text-[11px]">{val}</span>
+                    <span className="text-slate-600 dark:text-slate-400 text-[11px] font-medium">{val}</span>
                   </div>
-                  <div className="w-full bg-[var(--border)] h-1.5 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${progress}%`, background: color }} />
+                  <div className="w-full bg-slate-200 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${progress}%` }}
+                      viewport={{ once: true, margin: "-40px" }}
+                      transition={{ duration: 0.9, delay: 0.2 + idx * 0.15, ease: "easeOut" }}
+                      className="h-full rounded-full"
+                      style={{ background: color }}
+                    />
                   </div>
                 </div>
               ))}
@@ -1351,14 +1344,13 @@ export function LandingPage() {
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed pt-2 border-t border-[var(--border)]">
               Human-verified dispatch. Transparent AI scoring.
             </p>
-          </motion.div>
+          </SpotlightCard>
 
           {/* Right Bento: Candidate Audit Evaluation */}
-          <motion.div
-            variants={cardItemVariants}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 0.2 }}
-            className="lg:col-span-6 p-7 rounded-[32px] border border-[var(--border)] glass-panel space-y-4 transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.22)]"
+          <SpotlightCard
+            delay={0.1}
+            spotlightColor="rgba(6, 182, 212, 0.16)"
+            className="lg:col-span-6 p-6 sm:p-7 rounded-2xl border border-slate-300 border-l-4 border-l-cyan-500 dark:border-white/10 dark:border-l-cyan-500/80 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none space-y-4 transition-shadow duration-300"
           >
             <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border)]">
               <div>
@@ -1371,49 +1363,52 @@ export function LandingPage() {
             </div>
 
             {/* Top Match */}
-            <div className="p-4 rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-surface-2)] space-y-2">
+            <div className="p-4 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-zinc-950/60 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <UserCheckIcon size={16} className="text-emerald-500" />
                   <span className="font-bold text-sm text-slate-900 dark:text-white">Tanvir Hasan</span>
                 </div>
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30 tabular-nums">
                   91% Match Score
                 </span>
               </div>
-              <p className="text-xs text-slate-700 dark:text-slate-300">CCTV Specialist | Tejgaon Hub | Available</p>
-              <div className="flex gap-3 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
+              <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">CCTV Specialist · Tejgaon Hub · Available</p>
+              <div className="flex gap-3 text-[11px] font-semibold text-emerald-800 dark:text-emerald-400">
                 <span>✓ Active License</span><span>✓ Standby Available</span><span>✓ 2.1 km away</span>
               </div>
             </div>
 
             {/* 2nd Match */}
-            <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
+            <div className="p-4 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-zinc-950/60 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-sm text-slate-800 dark:text-slate-200">Mehedi Zaman</span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                <span className="font-bold text-sm text-slate-900 dark:text-slate-200">Mehedi Zaman</span>
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-cyan-100 text-cyan-900 border border-cyan-300 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/30 tabular-nums">
                   78% Match Score
                 </span>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">Security Tech | Banani | 1 Active Job</p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">Security Tech · Banani · 1 Active Job</p>
+              <div className="flex gap-3 text-[11px] font-semibold text-cyan-800 dark:text-cyan-400">
+                <span>✓ Active License</span><span>✓ Fast Transit</span><span>✓ 3.8 km away</span>
+              </div>
             </div>
 
             {/* Ineligible */}
-            <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface-2)] opacity-70">
+            <div className="p-4 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50/70 dark:bg-zinc-950/40">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-sm text-slate-600 dark:text-slate-400">Nayeem Islam</span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400">
+                <span className="font-bold text-sm text-slate-700 dark:text-slate-400">Nayeem Islam</span>
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-900 border border-rose-300 dark:bg-[#b8287a]/20 dark:text-[#f472b6] dark:border-[#b8287a]/30">
                   Disqualified
                 </span>
               </div>
-              <p className="text-xs text-red-600 dark:text-red-400 mt-1">✕ Trade license expired (filtered by hard rule)</p>
+              <p className="text-xs text-rose-700 dark:text-rose-400 mt-1 font-medium">✕ Trade license expired · Filtered by hard qualification gate</p>
             </div>
-          </motion.div>
+          </SpotlightCard>
         </motion.div>
       </section>
 
       {/* ── Section: How It Works (CONCISE 5-STEP PROCESS) ─────────────── */}
-      <section id="how" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+      <section id="how" data-section-tone="auto" className="py-20 border-t border-slate-300 dark:border-white/10 bg-[#e8edf3]/50 dark:bg-zinc-950/60">
         <div className="max-w-6xl mx-auto px-5">
           <motion.div
             initial="hidden"
@@ -1425,59 +1420,64 @@ export function LandingPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
               Coordination Workflow
             </span>
-            <h2 className="text-3xl sm:text-4xl font-space font-bold tracking-tight text-[var(--text-primary)]">
+            <h2 className="text-3xl sm:text-4xl font-space font-extrabold tracking-tight text-slate-900 dark:text-white">
               How VoltOps resolves{" "}
-              <span className="font-serif-italic font-normal">
+              <span className="font-serif-italic font-normal text-emerald-600 dark:text-emerald-400">
                 breakdowns
               </span>
             </h2>
-            <p className="text-sm text-slate-700 dark:text-slate-300">
+            <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
               A straightforward path from problem report to verified on-site sign-off.
             </p>
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-40px" }}
-            variants={sectionContainerVariants}
-            className="grid grid-cols-1 md:grid-cols-5 gap-4"
-          >
-            {WORKFLOW_STEPS.map(({ step, icon: StepIcon, title, desc }) => {
-              const isHov = hoveredStep === step;
-              return (
-                <motion.div
-                  key={step}
-                  variants={cardItemVariants}
-                  whileHover={{ y: -5, scale: 1.01 }}
-                  transition={{ duration: 0.2 }}
-                  tabIndex={0}
-                  onMouseEnter={() => setHoveredStep(step)}
-                  onMouseLeave={() => setHoveredStep(null)}
-                  onFocus={() => setHoveredStep(step)}
-                  onBlur={() => setHoveredStep(null)}
-                  className={`p-5 rounded-[26px] border border-[var(--border)] glass-panel transition-all duration-200 cursor-default hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.22)] ${
-                    isHov ? "border-[#10b981] shadow-[var(--shadow-md)]" : ""
-                  }`}
-                >
-                  <div
-                    className="w-11 h-11 rounded-2xl flex items-center justify-center mb-3.5 transition-all shadow-sm"
-                    style={{
-                      background: isHov ? "#10b981" : "var(--bg-surface-2)",
-                      color: isHov ? "#06090e" : "var(--text-primary)",
-                    }}
+          <div className="relative">
+            {/* Desktop connecting track line behind step icons */}
+            <div className="hidden md:block absolute top-[44px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-emerald-500/10 via-emerald-500/40 to-emerald-500/10 pointer-events-none z-0" />
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-40px" }}
+              variants={sectionContainerVariants}
+              className="relative z-10 grid grid-cols-1 md:grid-cols-5 gap-4"
+            >
+              {WORKFLOW_STEPS.map(({ step, icon: StepIcon, title, desc }, index) => {
+                const isHov = hoveredStep === step;
+                return (
+                  <SpotlightCard
+                    key={step}
+                    delay={index * 0.08}
+                    spotlightColor="rgba(16, 185, 129, 0.14)"
+                    tabIndex={0}
+                    onMouseEnter={() => setHoveredStep(step)}
+                    onMouseLeave={() => setHoveredStep(null)}
+                    onFocus={() => setHoveredStep(step)}
+                    onBlur={() => setHoveredStep(null)}
+                    className={`p-5 rounded-2xl border transition-all duration-200 cursor-default shadow-md dark:shadow-none ${
+                      isHov
+                        ? "border-emerald-500 bg-white dark:bg-zinc-900 shadow-lg shadow-emerald-500/10"
+                        : "border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 hover:border-emerald-500/40"
+                    }`}
                   >
-                    <StepIcon size={19} />
-                  </div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-[#34d399] mb-1">
-                    Step 0{step}
-                  </div>
-                  <h3 className="font-bold font-heading text-sm text-[var(--text-primary)] mb-1.5">{title}</h3>
-                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-normal">{desc}</p>
-                </motion.div>
-              );
-            })}
-          </motion.div>
+                    <div
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3.5 transition-all shadow-sm ${
+                        isHov
+                          ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
+                          : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                      }`}
+                    >
+                      <StepIcon size={19} />
+                    </div>
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1 font-semibold">
+                      Step 0{step}
+                    </div>
+                    <h3 className="font-bold font-heading text-sm text-slate-900 dark:text-white mb-1.5">{title}</h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal">{desc}</p>
+                  </SpotlightCard>
+                );
+              })}
+            </motion.div>
+          </div>
         </div>
       </section>
 
@@ -1506,8 +1506,7 @@ export function LandingPage() {
 
         {/* SLA Clarification Banner */}
         <div
-          className="max-w-2xl mx-auto mb-10 p-4 rounded-2xl border text-xs sm:text-sm flex items-start gap-3 glass-panel"
-          style={{ borderColor: "var(--border-strong)" }}
+          className="max-w-2xl mx-auto mb-10 p-4 rounded-xl border border-slate-300 border-l-4 border-l-emerald-500 dark:border-white/10 dark:border-l-emerald-500 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none text-xs sm:text-sm flex items-start gap-3"
         >
           <ClockIcon size={18} className="shrink-0 text-[#10b981] mt-0.5" />
           <div className="text-slate-800 dark:text-slate-200">
@@ -1525,17 +1524,16 @@ export function LandingPage() {
           className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-stretch"
         >
           {/* Plan A: 8-Hour Daily */}
-          <motion.div
-            variants={cardItemVariants}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.25)] rounded-[30px]"
+          <SpotlightCard
+            delay={0}
+            spotlightColor="rgba(16, 185, 129, 0.12)"
+            className="flex flex-col transition-shadow duration-300 rounded-2xl"
           >
-            <div className="h-full p-6 sm:p-7 rounded-[30px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)]">
+            <div className="h-full p-6 sm:p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none flex flex-col justify-between hover:border-emerald-500/40 transition-all">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold font-card-title text-slate-900 dark:text-white">8-Hour Daily</h3>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-slate-600 dark:text-slate-400">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 whitespace-nowrap">
                     Plan A
                   </span>
                 </div>
@@ -1546,7 +1544,7 @@ export function LandingPage() {
                     <span className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white">{COVERAGE_PLANS["8hr"].formattedPrice}</span>
                     <span className="text-xs text-slate-500">{COVERAGE_PLANS["8hr"].billingUnit}</span>
                   </div>
-                  <div className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 font-medium">Prototype Pricing • 08:00 – 17:00</div>
+                  <div className="text-[10px] text-slate-600 dark:text-slate-400 mt-0.5 font-medium">Prototype Pricing · 08:00 – 17:00</div>
                 </div>
 
                 <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
@@ -1554,10 +1552,11 @@ export function LandingPage() {
                   <span className="text-xs font-bold text-slate-700 dark:text-slate-300">No physical arrival SLA</span>
                 </div>
 
-                <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
+                <ul className="space-y-2 text-xs text-slate-800 dark:text-slate-200">
                   {["15 included visits / cycle", "Business Hours (08:00 - 16:00)", "Scheduled daytime repairs", "All 7 trades covered"].map((b) => (
-                    <li key={b} className="flex items-center gap-2">
-                      <CheckIcon className="text-emerald-500" />{b}
+                    <li key={b} className="flex items-center gap-2 font-medium">
+                      <CheckIcon className="text-emerald-500 shrink-0" />
+                      <span>{b}</span>
                     </li>
                   ))}
                 </ul>
@@ -1568,21 +1567,21 @@ export function LandingPage() {
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => handlePlan("8hr")}
-                className="mt-6 w-full py-2.5 rounded-full font-semibold text-xs border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#10b981] transition-colors"
+                className="mt-6 w-full py-2.5 rounded-full font-semibold text-xs border border-slate-300 dark:border-white/10 text-slate-800 dark:text-slate-200 hover:border-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               >
-                Select Plan A
+                <span>Select Plan A</span>
+                <ArrowRightIcon size={12} />
               </motion.button>
             </div>
-          </motion.div>
+          </SpotlightCard>
 
           {/* Plan B: 24/7 Standard */}
-          <motion.div
-            variants={cardItemVariants}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.25)] rounded-[30px]"
+          <SpotlightCard
+            delay={0.08}
+            spotlightColor="rgba(6, 182, 212, 0.14)"
+            className="flex flex-col transition-shadow duration-300 rounded-2xl"
           >
-            <div className="h-full p-6 sm:p-7 rounded-[30px] border border-[var(--border)] glass-panel glow-card-emerald flex flex-col justify-between shadow-[var(--shadow-sm)]">
+            <div className="h-full p-6 sm:p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none flex flex-col justify-between hover:border-emerald-500/40 transition-all">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold font-card-title text-slate-900 dark:text-white">24/7 Standard</h3>
@@ -1597,7 +1596,7 @@ export function LandingPage() {
                     <span className="text-2xl font-extrabold font-mono text-slate-900 dark:text-white">{COVERAGE_PLANS["247-standard"].formattedPrice}</span>
                     <span className="text-xs text-slate-500">{COVERAGE_PLANS["247-standard"].billingUnit}</span>
                   </div>
-                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5 font-medium">Prototype Pricing • 24 Hours / 7 Days</div>
+                  <div className="text-[10px] text-cyan-700 dark:text-cyan-400 mt-0.5 font-medium">Prototype Pricing · 24 Hours / 7 Days</div>
                 </div>
 
                 <div className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-surface-2)]">
@@ -1605,10 +1604,11 @@ export function LandingPage() {
                   <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Within 40 minutes on site</span>
                 </div>
 
-                <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
+                <ul className="space-y-2 text-xs text-slate-800 dark:text-slate-200">
                   {["25 included visits / cycle", "Round-the-clock coverage", "40-min physical arrival SLA", "Digital repair logs"].map((b) => (
-                    <li key={b} className="flex items-center gap-2">
-                      <CheckIcon className="text-emerald-500" />{b}
+                    <li key={b} className="flex items-center gap-2 font-medium">
+                      <CheckIcon className="text-emerald-500 shrink-0" />
+                      <span>{b}</span>
                     </li>
                   ))}
                 </ul>
@@ -1619,22 +1619,22 @@ export function LandingPage() {
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => handlePlan("247-standard")}
-                className="mt-6 w-full py-2.5 rounded-full font-semibold text-xs border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#10b981] transition-colors"
+                className="mt-6 w-full py-2.5 rounded-full font-semibold text-xs border border-slate-300 dark:border-white/10 text-slate-800 dark:text-slate-200 hover:border-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               >
-                Select Plan B
+                <span>Select Plan B</span>
+                <ArrowRightIcon size={12} />
               </motion.button>
             </div>
-          </motion.div>
+          </SpotlightCard>
 
           {/* Plan C: 24/7 Priority */}
-          <motion.div
-            variants={cardItemVariants}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.3)] rounded-[30px]"
+          <SpotlightCard
+            delay={0.16}
+            spotlightColor="rgba(16, 185, 129, 0.3)"
+            className="flex flex-col transition-shadow duration-300 rounded-2xl relative shadow-md dark:shadow-[0_0_40px_-10px_rgba(16,185,129,0.35)]"
           >
-            <div className="h-full p-6 sm:p-7 rounded-[30px] border-2 border-[#10b981] glass-panel glow-card-emerald flex flex-col justify-between relative shadow-[0_0_32px_rgba(16,185,129,0.22)]">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-0.5 rounded-full bg-[#10b981] text-[#06090e] text-[11px] font-bold uppercase tracking-wider shadow flex items-center gap-1">
+            <div className="h-full p-6 sm:p-7 rounded-2xl border-2 border-emerald-500 bg-white dark:bg-zinc-900 flex flex-col justify-between relative">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-0.5 rounded-full bg-emerald-500 text-zinc-950 text-[11px] font-bold uppercase tracking-wider shadow-md flex items-center gap-1 z-20 whitespace-nowrap">
                 <ZapIcon size={11} />
                 <span>Fastest Response</span>
               </div>
@@ -1661,40 +1661,44 @@ export function LandingPage() {
                   <span className="text-base font-extrabold font-heading text-slate-900 dark:text-white">Within 20 minutes on site</span>
                 </div>
 
-                <ul className="space-y-1.5 text-xs">
+                <ul className="space-y-2 text-xs">
                   {["30 included visits / cycle", "Critical commercial coverage", "20-min rapid arrival (2x faster)", "Top emergency priority"].map((b, i) => (
-                    <li key={b} className={`flex items-center gap-2 ${i === 0 || i === 1 ? "font-bold text-slate-900 dark:text-white" : "text-slate-800 dark:text-slate-200"}`}>
-                      <CheckIcon className="text-[#10b981]" />{b}
+                    <li key={b} className={`flex items-center gap-2 ${i === 0 || i === 1 ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-800 dark:text-slate-200"}`}>
+                      <CheckIcon className="text-[#10b981] shrink-0" />
+                      <span>{b}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
               <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => handlePlan("247-priority")}
-                className="mt-6 w-full py-2.5 rounded-full font-bold text-xs bg-[#10b981] text-[#06090e] shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:bg-[#34d399] transition-all flex items-center justify-center gap-1.5"
+                className="relative overflow-hidden mt-6 w-full py-2.5 rounded-full font-bold text-xs bg-emerald-500 text-zinc-950 shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_26px_rgba(16,185,129,0.5)] transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 group"
               >
-                <span>Select Plan C</span>
-                <ArrowRightIcon size={12} />
+                <span
+                  className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
+                  aria-hidden="true"
+                />
+                <span className="relative z-10">Select Plan C</span>
+                <ArrowRightIcon size={12} className="relative z-10 group-hover:translate-x-0.5 transition-transform" />
               </motion.button>
             </div>
-          </motion.div>
+          </SpotlightCard>
 
           {/* Plan D: Custom Coverage */}
-          <motion.div
-            variants={cardItemVariants}
-            whileHover={{ y: -5, scale: 1.01 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col transition-shadow duration-300 hover:shadow-[0_12px_28px_-8px_rgba(20,184,166,0.25)] rounded-[30px]"
+          <SpotlightCard
+            delay={0.24}
+            spotlightColor="rgba(6, 182, 212, 0.14)"
+            className="flex flex-col transition-shadow duration-300 rounded-2xl"
           >
-            <div className="h-full p-6 sm:p-7 rounded-[30px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)]">
+            <div className="h-full p-6 sm:p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none flex flex-col justify-between hover:border-emerald-500/40 transition-all">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold font-card-title text-slate-900 dark:text-white">Custom Coverage</h3>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-[var(--border)] text-slate-600 dark:text-slate-400">
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 whitespace-nowrap">
                     Plan D
                   </span>
                 </div>
@@ -1712,10 +1716,11 @@ export function LandingPage() {
                   <span className="text-xs font-bold text-slate-900 dark:text-white">6, 8, 12, or 16 hours/day</span>
                 </div>
 
-                <ul className="space-y-1.5 text-xs text-slate-800 dark:text-slate-200">
+                <ul className="space-y-2 text-xs text-slate-800 dark:text-slate-200">
                   {["Negotiated visit allowance", "Tailored enterprise shifts", "Negotiated SLAs", "Multi-facility scaling"].map((b) => (
-                    <li key={b} className="flex items-center gap-2">
-                      <CheckIcon className="text-emerald-500" />{b}
+                    <li key={b} className="flex items-center gap-2 font-medium">
+                      <CheckIcon className="text-emerald-500 shrink-0" />
+                      <span>{b}</span>
                     </li>
                   ))}
                 </ul>
@@ -1726,12 +1731,13 @@ export function LandingPage() {
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => handlePlan("custom")}
-                className="mt-6 w-full py-2.5 rounded-full font-semibold text-xs border-2 border-[#10b981] text-slate-900 dark:text-white hover:bg-[#10b981] hover:text-[#06090e] transition-all"
+                className="mt-6 w-full py-2.5 rounded-full font-bold text-xs border-2 border-emerald-500 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500 hover:text-zinc-950 transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-400"
               >
-                Discuss a Custom Plan →
+                <span>Discuss a Custom Plan</span>
+                <ArrowRightIcon size={12} />
               </motion.button>
             </div>
-          </motion.div>
+          </SpotlightCard>
         </motion.div>
 
         {/* Expandable Comparison Matrix */}
@@ -1784,7 +1790,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Section: Regional Coverage Hubs (CONCISE CARDS) ────────────── */}
-      <section id="hubs" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+      <section id="hubs" data-section-tone="auto" className="py-20 border-t border-slate-300 dark:border-white/10 bg-[#e8edf3]/50 dark:bg-zinc-950/60">
         <div className="max-w-6xl mx-auto px-5">
           <motion.div
             initial="hidden"
@@ -1811,43 +1817,49 @@ export function LandingPage() {
             variants={sectionContainerVariants}
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
           >
-            {REGIONAL_HUBS.map((hub) => (
-              <motion.div
+            {REGIONAL_HUBS.map((hub, idx) => (
+              <SpotlightCard
                 key={hub.name}
-                variants={cardItemVariants}
-                whileHover={{ y: -6 }}
-                transition={{ duration: 0.2 }}
-                className="flex flex-col"
+                delay={idx * 0.08}
+                spotlightColor="rgba(16, 185, 129, 0.15)"
+                className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none hover:border-emerald-500/50 hover:shadow-lg transition-all p-6 flex flex-col justify-between"
               >
-                <div className="h-full p-6 rounded-[28px] border border-[var(--border)] glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)]">
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#10b981] dark:text-[#34d399]">
-                        <MapPinIcon size={19} />
-                      </div>
-                      <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
-                        {hub.sla}
-                      </span>
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      <MapPinIcon size={19} />
                     </div>
-                    <h3 className="font-bold font-card-title text-base text-[var(--text-primary)]">{hub.name}</h3>
-                    <div className="text-xs font-semibold text-emerald-700 dark:text-[#34d399]">{hub.coverage}</div>
-                    <p className="text-xs leading-relaxed text-[var(--text-secondary)]">{hub.desc}</p>
+                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30 tabular-nums">
+                      {hub.sla}
+                    </span>
                   </div>
-
-                  <div className="pt-3.5 border-t border-[var(--border)] mt-4 flex items-center justify-between text-xs">
-                    <span className="text-slate-600 dark:text-slate-400">Status</span>
-                    <span className="font-bold text-[#10b981] dark:text-[#34d399]">Active Standby Roster</span>
-                  </div>
+                  <h3 className="font-bold font-heading text-base text-slate-900 dark:text-white">{hub.name}</h3>
+                  <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">{hub.coverage}</div>
+                  <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 font-medium">{hub.desc}</p>
                 </div>
-              </motion.div>
+
+                <div className="pt-3.5 border-t border-slate-200 dark:border-white/10 mt-4 flex items-center justify-between text-xs">
+                  <span className="text-slate-600 dark:text-slate-400">Status</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400">Active Standby Roster</span>
+                </div>
+              </SpotlightCard>
             ))}
           </motion.div>
         </div>
       </section>
 
       {/* ── Section: Our Operational Reach (Commercial Scale & Industrial Reach) ── */}
-      <section id="statistics" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface)]">
-        <div className="max-w-6xl mx-auto px-5">
+      <section id="statistics" data-section-tone="auto" className="relative py-20 border-t border-slate-300 dark:border-white/10 bg-[#e8edf3]/40 dark:bg-zinc-950/40 overflow-hidden">
+        {/* Subtle radial emerald/cyan ambient mesh backdrop in Dark Mode */}
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-100px,rgba(16,185,129,0.12),transparent_70%)] dark:block hidden"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute bottom-0 right-0 w-96 h-96 bg-[radial-gradient(circle_400px_at_bottom_right,rgba(6,182,212,0.08),transparent_70%)] dark:block hidden"
+          aria-hidden="true"
+        />
+        <div className="relative z-10 max-w-6xl mx-auto px-5">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -1858,14 +1870,14 @@ export function LandingPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
               Our Operational Reach
             </span>
-            <h2 className="text-3xl sm:text-4xl font-space font-bold tracking-tight text-[var(--text-primary)]">
+            <h2 className="text-3xl sm:text-4xl font-space font-extrabold tracking-tight text-slate-900 dark:text-white">
               Built for commercial{" "}
-              <span className="font-serif-italic font-normal">
+              <span className="font-serif-italic font-normal text-emerald-600 dark:text-emerald-400">
                 operations
               </span>
             </h2>
-            <p className="text-sm text-slate-700 dark:text-slate-300">
-              Illustrative platform scale demonstrating multi-zone technician dispatching and enterprise reliability.
+            <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">
+              Multi-zone technician dispatching and enterprise reliability across all commercial hubs.
             </p>
           </motion.div>
 
@@ -1876,49 +1888,47 @@ export function LandingPage() {
             variants={sectionContainerVariants}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            {OPERATIONAL_REACH_METRICS.map((metric) => (
-              <motion.div
+            {OPERATIONAL_REACH_METRICS.map((metric, idx) => (
+              <SpotlightCard
                 key={metric.id}
-                variants={cardItemVariants}
-                whileHover={{ y: -5 }}
-                transition={{ duration: 0.2 }}
-                className={`p-6 rounded-[28px] border glass-panel flex flex-col justify-between shadow-[var(--shadow-sm)] transition-all text-center ${
+                delay={idx * 0.08}
+                spotlightColor={metric.highlight ? "rgba(16, 185, 129, 0.2)" : "rgba(6, 182, 212, 0.14)"}
+                className={`p-6 rounded-2xl border flex flex-col justify-between shadow-md dark:shadow-none transition-all text-center ${
                   metric.highlight
-                    ? "border-2 border-[#10b981] bg-emerald-500/5 shadow-[0_0_24px_rgba(16,185,129,0.15)]"
-                    : "border-[var(--border)] hover:border-[#10b981]/50"
+                    ? "border-2 border-emerald-500 bg-white dark:bg-zinc-900 shadow-lg shadow-emerald-500/10"
+                    : "border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 hover:border-emerald-500/50"
                 }`}
               >
                 <div>
                   <div
-                    className={`text-4xl sm:text-5xl font-extrabold font-heading tracking-tight ${
+                    className={`text-4xl sm:text-5xl font-extrabold font-heading tracking-tight tabular-nums ${
                       metric.highlight
-                        ? "text-[#10b981] dark:text-[#34d399]"
+                        ? "text-emerald-600 dark:text-emerald-400"
                         : "text-slate-900 dark:text-white"
                     }`}
                   >
-                    <CountUpMetric
-                      value={metric.targetValue}
-                      decimals={metric.decimals || 0}
-                      suffix={metric.suffix}
+                    <AnimatedCounter
+                      value={`${metric.targetValue}${metric.suffix || ""}`}
+                      duration={1.8}
                     />
                   </div>
-                  <h3 className="font-bold text-sm text-[var(--text-primary)] mt-2">
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white mt-2 font-heading">
                     {metric.label}
                   </h3>
                 </div>
                 <p
-                  className={`text-xs text-[var(--text-secondary)] mt-3 leading-relaxed pt-3 border-t ${
-                    metric.highlight ? "border-[#10b981]/30" : "border-[var(--border)]"
+                  className={`text-xs text-slate-600 dark:text-slate-400 mt-3 leading-relaxed pt-3 border-t font-medium ${
+                    metric.highlight ? "border-emerald-500/30" : "border-slate-200 dark:border-white/10"
                   }`}
                 >
                   {metric.description}
                 </p>
-              </motion.div>
+              </SpotlightCard>
             ))}
           </motion.div>
 
           {/* Understated illustrative prototype disclaimer */}
-          <p className="text-center text-[11px] text-[var(--text-muted)] mt-8 italic">
+          <p className="text-center text-xs text-slate-600 dark:text-slate-400 mt-8 font-medium">
             {OPERATIONAL_REACH_DISCLAIMER}
           </p>
         </div>
@@ -1931,46 +1941,53 @@ export function LandingPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
               About VoltOps
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--text-primary)] leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-slate-900 dark:text-white leading-tight">
               Built for commercial{" "}
-              <span className="font-serif-italic font-normal">
+              <span className="font-serif-italic font-normal text-emerald-600 dark:text-emerald-400">
                 facility coordination
               </span>
             </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              We bridge commercial facility managers with verified multi-trade technicians, eliminating the frustration of unverified independent contractors and unpredictable arrival delays.
+            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+              We connect commercial facility managers with verified multi-trade technicians, eliminating unpredictable downtime and uncertified contractor delays.
             </p>
           </div>
           <div className="lg:col-span-6 space-y-3.5">
             {[
-              { title: "No uncertified technicians", desc: "Trade licenses and safety credentials are confirmed before assignment." },
-              { title: "No double bookings", desc: "Active jobs and proximity matching prevent overlapping assignments." },
-              { title: "Real accountability", desc: "Transparent physical arrival tracking and digital itemized repair logs." },
-            ].map(({ title, desc }) => (
-              <div key={title} className="p-5 rounded-2xl border border-[var(--border)] glass-panel space-y-1 shadow-[var(--shadow-sm)]">
-                <div className="flex items-center gap-2 font-bold text-sm text-[var(--text-primary)]">
-                  <CheckCircleIcon size={16} className="text-[#10b981] dark:text-[#34d399] shrink-0" />
+              { title: "No uncertified technicians", desc: "Trade licenses and safety credentials are authenticated before dispatch." },
+              { title: "No double bookings", desc: "Live workload balancing and hub proximity prevent overlapping assignments." },
+              { title: "Guaranteed arrival accountability", desc: "Transparent physical arrival countdowns and digital itemized sign-off." },
+            ].map(({ title, desc }, idx) => (
+              <SpotlightCard
+                key={title}
+                delay={idx * 0.08}
+                spotlightColor="rgba(16, 185, 129, 0.14)"
+                className="p-5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none space-y-1 hover:border-emerald-500/40 transition-all"
+              >
+                <div className="flex items-center gap-2 font-bold text-sm text-slate-900 dark:text-white font-heading">
+                  <CheckCircleIcon size={16} className="text-emerald-500 shrink-0" />
                   <span>{title}</span>
                 </div>
-                <p className="text-xs pl-6 text-[var(--text-secondary)]">{desc}</p>
-              </div>
+                <p className="text-xs pl-6 text-slate-600 dark:text-slate-400 font-medium">{desc}</p>
+              </SpotlightCard>
             ))}
           </div>
         </div>
       </section>
 
       {/* ── Section: Contact & Inquiries (Accessible Form) ───────────────── */}
-      <section id="contact" data-section-tone="auto" className="py-20 border-t border-[var(--border)] bg-[var(--bg-surface-2)]">
+      <section id="contact" data-section-tone="auto" className="py-20 border-t border-slate-300 dark:border-white/10 bg-[#e8edf3] dark:bg-zinc-950">
         <div className="max-w-6xl mx-auto px-5">
           {/* Banner */}
-          <div
-            className="p-8 sm:p-10 rounded-[32px] flex flex-col md:flex-row items-center justify-between gap-6 glass-panel glow-card-emerald mb-14 border border-[#10b981]/40"
+          <SpotlightCard
+            delay={0.05}
+            spotlightColor="rgba(16, 185, 129, 0.2)"
+            className="p-8 sm:p-10 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 bg-white dark:bg-zinc-900 border border-slate-300 border-l-4 border-l-emerald-500 dark:border-white/10 dark:border-l-emerald-500 shadow-md dark:shadow-none mb-14"
           >
             <div className="space-y-2 text-center md:text-left">
               <h2 className="text-2xl sm:text-3xl font-space font-bold tracking-tight text-slate-900 dark:text-white">
                 Ready to safeguard your facility operations?
               </h2>
-              <p className="text-sm text-slate-700 dark:text-slate-300">
+              <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
                 Select a coverage plan or discuss bespoke multi-site requirements.
               </p>
             </div>
@@ -1978,24 +1995,28 @@ export function LandingPage() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               href="#packages"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] shrink-0 shadow-md hover:bg-[#34d399] transition-all"
+              className="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 shrink-0 shadow-md shadow-emerald-500/20 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400 group"
             >
-              <span>View Plans</span>
-              <ArrowRightIcon size={14} />
+              <span
+                className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
+                aria-hidden="true"
+              />
+              <span className="relative z-10">View Plans</span>
+              <ArrowRightIcon size={14} className="relative z-10 group-hover:translate-x-0.5 transition-transform" />
             </motion.a>
-          </div>
+          </SpotlightCard>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 text-left">
             {/* Contact info */}
             <div className="lg:col-span-5 space-y-4">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#10b981] dark:text-[#34d399]">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   Direct Inquiries
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-space font-bold tracking-tight mt-1.5 text-slate-900 dark:text-white">
                   Talk with our team
                 </h2>
-                <p className="text-sm mt-1.5 text-slate-600 dark:text-slate-400">
+                <p className="text-sm mt-1.5 text-slate-600 dark:text-slate-400 font-medium">
                   Enterprise inquiries or multi-facility complex coordination? Send our operations team a message.
                 </p>
               </div>
@@ -2004,29 +2025,38 @@ export function LandingPage() {
                   { icon: MailIcon, label: "Email", value: "support@voltops.example" },
                   { icon: PhoneIcon, label: "Phone", value: "+880 1XXX-XXXXXX" },
                   { icon: MapPinIcon, label: "Operations Desk", value: "Dhaka Central & Regional Hubs, Bangladesh" },
-                ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-[var(--border)] glass-panel shadow-[var(--shadow-sm)]">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--bg-surface-2)] text-[#10b981] dark:text-[#34d399] shrink-0">
+                ].map(({ icon: Icon, label, value }, idx) => (
+                  <SpotlightCard
+                    key={label}
+                    delay={idx * 0.08}
+                    spotlightColor="rgba(16, 185, 129, 0.12)"
+                    className="flex items-center gap-3.5 p-3.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-sm dark:shadow-none"
+                  >
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-zinc-800 text-emerald-600 dark:text-emerald-400 shrink-0">
                       <Icon size={17} />
                     </div>
                     <div>
                       <span className="text-[11px] font-semibold block text-slate-600 dark:text-slate-400">{label}</span>
                       <span className="text-xs font-medium text-slate-800 dark:text-slate-200">{value}</span>
                     </div>
-                  </div>
+                  </SpotlightCard>
                 ))}
               </div>
             </div>
 
             {/* Contact form */}
             <div className="lg:col-span-7">
-              <div className="p-7 rounded-[32px] border border-[var(--border)] glass-panel shadow-[var(--shadow-sm)]">
+              <SpotlightCard
+                delay={0.12}
+                spotlightColor="rgba(16, 185, 129, 0.14)"
+                className="p-7 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-md dark:shadow-none"
+              >
                 <h3 className="text-lg font-bold font-heading mb-1 text-slate-900 dark:text-white">Send an inquiry</h3>
-                <p className="text-xs mb-4 text-slate-600 dark:text-slate-400">
+                <p className="text-xs mb-4 text-slate-600 dark:text-slate-400 font-medium">
                   For sales and custom schedule inquiries. For active emergencies, subscribe and log in to dispatch.
                 </p>
                 {contactDone ? (
-                  <div className="p-4 rounded-2xl text-sm border flex items-center gap-2 border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
+                  <div className="p-4 rounded-xl text-sm border flex items-center gap-2 border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
                     <CheckCircleIcon size={18} />
                     <span>Inquiry submitted. Our coordination desk will reply within one business day.</span>
                   </div>
@@ -2043,7 +2073,7 @@ export function LandingPage() {
                           value={cName}
                           onChange={(e) => setCName(e.target.value)}
                           placeholder="Facility Manager"
-                          className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-zinc-950 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-zinc-500 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                         />
                       </div>
                       <div>
@@ -2056,7 +2086,7 @@ export function LandingPage() {
                           value={cEmail}
                           onChange={(e) => setCEmail(e.target.value)}
                           placeholder="manager@company.com"
-                          className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-zinc-950 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-zinc-500 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                         />
                       </div>
                     </div>
@@ -2069,7 +2099,7 @@ export function LandingPage() {
                         value={cCompany}
                         onChange={(e) => setCCompany(e.target.value)}
                         placeholder="Apex Galleria Complex"
-                        className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                        className="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-zinc-950 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-zinc-500 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                       />
                     </div>
                     <div>
@@ -2082,21 +2112,21 @@ export function LandingPage() {
                         value={cMsg}
                         onChange={(e) => setCMsg(e.target.value)}
                         placeholder="Describe your facility locations, equipment types, and coverage requirements..."
-                        className="w-full px-4 py-2.5 rounded-xl text-sm border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[#10b981] resize-none"
+                        className="w-full px-4 py-2.5 rounded-xl text-sm border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-zinc-950 text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-zinc-500 focus:outline-none focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all resize-none"
                       />
                     </div>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       type="submit"
-                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-md"
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 shadow-md shadow-emerald-500/20 transition-all"
                     >
                       <span>Send Inquiry</span>
                       <ArrowRightIcon size={14} />
                     </motion.button>
                   </form>
                 )}
-              </div>
+              </SpotlightCard>
             </div>
           </div>
         </div>

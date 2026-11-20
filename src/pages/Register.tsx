@@ -253,11 +253,11 @@ export function Register() {
             className="mt-4 pt-4 border-t border-[var(--border)] rounded-xl p-3.5 bg-amber-500/5 border border-amber-500/20 space-y-2.5"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                 Local Preview Registration
               </span>
-              <span className="text-[10px] text-[var(--text-muted)] font-mono">DEMO MODE</span>
+              <span className="text-[11px] text-[var(--text-muted)]">Demo mode</span>
             </div>
             <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
               Demonstrate customer registration, session establishment, and automated plan preservation without a running backend.

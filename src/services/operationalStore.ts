@@ -29,7 +29,7 @@ import {
   INITIAL_DISPATCH_EVENTS,
 } from "./mockDispatcherData";
 
-const STORAGE_KEY = "voltops_operational_state_v1";
+const STORAGE_KEY = "voltops_operational_state_v3";
 const EVENT_NAME = "voltops-operational-update";
 const CHANNEL_NAME = "voltops_operational_sync";
 
@@ -39,7 +39,7 @@ export const INITIAL_INVOICES: Invoice[] = [
     workOrderId: "WO-2048",
     customerId: "cust-epz-01",
     customerName: "Apex Spinning & Weaving Mills",
-    assetName: "Standby Generator G-01",
+    assetName: "Standby Generator G-01 (Cummins 250kVA)",
     billingDate: "2026-11-10",
     dueDate: "2026-11-25",
     status: "PAYMENT_DUE",
@@ -72,6 +72,68 @@ export const INITIAL_INVOICES: Invoice[] = [
     totalAmount: 682.5,
     paymentNotice: "Demonstration Statement: Requires backend payment gateway integration for authoritative financial settlement.",
   },
+  {
+    id: "INV-4088",
+    workOrderId: "WO-2041",
+    customerId: "cust-epz-01",
+    customerName: "Apex Spinning & Weaving Mills",
+    assetName: "Substation Transformer TR-02 (1000 kVA)",
+    billingDate: "2026-10-28",
+    dueDate: "2026-11-12",
+    status: "PAYMENT_DUE",
+    items: [
+      {
+        id: "li-4",
+        description: "High Voltage Bushing Diagnostic & Thermal Imbalance Inspection",
+        quantity: 1,
+        unitPrice: 160,
+        totalPrice: 160,
+      },
+      {
+        id: "li-5",
+        description: "Dielectric Fluid Filtration & 20L Shell Diala Mineral Oil Replacement",
+        quantity: 1,
+        unitPrice: 520,
+        totalPrice: 520,
+      },
+      {
+        id: "li-6",
+        description: "Primary Feeder Cable Termination & Torquing Re-verification (3.5 hrs)",
+        quantity: 3.5,
+        unitPrice: 74.29,
+        totalPrice: 260,
+      },
+    ],
+    subtotal: 940,
+    taxRate: 0.05,
+    taxAmount: 47,
+    totalAmount: 987,
+    paymentNotice: "Demonstration Statement: Requires backend payment gateway integration for authoritative financial settlement.",
+  },
+  {
+    id: "INV-4075",
+    workOrderId: "WO-2019",
+    customerId: "cust-epz-01",
+    customerName: "Apex Spinning & Weaving Mills",
+    assetName: "Main Substation Transformer T-04 (500kVA)",
+    billingDate: "2026-09-20",
+    dueDate: "2026-10-05",
+    status: "PAID",
+    items: [
+      {
+        id: "li-7",
+        description: "Quarterly Preventive Infrared Thermographic Inspection & Winding Resistance Test",
+        quantity: 1,
+        unitPrice: 450,
+        totalPrice: 450,
+      },
+    ],
+    subtotal: 450,
+    taxRate: 0.05,
+    taxAmount: 22.5,
+    totalAmount: 472.5,
+    paymentNotice: "Settled via automated direct commercial debit. Transaction ID: TXN-DEPZ-88219.",
+  },
 ];
 
 export const INITIAL_CUSTOMER_ASSETS: CustomerAsset[] = [
@@ -93,7 +155,7 @@ export const INITIAL_CUSTOMER_ASSETS: CustomerAsset[] = [
     location: "High Voltage Substation Yard Bay 2",
     installedDate: "2018-09-12",
     lastServiceDate: "2026-11-11",
-    status: "NEEDS_SERVICE",
+    status: "OPERATIONAL",
   },
   {
     id: "AST-TRF-04",
@@ -153,7 +215,7 @@ export const INITIAL_CUSTOMER_ASSETS: CustomerAsset[] = [
     location: "Pump House Station East",
     installedDate: "2021-11-05",
     lastServiceDate: "2026-11-01",
-    status: "NEEDS_SERVICE",
+    status: "OPERATIONAL",
   },
   {
     id: "AST-SCA-02",

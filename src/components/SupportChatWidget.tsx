@@ -327,7 +327,7 @@ export function SupportChatWidget() {
           <div className="relative flex items-center justify-center">
             <span className="text-xl">💬</span>
             {hasUnread && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-amber-400 border-2 border-white dark:border-slate-950 animate-pulse" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white dark:border-slate-950 animate-pulse" />
             )}
           </div>
         )}

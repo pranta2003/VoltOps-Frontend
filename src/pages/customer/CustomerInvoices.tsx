@@ -1,11 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../../components/Layout";
 import { useAuth } from "../../context/AuthContext";
 import { Invoice } from "../../types";
 import { customerService } from "../../services/customerService";
 import { operationalStore } from "../../services/operationalStore";
-import { CheckCircleIcon, ClockIcon, ArrowRightIcon } from "../../components/Icons";
+import {
+  CheckCircleIcon,
+  ArrowRightIcon,
+  ShieldCheckIcon,
+  PrinterIcon,
+  ClockIcon,
+  AlertTriangleIcon,
+} from "../../components/Icons";
 
 export function CustomerInvoices() {
   const { user } = useAuth();
@@ -69,14 +76,36 @@ export function CustomerInvoices() {
     }
   };
 
+  const getStatusBadge = (status: Invoice["status"]) => {
+    switch (status) {
+      case "PAID":
+        return "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/10 dark:text-[#10b981] dark:border-emerald-500/20 font-semibold";
+      case "PAYMENT_PENDING":
+        return "bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20 font-semibold";
+      case "PAYMENT_DUE":
+      default:
+        return "bg-rose-50 text-[#8a1858] border-rose-300 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20 font-semibold";
+    }
+  };
+
+  // Top Strip Metrics
+  const outstandingBalance = useMemo(() => {
+    return invoices
+      .filter((inv) => inv.status !== "PAID")
+      .reduce((sum, inv) => sum + inv.totalAmount, 0);
+  }, [invoices]);
+
+  const dueInvoicesCount = useMemo(() => {
+    return invoices.filter((inv) => inv.status !== "PAID").length;
+  }, [invoices]);
+
+  const subscription = customerService.getSubscription(user?.id);
+
   return (
-    <Layout
-      title="Invoices"
-      subtitle="Work order billing and statements"
-    >
-      <div className="space-y-6 max-w-6xl mx-auto">
+    <Layout title="Invoices">
+      <div className="space-y-6 max-w-6xl mx-auto pb-24">
         {error && (
-          <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 text-xs flex items-center justify-between">
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 text-xs flex items-center justify-between">
             <span>{error}</span>
             <button
               type="button"
@@ -88,94 +117,164 @@ export function CustomerInvoices() {
           </div>
         )}
 
+        {/* Top Billing Summary Strip (3 Compact Cards) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          {/* Card 1: Outstanding Balance */}
+          <div className="p-4 rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-sm space-y-1 border-l-4 border-l-rose-500">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">
+                Outstanding Balance
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-transparent">
+                Settlement Due
+              </span>
+            </div>
+            <div className="text-2xl font-bold font-heading tabular-nums text-slate-950 dark:text-zinc-100">
+              ${outstandingBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <div className="text-[11px] text-slate-700 dark:text-zinc-400 font-medium">
+              Across {dueInvoicesCount} pending statement{dueInvoicesCount === 1 ? "" : "s"}
+            </div>
+          </div>
+
+          {/* Card 2: Active Subscription */}
+          <div className="p-4 rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-sm space-y-1 border-l-4 border-l-emerald-500">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">
+                Active Subscription
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-[#10b981] dark:border-transparent flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
+                <span>Active</span>
+              </span>
+            </div>
+            <div className="text-lg font-bold font-heading text-slate-950 dark:text-zinc-100 truncate">
+              {subscription.planName}
+            </div>
+            <div className="text-[11px] text-slate-700 dark:text-zinc-400 font-medium">
+              Billing cycle resets {subscription.billingCycleResetDate}
+            </div>
+          </div>
+
+          {/* Card 3: Invoices Due */}
+          <div className="p-4 rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] dark:shadow-sm space-y-1 border-l-4 border-l-[#b8287a]">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-600 dark:text-zinc-400 text-[11px] font-semibold block">
+                Invoices Due
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#b8287a]/10 text-[#9d1d66] border border-[#b8287a]/25 dark:bg-[#b8287a]/20 dark:text-[#f472b6] dark:border-transparent">
+                {dueInvoicesCount > 0 ? "Pending" : "Current"}
+              </span>
+            </div>
+            <div className={`text-2xl font-bold font-heading tabular-nums ${
+              dueInvoicesCount > 0 ? "text-[#8a1858] dark:text-[#f472b6]" : "text-emerald-700 dark:text-[#10b981]"
+            }`}>
+              {dueInvoicesCount}
+            </div>
+            <div className="text-[11px] text-slate-700 dark:text-zinc-400 font-medium">
+              {dueInvoicesCount > 0 ? "Settlement requested prior to due date" : "All statements current"}
+            </div>
+          </div>
+        </div>
+
         {isLoading ? (
-          <div className="p-12 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-3xl border border-[var(--border)]">
-            Loading commercial invoices and itemized billing statements...
+          <div className="p-12 text-center text-xs text-slate-600 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-white/5">
+            Loading commercial invoices and itemized statements…
           </div>
         ) : invoices.length === 0 ? (
-          <div className="p-12 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-3xl border border-[var(--border)] space-y-3">
-            <div className="text-base font-bold text-[var(--text-primary)]">No Billing Statements Available</div>
-            <p className="max-w-md mx-auto">
+          <div className="p-12 text-center text-xs text-slate-600 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200/90 dark:border-white/5 space-y-3">
+            <div className="text-base font-bold text-slate-950 dark:text-zinc-100">No Billing Statements Available</div>
+            <p className="max-w-md mx-auto text-slate-700 dark:text-zinc-400 font-medium">
               Invoices are automatically generated upon technician completion and verification of on-site work orders.
             </p>
             <Link
               to="/customer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e]"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#10b981] dark:text-zinc-950 shadow-sm"
             >
               <span>View Service Requests</span>
               <ArrowRightIcon size={12} />
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left: Invoice Listing */}
-            <div className="lg:col-span-4 space-y-3">
-              <div className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] flex items-center justify-between">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left: Invoice Listing (Master) */}
+            <div className="lg:col-span-4 space-y-2.5">
+              <div className="text-xs font-semibold text-slate-700 dark:text-zinc-400 flex items-center justify-between px-1">
                 <span>Billing Statements</span>
-                <span className="text-[11px] font-normal text-[#10b981]">
+                <span className="font-mono tabular-nums text-xs font-bold text-emerald-700 dark:text-[#10b981]">
                   {invoices.length} Total
                 </span>
               </div>
-              {invoices.map((inv) => (
-                <div
-                  key={inv.id}
-                  onClick={() => setSelectedInvoice(inv)}
-                  className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                    selectedInvoice?.id === inv.id
-                      ? "border-[#10b981] bg-[var(--bg-surface)] shadow-md ring-1 ring-[#10b981]"
-                      : "border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:border-[var(--border-strong)]"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-sm text-[var(--text-primary)]">{inv.id}</span>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                        inv.status === "PAID"
-                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
-                          : inv.status === "PAYMENT_PENDING"
-                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
-                          : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
+
+              <div className="space-y-2">
+                {invoices.map((inv) => {
+                  const isSelected = selectedInvoice?.id === inv.id;
+                  return (
+                    <button
+                      key={inv.id}
+                      type="button"
+                      onClick={() => setSelectedInvoice(inv)}
+                      className={`w-full text-left p-3.5 rounded-xl border transition-all ${
+                        isSelected
+                          ? "bg-emerald-50/70 border-2 border-emerald-500 text-slate-900 shadow-sm dark:border-[#10b981] dark:bg-zinc-900 dark:shadow-sm dark:ring-1 dark:ring-[#10b981]"
+                          : "border border-slate-300 bg-slate-50/70 hover:bg-slate-100 text-slate-800 dark:bg-zinc-900/60 dark:border-white/10 dark:text-zinc-400 dark:hover:border-white/20 dark:hover:text-zinc-200 shadow-2xs"
                       }`}
                     >
-                      {inv.status === "PAID" ? "PAID" : inv.status === "PAYMENT_PENDING" ? "GATEWAY PENDING" : "PAYMENT DUE"}
-                    </span>
-                  </div>
-                  <div className="mt-2 text-xs font-medium text-[var(--text-primary)]">
-                    Work Order: {inv.workOrderId} ({inv.assetName})
-                  </div>
-                  <div className="mt-1 flex items-center justify-between text-xs text-[var(--text-muted)]">
-                    <span>Due {inv.dueDate}</span>
-                    <span className="font-bold text-[var(--text-primary)]">${inv.totalAmount.toFixed(2)}</span>
-                  </div>
-                </div>
-              ))}
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono tabular-nums font-bold text-xs text-slate-950 dark:text-zinc-100">{inv.id}</span>
+                        <span
+                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${getStatusBadge(
+                            inv.status
+                          )}`}
+                        >
+                          {inv.status === "PAID"
+                            ? "Paid"
+                            : inv.status === "PAYMENT_PENDING"
+                            ? "Gateway Pending"
+                            : "Payment Due"}
+                        </span>
+                      </div>
+                      <div className="mt-1.5 text-xs font-semibold text-slate-950 dark:text-zinc-200 truncate">
+                        {inv.assetName}
+                      </div>
+                      <div className="mt-1 flex items-center justify-between text-[11px] text-slate-600 dark:text-zinc-400">
+                        <span className="font-medium">Due {inv.dueDate}</span>
+                        <span className="font-mono font-bold text-slate-950 dark:text-zinc-100 tabular-nums">
+                          ${inv.totalAmount.toFixed(2)}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Right: Full Itemized Invoice (Figma Customer invoice Frame) */}
+            {/* Right: Full Itemized Invoice Detail */}
             {selectedInvoice && (
-              <div className="lg:col-span-8 p-6 sm:p-8 rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm space-y-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-6">
+              <div className="lg:col-span-8 p-6 sm:p-7 rounded-xl border border-slate-300 dark:border-white/5 bg-white dark:bg-zinc-900 shadow-[0_2px_10px_-3px_rgba(15,23,42,0.10)] space-y-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/5 pb-5">
                   <div>
-                    <div className="text-xs font-bold uppercase tracking-wider text-[#10b981]">
-                      Commercial Invoice
+                    <div className="flex items-center gap-1.5 mb-1 text-[11px] font-mono font-bold text-emerald-700 dark:text-[#10b981] uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
+                      <span>VoltOps Commercial Operations</span>
                     </div>
-                    <h2 className="font-heading font-extrabold text-2xl text-[var(--text-primary)]">
+                    <h2 className="font-heading font-extrabold text-2xl text-slate-950 dark:text-zinc-50 tracking-tight">
                       {selectedInvoice.id}
                     </h2>
-                    <div className="text-xs text-[var(--text-muted)] mt-1">
-                      Work Order: <span className="font-mono font-bold text-[var(--text-primary)]">{selectedInvoice.workOrderId}</span> · {selectedInvoice.assetName}
+                    <div className="text-xs text-slate-700 dark:text-zinc-400 mt-1 font-medium">
+                      Work Order:{" "}
+                      <span className="font-mono font-semibold text-slate-950 dark:text-zinc-200">
+                        {selectedInvoice.workOrderId}
+                      </span>{" "}
+                      · {selectedInvoice.assetName}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5 flex-wrap">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold border ${
-                        selectedInvoice.status === "PAID"
-                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
-                          : selectedInvoice.status === "PAYMENT_PENDING"
-                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
-                          : "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20"
-                      }`}
+                      className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusBadge(
+                        selectedInvoice.status
+                      )}`}
                     >
                       {selectedInvoice.status === "PAID"
                         ? "Paid in Full"
@@ -183,18 +282,29 @@ export function CustomerInvoices() {
                         ? "Gateway Pending"
                         : "Payment Due"}
                     </span>
+
+                    <button
+                      type="button"
+                      onClick={() => window.print()}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-300 dark:border-white/10 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-950 shadow-xs dark:bg-zinc-950 dark:text-zinc-300 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1.5"
+                      title="Print invoice or save as PDF"
+                    >
+                      <PrinterIcon size={13} />
+                      <span>Print / PDF</span>
+                    </button>
+
                     {selectedInvoice.status === "PAYMENT_DUE" && (
                       <button
                         type="button"
                         onClick={handlePayNow}
                         disabled={isPaying}
-                        className="px-5 py-2 rounded-xl text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm disabled:opacity-50"
+                        className="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-[#10b981] dark:text-zinc-950 dark:hover:bg-[#34d399] transition-all shadow-sm disabled:opacity-50"
                       >
-                        {isPaying ? "Connecting Gateway..." : "Initiate Payment"}
+                        {isPaying ? "Connecting Gateway…" : "Initiate Payment"}
                       </button>
                     )}
                     {selectedInvoice.status === "PAYMENT_PENDING" && (
-                      <span className="text-[11px] text-amber-700 dark:text-amber-400 font-semibold italic">
+                      <span className="text-[11px] text-cyan-800 dark:text-cyan-400 font-semibold italic">
                         Webhook Pending
                       </span>
                     )}
@@ -202,50 +312,60 @@ export function CustomerInvoices() {
                 </div>
 
                 {paySuccess && (
-                  <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-semibold flex items-center gap-2 animate-fade-in">
+                  <div className="p-3.5 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-900 dark:bg-cyan-500/10 dark:border-cyan-500/20 dark:text-cyan-300 text-xs font-semibold flex items-center gap-2 animate-fade-in">
                     <CheckCircleIcon size={16} />
                     <span>Payment initiated (Demo Mode). Gateway webhook confirmation pending.</span>
                   </div>
                 )}
 
-                {/* Metadata Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-                  <div>
-                    <span className="text-[var(--text-muted)] block">Customer Account</span>
-                    <span className="font-bold text-[var(--text-primary)]">{selectedInvoice.customerName}</span>
+                {/* Metadata Grid (Generous spacing, no awkward truncation) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                  <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950/60 border border-slate-300/80 dark:border-white/5">
+                    <span className="text-slate-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Customer Account</span>
+                    <span className="font-semibold text-slate-950 dark:text-zinc-200 block mt-1 leading-snug">
+                      {selectedInvoice.customerName}
+                    </span>
                   </div>
-                  <div>
-                    <span className="text-[var(--text-muted)] block">Billing Date</span>
-                    <span className="font-bold text-[var(--text-primary)]">{selectedInvoice.billingDate}</span>
+                  <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950/60 border border-slate-300/80 dark:border-white/5">
+                    <span className="text-slate-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Billing Date</span>
+                    <span className="font-semibold text-slate-950 dark:text-zinc-200 block mt-1 tabular-nums">
+                      {selectedInvoice.billingDate}
+                    </span>
                   </div>
-                  <div>
-                    <span className="text-[var(--text-muted)] block">Payment Due</span>
-                    <span className="font-bold text-[var(--text-primary)]">{selectedInvoice.dueDate}</span>
+                  <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950/60 border border-slate-300/80 dark:border-white/5">
+                    <span className="text-slate-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Payment Due</span>
+                    <span className="font-semibold text-slate-950 dark:text-zinc-200 block mt-1 tabular-nums">
+                      {selectedInvoice.dueDate}
+                    </span>
                   </div>
-                  <div>
-                    <span className="text-[var(--text-muted)] block">Coverage Plan</span>
-                    <span className="font-bold text-[#10b981]">24/7 Standard</span>
+                  <div className="p-3.5 rounded-xl bg-slate-100 dark:bg-zinc-950/60 border border-slate-300/80 dark:border-white/5">
+                    <span className="text-slate-600 dark:text-zinc-500 text-[10px] uppercase font-bold tracking-wider block">Coverage Plan</span>
+                    <span className="font-semibold text-emerald-700 dark:text-[#10b981] block mt-1">
+                      {subscription.planName}
+                    </span>
                   </div>
                 </div>
 
                 {/* Itemized Table */}
-                <div className="overflow-x-auto border-t border-[var(--border)] pt-4">
+                <div className="border border-slate-300 dark:border-white/5 rounded-xl overflow-hidden bg-slate-50/50 dark:bg-zinc-950/40">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="text-[var(--text-muted)] border-b border-[var(--border)] uppercase tracking-wider text-[10px]">
-                        <th className="py-2.5">Description</th>
-                        <th className="py-2.5 text-center">Qty</th>
-                        <th className="py-2.5 text-right">Unit Price</th>
-                        <th className="py-2.5 text-right">Total</th>
+                      <tr className="text-slate-700 dark:text-zinc-400 border-b border-slate-300/80 dark:border-white/5 bg-slate-100 dark:bg-zinc-950/80 text-[11px] font-semibold">
+                        <th className="py-3 px-4">Line Item Description</th>
+                        <th className="py-3 px-3 text-center w-20">Qty</th>
+                        <th className="py-3 px-3 text-right w-28">Unit Price</th>
+                        <th className="py-3 px-4 text-right w-28">Total</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[var(--border)]">
+                    <tbody className="divide-y divide-slate-200 dark:divide-white/5">
                       {selectedInvoice.items.map((item) => (
-                        <tr key={item.id}>
-                          <td className="py-3 font-medium text-[var(--text-primary)]">{item.description}</td>
-                          <td className="py-3 text-center text-[var(--text-muted)]">{item.quantity}</td>
-                          <td className="py-3 text-right text-[var(--text-muted)]">${item.unitPrice.toFixed(2)}</td>
-                          <td className="py-3 text-right font-bold text-[var(--text-primary)]">
+                        <tr key={item.id} className="hover:bg-slate-100/70 dark:hover:bg-zinc-800/20 transition-colors">
+                          <td className="py-3.5 px-4 font-medium text-slate-950 dark:text-zinc-200">{item.description}</td>
+                          <td className="py-3.5 px-3 text-center text-slate-700 dark:text-zinc-400 font-medium tabular-nums">{item.quantity}</td>
+                          <td className="py-3.5 px-3 text-right text-slate-700 dark:text-zinc-400 font-medium tabular-nums">
+                            ${item.unitPrice.toFixed(2)}
+                          </td>
+                          <td className="py-3.5 px-4 text-right font-bold text-slate-950 dark:text-zinc-100 tabular-nums">
                             ${item.totalPrice.toFixed(2)}
                           </td>
                         </tr>
@@ -255,26 +375,34 @@ export function CustomerInvoices() {
                 </div>
 
                 {/* Totals Breakdown */}
-                <div className="border-t border-[var(--border)] pt-4 flex flex-col items-end text-xs space-y-1.5">
-                  <div className="flex justify-between w-48 text-[var(--text-muted)]">
-                    <span>Subtotal:</span>
-                    <span>${selectedInvoice.subtotal.toFixed(2)}</span>
+                <div className="flex flex-col items-end text-xs space-y-2 pt-1">
+                  <div className="flex justify-between w-64 text-slate-700 dark:text-zinc-400">
+                    <span className="font-medium">Subtotal:</span>
+                    <span className="font-mono tabular-nums font-semibold text-slate-950 dark:text-zinc-200">
+                      ${selectedInvoice.subtotal.toFixed(2)}
+                    </span>
                   </div>
-                  <div className="flex justify-between w-48 text-[var(--text-muted)]">
-                    <span>VAT / Tax ({(selectedInvoice.taxRate * 100).toFixed(0)}%):</span>
-                    <span>${selectedInvoice.taxAmount.toFixed(2)}</span>
+                  <div className="flex justify-between w-64 text-slate-700 dark:text-zinc-400">
+                    <span className="font-medium">VAT / Tax ({(selectedInvoice.taxRate * 100).toFixed(0)}%):</span>
+                    <span className="font-mono tabular-nums font-semibold text-slate-950 dark:text-zinc-200">
+                      ${selectedInvoice.taxAmount.toFixed(2)}
+                    </span>
                   </div>
-                  <div className="flex justify-between w-48 font-heading font-extrabold text-base text-[var(--text-primary)] border-t border-[var(--border)] pt-2">
+                  <div className="flex justify-between w-64 font-heading font-extrabold text-base text-slate-950 dark:text-zinc-100 border-t border-slate-200 dark:border-white/10 pt-2.5">
                     <span>Total Amount:</span>
-                    <span className="text-[#10b981]">${selectedInvoice.totalAmount.toFixed(2)}</span>
+                    <span className="text-emerald-700 dark:text-[#10b981] font-mono tabular-nums">
+                      ${selectedInvoice.totalAmount.toFixed(2)}
+                    </span>
                   </div>
                 </div>
 
-                {selectedInvoice.paymentNotice && (
-                  <div className="text-[11px] text-[var(--text-muted)] border-t border-[var(--border)] pt-4 italic">
-                    Note: {selectedInvoice.paymentNotice}
-                  </div>
-                )}
+                {/* Truthful Preview Disclaimer */}
+                <div className="text-[11px] text-slate-600 dark:text-zinc-500 border-t border-slate-200 dark:border-white/5 pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span>UI preview only · No live banking transaction processed</span>
+                  {selectedInvoice.paymentNotice && (
+                    <span className="italic">{selectedInvoice.paymentNotice}</span>
+                  )}
+                </div>
               </div>
             )}
           </div>

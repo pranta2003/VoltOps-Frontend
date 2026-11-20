@@ -102,29 +102,29 @@ export function DispatchAuditLog() {
   const getSeverityBadge = (severity: DispatchEventLog["severity"]) => {
     switch (severity) {
       case "CRITICAL":
-        return "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20";
+        return "bg-rose-50 text-[#8a1858] border-rose-300 dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30";
       case "WARNING":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20";
+        return "bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30";
       case "INFO":
       default:
-        return "bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/20";
+        return "bg-sky-50 text-sky-800 border-sky-300 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800/40";
     }
   };
 
   const getActionBadge = (action: DispatchEventLog["action"]) => {
     switch (action) {
       case "ORDER_CREATED":
-        return "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20";
+        return "bg-indigo-50 text-indigo-800 border-indigo-300 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800/40";
       case "TECH_DISPATCHED":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+        return "bg-blue-50 text-blue-800 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800/40";
       case "STATUS_CHANGED":
-        return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20";
+        return "bg-purple-50 text-purple-800 border-purple-300 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/40";
       case "REQUEST_REVIEWED":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+        return "bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30";
       case "CANCELLED":
-        return "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20";
+        return "bg-rose-50 text-[#8a1858] border-rose-300 dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30";
       default:
-        return "bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20";
+        return "bg-slate-50 text-slate-700 border-slate-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-white/10";
     }
   };
 
@@ -133,27 +133,18 @@ export function DispatchAuditLog() {
       title="Audit Log"
       action={
         <div className="flex items-center gap-2">
-          {/* Status indicator */}
-          <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
-              isOffline
-                ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
-                : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
-            }`}
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                isOffline ? "bg-amber-500" : "bg-emerald-500 animate-pulse"
-              }`}
-            />
-            <span>{isOffline ? "Local preview" : "Live API"}</span>
-          </span>
+          {!isOffline && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Live API
+            </span>
+          )}
 
           {/* Export JSON Compliance Button */}
           <button
             type="button"
             onClick={handleExportJson}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] active:scale-95 transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50 hover:border-slate-400 dark:hover:border-white/20 active:scale-95 transition-all shadow-xs"
           >
             <DownloadIcon size={13} />
             <span>Export JSON</span>
@@ -165,17 +156,17 @@ export function DispatchAuditLog() {
             onClick={handleRefresh}
             disabled={isRefreshing}
             aria-label="Refresh audit events"
-            className="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] active:scale-95 transition-all disabled:opacity-50"
+            className="p-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50 hover:border-slate-400 dark:hover:border-white/20 active:scale-95 transition-all disabled:opacity-50"
           >
             <RefreshCwIcon size={15} className={isRefreshing ? "animate-spin text-emerald-500" : ""} />
           </button>
         </div>
       }
     >
-      <div className="space-y-3">
+      <div className="space-y-4 pb-24">
         {/* Error notification banner if request failed */}
         {errorMessage && (
-          <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
+          <div className="p-3 rounded-xl border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-900 dark:text-rose-300">
             <div className="flex items-center gap-2">
               <AlertTriangleIcon size={15} className="text-rose-500 shrink-0" />
               <span>{errorMessage}</span>
@@ -190,98 +181,100 @@ export function DispatchAuditLog() {
           </div>
         )}
 
-        {/* ── Compact Filter Toolbar ──────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Search Input */}
-          <div className="relative flex-1 min-w-[200px]">
-            <SearchIcon
-              size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
-            />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search audit log"
-              aria-label="Search audit events"
-              className="w-full text-xs pl-9 pr-8 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                aria-label="Clear search"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] p-0.5"
+        {/* ── Elevated Filter Toolbar ─────────────────────────────────────── */}
+        <div className="bg-white border border-slate-300 border-l-4 border-l-emerald-500 rounded-xl p-4 shadow-md dark:bg-zinc-900 dark:border-white/5 dark:border-l-white/5 dark:shadow-none">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Search Input */}
+            <div className="relative flex-1 min-w-[200px]">
+              <SearchIcon
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search audit log"
+                aria-label="Search audit events"
+                className="w-full text-xs pl-9 pr-8 py-2 rounded-lg bg-slate-100/80 border border-slate-300 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 dark:placeholder:text-zinc-500"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  aria-label="Clear search"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-950 dark:text-zinc-400 dark:hover:text-zinc-100 p-0.5"
+                >
+                  <XIcon size={13} />
+                </button>
+              )}
+            </div>
+
+            {/* Action Filter */}
+            <div className="relative">
+              <select
+                value={selectedAction}
+                onChange={(e) => setSelectedAction(e.target.value)}
+                aria-label="Filter by event action"
+                className="text-xs py-2 pl-3 pr-8 rounded-lg bg-slate-100/80 border border-slate-300 text-slate-950 font-medium focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 appearance-none"
               >
-                <XIcon size={13} />
-              </button>
-            )}
-          </div>
+                <option value="ALL">All actions</option>
+                <option value="ORDER_CREATED">Order created</option>
+                <option value="TECH_DISPATCHED">Technician dispatched</option>
+                <option value="STATUS_CHANGED">Status changed</option>
+                <option value="REQUEST_REVIEWED">Request reviewed</option>
+                <option value="CANCELLED">Cancelled</option>
+              </select>
+              <ChevronDownIcon
+                size={13}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
+              />
+            </div>
 
-          {/* Action Filter */}
-          <div className="relative">
-            <select
-              value={selectedAction}
-              onChange={(e) => setSelectedAction(e.target.value)}
-              aria-label="Filter by event action"
-              className="text-xs py-1.5 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="ALL">All actions</option>
-              <option value="ORDER_CREATED">Order created</option>
-              <option value="TECH_DISPATCHED">Technician dispatched</option>
-              <option value="STATUS_CHANGED">Status changed</option>
-              <option value="REQUEST_REVIEWED">Request reviewed</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
-            <ChevronDownIcon
-              size={13}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
-            />
-          </div>
-
-          {/* Severity Filter */}
-          <div className="relative">
-            <select
-              value={selectedSeverity}
-              onChange={(e) => setSelectedSeverity(e.target.value)}
-              aria-label="Filter by severity"
-              className="text-xs py-1.5 pl-3 pr-8 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] appearance-none focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="ALL">All severities</option>
-              <option value="CRITICAL">Critical</option>
-              <option value="WARNING">Warning</option>
-              <option value="INFO">Info</option>
-            </select>
-            <ChevronDownIcon
-              size={13}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
-            />
+            {/* Severity Filter */}
+            <div className="relative">
+              <select
+                value={selectedSeverity}
+                onChange={(e) => setSelectedSeverity(e.target.value)}
+                aria-label="Filter by severity"
+                className="text-xs py-2 pl-3 pr-8 rounded-lg bg-slate-100/80 border border-slate-300 text-slate-950 font-medium focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50 appearance-none"
+              >
+                <option value="ALL">All severities</option>
+                <option value="CRITICAL">Critical</option>
+                <option value="WARNING">Warning</option>
+                <option value="INFO">Info</option>
+              </select>
+              <ChevronDownIcon
+                size={13}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-zinc-400 pointer-events-none"
+              />
+            </div>
           </div>
         </div>
 
         {/* ── Chronological Event Timeline & Ledger ───────────────────────── */}
         {isLoading ? (
-          <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
+          <div className="p-8 text-center text-xs text-slate-600 dark:text-zinc-400 bg-white dark:bg-zinc-900 rounded-xl border border-slate-300 dark:border-white/10 shadow-md">
             Loading audit events...
           </div>
         ) : filteredEvents.length === 0 ? (
-          <div className="p-8 text-center text-xs text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
+          <div className="p-8 text-center text-xs text-slate-600 dark:text-zinc-400 bg-white dark:bg-zinc-900 rounded-xl border border-slate-300 dark:border-white/10 shadow-md">
             No audit events match current filters.
           </div>
         ) : (
-          <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-xs divide-y divide-[var(--border)]">
+          <div className="bg-white border border-slate-300 border-t-4 border-t-emerald-500 rounded-xl shadow-md overflow-hidden dark:bg-zinc-900 dark:border-white/5 dark:border-t-white/5 dark:shadow-none divide-y divide-slate-200 dark:divide-white/5">
             {filteredEvents.map((ev) => {
               const isExpanded = expandedEventId === ev.id;
               return (
                 <div
                   key={ev.id}
                   onClick={() => setExpandedEventId(isExpanded ? null : ev.id)}
-                  className="p-3 hover:bg-[var(--bg-surface-2)] transition-colors cursor-pointer text-xs"
+                  className="p-3.5 odd:bg-white even:bg-slate-50/70 hover:bg-emerald-50/40 dark:odd:bg-zinc-900 dark:even:bg-zinc-900 dark:hover:bg-zinc-800/40 transition-colors cursor-pointer text-xs"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     {/* Left: Time, Action, Severity */}
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[11px] text-[var(--text-muted)] shrink-0">
+                    <div className="flex items-center gap-2.5">
+                      <span className="font-mono tabular-nums text-[11px] text-slate-600 dark:text-zinc-400 shrink-0 font-medium">
                         {new Date(ev.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                       </span>
                       <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getActionBadge(ev.action)}`}>
@@ -294,9 +287,9 @@ export function DispatchAuditLog() {
 
                     {/* Middle: Actor & Target */}
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-[var(--text-primary)]">{ev.actorName}</span>
-                      <span className="text-[11px] text-[var(--text-muted)] font-mono">
-                        → target: <span className="text-[var(--text-primary)] font-bold">{ev.targetId}</span>
+                      <span className="font-bold text-slate-950 dark:text-zinc-50">{ev.actorName}</span>
+                      <span className="text-[11px] text-slate-600 dark:text-zinc-400 font-mono">
+                        → target: <span className="text-slate-950 dark:text-zinc-50 font-bold">{ev.targetId}</span>
                       </span>
                     </div>
 
@@ -305,7 +298,7 @@ export function DispatchAuditLog() {
                       <button
                         type="button"
                         onClick={() => setExpandedEventId(isExpanded ? null : ev.id)}
-                        className="text-[11px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1"
+                        className="text-[11px] font-semibold text-slate-700 hover:text-slate-950 dark:text-zinc-300 dark:hover:text-zinc-100 flex items-center gap-1"
                       >
                         <span>{isExpanded ? "Hide" : "Details"}</span>
                         <ChevronDownIcon size={12} className={`transition-transform ${isExpanded ? "rotate-180" : ""}`} />
@@ -314,7 +307,7 @@ export function DispatchAuditLog() {
                         type="button"
                         onClick={() => setInspectEvent(ev)}
                         title="View Record"
-                        className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all"
+                        className="p-1 rounded-md text-slate-500 hover:text-slate-950 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-all"
                       >
                         <EyeIcon size={13} />
                       </button>
@@ -323,9 +316,9 @@ export function DispatchAuditLog() {
 
                   {/* Expandable Details Pane */}
                   {isExpanded && (
-                    <div className="mt-2.5 pt-2.5 border-t border-[var(--border)] text-xs space-y-2 animate-fade-in">
-                      <p className="text-[var(--text-secondary)] leading-relaxed">{ev.summary}</p>
-                      <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)] font-mono">
+                    <div className="mt-3 pt-3 border-t border-slate-200 dark:border-white/5 text-xs space-y-2 animate-fade-in">
+                      <p className="text-slate-700 dark:text-zinc-300 leading-relaxed font-medium">{ev.summary}</p>
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-400 font-mono tabular-nums">
                         <span>Event ID: {ev.id}</span>
                         <span>{ev.timestamp}</span>
                       </div>
@@ -344,23 +337,23 @@ export function DispatchAuditLog() {
           role="dialog"
           aria-modal="true"
           aria-labelledby={inspectModalHeadingId}
-          className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs animate-fade-in"
+          className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-xs animate-fade-in"
         >
-          <div className="w-full max-w-md h-full bg-[var(--bg-surface)] border-l border-[var(--border)] shadow-2xl flex flex-col justify-between overflow-y-auto">
+          <div className="w-full max-w-md h-full bg-white dark:bg-zinc-900 border-l border-slate-300 dark:border-white/10 shadow-2xl flex flex-col justify-between overflow-y-auto">
             {/* Header */}
-            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
+            <div className="p-4 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   Audit Event Record
                 </span>
-                <h3 id={inspectModalHeadingId} className="text-sm font-bold text-[var(--text-primary)]">
+                <h3 id={inspectModalHeadingId} className="text-sm font-bold text-slate-950 dark:text-zinc-50">
                   {inspectEvent.id}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setInspectEvent(null)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-950 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 <XIcon size={16} />
               </button>
@@ -368,7 +361,7 @@ export function DispatchAuditLog() {
 
             {/* Content */}
             <div className="p-4 space-y-3.5 flex-1 text-xs">
-              <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] space-y-2">
+              <div className="p-3.5 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-zinc-950 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getActionBadge(inspectEvent.action)}`}>
                     {inspectEvent.action}
@@ -377,58 +370,58 @@ export function DispatchAuditLog() {
                     {inspectEvent.severity}
                   </span>
                 </div>
-                <div className="text-[11px] text-[var(--text-muted)] font-mono">
+                <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-mono tabular-nums">
                   Timestamp: {inspectEvent.timestamp}
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] space-y-2 text-xs">
+              <div className="p-3.5 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-zinc-950 space-y-2 text-xs">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block">
                     Responsible Actor
                   </span>
-                  <span className="font-semibold text-[var(--text-primary)]">{inspectEvent.actorName}</span>
+                  <span className="font-bold text-slate-950 dark:text-zinc-50">{inspectEvent.actorName}</span>
                 </div>
 
-                <div className="pt-2 border-t border-[var(--border)]">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block">
+                <div className="pt-2 border-t border-slate-200 dark:border-white/5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block">
                     Target Resource
                   </span>
-                  <span className="font-mono font-semibold text-[var(--text-primary)]">{inspectEvent.targetId}</span>
+                  <span className="font-mono font-bold text-slate-950 dark:text-zinc-50">{inspectEvent.targetId}</span>
                 </div>
 
-                <div className="pt-2 border-t border-[var(--border)]">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block">
+                <div className="pt-2 border-t border-slate-200 dark:border-white/5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block">
                     Event Summary
                   </span>
-                  <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">{inspectEvent.summary}</p>
+                  <p className="text-[12px] text-slate-700 dark:text-zinc-300 mt-0.5 font-medium">{inspectEvent.summary}</p>
                 </div>
               </div>
 
               {/* Raw Payload View */}
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-400 block mb-1">
                   Raw Event JSON
                 </span>
-                <pre className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[10px] font-mono text-[var(--text-primary)] overflow-x-auto">
+                <pre className="p-3 rounded-xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-zinc-950 text-[10px] font-mono text-slate-950 dark:text-zinc-50 overflow-x-auto">
                   {JSON.stringify(inspectEvent, null, 2)}
                 </pre>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-surface)] flex items-center justify-between">
+            <div className="p-4 border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-zinc-950 flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => handleCopyId(inspectEvent.id)}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors"
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 dark:border-white/10 text-slate-800 dark:text-zinc-200 hover:text-slate-950 dark:hover:text-zinc-50 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 {copiedId === inspectEvent.id ? "✓ Copied ID" : "Copy Event ID"}
               </button>
               <button
                 type="button"
                 onClick={() => setInspectEvent(null)}
-                className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50"
               >
                 Close Drawer
               </button>

@@ -10,7 +10,6 @@ import { DispatcherMetrics, TechnicianRecommendation, DispatchEventLog } from ".
 import { dispatcherService } from "../../services/dispatcherService";
 import { DonutChart } from "../../components/charts/DonutChart";
 import { HorizontalBarChart } from "../../components/charts/HorizontalBarChart";
-import { ActivityVolumeChart } from "../../components/charts/ActivityVolumeChart";
 import { MetricCard } from "../../components/MetricCard";
 import {
   WrenchIcon,
@@ -66,7 +65,9 @@ export const DispatcherDashboard: FC = () => {
 
       setMetrics(metricsRes.data);
       setIsOffline(metricsRes.isOffline);
-      setActiveOrders(ordersRes.data.slice(0, 5));
+      setActiveOrders(
+        ordersRes.data.filter((w) => w.status !== "COMPLETED").slice(0, 5)
+      );
       setPendingReviews(
         ordersRes.data.filter((w) => w.status === "WORK_COMPLETED_AWAITING_CONFIRMATION")
       );
@@ -197,13 +198,12 @@ export const DispatcherDashboard: FC = () => {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case "URGENT":
-        return "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-900";
       case "HIGH":
-        return "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-900";
+        return "bg-rose-50 text-[#8a1858] border-rose-300 dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30 font-bold";
       case "MEDIUM":
-        return "bg-sky-50 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300 border-sky-200 dark:border-sky-900";
+        return "bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30 font-bold";
       default:
-        return "bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
+        return "bg-slate-100 text-slate-800 border-slate-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-white/10 font-bold";
     }
   };
 
@@ -211,49 +211,49 @@ export const DispatcherDashboard: FC = () => {
     switch (status) {
       case "UNASSIGNED":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-900">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-[#8a1858] border border-rose-300 dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#b8287a] animate-pulse" />
             Unassigned
           </span>
         );
       case "TRAVELLING":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-900">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-cyan-50 text-cyan-800 border border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#06b6d4]" />
             In Transit
           </span>
         );
       case "ON_SITE":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-900">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             On Site
           </span>
         );
       case "WORK_COMPLETED_AWAITING_CONFIRMATION":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-cyan-50 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-900">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-cyan-50 text-cyan-800 border border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#06b6d4] animate-pulse" />
             Reported Complete
           </span>
         );
       case "ASSIGNED":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-sky-50 text-sky-800 border border-sky-300 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
             Assigned
           </span>
         );
       case "COMPLETED":
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             Completed
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-white/10">
             <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
             {status}
           </span>
@@ -264,40 +264,19 @@ export const DispatcherDashboard: FC = () => {
   return (
     <Layout
       title="Dashboard"
-      subtitle="EPZ Industrial Core Hub"
       action={
         <div className="flex items-center gap-2">
-          {/* Status pill: Distinguishes Live, Local Preview, Stale, and Error */}
-          <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-              errorMessage && !metrics
-                ? "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20"
-                : isStale
-                ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20"
-                : isOffline
-                ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20"
-                : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20"
-            }`}
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                errorMessage && !metrics
-                  ? "bg-rose-500"
-                  : isStale
-                  ? "bg-amber-500"
-                  : isOffline
-                  ? "bg-amber-500"
-                  : "bg-emerald-500 animate-pulse"
-              }`}
-            />
-            {errorMessage && !metrics
-              ? "Connection Error"
-              : isStale
-              ? "Stale Data"
-              : isOffline
-              ? "Local preview"
-              : "Live API"}
-          </span>
+          {errorMessage && !metrics ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border border-rose-300 bg-rose-50 text-[#8a1858] dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#b8287a]" />
+              Connection Error
+            </span>
+          ) : !isOffline ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border border-emerald-300 bg-emerald-50 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live API
+            </span>
+          ) : null}
 
           {/* Refresh button */}
           <button
@@ -306,57 +285,47 @@ export const DispatcherDashboard: FC = () => {
             disabled={isRefreshing}
             aria-label="Refresh telemetry"
             title="Refresh telemetry"
-            className="p-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] active:scale-95 transition-all duration-150 disabled:opacity-50"
+            className="p-1.5 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50 hover:border-slate-400 disabled:opacity-40 transition-colors btn-press shadow-xs"
           >
-            <RefreshCwIcon size={15} className={isRefreshing ? "animate-spin text-emerald-500" : ""} />
+            <RefreshCwIcon size={14} className={isRefreshing ? "animate-spin text-emerald-500" : ""} />
           </button>
         </div>
       }
     >
-      <div className="space-y-5">
+      <div className="space-y-5 pb-24">
         {/* Error notification banner if request failed */}
         {errorMessage && (
-          <div className="p-3 rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 flex items-center justify-between text-xs text-rose-800 dark:text-rose-300">
+          <div className="p-3 rounded-lg border border-rose-300 bg-rose-50 text-xs text-[#8a1858] dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <AlertTriangleIcon size={15} className="text-rose-500 shrink-0" />
-              <span>{errorMessage}</span>
+              <AlertTriangleIcon size={14} className="text-[#b8287a] shrink-0" />
+              <span className="font-medium">{errorMessage}</span>
             </div>
             <button
               type="button"
               onClick={handleRefresh}
-              className="px-2.5 py-1 rounded-lg bg-rose-600 text-white font-semibold hover:bg-rose-700 active:scale-95 transition-all text-xs"
+              className="text-xs font-bold underline hover:no-underline shrink-0"
             >
               Retry
             </button>
           </div>
         )}
 
-        {/* Subheader & Hub Filter */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-1 border-b border-[var(--border)]">
-          <div className="flex items-center gap-2 text-xs font-medium text-[var(--text-muted)]">
-            <span className="font-semibold text-[var(--text-primary)]">Operations Hub</span>
-            <span>•</span>
-            <span>Shift Lead: Tania Akter</span>
-            <span>•</span>
-            <span>7 Trades Managed</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <label htmlFor="hub-select" className="text-xs text-[var(--text-muted)]">
-              Branch:
-            </label>
-            <select
-              id="hub-select"
-              value={selectedBranch}
-              onChange={(e) => setSelectedBranch(e.target.value)}
-              className="text-xs py-1 px-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
-            >
-              <option value="ALL">All Hubs (Dhaka Division)</option>
-              <option value="EPZ">EPZ Industrial Core (DEPZ)</option>
-              <option value="Gazipur">Gazipur Industrial Zone</option>
-              <option value="Tejgaon">Tejgaon Commercial Hub</option>
-            </select>
-          </div>
+        {/* Clean Hub Filter */}
+        <div className="flex items-center justify-end gap-2 pb-1">
+          <label htmlFor="hub-select" className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+            Branch:
+          </label>
+          <select
+            id="hub-select"
+            value={selectedBranch}
+            onChange={(e) => setSelectedBranch(e.target.value)}
+            className="text-xs py-1.5 px-3 rounded-lg border border-slate-300 bg-white text-slate-900 font-bold shadow-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-zinc-900 dark:border-white/10 dark:text-zinc-50"
+          >
+            <option value="ALL">All Hubs (Dhaka Division)</option>
+            <option value="EPZ">EPZ Industrial Core (DEPZ)</option>
+            <option value="Gazipur">Gazipur Industrial Zone</option>
+            <option value="Tejgaon">Tejgaon Commercial Hub</option>
+          </select>
         </div>
 
         {/* ── 1. Telemetry Metric Cards Strip ──────────────── */}
@@ -365,7 +334,6 @@ export const DispatcherDashboard: FC = () => {
             <MetricCard
               label="Unassigned Requests"
               value={isLoading ? "—" : metrics?.unassignedRequests ?? 0}
-              subtext="Awaiting Triage & Dispatch"
               icon={AlertTriangleIcon}
               trend={
                 (metrics?.unassignedRequests ?? 0) > 0
@@ -379,7 +347,6 @@ export const DispatcherDashboard: FC = () => {
             <MetricCard
               label="Active Work Orders"
               value={isLoading ? "—" : metrics?.activeWorkOrders ?? 0}
-              subtext="In Transit & On-site Repairs"
               icon={WrenchIcon}
               trend={{ direction: "up", label: "Live Jobs" }}
             />
@@ -389,7 +356,6 @@ export const DispatcherDashboard: FC = () => {
             <MetricCard
               label="Technicians On Duty"
               value={isLoading ? "—" : metrics?.techniciansOnDuty ?? 0}
-              subtext="Verified Licensed Capacity"
               icon={ShieldCheckIcon}
               trend={{ direction: "neutral", label: "EPZ & Gazipur" }}
             />
@@ -398,7 +364,6 @@ export const DispatcherDashboard: FC = () => {
           <MetricCard
             label="SLA Watch (Urgent)"
             value={isLoading ? "—" : metrics?.urgentSlaWatch ?? 0}
-            subtext="20–40m Physical Target"
             icon={ClockIcon}
             alert={(metrics?.urgentSlaWatch ?? 0) > 0}
             trend={
@@ -411,45 +376,45 @@ export const DispatcherDashboard: FC = () => {
 
         {/* ── Pending Completion Reviews Area ────────────────────────────── */}
         {pendingReviews.length > 0 && (
-          <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-3.5 sm:p-4 space-y-3 shadow-xs">
+          <div className="rounded-xl border border-cyan-300 bg-cyan-50/70 p-3.5 sm:p-4 space-y-3 shadow-md dark:border-cyan-500/30 dark:bg-[#06b6d4]/10 dark:shadow-none">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-cyan-900 dark:text-cyan-200">
-                  Pending Completion Reviews ({pendingReviews.length})
+                <span className="w-2 h-2 rounded-full bg-[#06b6d4] animate-pulse" />
+                <h3 className="text-xs font-bold text-cyan-950 dark:text-cyan-100 uppercase tracking-wide">
+                  Pending completion reviews ({pendingReviews.length})
                 </h3>
               </div>
-              <span className="text-[11px] text-cyan-700 dark:text-cyan-300 font-medium">
+              <span className="text-[11px] text-cyan-800 dark:text-cyan-300 font-semibold">
                 Technician reports awaiting dispatcher verification
               </span>
             </div>
 
-            <div className="divide-y divide-[var(--border)] border border-[var(--border)] rounded-xl bg-[var(--bg-surface)] overflow-hidden">
+            <div className="divide-y divide-slate-300/80 border border-slate-300 rounded-xl bg-white shadow-xs overflow-hidden dark:divide-white/5 dark:border-white/10 dark:bg-zinc-900">
               {pendingReviews.map((order) => (
                 <div
                   key={order.id}
-                  className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[var(--bg-surface-2)]/60 transition-colors"
+                  className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-emerald-50/40 dark:hover:bg-zinc-800/40 transition-colors"
                 >
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono font-bold text-xs text-[var(--text-primary)]">
+                      <span className="font-mono font-bold text-xs text-slate-950 dark:text-zinc-50">
                         {order.id}
                       </span>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border border-cyan-500/20">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-800 border border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30">
                         Review Required
                       </span>
-                      <span className="text-[11px] text-[var(--text-muted)]">
+                      <span className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
                         {order.category}
                       </span>
                     </div>
 
-                    <div className="text-xs font-semibold text-[var(--text-primary)] truncate">
-                      {order.customerName} • <span className="font-normal text-[var(--text-muted)]">{order.assetName}</span>
+                    <div className="text-xs font-bold text-slate-950 dark:text-zinc-100 truncate">
+                      {order.customerName} <span className="text-slate-300 dark:text-zinc-700 mx-1.5">|</span> <span className="font-medium text-slate-700 dark:text-zinc-300">{order.assetName}</span>
                     </div>
 
-                    <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-2">
-                      <span>Technician: <strong className="text-[var(--text-primary)]">{order.assignedTechnicianName || "Kamrul Islam"}</strong></span>
-                      <span>•</span>
+                    <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium flex items-center gap-2">
+                      <span>Technician: <strong className="text-slate-950 dark:text-zinc-100 font-bold">{order.assignedTechnicianName || "Kamrul Islam"}</strong></span>
+                      <span className="text-slate-300 dark:text-zinc-700">•</span>
                       <span>Submitted: {order.completionReport?.completedAt ? new Date(order.completionReport.completedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Recently"}</span>
                     </div>
                   </div>
@@ -457,9 +422,9 @@ export const DispatcherDashboard: FC = () => {
                   <button
                     type="button"
                     onClick={() => handleOpenReviewModal(order)}
-                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-[#06090e] transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-sm self-start sm:self-auto"
+                    className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-[#06090e] transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-sm btn-press self-start sm:self-auto"
                   >
-                    <span>Review Report</span>
+                    <span>Review report</span>
                     <ArrowRightIcon size={12} />
                   </button>
                 </div>
@@ -471,12 +436,12 @@ export const DispatcherDashboard: FC = () => {
         {/* ── 2. Operational Overview: Work Order Distribution & Trade Capacity ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
           {/* Donut Chart: Lifecycle State Distribution */}
-          <div className="lg:col-span-5 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                Work Orders
+          <div className="lg:col-span-5 p-4 rounded-xl border border-slate-300 bg-white shadow-md dark:bg-zinc-900 dark:border-white/5 dark:shadow-none flex flex-col justify-between">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2.5 mb-2">
+              <h3 className="text-xs font-bold text-slate-950 dark:text-zinc-50 uppercase tracking-wide">
+                Work orders by status
               </h3>
-              <span className="text-xs font-mono px-2 py-0.5 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
+              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-slate-700 dark:bg-zinc-800 dark:border-white/10 dark:text-zinc-300">
                 Status
               </span>
             </div>
@@ -484,9 +449,9 @@ export const DispatcherDashboard: FC = () => {
             <DonutChart
               data={[
                 { label: "Assigned", value: 1, color: "#38bdf8" },
-                { label: "In Transit", value: 1, color: "#f59e0b" },
+                { label: "In Transit", value: 1, color: "#06b6d4" },
                 { label: "On Site", value: 1, color: "#10b981" },
-                { label: "Unassigned", value: metrics?.unassignedRequests ?? 1, color: "#ef4444" },
+                { label: "Unassigned", value: metrics?.unassignedRequests ?? 1, color: "#b8287a" },
                 { label: "Completed", value: 1, color: "#64748b" },
               ]}
               totalLabel="Orders"
@@ -495,60 +460,62 @@ export const DispatcherDashboard: FC = () => {
             />
 
             {/* Quick Operational Telemetry Strip */}
-            <div className="pt-2.5 mt-2 border-t border-[var(--border)] grid grid-cols-3 gap-2 text-center">
-              <div className="p-1.5 rounded-lg bg-[var(--bg-surface-2)]">
-                <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">In Field</div>
-                <div className="font-mono text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400">2 Active</div>
+            <div className="pt-2.5 mt-2 border-t border-slate-200 dark:border-white/10 grid grid-cols-3 gap-2 text-center">
+              <div className="p-1.5 rounded-lg bg-slate-100/80 border border-slate-200 dark:bg-zinc-950 dark:border-white/10">
+                <div className="text-[10px] font-medium text-slate-600 dark:text-zinc-400">In field</div>
+                <div className="font-mono tabular-nums text-xs sm:text-sm font-bold text-cyan-800 dark:text-[#06b6d4]">2 Active</div>
               </div>
-              <div className="p-1.5 rounded-lg bg-[var(--bg-surface-2)]">
-                <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">SLA Target</div>
-                <div className="font-mono text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400">100% Met</div>
+              <div className="p-1.5 rounded-lg bg-slate-100/80 border border-slate-200 dark:bg-zinc-950 dark:border-white/10">
+                <div className="text-[10px] font-medium text-slate-600 dark:text-zinc-400">SLA target</div>
+                <div className="font-mono tabular-nums text-xs sm:text-sm font-bold text-emerald-800 dark:text-emerald-400">100% Met</div>
               </div>
-              <div className="p-1.5 rounded-lg bg-[var(--bg-surface-2)]">
-                <div className="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider">Avg Transit</div>
-                <div className="font-mono text-xs sm:text-sm font-bold text-[var(--text-primary)]">18 min</div>
+              <div className="p-1.5 rounded-lg bg-slate-100/80 border border-slate-200 dark:bg-zinc-950 dark:border-white/10">
+                <div className="text-[10px] font-medium text-slate-600 dark:text-zinc-400">Avg transit</div>
+                <div className="font-mono tabular-nums text-xs sm:text-sm font-bold text-slate-950 dark:text-zinc-50">18 min</div>
               </div>
             </div>
           </div>
 
           {/* Horizontal Bar Chart: 7 Canonical Service Trades Capacity */}
-          <div className="lg:col-span-7 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] flex flex-col justify-between">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                Trade Capacity
+          <div className="lg:col-span-7 p-4 rounded-xl border border-slate-300 bg-white shadow-md dark:bg-zinc-900 dark:border-white/5 dark:shadow-none flex flex-col justify-between">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-2.5 mb-2">
+              <h3 className="text-xs font-bold text-slate-950 dark:text-zinc-50 uppercase tracking-wide">
+                Trade capacity
               </h3>
-              <Link to="/dispatcher/technicians" className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
-                Roster →
+              <Link to="/dispatcher/technicians" className="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline">
+                View roster
               </Link>
             </div>
 
-            <HorizontalBarChart
-              data={
-                metrics?.tradeCoverage?.map((trade) => ({
-                  label: trade.category,
-                  value: trade.availableCount,
-                  secondaryValue: trade.activeCount,
-                  secondaryLabel: "busy",
-                  color: "#10b981",
-                  badge: trade.availableCount > 0 ? "Ready" : "Busy",
-                })) || []
-              }
-              valueSuffix=" avail"
-            />
+            <div className="[&_[class*='bg-amber']]:!bg-cyan-500">
+              <HorizontalBarChart
+                data={
+                  metrics?.tradeCoverage?.map((trade) => ({
+                    label: trade.category,
+                    value: trade.availableCount,
+                    secondaryValue: trade.activeCount,
+                    secondaryLabel: "busy",
+                    color: "#10b981",
+                    badge: trade.availableCount > 0 ? "Ready" : "Busy",
+                  })) || []
+                }
+                valueSuffix=" avail"
+              />
+            </div>
           </div>
         </div>
 
         {/* ── 2. Urgent Emergency Action Queue (If Any) ──────────────────── */}
         {urgentRequests.length > 0 && (
-          <div className="rounded-xl border border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20 p-3 sm:p-4 space-y-2.5">
+          <div className="rounded-xl border border-rose-300 bg-rose-50/70 dark:border-[#b8287a]/30 dark:bg-[#b8287a]/10 p-3 sm:p-4 space-y-2.5 shadow-md dark:shadow-none">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-rose-900 dark:text-rose-200">
-                  Critical Breakdown Queue
+                <span className="w-2 h-2 rounded-full bg-[#b8287a] animate-ping" />
+                <h3 className="text-xs font-bold text-[#8a1858] dark:text-[#e879b9] uppercase tracking-wide">
+                  Critical breakdown queue
                 </h3>
               </div>
-              <span className="text-xs text-rose-700 dark:text-rose-300 font-mono font-medium">
+              <span className="text-xs text-[#8a1858] dark:text-[#e879b9] font-mono tabular-nums font-bold">
                 {urgentRequests.length} critical breakdown{urgentRequests.length > 1 ? "s" : ""}
               </span>
             </div>
@@ -557,12 +524,12 @@ export const DispatcherDashboard: FC = () => {
               {urgentRequests.map((req) => (
                 <div
                   key={req.id}
-                  className="p-3 rounded-lg border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between gap-2"
+                  className="p-3 rounded-lg border border-rose-300 dark:border-[#b8287a]/30 bg-white dark:bg-zinc-900 shadow-xs flex flex-col justify-between gap-2"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono font-bold text-rose-700 dark:text-rose-400">{req.id}</span>
-                      <span className="text-[10px] font-semibold text-rose-600 dark:text-rose-300 bg-rose-100 dark:bg-rose-950 px-1.5 py-0.5 rounded">
+                      <span className="font-mono tabular-nums font-bold text-[#8a1858] dark:text-[#e879b9]">{req.id}</span>
+                      <span className="text-[10px] font-bold text-[#8a1858] dark:text-[#e879b9] bg-rose-100 dark:bg-[#b8287a]/20 border border-rose-300 dark:border-[#b8287a]/30 px-1.5 py-0.5 rounded">
                         {req.coveragePlan === "8hr"
                           ? "Plan A (Window)"
                           : req.coveragePlan === "custom"
@@ -572,19 +539,19 @@ export const DispatcherDashboard: FC = () => {
                           : "Urgent"}
                       </span>
                     </div>
-                    <div className="text-xs font-bold text-[var(--text-primary)] truncate">{req.customerName}</div>
-                    <div className="text-[11px] text-[var(--text-muted)] line-clamp-1">
+                    <div className="text-xs font-bold text-slate-950 dark:text-zinc-50 truncate">{req.customerName}</div>
+                    <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium line-clamp-1">
                       {req.assetName}: {req.problemTitle}
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between text-xs">
-                    <span className="text-[10px] text-[var(--text-muted)] truncate max-w-[140px]">{req.category}</span>
+                  <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex items-center justify-between text-xs">
+                    <span className="text-[10px] text-slate-600 dark:text-zinc-400 font-medium truncate max-w-[140px]">{req.category}</span>
                     <Link
                       to="/dispatcher/requests"
-                      className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 hover:underline text-[11px]"
+                      className="inline-flex items-center gap-1 font-bold text-emerald-700 dark:text-emerald-400 hover:underline text-[11px]"
                     >
-                      Triage <ArrowRightIcon size={11} />
+                      Triage
                     </Link>
                   </div>
                 </div>
@@ -594,23 +561,23 @@ export const DispatcherDashboard: FC = () => {
         )}
 
         {/* ── 3. Active Work Orders Operational Ledger ─────────────────────── */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden shadow-sm">
-          <div className="p-3 sm:p-4 border-b border-[var(--border)] flex items-center justify-between">
-            <h2 className="text-sm font-bold text-[var(--text-primary)]">Active Work Orders</h2>
+        <div className="bg-white border border-slate-300 border-t-4 border-t-emerald-500 rounded-xl shadow-md overflow-hidden dark:bg-zinc-900 dark:border-white/5 dark:border-t-white/5 dark:shadow-none">
+          <div className="p-3 sm:p-4 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
+            <h2 className="text-sm font-bold text-slate-950 dark:text-zinc-50">Active Work Orders</h2>
             <Link
               to="/dispatcher/work-orders"
-              className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              className="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
             >
-              View All <ArrowRightIcon size={12} />
+              View all
             </Link>
           </div>
 
           <div className="w-full max-w-full overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-[13px]">
-              <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-xs">
+              <thead className="bg-slate-200/70 border-b-2 border-slate-300 text-slate-800 font-bold text-xs uppercase tracking-wider dark:bg-zinc-950/60 dark:border-white/5 dark:text-zinc-400">
+                <tr>
                   <th className="py-2.5 px-3.5">Order ID</th>
-                  <th className="py-2.5 px-3.5">Customer & Facility</th>
+                  <th className="py-2.5 px-3.5">Customer</th>
                   <th className="py-2.5 px-3.5">Trade & Asset</th>
                   <th className="py-2.5 px-3.5">Priority</th>
                   <th className="py-2.5 px-3.5">Status</th>
@@ -618,28 +585,27 @@ export const DispatcherDashboard: FC = () => {
                   <th className="py-2.5 px-3.5 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-slate-300/80 dark:divide-white/5">
                 {activeOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={7} className="py-8 text-center text-xs text-slate-600 dark:text-zinc-400">
                       No active work orders. Incoming requests will appear in the triage queue.
                     </td>
                   </tr>
                 ) : (
                   activeOrders.map((wo) => (
-                    <tr key={wo.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-3 px-3.5 font-mono font-bold text-[var(--text-primary)]">{wo.id}</td>
-                      <td className="py-3 px-3.5">
-                        <div className="font-semibold text-[var(--text-primary)]">{wo.customerName}</div>
-                        <div className="text-xs text-[var(--text-muted)] truncate max-w-xs">{wo.facilityAddress}</div>
+                    <tr key={wo.id} className="odd:bg-white even:bg-slate-50/90 hover:bg-emerald-50/50 dark:odd:bg-zinc-900 dark:even:bg-zinc-900 dark:hover:bg-zinc-800/50 transition-colors">
+                      <td className="py-3 px-3.5 font-mono font-bold text-slate-950 dark:text-zinc-50 tabular-nums">{wo.id}</td>
+                      <td className="py-3 px-3.5 font-bold text-slate-950 dark:text-zinc-50">
+                        {wo.customerName}
                       </td>
                       <td className="py-3 px-3.5">
-                        <div className="font-medium text-[var(--text-primary)]">{wo.assetName}</div>
-                        <div className="text-xs text-[var(--text-muted)]">{wo.category}</div>
+                        <div className="font-semibold text-slate-950 dark:text-zinc-100">{wo.assetName}</div>
+                        <div className="text-xs text-slate-600 dark:text-zinc-400 font-medium">{wo.category}</div>
                       </td>
                       <td className="py-3 px-3.5">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${getPriorityBadge(
+                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold border ${getPriorityBadge(
                             wo.priority
                           )}`}
                         >
@@ -650,13 +616,13 @@ export const DispatcherDashboard: FC = () => {
                       <td className="py-3 px-3.5">
                         {wo.assignedTechnicianName ? (
                           <div className="flex items-center gap-1.5">
-                            <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0">
+                            <span className="w-5 h-5 rounded-full bg-slate-200 dark:bg-zinc-800 text-[10px] font-bold flex items-center justify-center shrink-0 text-slate-900 dark:text-zinc-200">
                               {wo.assignedTechnicianName.substring(0, 2).toUpperCase()}
                             </span>
-                            <span className="font-medium text-[var(--text-primary)]">{wo.assignedTechnicianName}</span>
+                            <span className="font-bold text-slate-950 dark:text-zinc-50">{wo.assignedTechnicianName}</span>
                           </div>
                         ) : (
-                          <span className="text-rose-600 dark:text-rose-400 font-semibold italic">Unassigned</span>
+                          <span className="text-[#8a1858] dark:text-[#e879b9] font-bold italic">Unassigned</span>
                         )}
                       </td>
                       <td className="py-3 px-3.5 text-right">
@@ -664,14 +630,14 @@ export const DispatcherDashboard: FC = () => {
                           <button
                             type="button"
                             onClick={() => handleOpenAssignModal(wo)}
-                            className="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-sm"
+                            className="px-3 py-1 rounded-lg text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#059669] transition-all shadow-xs btn-press"
                           >
                             Assign Tech
                           </button>
                         ) : (
                           <Link
                             to="/dispatcher/work-orders"
-                            className="px-3 py-1 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-all"
+                            className="px-3 py-1 rounded-lg text-xs font-bold border border-slate-300 bg-white text-slate-800 hover:text-slate-950 hover:bg-slate-100 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-200 transition-all shadow-xs btn-press"
                           >
                             Inspect
                           </Link>
@@ -684,63 +650,6 @@ export const DispatcherDashboard: FC = () => {
             </table>
           </div>
         </div>
-
-        {/* ── 4. Two-Column Grid: Activity Velocity & Operational Log ─ */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
-          {/* Dispatch Activity Volume Timeline */}
-          <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] space-y-2.5">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                Dispatch Velocity
-              </h3>
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[var(--bg-surface-2)] text-[var(--text-muted)]">
-                Hourly
-              </span>
-            </div>
-
-            <ActivityVolumeChart
-              data={[
-                { key: "h-09", label: "09:00", timestamp: "09:00 AM", volume: 3 },
-                { key: "h-10", label: "10:00", timestamp: "10:00 AM", volume: 6 },
-                { key: "h-11", label: "11:00", timestamp: "11:00 AM", volume: 4 },
-                { key: "h-12", label: "12:00", timestamp: "12:00 PM", volume: 2 },
-                { key: "h-13", label: "13:00", timestamp: "01:00 PM", volume: 5 },
-                { key: "h-14", label: "14:00", timestamp: "02:00 PM", volume: 8 },
-                { key: "h-15", label: "15:00", timestamp: "03:00 PM", volume: 7 },
-              ]}
-              height={90}
-              primaryLabel="dispatches"
-            />
-          </div>
-
-          {/* Recent Dispatch Ledger */}
-          <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)] space-y-2.5">
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                Operational Log
-              </h3>
-              <span className="text-[10px] font-mono text-[var(--text-muted)]">Live</span>
-            </div>
-
-            <div className="space-y-1.5">
-              {recentEvents.length === 0 ? (
-                <div className="py-4 text-center text-xs text-[var(--text-muted)]">No recent activity.</div>
-              ) : (
-                recentEvents.slice(0, 3).map((evt) => (
-                  <div key={evt.id} className="p-2 rounded-lg border border-[var(--border)] text-xs flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="font-semibold text-[var(--text-primary)] truncate text-[11px]">{evt.summary}</div>
-                      <div className="text-[10px] text-[var(--text-muted)] truncate">{evt.actorName}</div>
-                    </div>
-                    <span className="text-[10px] text-[var(--text-muted)] font-mono shrink-0">
-                      {new Date(evt.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* ── 5. Safe Technician Matching & Assignment Modal (Human Confirmed) ─ */}
@@ -751,60 +660,60 @@ export const DispatcherDashboard: FC = () => {
           aria-labelledby={assignModalHeadingId}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
         >
-          <div className="w-full max-w-2xl rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                  Advisory Matching Engine (SDP-4 Hard Rules)
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                  Advisory matching engine (SDP-4 rules)
                 </span>
-                <h3 id={assignModalHeadingId} className="text-base font-bold text-[var(--text-primary)]">
-                  Assign Technician — {selectedWorkOrder.id}
+                <h3 id={assignModalHeadingId} className="text-base font-bold text-slate-950 dark:text-zinc-50">
+                  Assign technician — {selectedWorkOrder.id}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedWorkOrder(null)}
-                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                className="p-1 rounded-lg text-slate-500 hover:text-slate-950 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-50 dark:hover:bg-zinc-800"
               >
                 <XIcon size={16} />
               </button>
             </div>
 
             {/* Target Breakdown Card */}
-            <div className="p-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-xs space-y-1">
+            <div className="p-3.5 rounded-xl border border-slate-300 bg-slate-50 dark:bg-zinc-950 dark:border-white/10 text-xs space-y-1">
               <div>
-                <strong className="text-[var(--text-primary)]">Customer:</strong> {selectedWorkOrder.customerName}
+                <strong className="text-slate-950 dark:text-zinc-50 font-semibold">Customer:</strong> {selectedWorkOrder.customerName}
               </div>
               <div>
-                <strong className="text-[var(--text-primary)]">Facility:</strong> {selectedWorkOrder.facilityAddress}
+                <strong className="text-slate-950 dark:text-zinc-50 font-semibold">Facility:</strong> {selectedWorkOrder.facilityAddress}
               </div>
               <div>
-                <strong className="text-[var(--text-primary)]">Required Trade:</strong> {selectedWorkOrder.category}
+                <strong className="text-slate-950 dark:text-zinc-50 font-semibold">Required Trade:</strong> {selectedWorkOrder.category}
               </div>
               <div>
-                <strong className="text-[var(--text-primary)]">Equipment & Problem:</strong> {selectedWorkOrder.assetName} —{" "}
+                <strong className="text-slate-950 dark:text-zinc-50 font-semibold">Equipment & Problem:</strong> {selectedWorkOrder.assetName} —{" "}
                 {selectedWorkOrder.problemSummary}
               </div>
             </div>
 
             {assignmentSuccess ? (
-              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-center font-bold text-sm">
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 dark:bg-emerald-500/10 dark:border-emerald-500/30 dark:text-emerald-300 text-center font-bold text-sm">
                 ✓ {assignmentSuccess}
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                  <span>Eligible Candidates (Ranked by Arithmetic Score)</span>
-                  <span className="text-[10px] font-normal text-slate-500">Human Confirmation Required</span>
+                <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-zinc-300">
+                  <span>Eligible candidates (ranked by arithmetic score)</span>
+                  <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-medium">Human confirmation required</span>
                 </div>
 
                 {isLoadingMatches ? (
-                  <div className="py-8 text-center text-xs text-[var(--text-muted)]">
+                  <div className="py-8 text-center text-xs text-slate-600 dark:text-zinc-400">
                     Evaluating candidate passports and branch locations...
                   </div>
                 ) : matchingTechs.length === 0 ? (
-                  <div className="py-6 text-center text-xs text-rose-600 dark:text-rose-400">
+                  <div className="py-6 text-center text-xs text-[#8a1858] dark:text-[#e879b9] font-bold">
                     No available certified technicians found for {selectedWorkOrder.category}.
                   </div>
                 ) : (
@@ -815,41 +724,41 @@ export const DispatcherDashboard: FC = () => {
                         onClick={() => setSelectedTech(candidate)}
                         className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
                           selectedTech?.technicianId === candidate.technicianId
-                            ? "border-emerald-500 bg-emerald-50/20 dark:bg-emerald-950/20 ring-1 ring-emerald-500"
-                            : "border-[var(--border)] bg-[var(--bg-surface)] hover:border-slate-300 dark:hover:border-slate-700"
+                            ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/20 ring-1 ring-emerald-500"
+                            : "border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 hover:border-slate-400 dark:hover:border-zinc-700"
                         }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-bold text-xs text-[var(--text-primary)]">
+                              <span className="font-bold text-xs text-slate-950 dark:text-zinc-50">
                                 {candidate.technicianName}
                               </span>
                               <span
                                 className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${
                                   candidate.recommendationTier === "TIER_1_PREFERRED"
-                                    ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20"
-                                    : "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20"
+                                    ? "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/20"
+                                    : "bg-sky-50 text-sky-800 border-sky-300 dark:bg-sky-500/10 dark:text-sky-300 dark:border-sky-500/20"
                                 }`}
                               >
                                 {candidate.recommendationTier === "TIER_1_PREFERRED" ? "Tier 1: Preferred" : "Tier 2: Eligible"}
                               </span>
-                              <span className="text-[11px] text-[var(--text-muted)]">· ETA ~{candidate.etaMinutes}m</span>
+                              <span className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium">· ETA ~{candidate.etaMinutes}m</span>
                             </div>
-                            <div className="text-[11px] text-[var(--text-muted)] flex flex-wrap items-center gap-1.5 pt-0.5">
+                            <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium flex flex-wrap items-center gap-1.5 pt-0.5">
                               <span>{candidate.designation}</span>
-                              <span>•</span>
-                              <span className="text-emerald-600 dark:text-emerald-400 font-medium">✓ Active License</span>
-                              <span>•</span>
+                              <span className="text-slate-300 dark:text-zinc-700">•</span>
+                              <span className="text-emerald-700 dark:text-emerald-400 font-bold">✓ Active License</span>
+                              <span className="text-slate-300 dark:text-zinc-700">•</span>
                               <span>{candidate.eligibilityFactors?.standbyAvailable ? "✓ Standby" : `${candidate.activeJobCount} Active Job(s)`}</span>
                               {candidate.eligibilityFactors?.branchMatched && (
                                 <>
-                                  <span>•</span>
-                                  <span className="text-sky-600 dark:text-sky-400 font-medium">✓ Branch Match</span>
+                                  <span className="text-slate-300 dark:text-zinc-700">•</span>
+                                  <span className="text-sky-700 dark:text-sky-400 font-bold">✓ Branch Match</span>
                                 </>
                               )}
                             </div>
-                            <p className="text-[11px] text-slate-600 dark:text-slate-300 italic pt-0.5">
+                            <p className="text-[11px] text-slate-700 dark:text-zinc-300 italic pt-0.5 font-medium">
                               "{candidate.explanation}"
                             </p>
                           </div>
@@ -860,7 +769,7 @@ export const DispatcherDashboard: FC = () => {
                                 <CheckIcon size={12} />
                               </span>
                             ) : (
-                              <span className="w-5 h-5 rounded-full border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)]" />
+                              <span className="w-5 h-5 rounded-full border border-slate-300 dark:border-white/10 flex items-center justify-center text-slate-400" />
                             )}
                           </div>
                         </div>
@@ -872,7 +781,7 @@ export const DispatcherDashboard: FC = () => {
                 {/* Dispatcher Notes */}
                 {selectedTech && (
                   <div className="space-y-1 pt-2">
-                    <label htmlFor="dispatch-notes" className="text-xs font-semibold text-[var(--text-primary)]">
+                    <label htmlFor="dispatch-notes" className="text-xs font-bold text-slate-800 dark:text-zinc-200">
                       Dispatch Instructions (Optional):
                     </label>
                     <textarea
@@ -881,7 +790,7 @@ export const DispatcherDashboard: FC = () => {
                       value={dispatchNotes}
                       onChange={(e) => setDispatchNotes(e.target.value)}
                       placeholder="e.g. Check substation gate 2 security badge; bring 10G-SR transceivers."
-                      className="w-full text-xs p-2.5 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                      className="w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-100/80 text-slate-950 placeholder:text-slate-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50"
                     />
                   </div>
                 )}
@@ -889,11 +798,11 @@ export const DispatcherDashboard: FC = () => {
             )}
 
             {/* Modal Actions */}
-            <div className="pt-3 border-t border-[var(--border)] flex items-center justify-end gap-2">
+            <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setSelectedWorkOrder(null)}
-                className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-slate-300 bg-white text-slate-800 hover:text-slate-950 hover:bg-slate-100 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-200 transition-colors btn-press shadow-xs"
               >
                 Cancel
               </button>
@@ -902,7 +811,7 @@ export const DispatcherDashboard: FC = () => {
                   type="button"
                   onClick={handleConfirmAssignment}
                   disabled={isAssigning}
-                  className="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 active:scale-95 transition-all shadow-sm disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-lg text-xs font-bold bg-[#10b981] text-[#06090e] hover:bg-[#059669] transition-all shadow-sm btn-press disabled:opacity-50"
                 >
                   {isAssigning ? "Dispatching..." : `Confirm Dispatch: ${selectedTech.technicianName}`}
                 </button>
@@ -917,21 +826,21 @@ export const DispatcherDashboard: FC = () => {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
         >
-          <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-2xl space-y-4 text-[var(--text-primary)]">
+          <div className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-zinc-900 p-5 sm:p-6 shadow-2xl space-y-4 text-slate-950 dark:text-zinc-50">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold font-heading text-[var(--text-primary)]">
-                    Technician Completion Report Review
+                  <h3 className="text-sm font-bold font-heading text-slate-950 dark:text-zinc-50">
+                    Technician completion report review
                   </h3>
-                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 border border-cyan-500/20">
+                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-cyan-50 text-cyan-800 border border-cyan-300 dark:bg-[#06b6d4]/15 dark:text-[#06b6d4] dark:border-[#06b6d4]/30">
                     {reviewingOrder.id}
                   </span>
                 </div>
-                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                <p className="text-xs text-slate-600 dark:text-zinc-400 mt-0.5 font-medium">
                   Verify technical findings, materials used, and work performed before closing work order.
                 </p>
               </div>
@@ -939,7 +848,7 @@ export const DispatcherDashboard: FC = () => {
               <button
                 type="button"
                 onClick={() => setReviewingOrder(null)}
-                className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)]"
+                className="p-1 rounded-md text-slate-500 hover:text-slate-950 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-50 dark:hover:bg-zinc-800"
               >
                 <XIcon size={14} />
               </button>
@@ -947,66 +856,66 @@ export const DispatcherDashboard: FC = () => {
 
             {/* Error or Success Notice */}
             {reviewError && (
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
-                <AlertTriangleIcon size={14} className="text-rose-500 shrink-0" />
-                <span>{reviewError}</span>
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-300 text-xs text-[#8a1858] dark:bg-[#b8287a]/15 dark:text-[#e879b9] dark:border-[#b8287a]/30 flex items-center gap-2">
+                <AlertTriangleIcon size={14} className="text-[#b8287a] shrink-0" />
+                <span className="font-semibold">{reviewError}</span>
               </div>
             )}
             {reviewActionSuccess && (
-              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2 font-semibold">
-                <CheckIcon size={14} className="text-emerald-500 shrink-0" />
+              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-xs text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/20 flex items-center gap-2 font-bold">
+                <CheckIcon size={14} className="text-emerald-600 shrink-0" />
                 <span>{reviewActionSuccess}</span>
               </div>
             )}
 
             {/* Summary Grid */}
-            <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-[var(--bg-surface-2)] text-xs border border-[var(--border)]">
+            <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-950 text-xs border border-slate-300 dark:border-white/10">
               <div>
-                <span className="text-[var(--text-muted)] text-[10px] uppercase font-bold tracking-wider block">Customer & Asset</span>
-                <span className="font-semibold">{reviewingOrder.customerName}</span>
-                <div className="text-[11px] text-[var(--text-muted)] truncate">{reviewingOrder.assetName}</div>
+                <span className="text-slate-600 dark:text-zinc-400 text-[10px] font-bold block">Customer & asset</span>
+                <span className="font-bold text-slate-950 dark:text-zinc-50">{reviewingOrder.customerName}</span>
+                <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium truncate">{reviewingOrder.assetName}</div>
               </div>
 
               <div>
-                <span className="text-[var(--text-muted)] text-[10px] uppercase font-bold tracking-wider block">Technician & Trade</span>
-                <span className="font-semibold">{reviewingOrder.assignedTechnicianName || "Kamrul Islam"}</span>
-                <div className="text-[11px] text-[var(--text-muted)] truncate">{reviewingOrder.category}</div>
+                <span className="text-slate-600 dark:text-zinc-400 text-[10px] font-bold block">Technician & trade</span>
+                <span className="font-bold text-slate-950 dark:text-zinc-50">{reviewingOrder.assignedTechnicianName || "Kamrul Islam"}</span>
+                <div className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium truncate">{reviewingOrder.category}</div>
               </div>
             </div>
 
             {/* Detailed Report Fields */}
             <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-xl border border-[var(--border)] space-y-1">
-                <span className="font-bold text-[11px] uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
-                  Work Performed & Resolution
+              <div className="p-3.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-950/50 space-y-1">
+                <span className="font-bold text-xs text-emerald-700 dark:text-emerald-400 block">
+                  Work performed & resolution
                 </span>
-                <p className="text-[var(--text-primary)] leading-relaxed">
+                <p className="text-slate-900 dark:text-zinc-100 font-medium leading-relaxed">
                   {reviewingOrder.completionReport?.workPerformed || reviewingOrder.completionReport?.notes || reviewingOrder.workNotes || "Technical diagnostic inspection completed."}
                 </p>
               </div>
 
-              <div className="p-3 rounded-xl border border-[var(--border)] space-y-1">
-                <span className="font-bold text-[11px] uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
-                  On-Site Diagnosis & Root Cause
+              <div className="p-3.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-950/50 space-y-1">
+                <span className="font-bold text-xs text-cyan-800 dark:text-cyan-400 block">
+                  On-site diagnosis & root cause
                 </span>
-                <p className="text-[var(--text-primary)] leading-relaxed">
+                <p className="text-slate-900 dark:text-zinc-100 font-medium leading-relaxed">
                   {reviewingOrder.completionReport?.diagnosis || "Component failure inspected and verified on site."}
                 </p>
               </div>
 
-              <div className="p-3 rounded-xl border border-[var(--border)] space-y-1">
-                <span className="font-bold text-[11px] uppercase tracking-wider text-[var(--text-muted)] block">
-                  Materials & Parts Used
+              <div className="p-3.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-950/50 space-y-1">
+                <span className="font-bold text-xs text-slate-700 dark:text-zinc-300 block">
+                  Materials & parts used
                 </span>
-                <p className="font-mono text-[11px] text-[var(--text-primary)]">
+                <p className="font-mono tabular-nums text-[11px] text-slate-900 dark:text-zinc-100 font-medium">
                   {reviewingOrder.completionReport?.materialsUsed || "Standard diagnostic tooling & equipment consumed."}
                 </p>
               </div>
 
               {/* Correction Reason Drawer */}
               {showCorrectionInput && (
-                <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-2 animate-fade-in">
-                  <label htmlFor="correction-reason" className="font-bold text-amber-800 dark:text-amber-300 block text-xs">
+                <div className="p-3.5 rounded-xl border border-cyan-300 bg-cyan-50/70 dark:border-cyan-500/30 dark:bg-[#06b6d4]/10 space-y-2 animate-fade-in">
+                  <label htmlFor="correction-reason" className="font-bold text-cyan-950 dark:text-cyan-100 block text-xs">
                     Correction Notes / Reason for Return:
                   </label>
                   <textarea
@@ -1015,13 +924,13 @@ export const DispatcherDashboard: FC = () => {
                     value={correctionReason}
                     onChange={(e) => setCorrectionReason(e.target.value)}
                     placeholder="Specify additional measurements, missing photos, or required repairs..."
-                    className="w-full p-2.5 rounded-lg border border-amber-500/30 bg-[var(--bg-surface)] text-xs text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="w-full p-2.5 rounded-lg border border-slate-300 bg-white text-xs text-slate-950 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 dark:bg-zinc-950 dark:border-white/10 dark:text-zinc-50"
                   />
                   <div className="flex justify-end gap-2">
                     <button
                       type="button"
                       onClick={() => setShowCorrectionInput(false)}
-                      className="px-2.5 py-1 text-[11px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                      className="px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:text-slate-950 dark:text-zinc-300 dark:hover:text-zinc-100"
                     >
                       Cancel
                     </button>
@@ -1029,7 +938,7 @@ export const DispatcherDashboard: FC = () => {
                       type="button"
                       onClick={handleRequestCorrection}
                       disabled={isReviewSubmitting}
-                      className="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs"
+                      className="px-3 py-1 rounded-lg bg-[#06b6d4] hover:bg-[#0891b2] text-white font-bold text-xs shadow-xs btn-press"
                     >
                       {isReviewSubmitting ? "Returning..." : "Send Back for Correction"}
                     </button>
@@ -1039,13 +948,13 @@ export const DispatcherDashboard: FC = () => {
             </div>
 
             {/* Modal Actions */}
-            <div className="pt-3 border-t border-[var(--border)] flex items-center justify-between gap-2">
+            <div className="pt-3 border-t border-slate-200 dark:border-white/10 flex items-center justify-between gap-2">
               <div>
                 {!showCorrectionInput && (
                   <button
                     type="button"
                     onClick={() => setShowCorrectionInput(true)}
-                    className="px-3 py-1.5 rounded-xl border border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 text-xs font-semibold transition-all"
+                    className="px-3 py-1.5 rounded-xl border border-cyan-300 text-cyan-800 bg-cyan-50 hover:bg-cyan-100 dark:border-cyan-500/30 dark:text-[#06b6d4] dark:bg-[#06b6d4]/15 text-xs font-bold transition-all shadow-xs btn-press"
                   >
                     Request Correction
                   </button>
@@ -1056,7 +965,7 @@ export const DispatcherDashboard: FC = () => {
                 <button
                   type="button"
                   onClick={() => setReviewingOrder(null)}
-                  className="px-3.5 py-1.5 rounded-xl text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold border border-slate-300 bg-white text-slate-800 hover:text-slate-950 hover:bg-slate-100 dark:border-white/10 dark:bg-zinc-800 dark:text-zinc-200 transition-colors btn-press shadow-xs"
                 >
                   Close
                 </button>
@@ -1064,7 +973,7 @@ export const DispatcherDashboard: FC = () => {
                   type="button"
                   onClick={handleApproveReport}
                   disabled={isReviewSubmitting}
-                  className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-[#06090e] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-xl text-xs font-bold bg-[#10b981] hover:bg-[#059669] text-[#06090e] transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50 btn-press"
                 >
                   <CheckIcon size={13} />
                   <span>{isReviewSubmitting ? "Approving..." : "Approve & Complete Work Order"}</span>

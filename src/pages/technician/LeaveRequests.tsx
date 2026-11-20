@@ -82,14 +82,14 @@ export function LeaveRequests() {
   const getStatusBadge = (status: TechnicianLeaveRequest["status"]) => {
     switch (status) {
       case "APPROVED":
-        return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
+        return "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30 font-bold";
       case "PENDING":
-        return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+        return "bg-cyan-100 text-cyan-900 border-cyan-300 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/30 font-semibold";
       case "REJECTED":
-        return "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20";
+        return "bg-rose-100 text-rose-900 border-rose-300 dark:bg-[#b8287a]/20 dark:text-[#f472b6] dark:border-[#b8287a]/30 font-bold";
       case "CANCELLED":
       default:
-        return "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20";
+        return "bg-slate-100 text-slate-800 border-slate-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-white/10 font-medium";
     }
   };
 
@@ -103,14 +103,14 @@ export function LeaveRequests() {
             setFormError(null);
             setModalOpen(true);
           }}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all shadow-sm"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm"
         >
           <span>Request Leave</span>
           <ArrowRightIcon size={12} />
         </button>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-4 pb-24">
         {/* Success Notice */}
         {actionSuccess && (
           <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
@@ -122,17 +122,17 @@ export function LeaveRequests() {
         )}
 
         {/* Requests Table */}
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--bg-surface-2)] flex items-center justify-between">
+        <div className="rounded-xl border border-slate-300 border-t-4 border-t-emerald-500 bg-white shadow-md overflow-hidden dark:border-white/5 dark:border-t-white/5 dark:bg-zinc-900 dark:shadow-none">
+          <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between dark:border-white/5 dark:bg-zinc-950">
             <div>
-              <h3 className="font-heading font-semibold text-xs text-[var(--text-primary)] uppercase tracking-wider">
-                My Leave History & Status
+              <h3 className="font-heading font-bold text-xs text-slate-950 dark:text-zinc-50">
+                My leave history & status
               </h3>
-              <p className="text-[11px] text-[var(--text-muted)]">
-                Approval requires Dispatcher or Admin review before shift rosters update.
+              <p className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
+                Approval requires dispatcher or admin review before shift rosters update.
               </p>
             </div>
-            <span className="text-[11px] font-mono font-medium text-[var(--text-muted)]">
+            <span className="text-[11px] font-mono font-bold text-slate-700 dark:text-zinc-300 bg-slate-100 border border-slate-300 dark:bg-zinc-900 dark:border-white/10 px-2 py-0.5 rounded tabular-nums">
               {requests.length} requests
             </span>
           </div>
@@ -140,7 +140,7 @@ export function LeaveRequests() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[var(--border)] text-[var(--text-muted)] font-semibold uppercase tracking-wider text-[11px]">
+                <tr className="border-b-2 border-slate-300 bg-slate-200/70 text-slate-800 font-bold text-xs uppercase tracking-wider dark:border-white/5 dark:bg-zinc-950/60 dark:text-zinc-400">
                   <th className="py-2.5 px-4">Request ID</th>
                   <th className="py-2.5 px-4">Type</th>
                   <th className="py-2.5 px-4">Dates</th>
@@ -149,37 +149,37 @@ export function LeaveRequests() {
                   <th className="py-2.5 px-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--border)]">
+              <tbody className="divide-y divide-slate-300/80 dark:divide-white/5">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={6} className="py-8 text-center text-xs text-slate-600 dark:text-zinc-400 font-medium">
                       Loading leave records...
                     </td>
                   </tr>
                 ) : requests.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-xs text-[var(--text-muted)]">
+                    <td colSpan={6} className="py-8 text-center text-xs text-slate-600 dark:text-zinc-400 font-medium">
                       No leave requests recorded. Click "Request Leave" above to apply.
                     </td>
                   </tr>
                 ) : (
                   requests.map((r) => (
-                    <tr key={r.id} className="hover:bg-[var(--bg-surface-2)] transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-[var(--text-primary)]">
+                    <tr key={r.id} className="odd:bg-white even:bg-slate-50/90 hover:bg-emerald-50/50 dark:odd:bg-zinc-900 dark:even:bg-zinc-900 dark:hover:bg-zinc-800/50 transition-colors">
+                      <td className="py-3 px-4 font-mono font-bold text-slate-950 dark:text-zinc-50 whitespace-nowrap">
                         {r.id}
                       </td>
                       <td className="py-3 px-4">
-                        <span className="font-semibold text-[var(--text-primary)]">
+                        <span className="font-bold text-slate-950 dark:text-zinc-50">
                           {r.leaveType}
                         </span>
                       </td>
-                      <td className="py-3 px-4 font-mono text-xs text-[var(--text-primary)]">
-                        {r.startDate} <span className="text-[var(--text-muted)]">to</span> {r.endDate}
+                      <td className="py-3 px-4 font-mono text-xs text-slate-700 dark:text-zinc-300 font-medium tabular-nums whitespace-nowrap">
+                        {r.startDate} <span className="text-slate-500 dark:text-zinc-400">to</span> {r.endDate}
                       </td>
                       <td className="py-3 px-4 max-w-[280px]">
-                        <p className="truncate text-[var(--text-primary)]">{r.reason}</p>
+                        <p className="truncate text-slate-900 dark:text-zinc-100 font-medium">{r.reason}</p>
                         {r.reviewerNotes && (
-                          <p className="text-[11px] text-[var(--text-muted)] truncate mt-0.5">
+                          <p className="text-[11px] text-slate-600 dark:text-zinc-400 font-medium truncate mt-0.5">
                             Note: {r.reviewerNotes}
                           </p>
                         )}
@@ -198,7 +198,7 @@ export function LeaveRequests() {
                           <button
                             type="button"
                             onClick={() => handleCancel(r.id)}
-                            className="px-2.5 py-1 rounded-md text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/20 transition-all"
+                            className="px-2.5 py-1 rounded-md text-[11px] font-semibold text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/10 border border-rose-300 dark:border-rose-500/20 transition-all"
                           >
                             Cancel
                           </button>
@@ -217,35 +217,35 @@ export function LeaveRequests() {
         {/* Modal: Submit Leave Request */}
         {modalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <div className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
-                <h3 className="font-heading font-bold text-sm text-[var(--text-primary)]">
+            <div className="w-full max-w-md rounded-2xl border border-slate-300 bg-white p-5 shadow-2xl space-y-4 dark:border-white/10 dark:bg-zinc-900">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-3">
+                <h3 className="font-heading font-bold text-sm text-slate-950 dark:text-zinc-50">
                   Submit Leave Request
                 </h3>
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="p-1 rounded-lg text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100"
                 >
                   <XIcon size={16} />
                 </button>
               </div>
 
               {formError && (
-                <div className="p-2.5 rounded-lg border border-rose-500/20 bg-rose-500/10 text-xs text-rose-700 dark:text-rose-300">
+                <div className="p-2.5 rounded-lg border border-rose-300 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 text-xs text-rose-800 dark:text-rose-300 font-semibold">
                   {formError}
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-3 text-xs">
                 <div>
-                  <label className="block font-semibold text-[var(--text-primary)] mb-1">
+                  <label className="block font-bold text-slate-800 dark:text-zinc-200 mb-1">
                     Leave Type
                   </label>
                   <select
                     value={leaveType}
                     onChange={(e) => setLeaveType(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)]"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-950 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50"
                   >
                     <option value="ANNUAL">Annual Planned Leave</option>
                     <option value="MEDICAL">Medical / Health Leave</option>
@@ -256,7 +256,7 @@ export function LeaveRequests() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-[var(--text-primary)] mb-1">
+                    <label className="block font-bold text-slate-800 dark:text-zinc-200 mb-1">
                       Start Date
                     </label>
                     <input
@@ -264,11 +264,11 @@ export function LeaveRequests() {
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                       required
-                      className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] font-mono"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-950 font-mono focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50"
                     />
                   </div>
                   <div>
-                    <label className="block font-semibold text-[var(--text-primary)] mb-1">
+                    <label className="block font-bold text-slate-800 dark:text-zinc-200 mb-1">
                       End Date
                     </label>
                     <input
@@ -276,13 +276,13 @@ export function LeaveRequests() {
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
                       required
-                      className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)] font-mono"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-950 font-mono focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-[var(--text-primary)] mb-1">
+                  <label className="block font-bold text-slate-800 dark:text-zinc-200 mb-1">
                     Reason & Handover Notes
                   </label>
                   <textarea
@@ -290,25 +290,25 @@ export function LeaveRequests() {
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Briefly state reason for leave and any pending tool or job handover details..."
-                    className="w-full px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] text-[var(--text-primary)]"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-950 placeholder-slate-400 focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none dark:border-white/10 dark:bg-zinc-950 dark:text-zinc-50"
                   />
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-800 dark:text-amber-300">
+                <div className="p-2.5 rounded-lg bg-cyan-50 border border-cyan-200 text-[11px] text-cyan-900 dark:bg-cyan-500/10 dark:border-cyan-500/20 dark:text-cyan-300 font-medium">
                   Notice: All leave requests require Dispatcher or Admin approval before shift assignments change.
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border)]">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-white/5">
                   <button
                     type="button"
                     onClick={() => setModalOpen(false)}
-                    className="px-3 py-1.5 rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                    className="px-3 py-1.5 rounded-lg border border-slate-300 dark:border-white/10 text-slate-700 dark:text-zinc-300 hover:text-slate-950 dark:hover:text-zinc-50 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-1.5 rounded-lg font-bold bg-[#10b981] text-[#06090e] hover:bg-[#34d399] transition-all"
+                    className="px-4 py-1.5 rounded-lg font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm"
                   >
                     Submit Request
                   </button>

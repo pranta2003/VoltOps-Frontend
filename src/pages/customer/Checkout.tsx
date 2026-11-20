@@ -242,18 +242,18 @@ export function Checkout() {
 
             {/* 2. Billing Period Selector */}
             <div
-              className="rounded-3xl border border-[var(--border)] p-6 shadow-sm space-y-3"
+              className="rounded-xl border border-[var(--border)] p-5 shadow-xs space-y-3"
               style={{ background: "var(--bg-surface)" }}
             >
-              <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                2. Billing Schedule
+              <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+                2. Billing schedule
               </h2>
 
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <button
                   type="button"
                   onClick={() => setBillingPeriod("Monthly")}
-                  className={`p-3.5 rounded-2xl border text-left transition-all ${
+                  className={`p-3.5 rounded-xl border text-left transition-all ${
                     billingPeriod === "Monthly"
                       ? "border-emerald-500 bg-emerald-500/10 font-bold"
                       : "border-[var(--border)] bg-[var(--bg-surface-2)] font-medium"
@@ -266,7 +266,7 @@ export function Checkout() {
                 <button
                   type="button"
                   onClick={() => setBillingPeriod("Annual")}
-                  className={`p-3.5 rounded-2xl border text-left transition-all ${
+                  className={`p-3.5 rounded-xl border text-left transition-all ${
                     billingPeriod === "Annual"
                       ? "border-emerald-500 bg-emerald-500/10 font-bold"
                       : "border-[var(--border)] bg-[var(--bg-surface-2)] font-medium"
@@ -283,11 +283,11 @@ export function Checkout() {
 
             {/* 3. Facility & Contact Details */}
             <div
-              className="rounded-3xl border border-[var(--border)] p-6 shadow-sm space-y-4"
+              className="rounded-xl border border-[var(--border)] p-5 shadow-xs space-y-4"
               style={{ background: "var(--bg-surface)" }}
             >
-              <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--text-muted)]">
-                3. Facility Deployment Location
+              <h2 className="text-sm font-semibold text-[var(--text-primary)]">
+                3. Facility deployment location
               </h2>
 
               <div className="space-y-3 text-xs">

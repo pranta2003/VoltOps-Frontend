@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,90 +7,91 @@
 /* ── Anti-flash: set dark/light ASAP before React hydrates ─────────── */
 /* This script is injected inline in index.html to avoid flash */
 
-/* ── CSS Custom Properties: Theme Tokens ────────────────────────────── */
+/* ── CSS Custom Properties: VoltOps Enterprise Design Tokens ────────── */
 :root {
-  /* Surface colors — Light Mode (Clean Modern SaaS Canvas) */
-  --bg-base: #f8fafc;        /* Slate 50 page background */
-  --bg-surface: #ffffff;     /* Pure white card surface */
-  --bg-surface-2: #f1f5f9;   /* Slate 100 secondary surface, inputs, hover */
-  --bg-surface-3: #e2e8f0;   /* Slate 200 raised / interactive */
-  --bg-overlay: rgba(248, 250, 252, 0.88); /* Clean overlay with blur */
+  /* Surface colors — Light Mode (Clean Slate Architectural Canvas) */
+  --bg-base: #e8edf3;        /* Architectural canvas for card elevation */
+  --bg-surface: #ffffff;     /* Pure white card and panel surface */
+  --bg-surface-2: #f8fafc;   /* Slate-50 secondary surface, inputs, subtle wells */
+  --bg-surface-3: #e2e8f0;   /* Raised controls / active interactive states */
+  --bg-overlay: rgba(241, 245, 249, 0.90); /* Modal and drawer backdrop */
 
-  /* Border */
-  --border: #cbd5e1;         /* Slate 300 crisp border — enhanced light mode definition */
-  --border-strong: #94a3b8;  /* Slate 400 strong border */
-  --border-subtle: #e2e8f0;  /* Slate 200 subtle divider */
+  /* Structural Hairline Borders */
+  --border: #e2e8f0;         /* Slate-200 1px crisp structural division */
+  --border-strong: #cbd5e1;  /* Slate-300 focused / elevated border definition */
+  --border-subtle: #f1f5f9;  /* Slate-100 quiet internal row dividers */
 
-  /* Text — High-contrast typography (WCAG 2.2 AA compliant across all surfaces) */
-  --text-primary: #0f172a;   /* Slate 900 headings / body (16.5:1 contrast) */
-  --text-secondary: #1e293b; /* Slate 800 secondary / metadata (13.5:1 contrast) */
-  --text-muted: #475569;     /* Slate 600 captions / table headers (7.0:1 contrast, passes AA) */
+  /* Typography Hierarchy (WCAG 2.2 AA compliant across all surfaces) */
+  --text-primary: #0f172a;   /* Slate 900 headings and primary values (16.5:1) */
+  --text-secondary: #334155; /* Slate 700 metadata and body prose (11.2:1) */
+  --text-muted: #64748b;     /* Slate 500 column headers and captions (5.4:1) */
   --text-inverse: #ffffff;
 
-  /* Accent — VoltOps Emerald */
-  --accent: #10b981;
-  --accent-hover: #059669;
+  /* Brand Anchor & Telemetry Signals */
+  --brand: #1a4b58;          /* Telegraph Teal — core VoltOps brand */
+  --brand-hover: #12353e;
+  --accent: #059669;         /* Signal Emerald — SLA compliance / active state */
+  --accent-hover: #047857;
   --accent-text: #047857;
-  --accent-subtle: rgba(16, 185, 129, 0.08);
-  --accent-glow: rgba(16, 185, 129, 0.18);
+  --accent-subtle: rgba(5, 150, 105, 0.08);
+  --accent-glow: rgba(5, 150, 105, 0.16);
 
-  --lime-accent: #65a30d;
-  --amber-accent: #d97706;
+  --amber-accent: #d97706;   /* Alert Amber — urgent triage / pending actions */
   --amber-subtle: rgba(217, 119, 6, 0.10);
 
-  /* Atmospheric hero glows (light mode) */
-  --hero-glow-1: rgba(16, 185, 129, 0.10);
-  --hero-glow-2: rgba(5, 150, 105, 0.08);
-  --hero-glow-3: rgba(217, 119, 6, 0.06);
+  /* Shadows (Quiet, structured — never heavy or muddy) */
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
 
-  /* Shadow */
-  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
-  --shadow-float: 0 20px 25px -5px rgba(15, 23, 42, 0.10);
-
-  /* Status */
-  --status-available: #10b981;
-  --status-danger: #ef4444;
+  /* Operational Status Tokens */
+  --status-available: #059669;
+  --status-busy: #d97706;
+  --status-offline: #64748b;
+  --status-danger: #dc2626;
 }
 
 .dark {
-  /* Surface colors — Dark Mode (Deep Midnight Obsidian + Emerald / Mint) */
-  --bg-base: #0b1117;        /* Clean deep midnight base */
-  --bg-surface: #111827;     /* Dark card surface */
-  --bg-surface-2: #16202c;   /* Secondary raised panel / inputs */
-  --bg-surface-3: #1e293b;   /* Active / focus elements */
-  --bg-overlay: rgba(11, 17, 23, 0.88);
+  /* Surface colors — Dark Mode (Deep Obsidian Slate) */
+  --bg-base: #0c1014;        /* Deep obsidian console canvas */
+  --bg-surface: #131920;     /* Primary raised card surface */
+  --bg-surface-2: #182029;   /* Secondary panel / input surface */
+  --bg-surface-3: #1f2935;   /* Active state / focused well */
+  --bg-overlay: rgba(12, 16, 20, 0.90);
 
-  --border: #1e293b;         /* Muted dark slate border */
-  --border-strong: #334155;  /* Crisp dark border */
-  --border-subtle: #16202c;  /* Subtle divider */
+  /* Structural Hairline Borders */
+  --border: #1e2631;         /* Crisp 1px division on dark */
+  --border-strong: #2d3948;  /* Highlighted border */
+  --border-subtle: #151d26;  /* Quiet dividers */
 
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-inverse: #0b1117;
+  /* Typography Hierarchy */
+  --text-primary: #f8fafc;   /* Slate 50 headings and active metrics */
+  --text-secondary: #cbd5e1; /* Slate 300 body and labels */
+  --text-muted: #8492a6;     /* Muted slate captions and timestamps */
+  --text-inverse: #0c1014;
 
-  /* Accent — Emerald / Mint Green */
-  --accent: #10b981;
+  /* Brand Anchor & Telemetry Signals */
+  --brand: #3d7186;
+  --brand-hover: #4d88a0;
+  --accent: #10b981;         /* Signal Emerald */
   --accent-hover: #34d399;
   --accent-text: #34d399;
-  --accent-subtle: rgba(16, 185, 129, 0.14);
-  --accent-glow: rgba(16, 185, 129, 0.35);
+  --accent-subtle: rgba(16, 185, 129, 0.12);
+  --accent-glow: rgba(16, 185, 129, 0.28);
 
-  --lime-accent: #34d399;
   --amber-accent: #f59e0b;
   --amber-subtle: rgba(245, 158, 11, 0.14);
 
-  /* Atmospheric hero glows */
-  --hero-glow-1: rgba(16, 185, 129, 0.20);
-  --hero-glow-2: rgba(52, 211, 153, 0.14);
-  --hero-glow-3: rgba(245, 158, 11, 0.12);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.55);
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
-  --shadow-float: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+  /* Operational Status Tokens */
+  --status-available: #10b981;
+  --status-busy: #f59e0b;
+  --status-offline: #8492a6;
+  --status-danger: #ef4444;
 }
 
 html,
@@ -102,133 +103,77 @@ body {
 body {
   background-color: var(--bg-base);
   color: var(--text-primary);
-  @apply font-sans antialiased;
+  font-family: 'Plus Jakarta Sans', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 h1, h2, h3, h4, .font-heading {
   font-family: 'Plus Jakarta Sans', Inter, -apple-system, sans-serif;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
 }
 
-.font-serif-italic {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-style: italic;
-  font-weight: 400;
-  color: #15803d;
+/* ── Tabular Numbers for Telemetry & Timers ─────────────────────────── */
+.tabular-nums,
+.font-mono-nums {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
-.dark .font-serif-italic {
-  color: #34d399;
-}
-
-/* ── Frosted Smoked Glass Card ──────────────────────────────────────── */
-.glass-panel {
-  background: var(--bg-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+/* ── Standard Card Surface (Hairline Border, Zero Heavy Dropshadow) ──── */
+.card-surface {
+  background-color: var(--bg-surface);
   border: 1px solid var(--border);
+  border-radius: 0.75rem; /* 12px clean radius */
   box-shadow: var(--shadow-sm);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.glass-panel:hover {
-  box-shadow: var(--shadow-md);
+.card-surface:hover {
   border-color: var(--border-strong);
 }
 
-/* ── Typography for Card & Service Titles (Clean, Modern B2B Proportions) ── */
-.font-service-title,
-.font-card-title {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  letter-spacing: -0.015em;
-  font-weight: 700;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
+/* ── Standard Operational Data Table Styling ────────────────────────── */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background-color: var(--bg-surface);
 }
 
-/* ── Professional Subtle Floating Wave (Gentle Levitation, Not Jarring) ── */
-@keyframes card-slow-float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
+.table-header {
+  background-color: var(--bg-surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: left;
 }
 
-/* Fluid Staggered Float Wave (Graceful Levitation) */
-.card-slow-float-0 { animation: card-slow-float 6.2s ease-in-out infinite; animation-delay: 0s; }
-.card-slow-float-1 { animation: card-slow-float 6.8s ease-in-out infinite; animation-delay: 1.1s; }
-.card-slow-float-2 { animation: card-slow-float 6.0s ease-in-out infinite; animation-delay: 2.2s; }
-.card-slow-float-3 { animation: card-slow-float 6.5s ease-in-out infinite; animation-delay: 3.3s; }
-.card-slow-float-4 { animation: card-slow-float 7.0s ease-in-out infinite; animation-delay: 4.4s; }
-
-/* ── Interactive Premium Card Motion: Card comes smoothly forward in motion ── */
-.premium-card-motion {
-  position: relative;
-  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.38s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.3s ease;
-  will-change: transform, box-shadow;
+.table-row {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color 0.12s ease;
 }
 
-.premium-card-motion:hover {
-  animation: none !important;
-  transform: translateY(-8px) scale(1.02) !important;
-  z-index: 25 !important;
-  box-shadow: 0 20px 40px -12px rgba(15, 23, 32, 0.12),
-              0 0 24px 0px rgba(16, 185, 129, 0.18) !important;
+.table-row:last-child {
+  border-bottom: none;
 }
 
-.dark .premium-card-motion:hover {
-  animation: none !important;
-  transform: translateY(-8px) scale(1.02) !important;
-  z-index: 25 !important;
-  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8),
-              0 0 28px 0px rgba(16, 185, 129, 0.3) !important;
+.table-row:hover {
+  background-color: var(--bg-surface-2);
 }
 
-/* ── Ambient Radial Glows ────────────────────────────────────────────── */
-.hero-glow-blob-1 {
-  background: radial-gradient(circle at center, var(--hero-glow-1) 0%, transparent 70%);
-}
-.hero-glow-blob-2 {
-  background: radial-gradient(circle at center, var(--hero-glow-2) 0%, transparent 68%);
-}
-.hero-glow-blob-3 {
-  background: radial-gradient(circle at center, var(--hero-glow-3) 0%, transparent 65%);
-}
-
-/* ── Individual Jewel-Tone Card Glows ────────────────────────────────── */
-.glow-card-lime {
-  background: radial-gradient(circle at 50% 0%, rgba(52, 211, 153, 0.20) 0%, transparent 70%), var(--bg-surface);
-}
-.glow-card-emerald {
-  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.22) 0%, transparent 70%), var(--bg-surface);
-}
-.glow-card-amber {
-  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.18) 0%, transparent 70%), var(--bg-surface);
-}
-.glow-card-cyan {
-  background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.18) 0%, transparent 70%), var(--bg-surface);
-}
-.glow-card-indigo {
-  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.18) 0%, transparent 70%), var(--bg-surface);
-}
-.glow-card-purple {
-  background: radial-gradient(circle at 50% 0%, rgba(168, 85, 247, 0.18) 0%, transparent 70%), var(--bg-surface);
-}
-
-/* ── Scrollbar hiding utility ────────────────────────────────────────── */
+/* ── Scrollbar customization ────────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ── Micro-Interactions & Polished Transitions ───────────────────────── */
+/* ── Micro-Interactions & Transitions ───────────────────────────────── */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(3px);
+    transform: translateY(2px);
   }
   to {
     opacity: 1;
@@ -237,18 +182,45 @@ h1, h2, h3, h4, .font-heading {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Chart & Metric Graphics Animations ─────────────────────────────── */
+@keyframes barRise {
+  from {
+    transform: scaleY(0);
+    opacity: 0.4;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.animate-bar-rise {
+  transform-origin: bottom;
+  animation: barRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes ringFill {
+  from {
+    stroke-dashoffset: 250;
+  }
+}
+
+.animate-ring-fill {
+  animation: ringFill 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .btn-press {
-  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.12s ease;
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.1s ease;
 }
 
 .btn-press:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
-/* ── Reduced motion ──────────────────────────────────────────────────── */
+/* ── Reduced motion compliance ───────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;

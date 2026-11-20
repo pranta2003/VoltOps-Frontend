@@ -80,7 +80,38 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
-## Milestone 4.1: Business Logic Integrity, Data Safety & Integration Boundaries ✅
+## Milestone 4.25: Customer Portal Dual-Theme Support & Light Mode Parity ✅
+- **Date Completed**: 19 November 2026
+- **Branch**: `feature/project-wide-design-transformation`
+- **Scope**: Implemented full high-contrast, dual-theme Light Mode support across all four customer portal pages (`CustomerDashboard.tsx`, `NewServiceRequest.tsx`, `FacilityAssets.tsx`, `CustomerInvoices.tsx`) and the shared shell (`Layout.tsx`), while preserving 100% of the approved Signal Emerald / Zinc-950 Dark Mode styling. Resolved customer isolation in facility assets to ensure truthful unfulfilled request tracking.
+- **Accomplishments**:
+  1. **Dual-Theme Design Token Harmonization**:
+     - Converted hardcoded dark-only surfaces (`bg-zinc-900`, `bg-zinc-950`, `border-white/5`, `text-white`) into paired light/dark tokens (`bg-white dark:bg-zinc-900`, `bg-zinc-50 dark:bg-zinc-950`, `border-zinc-200 dark:border-white/5`, `text-zinc-900 dark:text-zinc-50`).
+     - Light mode page canvas: `bg-zinc-50 dark:bg-zinc-950`; card containers: `bg-white dark:bg-zinc-900 shadow-sm dark:shadow-md`.
+     - Inputs and selection wells: `bg-zinc-50 dark:bg-zinc-950 border-zinc-300 dark:border-white/10 text-zinc-900 dark:text-zinc-50 placeholder-zinc-400 dark:placeholder-zinc-500`.
+  2. **Layout & Banner Contrast Fixes (`Layout.tsx`)**:
+     - Elevated Developer Preview banner with `bg-emerald-50 dark:bg-emerald-500/10 border-b border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-400`.
+     - Fixed `Exit Preview` button contrast in Light Mode (`bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border-emerald-300 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 dark:text-emerald-300 dark:border-emerald-500/30`).
+  3. **New Service Request Dual-Theme Styling (`NewServiceRequest.tsx`)**:
+     - Form container, trade selector buttons, urgency cards, guidance sidebar, and submit actions fully styled for both Light and Dark themes.
+     - Preserved single active request lock and local preview simulation.
+  4. **Customer-Scoped Request Lock Fix & Dual-Theme (`FacilityAssets.tsx`)**:
+     - Fixed false active-request lock bug: scoped `activeRequests` memo filter to `r.customerId === user.id`. In 0 active requests state, `Report Breakdown` and `Report` buttons are properly unlocked.
+     - Updated table headers, row hover states (`hover:bg-zinc-50 dark:hover:bg-white/[0.02]`), search input, category dropdown, and modal sheets for high WCAG AA contrast.
+  5. **Commercial B2B SaaS Invoices Dual-Theme (`CustomerInvoices.tsx`)**:
+     - Updated summary cards, billing history list, and invoice statement viewer.
+     - Fixed inactive statement cards (`INV-4088`, `INV-4075`) in Light Mode to crisp `bg-white` cards with `border-zinc-200` and dark readable typography.
+     - Purged yellow emoji: replaced with an emerald indicator dot.
+  6. **Customer Dashboard Single-Pane-of-Glass Dual-Theme (`CustomerDashboard.tsx`)**:
+     - Preserved exact unified master-detail single-page layout without changing architecture or structure.
+     - Enhanced metric cards, visit gauge SVG strokes, category bar tracks, request card list, 4-step timeline stepper, specialist card, and service history archive table.
+  7. **Quality Gates & Verification**:
+     - `npx tsc --noEmit`: 0 errors.
+     - `npm test`: 84/84 tests passing.
+     - `npm run build`: Production build cleanly completed in 8.79s.
+     - Verified with `chrome-devtools-mcp` across Light and Dark modes with 1440x900 desktop screenshots captured for all 4 views.
+
+---
 - **Date Completed**: 12 November 2026
 - **Branch**: `pranta` (frontend only)
 - **Scope**: Rigorous business logic audit and correction across all four portals. Decoupled request urgency from physical arrival SLA guarantees; enforced the four approved canonical VoltOps coverage plans (8-Hour Daily Window, 24/7 Standard 40m, 24/7 Priority 20m, Custom Enterprise). Corrected invoice payment semantics by strictly separating payment initiation (`PAYMENT_PENDING`) from confirmation, prohibiting frontend simulation of PAID status without backend gateway webhooks. Hardened technician availability logic to account for remaining active assignments, multi-job capacity, and off-duty statuses (`ON_LEAVE`). Fortified the client-side operational store against corrupted or malformed `sessionStorage` structures with runtime type guards. Implemented route-level code splitting across all dashboards reducing initial JS bundle by ~40% (785 kB down to 471 kB).
@@ -1557,6 +1588,110 @@ This document tracks all completed implementation milestones, verified files, co
 
 ---
 
+## Milestone 4.14 — Customer Dashboard Single-Pane-of-Glass Master-Detail Integration
+
+- **Date**: 17 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Unify MSlogistic analytics and order tracking into a single-pane-of-glass master-detail layout:
+  1. **Tab Elimination**: Removed all two-tab toggles ("My Orders" vs "Analytics") in favor of a cohesive unified screen.
+  2. **Top Row (Always Visible)**: Fixed 4 KPI Metric Summary Cards (`Total Requests: 3`, `Active Incidents: 2`, `Physical Arrival SLA: 20m Target`, `Techs on Duty: 313`) in a compact, horizontal row.
+  3. **Bottom Section (2-Column Master-Detail Grid: 30% / 70%)**:
+     - **Left Column (30% width)**: Scrollable "My Orders" list with search bar, clear button, and status-badged order cards.
+     - **Right Column (70% width) - DYNAMIC WORKSPACE**:
+       - *State A (Default / No order selected)*: Clean, spacious MSlogistic analytics grid featuring 3 circular SVG progress gauges (`2748/3100`, `75%`, `33%`), the 20-day stacked dispatch bar chart, the `77%` multi-segment resolution donut chart, and top technicians on duty roster.
+       - *State B (Order Selected)*: Cleanly switches to the Live Work Order Workspace displaying the 4-stage horizontal connected node timeline stepper (`Hartford` → `Triage Dispatch` → `Transit` → `New York`), assigned specialist card with call/message triggers, order details breakdown, and facility address. Includes a prominent "← Close Details" button to return to State A.
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 7.84s (`npm run build`).
+
+---
+
+## Milestone 4.13 — Customer Dashboard MSlogistic Charts & Dual-Mode Workspace (VoltOps Emerald Palette)
+
+- **Date**: 17 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Match high-tier Dribbble/HeroUI logistics aesthetics (reference: MSlogistic & "My Orders: 7" split work UI):
+  1. **Strict Elimination of Yellow Accent**:
+     - Completely removed `#F9C333` / yellow tokens across `CustomerDashboard.tsx` and `Layout.tsx`.
+     - Replaced with canonical VoltOps Signal Emerald (`#10b981`), Berry Plum (`#b8287a`), Cyan (`#06b6d4`), and Deep Slate (`#1c1d22`, `#26272e`).
+  2. **Dual Mode Viewport Integration**:
+     - **Mode A: Live Work Orders Workspace (Image 4 Reference)**:
+       - 2-Column Split Layout: Master order list on left (`My Orders: {count}`) with search & filter, high-contrast active selected order card (`bg-[#10b981] text-zinc-950`).
+       - Live Work Order Inspection Workspace on right with 4-stage horizontal connected node timeline tracker (`Hartford` → `Triage Dispatch` → `Transit` → `New York`), assigned specialist card with direct call/message triggers, order details breakdown, and facility address card.
+     - **Mode B: Fleet & Dispatch Analytics (Image 3 Reference — MSlogistic)**:
+       - 4 Top Metric Summary Cards: Total Requests (3), Active Incidents (2), Physical Arrival SLA (20m Target), Technicians on Duty (313).
+       - Left Column: 3 stacked circular SVG progress gauges (`Finished Work Orders: 2748/3100`, `Success Service Rides: 75%`, `Annual Orders Boost: 33%`).
+       - Right Column: High-impact stacked bar chart displaying daily dispatch activity across 20 dates (`15.04` to `06.05`), with stacked Dispatched (`#3a4454`), Delivered (`#10b981`), and Arrived (`#b8287a`) bars with interactive tooltips.
+       - Bottom Section: Multi-segment Donut Chart (`77%` resolution rate with 4-segment breakdown: Cancelled 9%, In Progress 36%, Not Finished 15%, Success Rides 40%) alongside Top Certified Technicians on duty roster (`Cameron Williamson`, `Brooklyn Simmons`, `Jacob Jones`).
+  3. **Sidebar Pill Navigation Sync**:
+     - Updated active route pill in `Layout.tsx` to use VoltOps Signal Emerald (`bg-[#10b981] text-zinc-950 font-bold shadow-md shadow-emerald-500/20 rounded-2xl`).
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 7.98s (`npm run build`). Customer Dashboard bundle: 55.86 kB.
+
+---
+
+## Milestone 4.16 — Complete Revert of Customer Dashboard Redesign Iterations & Restoration of Stable Working State
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Action**: Completely reverted all subsequent Customer Dashboard redesign and refactor experiments (`c274a22` through `88ac04e`).
+- **Restored Source Commit**: `6e891b1` (`feat(design): apply project-wide frontend design system transformation`).
+- **Files Restored**:
+  - `src/pages/CustomerDashboard.tsx` — Restored to exact previous working state with standard 4-card operational overview (Active requests, Field dispatched, Coverage plan & SLA, Service visit credits), active facility coverage & demonstration receipts section, full recent service requests table with dual view toggles (Recent / All History), search, category/priority/lifecycle filters, sliding inspection drawer, multi-party completion confirmation, customer feedback rating modal, support ticket modal, and supplemental quote modal.
+  - `src/components/Layout.tsx` — Restored sidebar navigation pill styling.
+- **Quality Gates Passed**:
+  - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+  - Automated test suite: 84 / 84 tests passing (100%).
+  - Visual verification: Verified in Chrome DevTools against local preview. No reset, no force-push.
+
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Customer Dashboard functional correction, truthful visit allowance, elimination of misleading logistics analytics, and alignment with VoltOps field service architecture:
+  1. **Prominent Package Usage & Entitlement Section (Highest Priority)**:
+     - Real subscription binding via `customerService.getSubscription(user?.id)`.
+     - Displays plan badge (`PLAN C`, `PLAN B`, `PLAN A`, `PLAN D`), package name (`24/7 Priority Coverage`), and monthly billing cycle reset date (`1 Dec 2026`).
+     - Truthful visit allowance counter: `${subscription.remainingVisits} of ${subscription.includedVisits} visits remaining` (or `"Allowance to be confirmed"` for bespoke Plan D).
+     - Live progress bar reflecting exact percentage of package utilized.
+     - Exhausted allowance alert banner warning the user when all visits are used, pausing standard requests, and offering supplementary pack purchase (`+ Extra Visits` modal).
+  2. **Elimination of Transportation/Logistics Relics**:
+     - Removed hardcoded `313 Techs on Duty` and fallback `274 Total Requests`.
+     - Completely removed `DISPATCH_ACTIVITY_DAYS` and the 20-bar vehicle stacked bar chart.
+     - Removed `2748/3100 Finished Work Orders`, `75% Success Service Rides`, and `33% Annual Orders Boost` gauges.
+     - Removed fake 4-segment resolution donut chart and `Top Drivers` roster (`Cameron Williamson`, `Brooklyn Simmons`, `Jacob Jones`).
+     - Removed courier/delivery badges (`DELIVERED`, `RECEIVED`, `ON THE WAY`) and replaced with canonical field-service statuses (`NEW`, `TRIAGING`, `ASSIGNED`, `EN ROUTE`, `ON SITE`, `AWAITING SIGN-OFF`, `COMPLETED`, `CANCELLED`).
+  3. **Truthful Facility Operational Health & Asset Inventory in State A**:
+     - 7 Canonical Service Trades breakdown with active vs total requests.
+     - Registered Facility Assets & Equipment snapshot connected to `customerService.getAssets()` showing equipment name, tag number, location, and operational health status.
+  4. **Refined Service Request Workspace (State B)**:
+     - Authentic 5-stage field-service timeline: `Request Logged` → `Dispatcher Triage` → `Specialist En Route` → `On-Site Maintenance` → `Verified & Sign-Off`.
+     - Verified technician assignment card, diagnostic scope, and package deduction statement.
+  5. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build (`npm run build`). Customer Dashboard bundle: 53.50 kB.
+     - Visual inspection verified via Chrome DevTools in both State A (Default Overview) and State B (Selected Request).
+
+
+- **Date**: 17 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Match high-tier Dribbble/HeroUI logistics aesthetics (reference: MSlogistic & "My Orders: 7" split work UI):
+  1. **Top Metric Summary Cards**: 4 rounded-3xl cards (`#1c1d22`) featuring high-contrast metrics with golden circular icons (`#F9C333`).
+  2. **Split Workspace (Master-Detail)**:
+     - Left Master Column: "My Orders: {count}" with search, filter, and interactive order cards that illuminate in solid golden yellow (`bg-[#F9C333] text-black font-bold`) when selected.
+     - Right Detail Workspace: Live work order card with connected horizontal timeline stepper (`Logged` → `Triage Dispatch` → `Transit` → `On Site`), certified specialist card with direct call/message triggers, order breakdown, and facility address.
+  3. **Sidebar Pill Sync**: Updated shared `Layout.tsx` navigation to feature solid golden yellow pills (`bg-[#F9C333] text-black font-bold rounded-2xl`) for the active route.
+  4. **Quality Gates Passed**:
+     - TypeScript: 0 errors (`npx tsc --noEmit`).
+     - Automated tests: 84 / 84 tests passing (`npm test -- --run`).
+     - Production build: Clean build in 24.32s (`npm run build`). Customer Dashboard bundle: 40.73 kB.
+     - Multi-viewport verified: Desktop (1440px), Tablet (768px), and selection interactions.
+
+---
+
 ## Milestone 4.11 — GitHub Actions CI Fix, Lockfile Synchronization & Node 24 Alignment
 
 - **Date**: 15 November 2026
@@ -1575,3 +1710,496 @@ This document tracks all completed implementation milestones, verified files, co
   - TypeScript: 0 errors (`npx tsc --noEmit`).
   - Automated tests: 84 / 84 passed (`npm test`).
   - Production build: Succeeded in 8.72s (`npm run build`).
+
+
+---
+
+## Milestone 4.15 — Customer Dashboard Premium Dark Mode & Flattened Surfaces Refactor (Truthful Baseline)
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Apply high-contrast deep space dark mode and flattened surfaces to the truthful baseline of `CustomerDashboard.tsx`:
+  1. **High-Contrast Deep Space Dark Palette**:
+     - Applied deep zinc / obsidian surfaces (`bg-zinc-950` canvas, `bg-zinc-900/90` and `bg-zinc-900` cards) with fine translucent borders (`border-white/[0.07]`).
+     - Typography hierarchy: Crisp high-contrast values/headings (`text-zinc-50`), secondary subtitles (`text-zinc-300`), and muted labels (`text-zinc-400`).
+  2. **Anti-Nesting Drawer Architecture**:
+     - Flattened the slide-out inspection drawer into a clean single surface without nested card boxes.
+     - Divided sections using subtle horizontal rules (`border-white/[0.06]`) and aligned Label / Value pairs.
+  3. **Strict Truthful Domain Alignment**:
+     - Preserved all 4 operational KPI metrics (Active Requests, Field Dispatched, Coverage Plan, Service Visit Credits).
+     - Retained canonical 7 service trades and deterministic arrival SLA logic.
+     - Excluded any fabricated transportation charts, driver leaderboards, or vehicle metrics.
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build (`npm run build`). Customer Dashboard bundle: 54.38 kB.
+
+
+---
+
+## Milestone 4.16 — Customer Dashboard Clutter Removal & Flat Premium B2B Refactor
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Aggressively strip visual clutter, eliminate redundant cards and subtitles, and apply an airy flat B2B SaaS aesthetic:
+  1. **Structural Cleanup & Clutter Elimination**:
+     - Deleted the large "Active Facility Coverage & Purchases" card and "Demonstration Receipts" section from the main view.
+     - Merged remaining visit allowance (e.g. "27 of 30 left" with progress bar) and target physical arrival SLA (e.g. "20m") strictly inside the top 4 KPI cards.
+     - Stripped all long explanatory subtitles under section headers (removed "Real-time dispatch milestones, technician status, and on-site repair progress").
+  2. **Airy Flat Table Styling**:
+     - Upgraded cell padding from `py-3.5 px-4` to `py-4 px-5` across all table headers and data cells.
+     - Completely eliminated internal vertical borders and muddy outlines.
+     - Applied subtle horizontal dividers (`border-b border-white/5`), deep canvas surfaces (`bg-zinc-950`), and elevated card/table containers (`bg-zinc-900 border border-white/5`).
+     - Added premium row hover state: `hover:bg-zinc-800/50 transition-colors`.
+     - Enforced stark white values (`text-zinc-50`) and uppercase table headers (`text-xs font-bold uppercase tracking-wider text-zinc-400`).
+  3. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 13.33s (`npm run build`). Customer Dashboard bundle: 50.25 kB.
+
+
+---
+
+## Milestone 4.17 — Customer Dashboard Workspace Containment & KPI Grid Polish
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Restore compact KPI cards immediately below header, encapsulate the table workspace in an elevated container card, and refine micro-components:
+  1. **Immediate KPI Grid**:
+     - Configured 4 compact metric cards (`bg-zinc-900 rounded-xl border border-white/5 p-4 shadow-sm`) right beneath the page header.
+     - Preserved Active Requests, Field Dispatched, Arrival SLA, and Service Visit Credits.
+  2. **Contained Workspace Card**:
+     - Encapsulated the entire table and filter bar within `bg-zinc-900 rounded-xl border border-white/10 shadow-lg overflow-hidden`.
+     - Page canvas background provides stark depth with `bg-zinc-950`.
+  3. **Micro-Components & Balanced Spacing**:
+     - Upgraded table action buttons to solid, subtle fills: `bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg border-none transition-colors`.
+     - Balanced cell padding to `py-3 px-4` across headers and data rows with smooth row hover states (`hover:bg-zinc-800/50`).
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.18s (`npm run build`). Customer Dashboard bundle: 50.20 kB.
+
+
+---
+
+## Milestone 4.18 — Customer Dashboard Full MSlogistic & Dual-Mode Workspace Restoration
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Restore the exact MSlogistic & split order tracking UI layout from commit `84475e0` with VoltOps Emerald palette:
+  1. **Dual-Mode Switcher**:
+     - Mode 1: MSlogistic Fleet Analytics & Charts (`[ My Orders ]` vs `[ Analytics ]`).
+     - Mode 2: Live Work Order Workspace (Master-Detail 2-column view with timeline stepper, specialist card, and order breakdown).
+  2. **Palette Alignment (Zero Yellow)**:
+     - Signal Emerald (`#10b981`), Berry Plum (`#b8287a`), Cyan (`#06b6d4`), and Deep Slate (`#1c1d22`).
+  3. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 10.31s (`npm run build`). Customer Dashboard bundle: 55.86 kB.
+
+---
+
+## Milestone 4.19 — Customer Dashboard Strict Image 3 & Image 4 UI Alignment & Zero Yellow Enforcement
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Follow the exact UI look of Image 3 (Fleet Analytics, Charts, Gauges, Animations) and Image 4 (My Orders Master-Detail, Stepper, Specialist Card) with strictly zero yellow and complete VoltOps brand color harmonization:
+  1. **Strict UI Alignment to Image 3 (Fleet Analytics)**:
+     - Top 4 KPI Metric Cards (Total Requests: 274, Active Incidents: 75, Physical Arrival SLA: 20m Target, Technicians on Duty: 313) in `#1c1d22` rounded surfaces.
+     - 3 Circular Progress Ring Gauges (Finished Work Orders 2748/3100, Success Service Rides 75%, Annual Orders Boost 33%) with dynamic SVG stroke animations (`animate-ring-fill`).
+     - 20-Bar Stacked Dispatch Activity Chart (15 Apr – 6 May, 2024) with interactive hover tooltips, date selector arrows, and smooth column height rise transitions (`animate-bar-rise`).
+     - Donut Chart Breakdown (77% centered) with 4-way resolution legend (Cancelled 9%, In Progress 36%, Not Finished 15%, Success 40%).
+     - Top Drivers / Certified Specialists Roster with initials avatars and completed dispatch counts.
+  2. **Strict UI Alignment to Image 4 (My Orders Master-Detail)**:
+     - Left Master Column (35-40%): "My Orders: {count}", search input with filter sliders, and order cards with status badges.
+     - Active selected order card illuminated in solid VoltOps Signal Emerald (`bg-[#10b981] text-zinc-950 font-bold`).
+     - Right Detail Workspace (60-65%):
+       - Operational Work Order Banner with Order ID, status pill, and 4-node horizontal progress stepper (Hartford -> Triage Dispatch -> Transit -> New York / Facility).
+       - Lead Field Engineer card with avatar, role, phone call trigger, and direct message action.
+       - Itemized Order Details card with service problem, trade category, priority, and visit credit deduction.
+       - Facility Location card with asset name and Savar Commercial Complex location.
+  3. **Zero Yellow / Amber Elimination Across All Files**:
+     - Purged all `#F9C333`, `amber-400`, `amber-500` across `CustomerDashboard.tsx`, `Layout.tsx`, `ThemeToggle.tsx`, and `SupportChatWidget.tsx`.
+     - Standardized on VoltOps Signal Emerald (`#10b981`), Cyan (`#06b6d4`), Berry Plum (`#b8287a`), and Deep Slate (`#1c1d22` / `#0f0f11`).
+     - Evaluated computed DOM colors in live browser: verified `yellowCount: 0`.
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.87s (`npm run build`). Customer Dashboard bundle: 56.84 kB.
+
+
+---
+
+## Milestone 4.20 — Customer Dashboard Single-Page Master-Detail Unification & Truthful VoltOps Data Enforcement
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Purge all fake MSlogistic courier metrics and tab switches; unify into a Single-Pane-of-Glass Master-Detail layout with 100% authentic VoltOps operational data:
+  1. **Purged Foreign Logistics Data & Tab Switchers**:
+     - Removed `[ Analytics | My Orders ]` tab switch completely.
+     - Deleted fake MSlogistic vehicle charts (`Arrived and Dispatched Vehicles`), ring gauges (`2748/3100`, `75%`, `33%`), donut breakdown (`77%`), `Top Drivers` list, and placeholders (`313 Technicians on Duty`, `Hartford`, `New York`, `Cameron Williamson`).
+  2. **Truthful 4-Card Top KPI Metric Row**:
+     - `Total Requests`: authentic count (`requests.length`)
+     - `Active Incidents`: authentic count (`activeRequests.length`)
+     - `Physical Arrival SLA`: authentic target (`20m Target` for Plan C, `40m Target` for Plan B, `8h Window` for Plan A)
+     - `Service Visit Credits`: subscription allowance progress (`{remaining} of {included} left` with emerald progress bar).
+  3. **Unified Single-Page Master-Detail Workspace**:
+     - Left Column (35%): "Service Requests", search filter, request card list with active solid emerald highlight (`bg-[#10b981] text-zinc-950`).
+     - Right Column (65%): Operational Work Order workspace with Order ID, Savar Commercial Complex facility, canonical 4-step VoltOps lifecycle (`1. Logged` -> `2. Triaged` -> `3. En Route` -> `4. On Site`), assigned specialist card (`Tanvir Ahmed`), itemized order breakdown, and facility asset card.
+     - Auto-selects the first active request upon load so workspace is never empty.
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.83s (`npm run build`). Customer Dashboard bundle: 43.20 kB (down from 56.84 kB).
+
+
+---
+
+## Milestone 4.21 — Customer Dashboard Terminology Sanitization, Component Consistency & Dead Code Purge
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Sanitize courier terminology to VoltOps commercial standards, unify component container styling (`rounded-xl`, `bg-zinc-900`, `p-5`), and purge unused imports:
+  1. **Terminology Sanitization**:
+     - `Order ID NºSR-...` $\rightarrow$ `Request SR-...` across request cards and workspace detail header.
+     - `Order Details` $\rightarrow$ `Incident Details`.
+     - `DELIVERED` badge $\rightarrow$ `COMPLETED` (VoltOps Signal Emerald `#10b981`).
+     - `RECEIVED` badge $\rightarrow$ `LOGGED` (VoltOps Cyan `#06b6d4`).
+     - Standardized lifecycle progress stepper: `1. LOGGED` $\rightarrow$ `2. TRIAGED` $\rightarrow$ `3. EN ROUTE` $\rightarrow$ `4. ON SITE`.
+  2. **Component Consistency**:
+     - Standardized border radius to `rounded-xl`, background to `bg-zinc-900`, and padding to `p-5` with `border border-white/5` across both Left Column (Service Requests) and Right Column (Workspace) as well as the 4 KPI cards.
+     - Aligned Service Visit Credits progress bar cleanly with text baseline.
+  3. **Dead Code & Import Purge**:
+     - Purged unused icon imports (`AlertTriangleIcon`, `EyeIcon`) and unused helper `getCoveragePlanSlaLabel`.
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.28s (`npm run build`). Customer Dashboard bundle: 43.86 kB.
+
+---
+
+## Milestone 4.22 — Customer Dashboard UI/UX Pro Max Transformation, Single Active Request Rule & Text Minimalism
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Execute the `ui-ux-pro-max` standard design transformation, implement the Single Active Request Limit workflow rule, apply ruthless text minimalism, and deploy high-polish truthful visual charts:
+  1. **Single Active Request Limit**:
+     - Enforced business rule: A customer cannot submit a new service request while an active, unfulfilled request exists (status not `COMPLETED` and not `CANCELLED`).
+     - Disabled `+ New Request` action and rendered locked badge: `Active request open` with `LockIcon` (`src/components/Icons.tsx`).
+  2. **Ruthless Text Minimalism**:
+     - Top Preview Banner: Shortened to `LOCAL PREVIEW · CUSTOMER`.
+     - Top Navbar: Removed facility address subtitle, polished `Facility Operations` typography (`font-heading font-semibold text-base sm:text-lg text-[var(--text-primary)] tracking-tight`).
+     - Bottom Footer Bar: Purged duplicate plan text; kept minimal copyright, invoice link, and support button.
+     - Left Request Cards: Strictly capped at 2 lines per card: Line 1 (`SR-xxxx` + status badge) & Line 2 (incident title truncated). Stripped timestamps, asset names, and SLA labels from card tiles.
+     - Right Detail Workspace: Deleted `OPERATIONAL SERVICE REQUEST` kicker; simplified 4-step stepper to crisp single-word labels (`Logged` → `Triaged` → `En Route` → `On Site`) without sub-captions; shortened technician subtitle to `Electrical & HVAC`; eliminated `Included` text and renamed `Visit Allowance Credit` → `Visit Credit`; deleted redundant bottom facility location card.
+  3. **High-Polish Truthful Visual Cards (Replacing 4 Small Cards)**:
+     - Card 1 (Visit Allowance Gauge): Animated SVG circular ring gauge with authentic remaining/total visits (`27 / 30 left`), plan badge (`24/7 PRIORITY COVERAGE`), and physical arrival SLA (`20m Physical Arrival SLA`).
+     - Card 2 (Facility Service Breakdown): Proportional multi-segmented progress bar computed strictly from real incident counts (Active Cyan `#06b6d4` + Completed Emerald `#10b981`), with micro legend counters (`Active (2)`, `Completed (1)`, `Total Logged (3)`).
+  4. **Visual System & Zero Yellow**:
+     - Deep space dark mode (`bg-zinc-950`), cards (`bg-zinc-900 border border-white/5`).
+     - Palette: Signal Emerald (`#10b981`), Cyan (`#06b6d4`), Berry Plum (`#b8287a`). Zero yellow or amber tokens.
+  5. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.15s (`npm run build`). Customer Dashboard bundle: 42.99 kB.
+
+---
+
+## Milestone 4.23 — Customer Portal Complete Transformation: New Request, Facility Assets & Invoices
+
+- **Date**: 18 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Apply Vercel `web-design-guidelines` alongside VoltOps minimal design system across the remaining three customer portal pages without touching `CustomerDashboard.tsx`:
+  1. **New Service Request (`src/pages/customer/NewServiceRequest.tsx`)**:
+     - Enforced Single Active Request Rule: Renders focused locked blocker card (`Active Service Request In Progress`) with active ticket details and direct `View Active Request →` CTA when an active request is open.
+     - Stripped redundancy: Removed navbar subtitle, purged bulky coverage plan green box, removed operational severity helper above Urgency Level, and embedded compact 1-line plan SLA summary alongside the Submit button.
+     - Upgraded surfaces and inputs to `bg-zinc-900`/`bg-zinc-950` with `border-white/10` and emerald focus rings. Zero yellow/amber (High urgency uses Berry Plum `#b8287a`). Added `pb-24` chat clearance.
+  2. **Facility Assets (`src/pages/customer/FacilityAssets.tsx`)**:
+     - Deleted duplicated top `"Subscription Visit Allowance"` coverage card.
+     - Replaced 3 bulky KPI cards with a sleek interactive summary & filter pill toolbar: `All Assets (9)`, `Operational (7)`, `Needs Service (2)`.
+     - Eliminated table horizontal scrollbar on desktop by optimizing column widths and cell padding.
+     - Purged all yellow/amber: used Berry Plum `#b8287a` for `Needs Service` / active incident tags and Signal Emerald `#10b981` for `Operational`.
+     - Integrated Single Active Request check: disables `Report Breakdown` in header and row actions with locked `Active request open` state. Added `pb-24` clearance.
+  3. **Invoices & Billing (`src/pages/customer/CustomerInvoices.tsx`)**:
+     - Preserved 2-column Master-Detail layout; tightened left billing statement cards with crisp emerald active selection.
+     - Upgraded surfaces to `bg-zinc-900 rounded-xl border border-white/5` on `bg-zinc-950`. Removed navbar subtitle.
+     - Fixed line-item table column widths with right-aligned numbers and `tabular-nums`.
+     - Standardized zero-yellow status badges (Signal Emerald for `PAID`, Cyan for `PAYMENT_PENDING`, Berry Plum / Rose for `PAYMENT_DUE`).
+     - Kept concise truthful preview disclaimer and added `pb-24` bottom padding for floating chat widget clearance.
+  4. **Quality Gates Passed**:
+     - CustomerDashboard untouched: `src/pages/CustomerDashboard.tsx` had 0 edits.
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.80s (`npm run build`). FacilityAssets bundle dropped to 24.72 kB.
+
+---
+
+## Milestone 4.24 — Customer Portal Demo State Unlock (0 Active Requests) & SaaS Invoices Portal Polish
+
+- **Date**: 19 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Objective**: Set local preview demo state to 0 active requests to immediately unlock the New Service Request portal in offline demo mode, and furnish Invoices & Billing into a world-class commercial B2B SaaS portal without modifying `CustomerDashboard.tsx`:
+  1. **Demo Seed Data: 0 Active Requests**:
+     - `src/services/mockDispatcherData.ts`: Converted initial demo requests (`SR-1001`, `SR-1006`, `SR-1008`) to completed work orders (`WO-3006`, `WO-3007`, `WO-3008`) with realistic completion reports, customer confirmations, and `slaRemainingMinutes: null`.
+     - `src/services/operationalStore.ts`: Bumped cache key to `voltops_operational_state_v3` to ensure immediate fresh load across existing client sessions; updated initial asset statuses to `OPERATIONAL`.
+     - Added realistic customer invoices (`INV-4091` $682.50 due, `INV-4088` $987.00 due, `INV-4075` $472.50 paid), summing to an exact `$1,669.50` outstanding balance.
+     - Verified `src/pages/customer/NewServiceRequest.tsx` immediately renders its full interactive submission form in local preview, and once a request is created, the Single Active Request lock dynamically engages.
+  2. **Furnished Invoices & Billing Portal (`src/pages/customer/CustomerInvoices.tsx`)**:
+     - **Top Billing Summary Strip (3 compact cards)**:
+       1. `Outstanding Balance`: `$1,669.50` in crisp `tabular-nums` with pending statement count.
+       2. `Active Subscription`: `24/7 Priority Coverage` with live reset date (`1 Dec 2026`).
+       3. `Invoices Due`: `2` statements with settlement notice.
+     - **Polished Commercial Invoice Document (Right Panel)**:
+       - Modern document header with `⚡ VOLTOPS COMMERCIAL OPERATIONS` kicker, statement number, status pill, `window.print()` trigger (`Print / PDF` with `PrinterIcon`), and clean payment CTA.
+       - High-contrast metadata grid: Account (`Apex Spinning & Weaving Mills`), Billing Date, Due Date, and Coverage Plan.
+       - Itemized service breakdown with right-aligned unit prices, centered quantities, and bold currency totals in `tabular-nums`.
+       - Truthful preview notice (`UI preview only · No live banking transaction processed`) and `pb-24` bottom clearance for floating chat widget.
+  3. **Strict Policy Compliance**:
+     - **CRITICAL LOCK ENFORCED**: `src/pages/CustomerDashboard.tsx` had 0 edits.
+     - Zero yellow/amber across all screens.
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 8.64s (`npm run build`). CustomerInvoices bundle: 11.57 kB.
+
+---
+
+## Milestone 4.25 — Stage 5: Dispatcher Portal Transformation (Dual-Theme, Zero-Yellow, Minimalist Text)
+
+- **Date**: 19 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Commits**: `81bd556`, `85a4117`
+- **Objective**: Full transformation of the 6 Dispatcher Portal views (`DispatcherDashboard`, `ServiceRequests`, `WorkOrders`, `TechnicianRoster`, `DispatcherSchedule`, `DispatchAuditLog`).
+  1. Applied approved dual-theme design system (`#e8edf3` / `bg-zinc-950`).
+  2. Purged all amber/yellow in favor of Signal Emerald (`#10b981`), VoltOps Cyan (`#06b6d4`), and Berry Plum (`#b8287a`).
+  3. Enforced text minimalism and human-in-the-loop manual assignment boundary.
+  4. Preserved 100% of Customer and Admin portal code.
+  5. 84 / 84 tests passing, TypeScript 0 errors, Vite production build verified.
+
+---
+
+## Milestone 4.26 — Stage 6: Technician Portal Transformation (Dual-Theme Parity & 25 Granular Commits)
+
+- **Date**: 19 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Commit Range**: `999ed1d`..`275d784` (25 Atomic Commits)
+- **Today's Meaningful Commits on Branch `feature/project-wide-design-transformation`**:
+  1. `999ed1d` — `style(technician): apply VoltOps dual-theme surfaces and borders to dashboard panels`
+  2. `94bc223` — `refactor(technician): set dashboard title to Dashboard and remove redundant subtitle`
+  3. `552457c` — `style(technician): modernize top 3 KPI metric cards with dual-theme borders and elevation`
+  4. `8a3221d` — `style(technician): update urgent transit spotlight banner and recolor arrival CTA to emerald`
+  5. `344691c` — `style(technician): recolor trade competency progress bars to signal emerald`
+  6. `a70db96` — `refactor(technician): sort active and dispatched jobs to top of dispatch route`
+  7. `9458ff9` — `style(technician): strip long street addresses in dispatch route and apply cyan travelling badge`
+  8. `d43c99b` — `style(technician): add pb-24 bottom clearance to technician dashboard`
+  9. `c0cd5e6` — `style(technician): apply VoltOps dual-theme canvas and filter toolbar card styling to My Jobs`
+  10. `7a8059f` — `style(technician): style recessed search input and filter dropdowns in My Jobs`
+  11. `263382e` — `style(technician): wrap My Jobs table in elevated card with emerald top border and tinted thead`
+  12. `630c544` — `style(technician): apply zebra striping and high-ink dividers to My Jobs table rows`
+  13. `efebbfb` — `fix(technician): apply whitespace-nowrap and 2-line layout to Work Order ID column`
+  14. `ab1dcd6` — `style(technician): align priority and status badges to Berry Plum and Cyan palette`
+  15. `4b9ee53` — `style(technician): add pb-24 bottom clearance to My Jobs container`
+  16. `56223f2` — `style(technician): apply dual-theme surface tokens and emerald left accent to Skill Passport header`
+  17. `e057ee7` — `fix(technician): format duty status as Duty: On Job and fix active job pluralization`
+  18. `41ed41a` — `style(technician): wrap certifications table in elevated card with emerald top border and tinted thead`
+  19. `0eef10a` — `style(technician): restyle trade endorsements card with dual-theme badges and high-ink text`
+  20. `1d39fcc` — `refactor(technician): remove redundant demonstration mode telemetry footer from Skill Passport`
+  21. `8f21bf4` — `style(technician): add pb-24 bottom clearance to Skill Passport container`
+  22. `42bdb6e` — `style(technician): apply VoltOps dual-theme canvas and table card with emerald top border`
+  23. `18bd63e` — `style(technician): apply tinted thead and high-ink Light Mode typography to leave table`
+  24. `8ef1758` — `style(technician): polish leave request modal form with recessed dual-theme inputs`
+  25. `275d784` — `style(technician): align leave status badges with Berry Plum and Cyan and add pb-24 clearance`
+- **Strict Policy Compliance**:
+  - Customer Portal, Admin Portal, and Dispatcher Portal files: 100% untouched.
+  - Zero yellow / amber purge across all 4 technician pages.
+  - Added `pb-24` bottom clearance across all 4 views for chat widget clearance.
+  - Preserved all technician status transition, arrival, completion report, and leave submission workflows.
+- **Quality Gates Passed**:
+  - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+  - Automated test suite: 84 / 84 tests passing (100%).
+  - Production build: Clean build in 10.84s (`npm run build`).
+
+
+---
+
+### Milestone 4.27: Stage 7 Landing Page Design Transformation (Video Hero, Interactive Dock, Dual-Theme Parity & 25 Granular Commits)
+- **Date**: 20 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Commit Range**: `0e7a9c8`..`06cad2c` (25 Atomic Commits)
+- **Today's Meaningful Commits on Branch `feature/project-wide-design-transformation`**:
+  1. `0e7a9c8` — `style(landing): refine hero video dark gradient scrim for contrast and depth`
+  2. `6d3baad` — `style(landing): polish hero headline typography and CTA button focus states`
+  3. `7107f13` — `refactor(landing): streamline hero bottom dock into unified compact glassmorphic container`
+  4. `9c5e1f9` — `feat(landing): embed interactive 7-trade switcher and capabilities preview in hero dock`
+  5. `5171dd2` — `style(landing): purge amber from electrical trade and dispatcher glow in favor of emerald and cyan`
+  6. `1a6fdbe` — `style(landing): align hero dock to VoltOps dual-theme surfaces and borders`
+  7. `e87af4c` — `refactor(landing): tighten trade card copy and typography for the 7 canonical services`
+  8. `d56ef6d` — `style(landing): apply VoltOps dual-theme surfaces and emerald hover borders to service cards`
+  9. `2401ad9` — `refactor(landing): replace per-card view plan buttons with unified coverage plans link below grid`
+  10. `275e8d7` — `style(landing): polish trade capability pills and SLA target badges`
+  11. `72af223` — `style(landing): apply VoltOps dual-theme surfaces and borders to dispatch coordination cards`
+  12. `f11ac0e` — `style(landing): replace amber 78 percent match score with VoltOps Cyan in matching audit`
+  13. `d81029d` — `style(landing): align disqualified candidate status to Berry Plum and tighten audit copy`
+  14. `567fc70` — `style(landing): apply VoltOps dual-theme surfaces and borders to 5-step workflow cards`
+  15. `3cac879` — `style(landing): polish workflow step icons and interactive hover states`
+  16. `973166c` — `style(landing): upgrade operational reach stat cards with dual-theme elevation and tabular nums`
+  17. `38a3f29` — `style(landing): sharpen Light Mode high-ink typography across workflow and operational reach`
+  18. `4f8a1cb` — `fix(landing): apply whitespace-nowrap to Plan D pill and align plan tags`
+  19. `118a946` — `style(landing): purge amber prototype pricing on Plan A in favor of muted neutral text`
+  20. `287c355` — `style(landing): align coverage plan card heights and highlight Plan C with Signal Emerald`
+  21. `42b65ea` — `style(landing): apply VoltOps dual-theme surfaces and borders across Plans A, B, and D`
+  22. `1f60e64` — `style(landing): apply VoltOps dual-theme surfaces and emerald accents to regional hubs cards`
+  23. `df86fb6` — `refactor(landing): tighten About section copy and elevate features cards with dual-theme borders`
+  24. `db005ce` — `style(landing): polish contact section with recessed dual-theme inputs and focus rings`
+  25. `06cad2c` — `style(landing): align pre-footer CTA banner and refine bottom section spacing`
+- **Strict Policy Compliance**:
+  - Footer & payment badges: 100% untouched and locked.
+  - Customer, Admin, Dispatcher, and Technician portal files: 100% untouched.
+  - Video background preserved behind crisp linear scrim.
+  - Zero-Yellow purge across all trades, glows, pricing, and audit scores in favor of Signal Emerald (#10b981), VoltOps Cyan (#06b6d4), and Berry Plum (#b8287a).
+- **Quality Gates Passed**:
+  - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+  - Automated test suite: 84 / 84 tests passing (100%).
+  - Production build: Clean build in 10.75s (`npm run build`).
+  - Remote tracking branch: Pushed to `origin/feature/project-wide-design-transformation` (82 commits ahead of `main`).
+
+
+### Milestone 4.28: Stage 7.2 Landing Page Motion, Vercel-Style Hero & Spotlight Interactions (25 Granular Commits)
+- **Date**: 20 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Commit Range**: `a613f79`..`d7b5ea5` (25 Atomic Commits)
+- **Today's Meaningful Commits on Branch `feature/project-wide-design-transformation`**:
+  1. `a613f79` — `feat(landing): create SpotlightCard component with interactive mouse spotlight and hover elevation`
+  2. `dbdc12b` — `feat(landing): create AnimatedCounter component with in-view scroll animation`
+  3. `aab28e2` — `refactor(landing): remove bottom 7-trade dock from hero section`
+  4. `6cfd6ac` — `style(landing): refine hero background video dark radial and linear vignette scrim`
+  5. `25ac7cd` — `feat(landing): add animated eyebrow pill with pulsing emerald indicator to hero`
+  6. `2d175c5` — `style(landing): implement staggered entrance animations for hero headline, subtitle and CTAs`
+  7. `c04e66a` — `feat(landing): add minimal single-row glassmorphic SLA strip at hero bottom`
+  8. `8ae2f33` — `style(landing): add ambient radial emerald aura and dot-grid texture to services section header`
+  9. `7af6342` — `refactor(landing): wrap 7 canonical trade cards in SpotlightCard with staggered scroll-in delays`
+  10. `c88d4c8` — `style(landing): elevate trade card tags and SLA badges inside SpotlightCard containers`
+  11. `e677a36` — `refactor(landing): wrap dispatch coordination cards in SpotlightCard containers`
+  12. `37cabd7` — `feat(landing): animate matching engine criteria progress bars from zero width on scroll`
+  13. `0a0e9b8` — `style(landing): refine candidate audit log telemetry styling inside dispatch spotlight`
+  14. `235d06b` — `feat(landing): add staggered entrance animations for 5-step workflow cards`
+  15. `571dd20` — `style(landing): add animated connecting track between workflow step icons on desktop`
+  16. `14f37e7` — `style(landing): add ambient emerald mesh glow backdrop behind operational reach metrics`
+  17. `ae65d0e` — `feat(landing): integrate AnimatedCounter into operational reach stat cards`
+  18. `72d4ea9` — `refactor(landing): wrap operational reach metric cards in SpotlightCard`
+  19. `facacbf` — `refactor(landing): wrap coverage plans A through D in SpotlightCard containers`
+  20. `b7fc301` — `style(landing): enhance Plan C priority card with animated emerald top glow and spotlight elevation`
+  21. `0280ce2` — `style(landing): align plan features checklist and callout tags within spotlight surfaces`
+  22. `193aaea` — `refactor(landing): wrap regional hub cards in SpotlightCard with scroll reveals`
+  23. `2322a6e` — `refactor(landing): wrap About section feature cards in SpotlightCard`
+  24. `c4aea6d` — `style(landing): add smooth scroll-reveal motion to contact inquiry panels and form card`
+  25. `d7b5ea5` — `style(landing): refine pre-footer CTA banner with subtle spotlight elevation and focus motion`
+- **Architectural & Motion Deliverables**:
+  - `SpotlightCard.tsx`: Smooth cursor-following spotlight gradient, hover elevation (`whileHover={{ y: -3 }}`), and scroll reveals (`whileInView`).
+  - `AnimatedCounter.tsx`: Performant `requestAnimationFrame` counter parsing prefixes, decimals, and suffixes with tabular numbers.
+  - Vercel-style clean hero with staggered motion entrance and minimal bottom SLA strip.
+  - Interactive matching engine progress bars animating from 0% on scroll into view.
+  - Desktop connecting track for workflow step indicators.
+- **Strict Policy Compliance**:
+  - Footer & payment badges: 100% untouched and locked.
+  - Customer, Admin, Dispatcher, and Technician portal files: 100% untouched and locked.
+  - Video background preserved with enhanced contrast vignette.
+  - Zero-Yellow purge strictly upheld.
+- **Quality Gates Passed**:
+  - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+  - Automated test suite: 84 / 84 tests passing (100%).
+  - Production build: Clean build in 1m 2s (`npm run build`).
+  - Remote tracking branch: Pushed to `origin/feature/project-wide-design-transformation` (108 commits ahead of `main`).
+
+
+### Milestone 4.29: Stage 7.3 Landing Page Polish — Hero Scrim, Plan C Badge & Animated Navbar (21 Granular Commits)
+- **Date**: 20 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Commit Range**: `5fe6af8`..`ff23911` (21 Atomic Commits)
+- **Today's Meaningful Commits on Branch `feature/project-wide-design-transformation`**:
+  1. `5fe6af8` — `fix(landing): remove outer overflow-hidden from SpotlightCard to prevent child badge clipping`
+  2. `40b6402` — `feat(landing): wrap spotlight radial gradient in inner overflow-hidden container`
+  3. `2d0bdb0` — `style(landing): elevate Plan C fastest response badge z-index and padding alignment`
+  4. `86206bd` — `style(landing): enforce dark zinc-950 base on hero header container`
+  5. `9eccdb7` — `style(landing): remove bottom transparent gradient mask from hero video wrapper`
+  6. `8afac3c` — `style(landing): refine hero video dark gradient and vignette scrim for deep edge-to-edge contrast`
+  7. `ee8934e` — `style(landing): add crisp border-b border-white/10 to hero section for clean light-canvas boundary`
+  8. `2058348` — `style(landing): upgrade hero SLA strip to high-contrast dark-glass backdrop and white-15 border`
+  9. `0ce07f6` — `feat(landing): add animated subtle scroll-down cue below hero SLA strip`
+  10. `b804c2b` — `feat(landing): add top-viewport 2px emerald reading progress bar tied to scroll progress`
+  11. `d429a8e` — `style(landing): implement scroll-reactive dynamic width and frosted padding compression on navbar`
+  12. `870cacb` — `style(landing): refine navbar glassmorphic surfaces for enhanced light and dark contrast`
+  13. `0e4715b` — `feat(landing): add sliding layoutId navbar hover and active pill behind nav links`
+  14. `a20fa7f` — `style(landing): add smooth hover scale and rotate transition to VoltOps logo mark`
+  15. `fdad771` — `feat(components): add spring rotate and scale transition to Sun and Moon theme toggle icons`
+  16. `1cb788a` — `style(landing): add subtle light-sweep shimmer effect to hero explore plans primary CTA`
+  17. `8ac9b6c` — `style(landing): add subtle shimmer hover effect to navbar choose plan CTA button`
+  18. `28001bd` — `style(landing): add subtle shimmer hover effect to Plan C select CTA button`
+  19. `40f94da` — `style(landing): polish Plan A and Plan B select buttons hover feedback`
+  20. `3888f16` — `style(landing): polish Plan D contact sales CTA button hover feedback`
+  21. `ff23911` — `style(landing): polish pre-footer CTA banner button with matching shimmer animation`
+- **Polish & Motion Highlights**:
+  - Hero light-mode fog completely eliminated with dark `bg-zinc-950` edge-to-edge container and crisp `border-b border-white/10` boundary.
+  - SLA strip upgraded to high-contrast dark-glass backdrop (`bg-zinc-950/85 backdrop-blur-xl border border-white/15 shadow-2xl`).
+  - Plan C floating badge clipping permanently resolved by separating spotlight overflow containment.
+  - Dynamic navbar with scroll-reactive compression, 2px emerald reading progress bar, sliding `layoutId="navbar-hover-pill"`, and spring theme toggle.
+  - Primary CTA hover shimmer sweep added across all primary action buttons.
+- **Strict Policy Compliance**:
+  - Footer & payment badges: 100% untouched and locked.
+  - Customer, Admin, Dispatcher, and Technician portal files: 100% untouched.
+  - Zero-Yellow purge strictly upheld.
+- **Quality Gates Passed**:
+  - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+  - Automated test suite: 84 / 84 tests passing (100%).
+  - Production build: Clean build in 17.91s (`npm run build`).
+  - Remote tracking branch: Pushed to `origin/feature/project-wide-design-transformation`.
+
+---
+
+## Milestone 4.30 — Stage 8: Light-Mode Hero Frame Enhancement & End-to-End System QA
+
+- **Date**: 20 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Key Commits**:
+  - `691665a` — `style(landing): frame hero showcase with rounded borders and padding in light mode while preserving full-bleed in dark mode`
+  - `b27696e` — `style(landing): design true light-mode architectural hero and navbar while preserving dark video hero`
+  - `7bcc9b1` — `style(landing): upgrade light-mode hero to 2-column split layout with animated dispatch preview`
+  - `6d02648` — `style(landing): declutter light-mode hero and minimalize live dispatch visual`
+  - `754c3af` — `style(landing): replace mock ETA card with minimalist animated 3-tile bento in LightHeroVisual`
+- **Objective & Accomplishments**:
+  1. **True Light-Mode Architectural Hero & Navbar**:
+     - Converted the Light Mode Hero into a clean, modern SaaS hero (`bg-gradient-to-b from-white via-[#f4f7fb] to-[#e8edf3]`) with an engineering grid pattern and dual ambient radial glows (`bg-emerald-400/15` and `bg-cyan-400/15`).
+     - Restricted the looping cinematic video and dark gradient scrim exclusively to Dark Mode (`hidden dark:block`), leaving Dark Mode Hero 100% full-bleed and untouched.
+     - Upgraded Light Mode Hero typography (`text-slate-950`), emerald/cyan gradient headline highlight, secondary CTA (`bg-white border-slate-300 shadow-sm`), and light SLA strip (`bg-white/90 backdrop-blur-md border-slate-300 shadow-md text-slate-800`).
+     - Fixed Light Mode navbar at top of page (`scrollY = 0`) to immediately render in its crisp frosted-white pill (`bg-white/85 backdrop-blur-xl border-slate-300/90 text-slate-900 shadow-sm`), while Dark Mode navbar remains dark.
+  2. **Light-Mode 2-Column Split SaaS Hero & Live Dispatch Visual**:
+     - Upgraded Light Mode Hero to an asymmetric 2-column split grid (`max-w-7xl mx-auto grid lg:grid-cols-12 gap-10 lg:gap-12 items-center text-left`).
+     - Left column features left-aligned editorial typography, dual CTAs with shimmer feedback, and compact inline SLA indicators.
+     - Right column features `LightHeroVisual.tsx` with elevated dashboard card, live dispatch desk header, active work order preview (`WO-3002 · Raw Water Booster Pump P-03`) with animated progress bar and 14m ETA, matched Tier 1 technician row (`Kamrul Islam · 96% Match`), and 2 floating micro-cards (`99.4% On-Time Arrival` and `7 Licensed Trades Ready`).
+  3. **Surgical Decluttering of Light-Mode Hero (`6d02648`)**:
+     - Stripped out the bottom 4-pill SLA strip from the left column in `LandingPage.tsx` to eliminate redundancy with the eyebrow and Plans section.
+     - Shortened eyebrow pill to `20–40m Physical Arrival SLA`.
+     - Removed both floating micro-cards (`99.4% On-Time Arrival` and `7 Licensed Trades Ready`) from `LightHeroVisual.tsx` to eliminate overlapping clutter and noisy badges.
+     - Cut card internal text by 60%, introducing generous breathing room (`p-7 sm:p-8 space-y-6`), a clean `LIVE DISPATCH` / `EPZ Hub` header, bold `14 min` ETA focal point with animated progress bar, and a minimal technician row (`KI` avatar, `Kamrul Islam`, `Master Electrician`, `Verified` emerald badge).
+     - Verified Dark Mode Hero remained 100% untouched and full-bleed.
+  4. **Minimalist Animated 3-Tile Bento in `LightHeroVisual.tsx` (`754c3af`)**:
+     - Replaced the single-ticket dispatch mockup with an architectural 3-tile Bento grid floating above the Light Mode backdrop.
+     - Tile 1 (`col-span-2`): Elevated white card with pulsing green indicator, `PHYSICAL ARRIVAL SLA`, bold `20–40 min` editorial typography, caption, and animated concentric radar pulse rings.
+     - Tile 2 (`col-span-1`): Bold `7 Trades` · `Single Contract` with horizontal 7-trade icon strip and smooth gliding emerald light sweep.
+     - Tile 3 (`col-span-1`): Bold `100%` in emerald-to-cyan gradient text, `Verified & Licensed` subtitle, and `Skill Passport` emerald badge.
+     - Maintained 100% isolation: zero changes to `LandingPage.tsx`, Dark Mode Hero, Footer, or portal pages.
+  5. **Comprehensive End-to-End System QA (Real Browser Walkthrough)**:
+     - **Flow 1 (Landing Page & Onboarding)**: Nav links (`#services`, `#dispatch`, `#how`, `#packages`, `#hubs`, `#about`, `#contact`), spring theme toggle, Plan C selection, and contact form submission verified.
+     - **Flow 2 (Customer Portal)**: Active 24/7 Priority KPIs verified; New Service Request submitted for AC, HVAC trade and verified active; Facility assets searched and specs viewed; Invoice payment simulation tested (`Initiate Payment` -> `Gateway Pending` / `Webhook Pending`).
+     - **Flow 3 (Dispatcher Portal)**: Verified Trade Capacity cyan progress bars; Service Requests triaged; Work Orders Kanban lifecycle verified; `+ Assign technician` matching modal tested; Technicians roster, schedule, and audit log verified.
+     - **Flow 4 (Technician Portal)**: Dashboard arrival confirmation verified; My Jobs drawers inspected; Skill Passport verified; Leave Requests modal tested.
+     - **Flow 5 (Sign-Off & Customer Review)**: Work order approved from `PENDING COMPLETION REVIEWS` by Dispatcher -> status moved to `COMPLETED` -> Customer Dashboard verified completed banner and submitted 5★ feedback rating.
+     - **Flow 6 (Admin Portal)**: Overview hub verified; User management searched and `+ Create Staff` modal verified; Dispatchers management tested; Technicians credential audit drawer verified; Audit Log JSON export verified.
+  3. **Strict Policy Compliance**:
+     - Footer & payment badges: 100% untouched and locked.
+     - Zero-Yellow purge strictly upheld.
+     - Branch discipline: Strictly on `feature/project-wide-design-transformation` (never pushed to `main`).
+  4. **Quality Gates Passed**:
+     - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+     - Automated test suite: 84 / 84 tests passing (100%).
+     - Production build: Clean build in 25.05s (`npm run build`).
