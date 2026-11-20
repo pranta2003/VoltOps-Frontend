@@ -1574,10 +1574,14 @@ export function LandingPage() {
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => handlePlan("247-priority")}
-                className="mt-6 w-full py-2.5 rounded-full font-bold text-xs bg-emerald-500 text-zinc-950 shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:bg-emerald-400 transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
+                className="relative overflow-hidden mt-6 w-full py-2.5 rounded-full font-bold text-xs bg-emerald-500 text-zinc-950 shadow-[0_0_20px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_26px_rgba(16,185,129,0.5)] transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 group"
               >
-                <span>Select Plan C</span>
-                <ArrowRightIcon size={12} />
+                <span
+                  className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
+                  aria-hidden="true"
+                />
+                <span className="relative z-10">Select Plan C</span>
+                <ArrowRightIcon size={12} className="relative z-10 group-hover:translate-x-0.5 transition-transform" />
               </motion.button>
             </div>
           </SpotlightCard>
