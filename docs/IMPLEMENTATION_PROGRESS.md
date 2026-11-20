@@ -2165,6 +2165,7 @@ This document tracks all completed implementation milestones, verified files, co
   - `b27696e` — `style(landing): design true light-mode architectural hero and navbar while preserving dark video hero`
   - `7bcc9b1` — `style(landing): upgrade light-mode hero to 2-column split layout with animated dispatch preview`
   - `6d02648` — `style(landing): declutter light-mode hero and minimalize live dispatch visual`
+  - `754c3af` — `style(landing): replace mock ETA card with minimalist animated 3-tile bento in LightHeroVisual`
 - **Objective & Accomplishments**:
   1. **True Light-Mode Architectural Hero & Navbar**:
      - Converted the Light Mode Hero into a clean, modern SaaS hero (`bg-gradient-to-b from-white via-[#f4f7fb] to-[#e8edf3]`) with an engineering grid pattern and dual ambient radial glows (`bg-emerald-400/15` and `bg-cyan-400/15`).
@@ -2181,7 +2182,13 @@ This document tracks all completed implementation milestones, verified files, co
      - Removed both floating micro-cards (`99.4% On-Time Arrival` and `7 Licensed Trades Ready`) from `LightHeroVisual.tsx` to eliminate overlapping clutter and noisy badges.
      - Cut card internal text by 60%, introducing generous breathing room (`p-7 sm:p-8 space-y-6`), a clean `LIVE DISPATCH` / `EPZ Hub` header, bold `14 min` ETA focal point with animated progress bar, and a minimal technician row (`KI` avatar, `Kamrul Islam`, `Master Electrician`, `Verified` emerald badge).
      - Verified Dark Mode Hero remained 100% untouched and full-bleed.
-  4. **Comprehensive End-to-End System QA (Real Browser Walkthrough)**:
+  4. **Minimalist Animated 3-Tile Bento in `LightHeroVisual.tsx` (`754c3af`)**:
+     - Replaced the single-ticket dispatch mockup with an architectural 3-tile Bento grid floating above the Light Mode backdrop.
+     - Tile 1 (`col-span-2`): Elevated white card with pulsing green indicator, `PHYSICAL ARRIVAL SLA`, bold `20–40 min` editorial typography, caption, and animated concentric radar pulse rings.
+     - Tile 2 (`col-span-1`): Bold `7 Trades` · `Single Contract` with horizontal 7-trade icon strip and smooth gliding emerald light sweep.
+     - Tile 3 (`col-span-1`): Bold `100%` in emerald-to-cyan gradient text, `Verified & Licensed` subtitle, and `Skill Passport` emerald badge.
+     - Maintained 100% isolation: zero changes to `LandingPage.tsx`, Dark Mode Hero, Footer, or portal pages.
+  5. **Comprehensive End-to-End System QA (Real Browser Walkthrough)**:
      - **Flow 1 (Landing Page & Onboarding)**: Nav links (`#services`, `#dispatch`, `#how`, `#packages`, `#hubs`, `#about`, `#contact`), spring theme toggle, Plan C selection, and contact form submission verified.
      - **Flow 2 (Customer Portal)**: Active 24/7 Priority KPIs verified; New Service Request submitted for AC, HVAC trade and verified active; Facility assets searched and specs viewed; Invoice payment simulation tested (`Initiate Payment` -> `Gateway Pending` / `Webhook Pending`).
      - **Flow 3 (Dispatcher Portal)**: Verified Trade Capacity cyan progress bars; Service Requests triaged; Work Orders Kanban lifecycle verified; `+ Assign technician` matching modal tested; Technicians roster, schedule, and audit log verified.
