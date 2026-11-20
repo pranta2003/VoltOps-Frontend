@@ -856,7 +856,7 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       {/* ── HERO SECTION: INDUSTRIAL MAINTENANCE PHOTOGRAPHY & ENTRANCE ─── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
-      <header data-section-tone="dark" className="relative overflow-hidden pt-20 sm:pt-22 lg:pt-24 pb-20 lg:pb-24 text-center">
+      <header data-section-tone="dark" className="relative overflow-hidden bg-zinc-950 text-white pt-20 sm:pt-22 lg:pt-24 pb-20 lg:pb-24 text-center">
         {/* Hero Background Layer: Looping Cinematic Slow-Motion Video with Dark CSS Overlay */}
         <div
           className="absolute inset-0 pointer-events-none overflow-hidden z-0"
