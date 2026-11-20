@@ -55,16 +55,17 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
       className={`relative ${className}`}
       {...props}
     >
-      {/* Interactive mouse spotlight glow */}
+      {/* Inner overflow-hidden wrapper for the spotlight gradient to avoid clipping outer badges */}
       {interactive && (
-        <div
-          className="pointer-events-none absolute -inset-px rounded-[inherit] transition-opacity duration-300 z-10"
-          style={{
-            opacity: isHovered ? 1 : 0,
-            background: `radial-gradient(400px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 65%)`,
-          }}
-          aria-hidden="true"
-        />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit] z-10" aria-hidden="true">
+          <div
+            className="absolute -inset-px rounded-[inherit] transition-opacity duration-300"
+            style={{
+              opacity: isHovered ? 1 : 0,
+              background: `radial-gradient(400px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 65%)`,
+            }}
+          />
+        </div>
       )}
       {children}
     </motion.div>
