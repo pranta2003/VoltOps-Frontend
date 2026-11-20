@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { SpotlightCard } from "../components/landing/SpotlightCard";
 import { AnimatedCounter } from "../components/landing/AnimatedCounter";
+import { LightHeroVisual } from "../components/landing/LightHeroVisual";
 import { COVERAGE_PLANS } from "../config/coveragePricing";
 import { OPERATIONAL_REACH_METRICS, OPERATIONAL_REACH_DISCLAIMER } from "../config/operationalReach";
 import {
@@ -891,7 +892,7 @@ export function LandingPage() {
       {/* ══════════════════════════════════════════════════════════════════ */}
       <header
         data-section-tone={isDark ? "dark" : "light"}
-        className="relative overflow-hidden bg-gradient-to-b from-white via-[#f4f7fb] to-[#e8edf3] dark:bg-zinc-950 dark:bg-none text-slate-900 dark:text-white border-b border-slate-300/80 dark:border-white/10 pt-20 sm:pt-22 lg:pt-24 pb-20 lg:pb-24 text-center transition-colors"
+        className="relative overflow-hidden bg-gradient-to-b from-white via-[#f4f7fb] to-[#e8edf3] dark:bg-zinc-950 dark:bg-none text-slate-900 dark:text-white border-b border-slate-300/80 dark:border-white/10 dark:pt-20 dark:sm:pt-22 dark:lg:pt-24 dark:pb-20 dark:lg:pb-24 dark:text-center transition-colors"
       >
         {/* Light Mode Architectural Backdrop: Engineering Grid & Ambient Soft Radial Glows */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 block dark:hidden">
@@ -931,22 +932,135 @@ export function LandingPage() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(9,9,11,0.6)_65%,rgba(9,9,11,0.98)_100%)]" />
         </div>
 
+        {/* ── LIGHT MODE: 2-COLUMN SPLIT SAAS HERO ── */}
         <motion.div
           variants={heroContainerVariants}
           initial="hidden"
           animate="visible"
-          className="relative z-10 max-w-6xl mx-auto px-5"
+          className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-16 lg:pb-20 block dark:hidden"
+        >
+          <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center text-left">
+            {/* Left Column (lg:col-span-6, left-aligned) */}
+            <div className="lg:col-span-6 space-y-6">
+              {/* Animated Eyebrow Pill */}
+              <motion.div
+                variants={heroItemVariants}
+                className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 shadow-xs transition-colors"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
+                </span>
+                <span className="text-xs font-semibold tracking-wide">
+                  7 Commercial Trades · 20–40m Physical Arrival SLA
+                </span>
+              </motion.div>
+
+              {/* Editorial Headline */}
+              <motion.h1
+                variants={heroItemVariants}
+                className="font-heading font-extrabold text-4xl sm:text-5xl lg:text-[54px] xl:text-[58px] tracking-tight leading-[1.08] text-slate-950"
+              >
+                One partner for every{" "}
+                <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
+                  commercial facility repair.
+                </span>
+              </motion.h1>
+
+              {/* Supporting Text */}
+              <motion.p
+                variants={heroItemVariants}
+                className="text-base sm:text-lg font-heading font-normal text-slate-600 max-w-xl leading-relaxed tracking-tight"
+              >
+                Commercial maintenance across seven essential trades.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div
+                variants={heroItemVariants}
+                className="flex flex-wrap items-center gap-4 pt-2"
+              >
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  href="#packages"
+                  className="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-emerald-500 text-zinc-950 shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2"
+                >
+                  <span
+                    className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
+                    aria-hidden="true"
+                  />
+                  <span className="relative z-10">Explore Coverage Plans</span>
+                  <ArrowRightIcon size={15} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+                </motion.a>
+                <motion.a
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  href="#how"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm bg-white hover:bg-slate-50 text-slate-900 border border-slate-300 shadow-sm backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+                >
+                  <CompassIcon size={15} className="text-emerald-600" />
+                  <span>See How It Works</span>
+                </motion.a>
+              </motion.div>
+
+              {/* Compact Inline SLA Strip Below Buttons */}
+              <motion.div
+                variants={heroItemVariants}
+                className="pt-2 flex flex-wrap items-center gap-3 sm:gap-3.5 text-xs"
+              >
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white/80 shadow-2xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="text-slate-700 font-medium">
+                    Plan C: <strong className="text-emerald-700 font-bold">20m</strong>
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white/80 shadow-2xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
+                  <span className="text-slate-700 font-medium">
+                    Plan B: <strong className="text-cyan-700 font-bold">40m</strong>
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white/80 shadow-2xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                  <span className="text-slate-700 font-medium">
+                    Plan A: <strong className="text-slate-800 font-bold">8h Daily</strong>
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white/80 shadow-2xs">
+                  <ShieldCheckIcon size={13} className="text-emerald-600" />
+                  <span className="text-emerald-800 font-bold">7 Licensed Trades</span>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Right Column (lg:col-span-6) — Animated VoltOps Live Dispatch Preview */}
+            <motion.div
+              variants={heroItemVariants}
+              className="lg:col-span-6 flex justify-center lg:justify-end pt-4 lg:pt-0"
+            >
+              <LightHeroVisual shouldReduceMotion={shouldReduceMotion ?? false} />
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* ── DARK MODE: FULL-BLEED CENTERED CINEMATIC HERO (100% UNTOUCHED) ── */}
+        <motion.div
+          variants={heroContainerVariants}
+          initial="hidden"
+          animate="visible"
+          className="relative z-10 max-w-6xl mx-auto px-5 hidden dark:block"
         >
           {/* Animated Eyebrow Pill */}
           <motion.div
             variants={heroItemVariants}
-            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-300 backdrop-blur-md mb-6 shadow-sm shadow-emerald-500/10 transition-colors"
+            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md mb-6 shadow-sm shadow-emerald-500/10"
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600 dark:bg-emerald-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
-            <span className="text-xs font-semibold tracking-wide">
+            <span className="text-xs font-semibold tracking-wide text-emerald-300">
               7 Commercial Trades · 20–40m Physical Arrival SLA
             </span>
           </motion.div>
@@ -954,18 +1068,15 @@ export function LandingPage() {
           {/* Editorial Headline */}
           <motion.h1
             variants={heroItemVariants}
-            className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[64px] tracking-tight leading-[1.08] text-slate-950 dark:text-white max-w-4xl mx-auto drop-shadow-xs dark:drop-shadow-md"
+            className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[64px] tracking-tight leading-[1.08] text-white max-w-4xl mx-auto drop-shadow-md"
           >
-            One partner for every{" "}
-            <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent dark:from-white dark:to-white">
-              commercial facility repair.
-            </span>
+            One partner for every commercial facility repair.
           </motion.h1>
 
           {/* Supporting Text */}
           <motion.p
             variants={heroItemVariants}
-            className="text-base sm:text-lg lg:text-xl font-heading font-normal text-slate-600 dark:text-zinc-300 max-w-2xl mx-auto leading-relaxed mt-4 tracking-tight drop-shadow-xs dark:drop-shadow-sm"
+            className="text-base sm:text-lg lg:text-xl font-heading font-normal text-slate-200 max-w-2xl mx-auto leading-relaxed mt-4 tracking-tight drop-shadow-sm"
           >
             Commercial maintenance across seven essential trades.
           </motion.p>
@@ -979,7 +1090,7 @@ export function LandingPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               href="#packages"
-              className="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-emerald-500 text-zinc-950 shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 dark:focus:ring-offset-zinc-950"
+              className="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-emerald-500 text-zinc-950 shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-zinc-950"
             >
               <span
                 className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
@@ -992,9 +1103,9 @@ export function LandingPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               href="#how"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm bg-white hover:bg-slate-50 text-slate-900 border border-slate-300 shadow-sm dark:bg-white/5 dark:hover:bg-white/10 dark:text-white dark:border-white/15 backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-white/40 focus:ring-offset-2 dark:focus:ring-offset-zinc-950"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm border border-white/20 text-white bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-white/40 focus:ring-offset-2 focus:ring-offset-zinc-950"
             >
-              <CompassIcon size={15} className="text-emerald-600 dark:text-emerald-400" />
+              <CompassIcon size={15} className="text-emerald-400" />
               <span>See How It Works</span>
             </motion.a>
           </motion.div>
@@ -1002,32 +1113,32 @@ export function LandingPage() {
           {/* Minimal Single-Row Glassmorphic SLA Strip */}
           <motion.div
             variants={heroItemVariants}
-            className="mt-12 inline-flex flex-wrap items-center justify-center gap-3 sm:gap-6 px-6 py-2.5 rounded-full border border-slate-300 bg-white/90 backdrop-blur-md shadow-md text-slate-800 dark:bg-zinc-950/85 dark:border-white/15 dark:text-zinc-200 dark:shadow-2xl transition-all"
+            className="mt-12 inline-flex flex-wrap items-center justify-center gap-3 sm:gap-6 px-6 py-2.5 rounded-full border border-white/15 bg-zinc-950/85 backdrop-blur-xl shadow-2xl"
           >
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
-              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                Plan C: <strong className="text-emerald-700 dark:text-emerald-400 font-bold">20m Arrival</strong>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="text-xs font-semibold text-slate-200">
+                Plan C: <strong className="text-emerald-400 font-bold">20m Arrival</strong>
               </span>
             </div>
-            <span className="hidden sm:inline text-slate-300 dark:text-white/20">·</span>
+            <span className="hidden sm:inline text-white/20">·</span>
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
-              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                Plan B: <strong className="text-cyan-700 dark:text-cyan-400 font-bold">40m Arrival</strong>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+              <span className="text-xs font-semibold text-slate-200">
+                Plan B: <strong className="text-cyan-400 font-bold">40m Arrival</strong>
               </span>
             </div>
-            <span className="hidden sm:inline text-slate-300 dark:text-white/20">·</span>
+            <span className="hidden sm:inline text-white/20">·</span>
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-                Plan A: <strong className="text-slate-800 dark:text-slate-300 font-bold">8h Daily</strong>
+              <span className="text-xs font-semibold text-slate-200">
+                Plan A: <strong className="text-slate-300 font-bold">8h Daily</strong>
               </span>
             </div>
-            <span className="hidden sm:inline text-slate-300 dark:text-white/20">·</span>
+            <span className="hidden sm:inline text-white/20">·</span>
             <div className="flex items-center gap-2">
-              <ShieldCheckIcon size={14} className="text-emerald-600 dark:text-emerald-400" />
-              <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+              <ShieldCheckIcon size={14} className="text-emerald-400" />
+              <span className="text-xs font-semibold text-emerald-300">
                 7 Licensed Trades
               </span>
             </div>
@@ -1054,7 +1165,7 @@ export function LandingPage() {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="group inline-flex flex-col items-center gap-1.5 text-slate-500 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors focus:outline-none"
+              className="group inline-flex flex-col items-center gap-1.5 text-zinc-400 hover:text-emerald-400 transition-colors focus:outline-none"
             >
               <span className="text-[10px] uppercase font-bold tracking-widest opacity-80 group-hover:opacity-100">
                 Explore Platform
@@ -1068,7 +1179,7 @@ export function LandingPage() {
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-4 h-4 text-emerald-600/80 dark:text-emerald-400/80 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
+                className="w-4 h-4 text-emerald-400/80 group-hover:text-emerald-400 transition-colors"
               >
                 <path d="m6 9 6 6 6-6" />
               </svg>
