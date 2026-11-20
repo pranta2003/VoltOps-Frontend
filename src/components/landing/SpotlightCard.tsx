@@ -52,7 +52,7 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
       viewport={{ once: true, margin: '-60px' }}
       whileHover={interactive ? { y: -3 } : undefined}
       transition={{ duration: 0.45, ease: 'easeOut', delay }}
-      className={`relative overflow-hidden ${className}`}
+      className={`relative ${className}`}
       {...props}
     >
       {/* Interactive mouse spotlight glow */}
