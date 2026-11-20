@@ -952,7 +952,7 @@ export function LandingPage() {
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
                 </span>
                 <span className="text-xs font-semibold tracking-wide">
-                  7 Commercial Trades · 20–40m Physical Arrival SLA
+                  20–40m Physical Arrival SLA
                 </span>
               </motion.div>
 
@@ -1002,35 +1002,6 @@ export function LandingPage() {
                   <CompassIcon size={15} className="text-emerald-600" />
                   <span>See How It Works</span>
                 </motion.a>
-              </motion.div>
-
-              {/* Compact Inline SLA Strip Below Buttons */}
-              <motion.div
-                variants={heroItemVariants}
-                className="pt-2 flex flex-wrap items-center gap-3 sm:gap-3.5 text-xs"
-              >
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white/80 shadow-2xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span className="text-slate-700 font-medium">
-                    Plan C: <strong className="text-emerald-700 font-bold">20m</strong>
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white/80 shadow-2xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
-                  <span className="text-slate-700 font-medium">
-                    Plan B: <strong className="text-cyan-700 font-bold">40m</strong>
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white/80 shadow-2xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                  <span className="text-slate-700 font-medium">
-                    Plan A: <strong className="text-slate-800 font-bold">8h Daily</strong>
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white/80 shadow-2xs">
-                  <ShieldCheckIcon size={13} className="text-emerald-600" />
-                  <span className="text-emerald-800 font-bold">7 Licensed Trades</span>
-                </div>
               </motion.div>
             </div>
 
