@@ -67,12 +67,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthNotice(null);
   }
 
-  // Development-only role preview helpers
+  // Role preview helpers (enabled in dev, local preview, and production demo environments)
   function enterPreviewRole(
     role: "ADMIN" | "DISPATCHER" | "TECHNICIAN" | "CUSTOMER",
     customOverrides?: Partial<AuthUser>
   ) {
-    if (!import.meta.env.DEV) return;
     setIsPreview(true);
     const base = PREVIEW_USERS[role];
     const customized: AuthUser = customOverrides
@@ -116,35 +115,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = "/login";
   }
 
-  // Session bootstrap: checks dev preview, saved token, and Firebase auth state
+  // Session bootstrap: checks dev/demo preview, saved token, and Firebase auth state
   useEffect(() => {
-    // 1. If in dev mode and a preview role was selected in this session, restore preview
-    if (import.meta.env.DEV) {
-      const savedPreviewUserStr = sessionStorage.getItem("voltops_preview_user");
-      if (savedPreviewUserStr) {
-        try {
-          const parsed = JSON.parse(savedPreviewUserStr);
-          setIsPreview(true);
-          setUser(parsed);
-          setIsLoading(false);
-          return;
-        } catch {
-          sessionStorage.removeItem("voltops_preview_user");
-        }
-      }
-
-      const savedPreviewRole = sessionStorage.getItem("voltops_preview_role") as
-        | "ADMIN"
-        | "DISPATCHER"
-        | "TECHNICIAN"
-        | "CUSTOMER"
-        | null;
-      if (savedPreviewRole && PREVIEW_USERS[savedPreviewRole]) {
+    // 1. If a preview role was selected in this session, restore preview
+    const savedPreviewUserStr = sessionStorage.getItem("voltops_preview_user");
+    if (savedPreviewUserStr) {
+      try {
+        const parsed = JSON.parse(savedPreviewUserStr);
         setIsPreview(true);
-        setUser(PREVIEW_USERS[savedPreviewRole]);
+        setUser(parsed);
         setIsLoading(false);
         return;
+      } catch {
+        sessionStorage.removeItem("voltops_preview_user");
       }
+    }
+
+    const savedPreviewRole = sessionStorage.getItem("voltops_preview_role") as
+      | "ADMIN"
+      | "DISPATCHER"
+      | "TECHNICIAN"
+      | "CUSTOMER"
+      | null;
+    if (savedPreviewRole && PREVIEW_USERS[savedPreviewRole]) {
+      setIsPreview(true);
+      setUser(PREVIEW_USERS[savedPreviewRole]);
+      setIsLoading(false);
+      return;
     }
 
     // 2. Check saved user / token

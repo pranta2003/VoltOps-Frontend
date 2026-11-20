@@ -164,7 +164,7 @@ export function Register() {
                 <span className="font-bold text-emerald-600">✓</span>
                 <span>Included allowance: <strong>{planPricing.includedVisitsLabel}</strong></span>
               </div>
-              <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium pt-1 border-t border-emerald-500/20">
+              <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium pt-1 border-t border-emerald-500/20">
                 {planPricing.prototypeNotice}
               </div>
             </div>
@@ -250,11 +250,11 @@ export function Register() {
 
           {/* Dedicated Local Preview Demonstration Registration */}
           <div
-            className="mt-4 pt-4 border-t border-[var(--border)] rounded-xl p-3.5 bg-amber-500/5 border border-amber-500/20 space-y-2.5"
+            className="mt-4 pt-4 border-t border-[var(--border)] rounded-xl p-3.5 bg-emerald-500/5 border border-emerald-500/20 space-y-2.5"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 Local Preview Registration
               </span>
               <span className="text-[11px] text-[var(--text-muted)]">Demo mode</span>
@@ -287,7 +287,7 @@ export function Register() {
             <button
               type="button"
               onClick={handleDemoRegister}
-              className="w-full py-2 px-3 rounded-xl text-xs font-bold text-amber-950 dark:text-amber-200 bg-amber-400 dark:bg-amber-500/20 hover:bg-amber-500 dark:hover:bg-amber-500/30 border border-amber-500/40 transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.99]"
+              className="w-full py-2 px-3 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 border border-emerald-500/40 transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.99]"
             >
               <span>Demonstrate Registration as Customer</span>
               {selectedPlanId && <span className="opacity-90">→ Continue to Checkout</span>}
