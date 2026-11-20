@@ -947,7 +947,7 @@ export function LandingPage() {
           {/* Minimal Single-Row Glassmorphic SLA Strip */}
           <motion.div
             variants={heroItemVariants}
-            className="mt-12 inline-flex flex-wrap items-center justify-center gap-3 sm:gap-6 px-6 py-2.5 rounded-full border border-white/10 bg-white/5 dark:bg-zinc-900/60 backdrop-blur-md shadow-lg"
+            className="mt-12 inline-flex flex-wrap items-center justify-center gap-3 sm:gap-6 px-6 py-2.5 rounded-full border border-white/15 bg-zinc-950/85 backdrop-blur-xl shadow-2xl"
           >
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
