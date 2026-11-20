@@ -510,9 +510,9 @@ export function LandingPage() {
       className="relative min-h-screen font-sans selection:bg-[#10b981] selection:text-[#06090e] overflow-x-hidden"
       style={{ background: "var(--bg-base)", color: "var(--text-primary)" }}
     >
-      {/* ── Top-Edge Scroll Progress Indicator (Framer Motion Spring) ───── */}
+      {/* ── Top-Edge Scroll Progress Indicator (2px Emerald-to-Cyan Spring) ───── */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#10b981] via-[#34d399] to-[#38bdf8] origin-left z-[100]"
+        className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-cyan-400 to-emerald-500 origin-left z-[100] shadow-[0_0_8px_rgba(16,185,129,0.5)]"
         style={{ scaleX }}
         aria-hidden="true"
       />
