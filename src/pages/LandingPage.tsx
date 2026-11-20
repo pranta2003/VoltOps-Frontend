@@ -320,7 +320,7 @@ export function LandingPage() {
   }, []);
 
   // Context-aware navbar: adapts appearance to whether the section directly behind the floating navbar is dark or light
-  const [activeSectionTone, setActiveSectionTone] = useState<"dark" | "light">("dark");
+  const [activeSectionTone, setActiveSectionTone] = useState<"dark" | "light">(() => (isDark ? "dark" : "light"));
 
   useEffect(() => {
     if (isDark) {
@@ -624,10 +624,10 @@ export function LandingPage() {
               isNavbarDark
                 ? scrolled
                   ? "backdrop-blur-xl shadow-2xl bg-zinc-950/85 border border-white/15"
-                  : "backdrop-blur-xl shadow-xl bg-zinc-950/80 dark:bg-zinc-950/50 border border-white/15 dark:border-white/10"
+                  : "backdrop-blur-xl shadow-xl bg-zinc-950/50 border border-white/10"
                 : scrolled
-                ? "backdrop-blur-xl shadow-lg bg-white/85 border border-slate-300/90"
-                : "backdrop-blur-xl shadow-md bg-white/75 border border-slate-200/90"
+                ? "backdrop-blur-xl shadow-md bg-white/90 border border-slate-300/90 text-slate-900"
+                : "backdrop-blur-xl shadow-sm bg-white/85 border border-slate-300/90 text-slate-900"
             }`}
             aria-label="Main Navigation"
           >
@@ -890,12 +890,23 @@ export function LandingPage() {
       {/* ── HERO SECTION: INDUSTRIAL MAINTENANCE PHOTOGRAPHY & ENTRANCE ─── */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       <header
-        data-section-tone="dark"
-        className="relative bg-[#e8edf3] dark:bg-zinc-950 pt-20 pb-6 px-3 sm:px-6 lg:px-8 dark:p-0 dark:border-b dark:border-white/10 transition-colors"
+        data-section-tone={isDark ? "dark" : "light"}
+        className="relative overflow-hidden bg-gradient-to-b from-white via-[#f4f7fb] to-[#e8edf3] dark:bg-zinc-950 dark:bg-none text-slate-900 dark:text-white border-b border-slate-300/80 dark:border-white/10 pt-20 sm:pt-22 lg:pt-24 pb-20 lg:pb-24 text-center transition-colors"
       >
-        <div className="relative overflow-hidden rounded-[2rem] shadow-2xl border border-slate-300/90 dark:rounded-none dark:border-0 dark:shadow-none bg-zinc-950 text-white pt-16 sm:pt-20 lg:pt-24 pb-16 lg:pb-24 dark:pt-20 dark:sm:pt-22 dark:lg:pt-24 dark:pb-20 dark:lg:pb-24 text-center">
-          {/* Hero Background Layer: Looping Cinematic Slow-Motion Video with Dark CSS Overlay */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        {/* Light Mode Architectural Backdrop: Engineering Grid & Ambient Soft Radial Glows */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 block dark:hidden">
+          {/* Subtle engineering grid overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.05)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,#000_60%,transparent_100%)]" />
+
+          {/* Soft ambient radial emerald glow behind headline */}
+          <div className="absolute -top-12 left-1/2 -translate-x-[65%] w-[38rem] h-[24rem] bg-emerald-400/15 rounded-full blur-[100px] pointer-events-none" />
+
+          {/* Soft ambient radial cyan glow behind headline */}
+          <div className="absolute top-10 left-1/2 -translate-x-[35%] w-[36rem] h-[22rem] bg-cyan-400/15 rounded-full blur-[100px] pointer-events-none" />
+        </div>
+
+        {/* Hero Background Layer: Dark Mode ONLY Looping Cinematic Video with Dark CSS Overlay */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 hidden dark:block">
           {/* Highly compressed looping 16:9 video with enhanced brightness */}
           <video
             autoPlay
@@ -929,13 +940,13 @@ export function LandingPage() {
           {/* Animated Eyebrow Pill */}
           <motion.div
             variants={heroItemVariants}
-            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md mb-6 shadow-sm shadow-emerald-500/10"
+            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-300 backdrop-blur-md mb-6 shadow-sm shadow-emerald-500/10 transition-colors"
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600 dark:bg-emerald-500" />
             </span>
-            <span className="text-xs font-semibold tracking-wide text-emerald-300">
+            <span className="text-xs font-semibold tracking-wide">
               7 Commercial Trades · 20–40m Physical Arrival SLA
             </span>
           </motion.div>
@@ -943,15 +954,18 @@ export function LandingPage() {
           {/* Editorial Headline */}
           <motion.h1
             variants={heroItemVariants}
-            className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[64px] tracking-tight leading-[1.08] text-white max-w-4xl mx-auto drop-shadow-md"
+            className="font-heading font-extrabold text-4xl sm:text-6xl lg:text-[64px] tracking-tight leading-[1.08] text-slate-950 dark:text-white max-w-4xl mx-auto drop-shadow-xs dark:drop-shadow-md"
           >
-            One partner for every commercial facility repair.
+            One partner for every{" "}
+            <span className="bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent dark:from-white dark:to-white">
+              commercial facility repair.
+            </span>
           </motion.h1>
 
           {/* Supporting Text */}
           <motion.p
             variants={heroItemVariants}
-            className="text-base sm:text-lg lg:text-xl font-heading font-normal text-slate-200 max-w-2xl mx-auto leading-relaxed mt-4 tracking-tight drop-shadow-sm"
+            className="text-base sm:text-lg lg:text-xl font-heading font-normal text-slate-600 dark:text-zinc-300 max-w-2xl mx-auto leading-relaxed mt-4 tracking-tight drop-shadow-xs dark:drop-shadow-sm"
           >
             Commercial maintenance across seven essential trades.
           </motion.p>
@@ -965,7 +979,7 @@ export function LandingPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               href="#packages"
-              className="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-emerald-500 text-zinc-950 shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-zinc-950"
+              className="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-emerald-500 text-zinc-950 shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 dark:focus:ring-offset-zinc-950"
             >
               <span
                 className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
@@ -978,9 +992,9 @@ export function LandingPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               href="#how"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm border border-white/20 text-white bg-white/10 hover:bg-white/20 backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-white/40 focus:ring-offset-2 focus:ring-offset-zinc-950"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm bg-white hover:bg-slate-50 text-slate-900 border border-slate-300 shadow-sm dark:bg-white/5 dark:hover:bg-white/10 dark:text-white dark:border-white/15 backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-white/40 focus:ring-offset-2 dark:focus:ring-offset-zinc-950"
             >
-              <CompassIcon size={15} className="text-emerald-400" />
+              <CompassIcon size={15} className="text-emerald-600 dark:text-emerald-400" />
               <span>See How It Works</span>
             </motion.a>
           </motion.div>
@@ -988,32 +1002,32 @@ export function LandingPage() {
           {/* Minimal Single-Row Glassmorphic SLA Strip */}
           <motion.div
             variants={heroItemVariants}
-            className="mt-12 inline-flex flex-wrap items-center justify-center gap-3 sm:gap-6 px-6 py-2.5 rounded-full border border-white/15 bg-zinc-950/85 backdrop-blur-xl shadow-2xl"
+            className="mt-12 inline-flex flex-wrap items-center justify-center gap-3 sm:gap-6 px-6 py-2.5 rounded-full border border-slate-300 bg-white/90 backdrop-blur-md shadow-md text-slate-800 dark:bg-zinc-950/85 dark:border-white/15 dark:text-zinc-200 dark:shadow-2xl transition-all"
           >
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-xs font-semibold text-slate-200">
-                Plan C: <strong className="text-emerald-400 font-bold">20m Arrival</strong>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                Plan C: <strong className="text-emerald-700 dark:text-emerald-400 font-bold">20m Arrival</strong>
               </span>
             </div>
-            <span className="hidden sm:inline text-white/20">·</span>
+            <span className="hidden sm:inline text-slate-300 dark:text-white/20">·</span>
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-              <span className="text-xs font-semibold text-slate-200">
-                Plan B: <strong className="text-cyan-400 font-bold">40m Arrival</strong>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                Plan B: <strong className="text-cyan-700 dark:text-cyan-400 font-bold">40m Arrival</strong>
               </span>
             </div>
-            <span className="hidden sm:inline text-white/20">·</span>
+            <span className="hidden sm:inline text-slate-300 dark:text-white/20">·</span>
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-              <span className="text-xs font-semibold text-slate-200">
-                Plan A: <strong className="text-slate-300 font-bold">8h Daily</strong>
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                Plan A: <strong className="text-slate-800 dark:text-slate-300 font-bold">8h Daily</strong>
               </span>
             </div>
-            <span className="hidden sm:inline text-white/20">·</span>
+            <span className="hidden sm:inline text-slate-300 dark:text-white/20">·</span>
             <div className="flex items-center gap-2">
-              <ShieldCheckIcon size={14} className="text-emerald-400" />
-              <span className="text-xs font-semibold text-emerald-300">
+              <ShieldCheckIcon size={14} className="text-emerald-600 dark:text-emerald-400" />
+              <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
                 7 Licensed Trades
               </span>
             </div>
@@ -1040,7 +1054,7 @@ export function LandingPage() {
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="group inline-flex flex-col items-center gap-1.5 text-zinc-400 hover:text-emerald-400 transition-colors focus:outline-none"
+              className="group inline-flex flex-col items-center gap-1.5 text-slate-500 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors focus:outline-none"
             >
               <span className="text-[10px] uppercase font-bold tracking-widest opacity-80 group-hover:opacity-100">
                 Explore Platform
@@ -1054,14 +1068,13 @@ export function LandingPage() {
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="w-4 h-4 text-emerald-400/80 group-hover:text-emerald-400 transition-colors"
+                className="w-4 h-4 text-emerald-600/80 dark:text-emerald-400/80 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
               >
                 <path d="m6 9 6 6 6-6" />
               </svg>
             </motion.a>
           </motion.div>
         </motion.div>
-        </div>
       </header>
 
       {/* ══════════════════════════════════════════════════════════════════ */}
