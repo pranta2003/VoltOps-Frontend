@@ -1459,7 +1459,7 @@ export function LandingPage() {
             className="flex flex-col transition-shadow duration-300 rounded-2xl relative shadow-md dark:shadow-[0_0_40px_-10px_rgba(16,185,129,0.35)]"
           >
             <div className="h-full p-6 sm:p-7 rounded-2xl border-2 border-emerald-500 bg-white dark:bg-zinc-900 flex flex-col justify-between relative">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-0.5 rounded-full bg-emerald-500 text-zinc-950 text-[11px] font-bold uppercase tracking-wider shadow flex items-center gap-1">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-0.5 rounded-full bg-emerald-500 text-zinc-950 text-[11px] font-bold uppercase tracking-wider shadow-md flex items-center gap-1 z-20 whitespace-nowrap">
                 <ZapIcon size={11} />
                 <span>Fastest Response</span>
               </div>
