@@ -613,9 +613,11 @@ export function LandingPage() {
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         className="fixed top-0 left-0 right-0 z-50 pointer-events-none px-3.5 sm:px-6 pt-3 sm:pt-4 transition-all duration-300"
       >
-        <div className="max-w-xl md:max-w-3xl lg:max-w-6xl mx-auto">
+        <div className={`mx-auto transition-all duration-500 ease-out ${scrolled ? "max-w-xl md:max-w-2xl lg:max-w-5xl" : "max-w-xl md:max-w-3xl lg:max-w-6xl"}`}>
           <nav
-            className={`pointer-events-auto px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full transition-all duration-300 ease-in-out ${
+            className={`pointer-events-auto rounded-full transition-all duration-300 ease-in-out ${
+              scrolled ? "px-3.5 sm:px-4 py-1.5 sm:py-2" : "px-4 sm:px-5 py-2.5 sm:py-3"
+            } ${
               isNavbarDark
                 ? scrolled
                   ? "backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] bg-slate-950/80 border border-white/20"
