@@ -977,6 +977,48 @@ export function LandingPage() {
               </span>
             </div>
           </motion.div>
+
+          {/* Subtle Animated Scroll-Down Cue */}
+          <motion.div
+            variants={heroItemVariants}
+            className="mt-8 flex justify-center"
+          >
+            <motion.a
+              href="#services"
+              aria-label="Scroll to services"
+              animate={
+                shouldReduceMotion
+                  ? undefined
+                  : {
+                      y: [0, 6, 0],
+                      opacity: [0.55, 0.95, 0.55],
+                    }
+              }
+              transition={{
+                duration: 2.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="group inline-flex flex-col items-center gap-1.5 text-zinc-400 hover:text-emerald-400 transition-colors focus:outline-none"
+            >
+              <span className="text-[10px] uppercase font-bold tracking-widest opacity-80 group-hover:opacity-100">
+                Explore Platform
+              </span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4 text-emerald-400/80 group-hover:text-emerald-400 transition-colors"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </motion.a>
+          </motion.div>
         </motion.div>
       </header>
 
