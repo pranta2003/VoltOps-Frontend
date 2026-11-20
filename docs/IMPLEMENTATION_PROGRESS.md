@@ -2110,3 +2110,46 @@ This document tracks all completed implementation milestones, verified files, co
   - Automated test suite: 84 / 84 tests passing (100%).
   - Production build: Clean build in 1m 2s (`npm run build`).
   - Remote tracking branch: Pushed to `origin/feature/project-wide-design-transformation` (108 commits ahead of `main`).
+
+
+### Milestone 4.29: Stage 7.3 Landing Page Polish — Hero Scrim, Plan C Badge & Animated Navbar (21 Granular Commits)
+- **Date**: 20 November 2026
+- **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
+- **Commit Range**: `5fe6af8`..`ff23911` (21 Atomic Commits)
+- **Today's Meaningful Commits on Branch `feature/project-wide-design-transformation`**:
+  1. `5fe6af8` — `fix(landing): remove outer overflow-hidden from SpotlightCard to prevent child badge clipping`
+  2. `40b6402` — `feat(landing): wrap spotlight radial gradient in inner overflow-hidden container`
+  3. `2d0bdb0` — `style(landing): elevate Plan C fastest response badge z-index and padding alignment`
+  4. `86206bd` — `style(landing): enforce dark zinc-950 base on hero header container`
+  5. `9eccdb7` — `style(landing): remove bottom transparent gradient mask from hero video wrapper`
+  6. `8afac3c` — `style(landing): refine hero video dark gradient and vignette scrim for deep edge-to-edge contrast`
+  7. `ee8934e` — `style(landing): add crisp border-b border-white/10 to hero section for clean light-canvas boundary`
+  8. `2058348` — `style(landing): upgrade hero SLA strip to high-contrast dark-glass backdrop and white-15 border`
+  9. `0ce07f6` — `feat(landing): add animated subtle scroll-down cue below hero SLA strip`
+  10. `b804c2b` — `feat(landing): add top-viewport 2px emerald reading progress bar tied to scroll progress`
+  11. `d429a8e` — `style(landing): implement scroll-reactive dynamic width and frosted padding compression on navbar`
+  12. `870cacb` — `style(landing): refine navbar glassmorphic surfaces for enhanced light and dark contrast`
+  13. `0e4715b` — `feat(landing): add sliding layoutId navbar hover and active pill behind nav links`
+  14. `a20fa7f` — `style(landing): add smooth hover scale and rotate transition to VoltOps logo mark`
+  15. `fdad771` — `feat(components): add spring rotate and scale transition to Sun and Moon theme toggle icons`
+  16. `1cb788a` — `style(landing): add subtle light-sweep shimmer effect to hero explore plans primary CTA`
+  17. `8ac9b6c` — `style(landing): add subtle shimmer hover effect to navbar choose plan CTA button`
+  18. `28001bd` — `style(landing): add subtle shimmer hover effect to Plan C select CTA button`
+  19. `40f94da` — `style(landing): polish Plan A and Plan B select buttons hover feedback`
+  20. `3888f16` — `style(landing): polish Plan D contact sales CTA button hover feedback`
+  21. `ff23911` — `style(landing): polish pre-footer CTA banner button with matching shimmer animation`
+- **Polish & Motion Highlights**:
+  - Hero light-mode fog completely eliminated with dark `bg-zinc-950` edge-to-edge container and crisp `border-b border-white/10` boundary.
+  - SLA strip upgraded to high-contrast dark-glass backdrop (`bg-zinc-950/85 backdrop-blur-xl border border-white/15 shadow-2xl`).
+  - Plan C floating badge clipping permanently resolved by separating spotlight overflow containment.
+  - Dynamic navbar with scroll-reactive compression, 2px emerald reading progress bar, sliding `layoutId="navbar-hover-pill"`, and spring theme toggle.
+  - Primary CTA hover shimmer sweep added across all primary action buttons.
+- **Strict Policy Compliance**:
+  - Footer & payment badges: 100% untouched and locked.
+  - Customer, Admin, Dispatcher, and Technician portal files: 100% untouched.
+  - Zero-Yellow purge strictly upheld.
+- **Quality Gates Passed**:
+  - TypeScript compiler: 0 errors (`npx tsc --noEmit`).
+  - Automated test suite: 84 / 84 tests passing (100%).
+  - Production build: Clean build in 17.91s (`npm run build`).
+  - Remote tracking branch: Pushed to `origin/feature/project-wide-design-transformation`.
