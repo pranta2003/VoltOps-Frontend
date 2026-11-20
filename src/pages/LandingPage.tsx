@@ -1467,9 +1467,10 @@ export function LandingPage() {
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => handlePlan("8hr")}
-                className="mt-6 w-full py-2.5 rounded-full font-semibold text-xs border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#10b981] transition-colors"
+                className="mt-6 w-full py-2.5 rounded-full font-semibold text-xs border border-slate-300 dark:border-white/10 text-slate-800 dark:text-slate-200 hover:border-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               >
-                Select Plan A
+                <span>Select Plan A</span>
+                <ArrowRightIcon size={12} />
               </motion.button>
             </div>
           </SpotlightCard>
@@ -1518,9 +1519,10 @@ export function LandingPage() {
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => handlePlan("247-standard")}
-                className="mt-6 w-full py-2.5 rounded-full font-semibold text-xs border border-[var(--border)] text-slate-800 dark:text-slate-200 hover:border-[#10b981] hover:text-[#10b981] transition-colors"
+                className="mt-6 w-full py-2.5 rounded-full font-semibold text-xs border border-slate-300 dark:border-white/10 text-slate-800 dark:text-slate-200 hover:border-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
               >
-                Select Plan B
+                <span>Select Plan B</span>
+                <ArrowRightIcon size={12} />
               </motion.button>
             </div>
           </SpotlightCard>
