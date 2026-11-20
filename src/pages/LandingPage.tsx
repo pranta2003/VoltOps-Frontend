@@ -775,10 +775,14 @@ export function LandingPage() {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   href="#packages"
-                  className="inline-flex items-center gap-1.5 px-3.5 xl:px-4 py-1.5 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] shadow-[0_0_16px_rgba(16,185,129,0.35)] hover:bg-[#34d399] transition-all group"
+                  className="relative overflow-hidden inline-flex items-center gap-1.5 px-3.5 xl:px-4 py-1.5 rounded-full text-xs font-bold bg-[#10b981] text-[#06090e] shadow-[0_0_16px_rgba(16,185,129,0.35)] hover:bg-[#34d399] transition-all group"
                 >
-                  <span>Choose Plan</span>
-                  <ArrowRightIcon size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                  <span
+                    className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
+                    aria-hidden="true"
+                  />
+                  <span className="relative z-10">Choose Plan</span>
+                  <ArrowRightIcon size={12} className="relative z-10 group-hover:translate-x-0.5 transition-transform" />
                 </motion.a>
               </div>
 
