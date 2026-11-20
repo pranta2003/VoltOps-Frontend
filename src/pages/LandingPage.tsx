@@ -620,11 +620,11 @@ export function LandingPage() {
             } ${
               isNavbarDark
                 ? scrolled
-                  ? "backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.4)] bg-slate-950/80 border border-white/20"
-                  : "backdrop-blur-xl bg-slate-950/45 shadow-[0_8px_32px_rgba(0,0,0,0.25)] border border-white/15"
+                  ? "backdrop-blur-xl shadow-2xl bg-zinc-950/85 border border-white/15"
+                  : "backdrop-blur-xl shadow-xl bg-zinc-950/50 border border-white/10"
                 : scrolled
-                ? "backdrop-blur-2xl shadow-[0_12px_36px_rgba(0,0,0,0.08)] bg-white/85 border border-slate-300/80"
-                : "backdrop-blur-xl bg-white/70 shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-slate-200/80"
+                ? "backdrop-blur-xl shadow-lg bg-white/85 border border-slate-300/90"
+                : "backdrop-blur-xl shadow-md bg-white/75 border border-slate-200/90"
             }`}
             aria-label="Main Navigation"
           >
