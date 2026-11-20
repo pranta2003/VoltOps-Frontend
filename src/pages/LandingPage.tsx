@@ -634,7 +634,13 @@ export function LandingPage() {
             <div className="flex items-center justify-between">
               {/* Logo Mark & Staggered Wordmark */}
               <a href="#" className="flex items-center gap-2.5 group shrink-0 focus-visible:outline-none">
-                <LogoMark size={32} />
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 6 }}
+                  whileTap={{ scale: 0.94 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <LogoMark size={32} />
+                </motion.div>
                 <div className="flex items-center gap-1.5">
                   {shouldReduceMotion ? (
                     <span
