@@ -957,10 +957,14 @@ export function LandingPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               href="#packages"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-emerald-500 text-zinc-950 shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-zinc-950"
+              className="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm bg-emerald-500 text-zinc-950 shadow-[0_0_24px_rgba(16,185,129,0.35)] hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.5)] transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-zinc-950"
             >
-              <span>Explore Coverage Plans</span>
-              <ArrowRightIcon size={15} className="group-hover:translate-x-1 transition-transform" />
+              <span
+                className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
+                aria-hidden="true"
+              />
+              <span className="relative z-10">Explore Coverage Plans</span>
+              <ArrowRightIcon size={15} className="relative z-10 group-hover:translate-x-1 transition-transform" />
             </motion.a>
             <motion.a
               whileHover={{ scale: 1.02 }}
