@@ -2162,12 +2162,13 @@ This document tracks all completed implementation milestones, verified files, co
 - **Branch**: `feature/project-wide-design-transformation` (Target: `main`)
 - **Key Commits**:
   - `691665a` — `style(landing): frame hero showcase with rounded borders and padding in light mode while preserving full-bleed in dark mode`
+  - `b27696e` — `style(landing): design true light-mode architectural hero and navbar while preserving dark video hero`
 - **Objective & Accomplishments**:
-  1. **Light-Mode Hero Frame Enhancement**:
-     - Eliminates abrupt full-bleed black cut into `#e8edf3` canvas in Light Mode by providing an outer framing wrapper (`bg-[#e8edf3] dark:bg-zinc-950 pt-20 pb-6 px-3 sm:px-6 lg:px-8 dark:p-0 dark:border-b dark:border-white/10`).
-     - Houses the video background and dark gradient scrim inside an inner rounded cinematic showcase (`rounded-[2rem] overflow-hidden shadow-2xl border border-slate-300/90 dark:rounded-none dark:border-0 dark:shadow-none bg-zinc-950`).
-     - In Dark Mode, maintains 100% full-bleed edge-to-edge layout with crisp bottom boundary.
-     - Preserves floating navbar contrast over framed showcase with deep dark glass pill (`bg-zinc-950/80` / `border-white/15`).
+  1. **True Light-Mode Architectural Hero & Navbar**:
+     - Converted the Light Mode Hero into a clean, modern SaaS hero (`bg-gradient-to-b from-white via-[#f4f7fb] to-[#e8edf3]`) with an engineering grid pattern and dual ambient radial glows (`bg-emerald-400/15` and `bg-cyan-400/15`).
+     - Restricted the looping cinematic video and dark gradient scrim exclusively to Dark Mode (`hidden dark:block`), leaving Dark Mode Hero 100% full-bleed and untouched.
+     - Upgraded Light Mode Hero typography (`text-slate-950`), emerald/cyan gradient headline highlight, secondary CTA (`bg-white border-slate-300 shadow-sm`), and light SLA strip (`bg-white/90 backdrop-blur-md border-slate-300 shadow-md text-slate-800`).
+     - Fixed Light Mode navbar at top of page (`scrollY = 0`) to immediately render in its crisp frosted-white pill (`bg-white/85 backdrop-blur-xl border-slate-300/90 text-slate-900 shadow-sm`), while Dark Mode navbar remains dark.
   2. **Comprehensive End-to-End System QA (Real Browser Walkthrough)**:
      - **Flow 1 (Landing Page & Onboarding)**: Nav links (`#services`, `#dispatch`, `#how`, `#packages`, `#hubs`, `#about`, `#contact`), spring theme toggle, Plan C selection, and contact form submission verified.
      - **Flow 2 (Customer Portal)**: Active 24/7 Priority KPIs verified; New Service Request submitted for AC, HVAC trade and verified active; Facility assets searched and specs viewed; Invoice payment simulation tested (`Initiate Payment` -> `Gateway Pending` / `Webhook Pending`).
