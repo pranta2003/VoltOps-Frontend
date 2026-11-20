@@ -1895,10 +1895,14 @@ export function LandingPage() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               href="#packages"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 shrink-0 shadow-md shadow-emerald-500/20 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="relative overflow-hidden inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 shrink-0 shadow-md shadow-emerald-500/20 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-400 group"
             >
-              <span>View Plans</span>
-              <ArrowRightIcon size={14} />
+              <span
+                className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
+                aria-hidden="true"
+              />
+              <span className="relative z-10">View Plans</span>
+              <ArrowRightIcon size={14} className="relative z-10 group-hover:translate-x-0.5 transition-transform" />
             </motion.a>
           </SpotlightCard>
 
