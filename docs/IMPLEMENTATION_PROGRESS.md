@@ -2164,6 +2164,7 @@ This document tracks all completed implementation milestones, verified files, co
   - `691665a` — `style(landing): frame hero showcase with rounded borders and padding in light mode while preserving full-bleed in dark mode`
   - `b27696e` — `style(landing): design true light-mode architectural hero and navbar while preserving dark video hero`
   - `7bcc9b1` — `style(landing): upgrade light-mode hero to 2-column split layout with animated dispatch preview`
+  - `6d02648` — `style(landing): declutter light-mode hero and minimalize live dispatch visual`
 - **Objective & Accomplishments**:
   1. **True Light-Mode Architectural Hero & Navbar**:
      - Converted the Light Mode Hero into a clean, modern SaaS hero (`bg-gradient-to-b from-white via-[#f4f7fb] to-[#e8edf3]`) with an engineering grid pattern and dual ambient radial glows (`bg-emerald-400/15` and `bg-cyan-400/15`).
@@ -2174,7 +2175,13 @@ This document tracks all completed implementation milestones, verified files, co
      - Upgraded Light Mode Hero to an asymmetric 2-column split grid (`max-w-7xl mx-auto grid lg:grid-cols-12 gap-10 lg:gap-12 items-center text-left`).
      - Left column features left-aligned editorial typography, dual CTAs with shimmer feedback, and compact inline SLA indicators.
      - Right column features `LightHeroVisual.tsx` with elevated dashboard card, live dispatch desk header, active work order preview (`WO-3002 · Raw Water Booster Pump P-03`) with animated progress bar and 14m ETA, matched Tier 1 technician row (`Kamrul Islam · 96% Match`), and 2 floating micro-cards (`99.4% On-Time Arrival` and `7 Licensed Trades Ready`).
-  3. **Comprehensive End-to-End System QA (Real Browser Walkthrough)**:
+  3. **Surgical Decluttering of Light-Mode Hero (`6d02648`)**:
+     - Stripped out the bottom 4-pill SLA strip from the left column in `LandingPage.tsx` to eliminate redundancy with the eyebrow and Plans section.
+     - Shortened eyebrow pill to `20–40m Physical Arrival SLA`.
+     - Removed both floating micro-cards (`99.4% On-Time Arrival` and `7 Licensed Trades Ready`) from `LightHeroVisual.tsx` to eliminate overlapping clutter and noisy badges.
+     - Cut card internal text by 60%, introducing generous breathing room (`p-7 sm:p-8 space-y-6`), a clean `LIVE DISPATCH` / `EPZ Hub` header, bold `14 min` ETA focal point with animated progress bar, and a minimal technician row (`KI` avatar, `Kamrul Islam`, `Master Electrician`, `Verified` emerald badge).
+     - Verified Dark Mode Hero remained 100% untouched and full-bleed.
+  4. **Comprehensive End-to-End System QA (Real Browser Walkthrough)**:
      - **Flow 1 (Landing Page & Onboarding)**: Nav links (`#services`, `#dispatch`, `#how`, `#packages`, `#hubs`, `#about`, `#contact`), spring theme toggle, Plan C selection, and contact form submission verified.
      - **Flow 2 (Customer Portal)**: Active 24/7 Priority KPIs verified; New Service Request submitted for AC, HVAC trade and verified active; Facility assets searched and specs viewed; Invoice payment simulation tested (`Initiate Payment` -> `Gateway Pending` / `Webhook Pending`).
      - **Flow 3 (Dispatcher Portal)**: Verified Trade Capacity cyan progress bars; Service Requests triaged; Work Orders Kanban lifecycle verified; `+ Assign technician` matching modal tested; Technicians roster, schedule, and audit log verified.
