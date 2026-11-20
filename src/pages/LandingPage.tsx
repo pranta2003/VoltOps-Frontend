@@ -1631,9 +1631,10 @@ export function LandingPage() {
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => handlePlan("custom")}
-                className="mt-6 w-full py-2.5 rounded-full font-semibold text-xs border-2 border-[#10b981] text-slate-900 dark:text-white hover:bg-[#10b981] hover:text-[#06090e] transition-all"
+                className="mt-6 w-full py-2.5 rounded-full font-bold text-xs border-2 border-emerald-500 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500 hover:text-zinc-950 transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-400"
               >
-                Discuss a Custom Plan →
+                <span>Discuss a Custom Plan</span>
+                <ArrowRightIcon size={12} />
               </motion.button>
             </div>
           </SpotlightCard>
