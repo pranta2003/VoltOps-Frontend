@@ -2163,13 +2163,18 @@ This document tracks all completed implementation milestones, verified files, co
 - **Key Commits**:
   - `691665a` — `style(landing): frame hero showcase with rounded borders and padding in light mode while preserving full-bleed in dark mode`
   - `b27696e` — `style(landing): design true light-mode architectural hero and navbar while preserving dark video hero`
+  - `7bcc9b1` — `style(landing): upgrade light-mode hero to 2-column split layout with animated dispatch preview`
 - **Objective & Accomplishments**:
   1. **True Light-Mode Architectural Hero & Navbar**:
      - Converted the Light Mode Hero into a clean, modern SaaS hero (`bg-gradient-to-b from-white via-[#f4f7fb] to-[#e8edf3]`) with an engineering grid pattern and dual ambient radial glows (`bg-emerald-400/15` and `bg-cyan-400/15`).
      - Restricted the looping cinematic video and dark gradient scrim exclusively to Dark Mode (`hidden dark:block`), leaving Dark Mode Hero 100% full-bleed and untouched.
      - Upgraded Light Mode Hero typography (`text-slate-950`), emerald/cyan gradient headline highlight, secondary CTA (`bg-white border-slate-300 shadow-sm`), and light SLA strip (`bg-white/90 backdrop-blur-md border-slate-300 shadow-md text-slate-800`).
      - Fixed Light Mode navbar at top of page (`scrollY = 0`) to immediately render in its crisp frosted-white pill (`bg-white/85 backdrop-blur-xl border-slate-300/90 text-slate-900 shadow-sm`), while Dark Mode navbar remains dark.
-  2. **Comprehensive End-to-End System QA (Real Browser Walkthrough)**:
+  2. **Light-Mode 2-Column Split SaaS Hero & Live Dispatch Visual**:
+     - Upgraded Light Mode Hero to an asymmetric 2-column split grid (`max-w-7xl mx-auto grid lg:grid-cols-12 gap-10 lg:gap-12 items-center text-left`).
+     - Left column features left-aligned editorial typography, dual CTAs with shimmer feedback, and compact inline SLA indicators.
+     - Right column features `LightHeroVisual.tsx` with elevated dashboard card, live dispatch desk header, active work order preview (`WO-3002 · Raw Water Booster Pump P-03`) with animated progress bar and 14m ETA, matched Tier 1 technician row (`Kamrul Islam · 96% Match`), and 2 floating micro-cards (`99.4% On-Time Arrival` and `7 Licensed Trades Ready`).
+  3. **Comprehensive End-to-End System QA (Real Browser Walkthrough)**:
      - **Flow 1 (Landing Page & Onboarding)**: Nav links (`#services`, `#dispatch`, `#how`, `#packages`, `#hubs`, `#about`, `#contact`), spring theme toggle, Plan C selection, and contact form submission verified.
      - **Flow 2 (Customer Portal)**: Active 24/7 Priority KPIs verified; New Service Request submitted for AC, HVAC trade and verified active; Facility assets searched and specs viewed; Invoice payment simulation tested (`Initiate Payment` -> `Gateway Pending` / `Webhook Pending`).
      - **Flow 3 (Dispatcher Portal)**: Verified Trade Capacity cyan progress bars; Service Requests triaged; Work Orders Kanban lifecycle verified; `+ Assign technician` matching modal tested; Technicians roster, schedule, and audit log verified.
