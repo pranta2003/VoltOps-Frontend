@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0:0f172a,50:10b981,100:06b6d4&height=220&section=header&text=VoltOps&fontSize=52&fontAlignY=38&desc=Commercial%20Field%20Service%20%26%20Emergency%20Technician%20Coordination&descFontSize=20&descAlignY=60&fontColor=ffffff" width="100%" alt="VoltOps Banner" />
+  <img src="./docs/assets/voltops-hero-banner.svg" alt="VoltOps Banner" width="100%" />
 </div>
 
 <div align="center">
