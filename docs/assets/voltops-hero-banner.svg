@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 260" width="100%" height="auto">
+  <defs>
+    <!-- Background Grid -->
+    <pattern id="grid-pattern" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#1e293b" stroke-width="0.8" stroke-opacity="0.35" />
+    </pattern>
+
+    <!-- Signal Emerald Glow -->
+    <radialGradient id="emerald-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.28" />
+      <stop offset="60%" stop-color="#10b981" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Cyan Glow -->
+    <radialGradient id="cyan-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.25" />
+      <stop offset="60%" stop-color="#06b6d4" stop-opacity="0.06" />
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Centerpiece Title Gradient -->
+    <linearGradient id="voltops-title-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="35%" stop-color="#f0fdf4" />
+      <stop offset="65%" stop-color="#6ee7b7" />
+      <stop offset="85%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+
+    <!-- Dynamic Wave Gradient -->
+    <linearGradient id="wave-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0" />
+      <stop offset="25%" stop-color="#10b981" stop-opacity="0.85" />
+      <stop offset="50%" stop-color="#34d399" stop-opacity="0.9" />
+      <stop offset="75%" stop-color="#06b6d4" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Clip Path for rounded corners -->
+    <clipPath id="card-clip">
+      <rect width="1200" height="260" rx="16" />
+    </clipPath>
+
+    <style>
+      @keyframes pulseOrbLeft {
+        0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.75; }
+        50% { transform: scale(1.18) translate(-10px, -6px); opacity: 1; }
+      }
+      @keyframes pulseOrbRight {
+        0%, 100% { transform: scale(1) translate(0, 0); opacity: 0.7; }
+        50% { transform: scale(1.22) translate(12px, 8px); opacity: 0.95; }
+      }
+      @keyframes waveStream {
+        0% { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: -1200; }
+      }
+      @keyframes waveStreamSlow {
+        0% { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: 1200; }
+      }
+      .orb-emerald {
+        animation: pulseOrbLeft 6s ease-in-out infinite;
+        transform-origin: 320px 110px;
+      }
+      .orb-cyan {
+        animation: pulseOrbRight 7s ease-in-out infinite;
+        transform-origin: 880px 130px;
+      }
+      .energy-wave-fast {
+        stroke-dasharray: 220 380;
+        animation: waveStream 7s linear infinite;
+      }
+      .energy-wave-slow {
+        stroke-dasharray: 160 440;
+        animation: waveStreamSlow 11s linear infinite;
+      }
+      .title {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+        font-weight: 900;
+        font-size: 84px;
+        letter-spacing: 8px;
+        text-anchor: middle;
+      }
+      .subtitle {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+        letter-spacing: 4px;
+        text-anchor: middle;
+        fill: #94a3b8;
+      }
+      .tagline {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+        font-weight: 700;
+        font-size: 11px;
+        letter-spacing: 3px;
+        text-anchor: middle;
+        fill: #10b981;
+      }
+    </style>
+  </defs>
+
+  <g clip-path="url(#card-clip)">
+    <!-- Base Canvas -->
+    <rect width="1200" height="260" rx="16" fill="#090d16" />
+
+    <!-- Grid Overlay -->
+    <rect width="1200" height="260" fill="url(#grid-pattern)" />
+
+    <!-- Radial Glow Orbs -->
+    <circle cx="320" cy="110" r="280" fill="url(#emerald-glow)" class="orb-emerald" />
+    <circle cx="880" cy="130" r="300" fill="url(#cyan-glow)" class="orb-cyan" />
+
+    <!-- Subtle Center Radial Glow behind text -->
+    <circle cx="600" cy="125" r="220" fill="url(#emerald-glow)" opacity="0.45" />
+
+    <!-- Subtle Top Edge Light -->
+    <line x1="100" y1="1" x2="1100" y2="1" stroke="#334155" stroke-width="1.2" stroke-opacity="0.5" />
+
+    <!-- Micro Eyebrow Tag -->
+    <g transform="translate(600, 48)">
+      <rect x="-115" y="-14" width="230" height="26" rx="13" fill="#0f172a" stroke="#1e293b" stroke-width="1" />
+      <circle cx="-92" cy="-1" r="3.5" fill="#10b981" />
+      <text x="5" y="3" class="tagline">MISSION-CRITICAL B2B</text>
+    </g>
+
+    <!-- Centerpiece Title: VOLTOPS -->
+    <text x="600" y="142" class="title" fill="url(#voltops-title-grad)">VOLTOPS</text>
+
+    <!-- Subtitle -->
+    <text x="600" y="186" class="subtitle">COMMERCIAL FIELD SERVICE &amp; EMERGENCY DISPATCH PLATFORM</text>
+
+    <!-- Bottom Energy Lines -->
+    <path d="M 0 236 L 1200 236" stroke="#1e293b" stroke-width="1" stroke-opacity="0.6" />
+    <path d="M 0 236 Q 300 216 600 236 T 1200 236" fill="none" stroke="url(#wave-grad)" stroke-width="2.5" class="energy-wave-fast" />
+    <path d="M 0 236 Q 400 248 800 236 T 1200 236" fill="none" stroke="url(#wave-grad)" stroke-width="1.5" class="energy-wave-slow" opacity="0.7" />
+
+    <!-- Border stroke -->
+    <rect width="1200" height="260" rx="16" fill="none" stroke="#1e293b" stroke-width="1.5" />
+  </g>
+</svg>
